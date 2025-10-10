@@ -79,17 +79,13 @@ Then open 👉 https://localhost
 
 
 ---
+## 👥 Team
 
-👥 Team
-
-Name	Role
-
-Hashir	Frontend & Architecture Lead
-Natalia	DevOps & Security Engineer
-Abdul Rehman	Gameplay Developer
-
-
-
+| 👤 Name | 🧭 Role |
+|:--------|:----------------------------|
+| **Hashir** | 🎨 Frontend & Architecture Lead |
+| **Natalia** | 🐳 DevOps & Security Engineer |
+| **Abdul Rehman** | 🕹️ Gameplay Developer |
 ---
 
 🧩 Notes
