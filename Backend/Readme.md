@@ -46,10 +46,23 @@ and later scales into **module integrations** such as:
 
 ## 📁 Folder Structure
 
-backend/ ├─ src/ │   ├─ server.ts              # Fastify entry │   ├─ routes/                # API endpoints │   ├─ services/              # Business logic (chat, game, blockchain) │   ├─ database/              # SQLite setup + queries │   ├─ sockets/               # WSS connections │   ├─ middleware/            # Auth, security filters │   ├─ utils/                 # Helpers, env loaders │   └─ config/                # Env, constants ├─ package.json ├─ .env.example ├─ Dockerfile └─ README.md
+backend/
+├── src/
+│   ├── server.ts — Fastify entry point
+│   ├── routes/ — API endpoints (auth, game, chat, etc.)
+│   ├── services/ — Business logic (chat, blockchain, matchmaking)
+│   ├── database/ — SQLite setup + query handlers
+│   ├── sockets/ — WebSocket (WSS) connections
+│   ├── middleware/ — Auth, validation, security filters
+│   ├── utils/ — Helpers, constants, environment loaders
+│   └── config/ — Env setup, certificates, global vars
+│
+├── package.json
+├── Dockerfile
+├── .env.example
+└── README.md
 
 ---
-
 ## 🔐 Environment Variables
 Example `.env`:
 
