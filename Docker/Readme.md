@@ -27,7 +27,7 @@ docker/
 ├── compose.yml             # Main Docker Compose file
 ├── .env.example            # Example environment variables
 └── README.md
-
+```
 
 ---
 
