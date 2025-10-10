@@ -36,13 +36,6 @@ Built as part of the **42 Network Transcendence project**, this repository inclu
 
 ---
 
-## ✅ Current Progress
-- Base foundation completed  
-- 7 Major equivalents planned → full 100% project scope  
-- Additional modules will be added later in separate feature branches  
-
----
-
 ## ⚙️ Tech Stack
 - **Frontend:** TypeScript, Tailwind CSS, Babylon.js  
 - **Backend:** Node.js + Fastify, SQLite  
@@ -53,7 +46,7 @@ Built as part of the **42 Network Transcendence project**, this repository inclu
 ---
 
 ## 🌿 Branching Strategy
-```
+
 | Branch | Purpose |
 |--------|----------|
 | **main** | ✅ **Production / stable branch** — always deployable, clean, and tested. |
@@ -63,7 +56,6 @@ Built as part of the **42 Network Transcendence project**, this repository inclu
 | **abdul** | Pong gameplay and multiplayer systems. |
 
 > Only **tested, production-ready code** is merged into `main`.
-```
 ---
 
 ## 📁 Project Structure
