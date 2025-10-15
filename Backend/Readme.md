@@ -12,7 +12,6 @@ and later scales into **module integrations** such as:
 - AI / Multiplayer services  
 
 ---
-
 ## 🧱 Base Responsibilities
 - Serve frontend SPA content via HTTPS  
 - Provide secure WebSocket (WSS) connection  
