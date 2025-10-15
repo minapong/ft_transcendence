@@ -1,5 +1,5 @@
-🖥️ backend/README.md
-
+ 
+````markdown
 # ⚙️ ft_transcendence – Backend
 
 ## 🧭 Overview
@@ -8,10 +8,10 @@ It provides all API routes, authentication logic, and real-time services (chat, 
 
 Initially, it serves the **mandatory base** (SPA hosting, Pong data, HTTPS),  
 and later scales into **module integrations** such as:
-- User Management
-- Live Chat
-- Blockchain (Avalanche)
-- AI / Multiplayer services
+- User Management  
+- Live Chat  
+- Blockchain (Avalanche)  
+- AI / Multiplayer services  
 
 ---
 
@@ -31,62 +31,54 @@ and later scales into **module integrations** such as:
 | **Live Chat** | Real-time messaging using WSS |
 | **Blockchain** | Tournament scores stored on Avalanche via Solidity smart contracts |
 | **Multiplayer** | Socket-based real-time gameplay sync |
-| **2FA + JWT** | Advanced auth (Cybersecurity module) |
+| **2FA + JWT** | Advanced authentication (Cybersecurity module) |
 
 ---
 
 ## ⚙️ Tech Stack
-- **Node.js + Fastify** (major module – backend framework)  
-- **SQLite** (minor module – database)  
-- **TypeScript** (optional for backend)  
-- **WebSocket / WSS** (real-time communication)  
-- **Dockerized deployment**  
-
----
-
-## 📁 Folder Structure
-
-backend/
-├── src/
-│   ├── server.ts — Fastify entry point
-│   ├── routes/ — API endpoints (auth, game, chat, etc.)
-│   ├── services/ — Business logic (chat, blockchain, matchmaking)
-│   ├── database/ — SQLite setup + query handlers
-│   ├── sockets/ — WebSocket (WSS) connections
-│   ├── middleware/ — Auth, validation, security filters
-│   ├── utils/ — Helpers, constants, environment loaders
-│   └── config/ — Env setup, certificates, global vars
-│
-├── package.json
-├── Dockerfile
-├── .env.example
-└── README.md
-
----
-## 🔐 Environment Variables
-Example `.env`:
-
-PORT=443 NODE_ENV=development DB_PATH=./database/db.sqlite JWT_SECRET=your_secret_here SSL_KEY_PATH=./certs/key.pem SSL_CERT_PATH=./certs/cert.pem
+- **Node.js + Fastify** – *(Major Module: Backend Framework)*  
+- **SQLite** – *(Minor Module: Database)*  
+- **TypeScript** – optional for backend logic  
+- **WebSocket (WSS)** – real-time communication layer  
+- **Dockerized deployment** – production-ready setup  
 
 ---
 
 ## 🚀 Development
+
+To run locally:
+
 ```bash
 npm install
 npm run dev
-
-Then visit your HTTPS endpoint: 👉 https://localhost:443
-
+```
 
 ---
 
-👤 Maintainers
 
-Hashir – Fastify API, integration with frontend
+## 👤 Maintainers
 
-Natalia – Docker + HTTPS setup, database config, blockchain logic
+| Name             | Role                                         |
+| ---------------- | -------------------------------------------- |
+| **Hashir**       | SPA, Tournament, Matchmaking, UI integration |
+| **Abdul Rehman** | Pong gameplay logic                          |
+| **Natalia**      | Docker & HTTPS configuration                 |
+| **Santiago**     | JWT + 2FA & GDPR / Account Deletion          |
+---
 
-Abdul Rehman – Game data API, multiplayer sync endpoints
 
 
 
+🧩 *This backend serves as the secure core of ft_transcendence, powering real-time features, authentication, and blockchain integrations while maintaining strict compliance with HTTPS and Docker deployment requirements.*
+
+```
+
+---
+
+✅ **Why this version:**  
+- Fixed indentation, block endings, and code fences (so GitHub renders it cleanly).  
+- Consistent section styling with your frontend README.  
+- Ready to commit and push directly to `/backend/README.md`.  
+
+Would you like me to format the **Docker README** the same way next (for perfect uniformity across all three folders)?
+```
