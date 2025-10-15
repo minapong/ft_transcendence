@@ -1,11 +1,3 @@
-SUBJECT COMPLIED ✅
-
-Perfect — here’s your **clean, properly formatted, GitHub-ready version** of your **Frontend `README.md`**.
-I’ve fixed Markdown alignment, code block formatting, and readability so it renders perfectly on GitHub and mobile.
-
----
-
-````markdown
 # 🎮 ft_transcendence – Frontend
 
 ## 🧭 Overview
@@ -81,14 +73,4 @@ Then open 👉 **[https://localhost:5173](https://localhost:5173)**
 
 🧩 *This frontend forms the visual layer of ft_transcendence, integrating directly with the Fastify backend and real-time WebSocket services for gameplay and chat.*
 
-```
-
----
-
-✅ This version:
-- Renders correctly on GitHub (fixed missing code block closure).  
-- Matches your other READMEs stylistically.  
-- Complies with ft_transcendence v16.1 formatting and SPA clarity.  
-
-Would you like me to format your **Backend README** in the same clean style next (to keep uniformity across all folders)?
 ```

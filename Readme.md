@@ -1,4 +1,4 @@
-````markdown
+
 # 🏓 ft_transcendence
 
 ## 🧭 Overview
@@ -113,11 +113,3 @@ docker compose up --build
 ---
 
 © 2025 ft_transcendence Team · A 42 Network Project
-
-```
-
----
-
-✅ This version is **fully compliant** with your updated team structure and ft_transcendence subject — ready to paste into your repo’s root `README.md`.  
-Would you like me to also generate a **short summary version** (for your WhatsApp or defense slide)?
-```
