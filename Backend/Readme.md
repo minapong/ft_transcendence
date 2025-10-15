@@ -1,5 +1,3 @@
- 
-````markdown
 # ⚙️ ft_transcendence – Backend
 
 ## 🧭 Overview
@@ -71,14 +69,4 @@ npm run dev
 
 🧩 *This backend serves as the secure core of ft_transcendence, powering real-time features, authentication, and blockchain integrations while maintaining strict compliance with HTTPS and Docker deployment requirements.*
 
-```
-
----
-
-✅ **Why this version:**  
-- Fixed indentation, block endings, and code fences (so GitHub renders it cleanly).  
-- Consistent section styling with your frontend README.  
-- Ready to commit and push directly to `/backend/README.md`.  
-
-Would you like me to format the **Docker README** the same way next (for perfect uniformity across all three folders)?
-```
+ 
