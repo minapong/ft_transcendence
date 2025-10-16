@@ -1,0 +1,35 @@
+🧱 BASE (Mandatory Part)
+
+*Member 1*: SPA frontend + Tournament or Matchmaking system
+*Me*: Docker setup + HTTPS (SSL/TLS) configuration
+*Member 2*: Core Pong game (2-player local version)
+
+💻 Member 1 (Malik)
+1️⃣ Babylon.js 3D Graphics (Major)
+2️⃣ Fastify with Node.js (Major – backend framework)
+3️⃣ Tailwind CSS for frontend (Minor)
+
+---
+💬 Me
+1️⃣ Live Chat (Major)
+2️⃣ User Management + Database (SQLite) (Major + Minor)
+3️⃣ Blockchain (Avalanche + Solidity) (Major)
+
+---
+🎮 Member 3 (Abdulrahman)
+1️⃣ Multiplayer Pong (Major)
+2️⃣ Second Game with matchmaking & history (Major)
+
+---
+Member 4 (Santiago)
+1️⃣ Security
+2️⃣ Dashboard and DB for that
+
+✅ Total:
+
+Base complete foundation
+7 Major equivalents (100% project scope covered)
+
+Malik will work with Abdulrahman as SPA is needed for game testing  and rendering
+For Natalia it is important to strt with the basic Docker, then do SPA with Malik
+Abdulrahman and Santiago need to collaborate for Matchmaking

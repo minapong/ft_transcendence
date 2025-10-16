@@ -1,0 +1,7 @@
+ft_spa_mvp/
+├── frontend/
+│   ├── index.html
+│   └── main.js
+├── nginx/
+│   └── nginx.conf
+└── docker-compose.yml

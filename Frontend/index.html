@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal SPA</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background-color: black; color: white; }
+    nav a { margin-right: 1rem; cursor: pointer; color: dodgerblue; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" data-link>Home</a>
+    <a href="/about" data-link>About</a>
+    <a href="/contact" data-link>Contact</a>
+  </nav>
+  <div id="app"></div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
