@@ -1,5 +1,33 @@
-FROM node:20-alpine
+#mvp
+# Stage 1: Build
+FROM node:20-alpine AS build
 WORKDIR /app
-RUN npm install -g serve
+COPY package*.json ./
+RUN npm ci
 COPY . .
-CMD ["serve", "-s", ".", "-l", "80"]
+RUN npm run build
+
+# Stage 2: NGINX static server
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY ../nginx/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+EXPOSE 443
+CMD ["nginx", "-g", "daemon off;"]
+
+
+
+# # Stage 1: Build
+# FROM node:20-alpine AS build
+# WORKDIR /app
+# COPY package*.json ./
+# RUN npm ci
+# COPY . .
+# RUN npm run build
+
+# # Stage 2: Serve with NGINX
+# FROM nginx:alpine
+# COPY --from=build /app/dist /usr/share/nginx/html
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# EXPOSE 80
+# CMD ["nginx", "-g", "daemon off;"]

@@ -1,7 +1,13 @@
-ft_spa_mvp/
-├── frontend/
-│   ├── index.html
-│   └── main.js
-├── nginx/
-│   └── nginx.conf
-└── docker-compose.yml
+project/
+├─ docker-compose.yml               # base config
+├─ docker-compose.dev.yml           # development override
+├─ frontend/
+│  ├─ Dockerfile                    # production Dockerfile
+│  ├─ Dockerfile.dev                # dev Dockerfile
+│  ├─ package.json
+│  ├─ tsconfig.json
+│  └─ src/
+│     └─ main.tsx
+└─ nginx/
+   ├─ nginx.conf
+   └─ certbot/
