@@ -10,6 +10,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+    env_file:
+      - ./Backend/.env
 
   frontend:
     build:
@@ -23,3 +25,5 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:3000
+    env_file:
+      - ./Frontend/.env
