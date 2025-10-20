@@ -1,39 +1,24 @@
 version: "3.8"
 
 services:
+  backend:
+    build:
+      context: ./Backend
+    expose:
+      - "3000"
+    networks:
+      - app_net
+
   frontend:
     build:
       context: ./Frontend
     expose:
       - "80"
-    networks:
-      - web
-
-  nginx:
-    image: nginx:alpine
     depends_on:
-      - frontend
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/certbot:/etc/letsencrypt
-      - ./frontend/dist:/usr/share/nginx/html
+      - backend
     networks:
-      - web
-
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./nginx/certbot:/etc/letsencrypt
-    entrypoint: >
-      /bin/sh -c "trap exit TERM;
-      while :;
-      do certbot renew;
-      sleep 12h & wait $${!};
-      done"
+      - app_net
 
 networks:
-  web:
+  app_net:
     driver: bridge

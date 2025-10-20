@@ -1,13 +1,24 @@
 project/
-├─ docker-compose.yml               # base config
-├─ docker-compose.dev.yml           # development override
-├─ frontend/
-│  ├─ Dockerfile                    # production Dockerfile
-│  ├─ Dockerfile.dev                # dev Dockerfile
+├─ docker-compose.yml
+├─ docker-compose.dev.yml
+├─ docker-compose.prod.yml
+│
+├─ Backend/
+│  ├─ Dockerfile
+│  ├─ Dockerfile.dev
 │  ├─ package.json
 │  ├─ tsconfig.json
 │  └─ src/
-│     └─ main.tsx
+│      └─ index.ts
+│
+├─ Frontend/
+│  ├─ Dockerfile
+│  ├─ Dockerfile.dev
+│  ├─ package.json
+│  ├─ tsconfig.json
+│  └─ src/
+│      └─ main.tsx
+│
 └─ nginx/
    ├─ nginx.conf
-   └─ certbot/
+   └─ ssl/   (for HTTPS certs)
