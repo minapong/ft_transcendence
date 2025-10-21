@@ -11,8 +11,8 @@ services:
 
   frontend:
     build:
-      context: ./Frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Frontend/Dockerfile
     restart: always
 
   nginx:

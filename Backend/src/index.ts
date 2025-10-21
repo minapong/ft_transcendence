@@ -8,5 +8,5 @@ server.get("/", async () => {
 
 server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;
-  console.log(`Server listening at ${address}, hot reload!`);
+  console.log(`Server listening at ${address}, hot reload is working!`);
 });
