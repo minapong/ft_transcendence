@@ -8,24 +8,37 @@ services:
     restart: always
     expose:
       - "3000"
+    networks:
+      - app_net
 
   frontend:
     build:
-      context: .
-      dockerfile: Frontend/Dockerfile
-    restart: always
+      context: ./Frontend
+      dockerfile: Dockerfile
+    volumes:
+      - frontend-build:/app/dist
+    restart: "no" # just used to build
+    networks:
+      - app_net
 
   nginx:
     image: nginx:alpine
     depends_on:
-      - backend
       - frontend
+    volumes:
+      - frontend-build:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/ssl:/etc/letsencrypt
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/ssl:/etc/letsencrypt
     networks:
       - app_net
     restart: always
+
+volumes:
+  frontend-build:
+
+networks:
+  app_net:
+    driver: bridge
