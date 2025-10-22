@@ -3,7 +3,7 @@ version: "3.8"
 services:
   backend:
     build:
-      context: ./Backend
+      context: ../Backend
     expose:
       - "3000"
     networks:
@@ -11,7 +11,7 @@ services:
 
   frontend:
     build:
-      context: ./Frontend
+      context: ../Frontend
     expose:
       - "80"
     depends_on:

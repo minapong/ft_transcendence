@@ -1,7 +1,7 @@
 services:
   backend:
     build:
-      context: ./Backend
+      context: ../Backend
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
@@ -13,7 +13,7 @@ services:
 
   frontend:
     build:
-      context: ./Frontend
+      context: ../Frontend
       dockerfile: Dockerfile
     volumes:
       - frontend-build:/app/dist
@@ -27,8 +27,8 @@ services:
       - frontend
     volumes:
       - frontend-build:/usr/share/nginx/html
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/ssl:/etc/letsencrypt
+      - ../nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../nginx/ssl:/etc/letsencrypt
     ports:
       - "80:80"
       - "443:443"

@@ -1,24 +1,24 @@
 services:
   backend:
     build:
-      context: ./Backend
+      context: ../Backend
       dockerfile: Dockerfile.dev
     volumes:
-      - ./Backend:/app
+      - ../Backend:/app
       - backend_node_modules:/app/node_modules
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
     env_file:
-      - ./Backend/.env
+      - ../Backend/.env
 
   frontend:
     build:
-      context: ./Frontend
+      context: ../Frontend
       dockerfile: Dockerfile.dev
     volumes:
-      - ./Frontend:/app
+      - ../Frontend:/app
       - /app/node_modules
     ports:
       - "5173:5173"
@@ -26,6 +26,6 @@ services:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:3000
     env_file:
-      - ./Frontend/.env
+      - ../Frontend/.env
 volumes:
   backend_node_modules:

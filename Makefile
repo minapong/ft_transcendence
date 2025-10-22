@@ -1,7 +1,7 @@
 # Configuration
-COMPOSE_BASE = docker-compose.yml
-COMPOSE_DEV = docker-compose.dev.yml
-COMPOSE_PROD = docker-compose.prod.yml
+COMPOSE_BASE = Docker/docker-compose.yml
+COMPOSE_DEV = Docker/docker-compose.dev.yml
+COMPOSE_PROD = Docker/docker-compose.prod.yml
 
 # Container names (optional; for clarity)
 PROJECT_NAME = game_app
