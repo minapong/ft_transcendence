@@ -1,0 +1,32 @@
+// tsconfig.ts
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+	
+	// user specific
+	"jsx": "preserve",
+	"jsxImportSource": "reactor",
+
+	"baseUrl":"./src",
+	"paths": {
+		"reactor":["reactor"],
+		"components": ["components"]
+	},
+},
+  "include": ["src"]
+}
