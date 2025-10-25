@@ -39,8 +39,8 @@ Built as part of the **42 Network Transcendence project**, this repository inclu
 ---
 
 ## 🧠 SANTIAGO – Modules
-1️⃣ **JWT + 2FA (Cybersecurity)** *(Major)*  
-2️⃣ **GDPR / Account Deletion (Cybersecurity)** *(Minor)*  
+1️⃣ **AI Oponent** *(Major)*  
+2️⃣ **Dashboard** *(Minor)*  
 
 ---
 
@@ -55,7 +55,6 @@ Built as part of the **42 Network Transcendence project**, this repository inclu
 - **Frontend:** TypeScript, Tailwind CSS, Babylon.js  
 - **Backend:** Node.js + Fastify, SQLite  
 - **DevOps:** Docker, NGINX, HTTPS (TLS 1.2/1.3)  
-- **Cybersecurity:** JWT, 2FA, GDPR Compliance  
 - **Blockchain:** Avalanche + Solidity  
 - **Communication:** WebSocket (WSS) for chat and gameplay  
 
@@ -69,7 +68,7 @@ Built as part of the **42 Network Transcendence project**, this repository inclu
 | **hashir** | SPA frontend + backend (Fastify) |
 | **natalia** | Docker, HTTPS, blockchain, and database integration |
 | **abdul** | Pong gameplay and second game features |
-| **santiago** | Cybersecurity modules (JWT, 2FA, GDPR) |
+| **santiago** | AI Oponent and Dashboard |
 
 > All Pull Requests merge into `dev` → then into `main` only after review and testing.  
 
@@ -100,7 +99,7 @@ docker compose up --build
 | **Hashir**       | 🎨 Frontend & Architecture Lead         |
 | **Natalia**      | 🐳 DevOps & Security Engineer           |
 | **Abdul Rehman** | 🕹️ Gameplay Developer                  |
-| **Santiago**     | 🔐 Cybersecurity & Matchmaking Engineer |
+| **Santiago**     | 🔐 AI & Matchmaking Engineer 			|
 
 ---
 

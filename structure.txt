@@ -10,8 +10,14 @@ project/
 │  ├─ Dockerfile.dev
 │  ├─ package.json
 │  ├─ tsconfig.json
-│  └─ src/
-│      └─ index.ts
+└─ src/
+   ├─ index.ts
+   ├─ routes/
+   │   ├─ tournament.ts
+   │   └─ matchmaking.ts
+   └─ logic/
+       ├─ tournamentManager.ts
+       └─ matchmakingQueue.ts
 │
 ├─ Frontend/
 │  ├─ Dockerfile
