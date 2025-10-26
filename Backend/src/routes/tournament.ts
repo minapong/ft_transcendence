@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createTournament } from "../logic/tournamentManager";
+import { createTournament } from "../logic/tournament_manager";
 
 export default async function tournamentRoutes(server: FastifyInstance) {
 	server.post("/api/tournament/start", async (req, reply) => {
