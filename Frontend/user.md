@@ -42,3 +42,10 @@ function Greeting() {
     createIt("h1", null, "jksdfklasd"));
 }
 export default Greeting;
+
+
+
+
+
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p

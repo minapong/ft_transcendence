@@ -1,9 +1,11 @@
 import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   esbuild: {
-	jsx:"automatic",
-  	jsxImportSource: "reactor"
+	jsx:"transform",
+ 	jsxFactory: "createReactor",
+    jsxFragment: "Fragment"
   },
   resolve: {
     alias: {
@@ -19,4 +21,6 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
   },
+  plugins: [tailwindcss()],
+
 });

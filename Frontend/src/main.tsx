@@ -1,4 +1,10 @@
-// main.tsx
+import "./index.css";
+import "reactor";
 import Greeting from "components/Greeting";
 
-document.getElementById("app").append(<Greeting />);
+const root = document.getElementById("app");
+if (root) {
+  root.innerHTML = "";
+  root.append(<Greeting/>);
+}
+// console.log("Greeting returns:", Greeting());
