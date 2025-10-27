@@ -7,5 +7,8 @@ declare module "reactor/jsx-runtime" {
 // just for  the sake of intellisense
 
 declare module "reactor/createReactor" {
-	export function createreactor(type: any, props: any): any;
+	export function createReactor(type: any, props: any): any;
+}
+declare module "reactor/router" {
+	export function createRouter(type: any, props: any): any;
 }

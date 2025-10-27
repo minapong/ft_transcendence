@@ -1,4 +1,5 @@
 function Greeting() {
+
 	let offsetHashir = 0, offsetNatalia = 0, offsetAb = 0, offsetSantiago = 0;
 	let hashirBox: HTMLElement | null = null, nataliaBox: HTMLElement | null = null, abBox: HTMLElement | null = null, santiagoBox: HTMLElement | null = null;
 
@@ -29,6 +30,7 @@ function Greeting() {
 
 	return (
 		<div
+			//inline style
 			style={{
 				height: "100vh",
 				display: "flex",
@@ -38,6 +40,7 @@ function Greeting() {
 				background: "radial-gradient(circle at 50% 50%, #0f0f1a 0%, #050509 100%)",
 				overflow: "hidden",
 				position: "relative",
+				backgroundSize: "auto"
 			}}
 		>
 			<div ref={el => (hashirBox = el)} style={cardStyle("linear-gradient(135deg, #00e0ff, #0078ff)")}>Hashir</div>

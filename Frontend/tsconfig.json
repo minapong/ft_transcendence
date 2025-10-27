@@ -21,8 +21,9 @@
 
 	"baseUrl":"./src",
 	"paths": {
-		"reactor":["preserve"],
-		"components": ["components"]
+		"reactor":["reactor"],
+		"components": ["components"],
+		"pages": ["pages"]
 	},
 },
   "include": ["src"]

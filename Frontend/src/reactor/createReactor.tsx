@@ -52,3 +52,5 @@ function attachChild(parent: HTMLElement, child: any) {
 // expose aliases so the TypeScript JSX compiler knows what to call
 // attach globally for runtime use (Vite/TSX looks for this name)
 (window as any).createReactor = createReactor;
+
+

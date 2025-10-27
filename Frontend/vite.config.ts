@@ -11,6 +11,7 @@ export default defineConfig({
     alias: {
       reactor: "/src/reactor",
       components: "/src/components",
+	  pages: "/src/pages",
     },
   },
   server: {
