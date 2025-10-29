@@ -1,5 +1,4 @@
 // just for  the sake of intellisense
-
 declare module "reactor/jsx-runtime" {
 	export function jsx(type: any, props: any): any;
 	export function jsxs(type: any, props: any): any;

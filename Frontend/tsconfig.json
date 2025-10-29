@@ -23,6 +23,7 @@
 	"paths": {
 		"reactor":["reactor"],
 		"components": ["components"],
+		"layouts": ["layouts"],
 		"pages": ["pages"]
 	},
 },
