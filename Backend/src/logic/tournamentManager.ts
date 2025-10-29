@@ -52,6 +52,10 @@ export function recordMatchResult(
 	if (!match) return { error: "Match not found" };
 	if (match.status === "finished") return { error: "Match already finished" };
 
+	if (winner !== match.p1 && winner !== match.p2) {
+		return { error: `Invalid winner: ${winner} was not part of this match` };
+	}
+
 	match.winner = winner;
 	match.status = "finished";
 
