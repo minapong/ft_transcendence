@@ -64,7 +64,7 @@ export function recordMatchResult(
 
 export function advanceRound(
 	tournamentId: number
-): Tournament | { error?: string; message?: string } {
+): Tournament |  {error: string} | {message: string}  {
 	const t = tournaments.find(t => t.id === tournamentId);
 	if (!t) return { error: "Tournament not found" };
 

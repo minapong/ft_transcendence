@@ -1,29 +1,65 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
   createTournament,
   recordMatchResult,
   advanceRound,
+  Tournament,
+  Match
 } from "../logic/tournamentManager";
+
+// Define types for each route body
+type StartTournamentBody = {
+  players: string[];
+};
+
+type ReportResultBody = {
+  tournamentId: number;
+  matchIndex: number;
+  winner: string;
+};
+
+type AdvanceRoundBody = {
+  tournamentId: number;
+};
 
 export async function registerTournamentRoutes(server: FastifyInstance) {
   // Start tournament
-  server.post("/api/tournament/start", async (req, reply) => {
-    const { players } = req.body as any;
-    const result = createTournament(players);
-    reply.send(result);
-  });
+  server.post(
+    "/api/tournament/start",
+    async (
+      req: FastifyRequest<{ Body: StartTournamentBody }>,
+      reply: FastifyReply
+    ) => {
+      const { players } = req.body;
+      const result: Tournament | { error: string } = createTournament(players);
+      reply.send(result);
+    }
+  );
 
   // Report match result
-  server.post("/api/tournament/result", async (req, reply) => {
-    const { tournamentId, matchIndex, winner } = req.body as any;
-    const result = recordMatchResult(tournamentId, matchIndex, winner);
-    reply.send(result);
-  });
+  server.post(
+    "/api/tournament/result",
+    async (
+      req: FastifyRequest<{ Body: ReportResultBody }>,
+      reply: FastifyReply
+    ) => {
+      const { tournamentId, matchIndex, winner } = req.body;
+      const result: { success: true; match: Match } | { error: string } =
+        recordMatchResult(tournamentId, matchIndex, winner);
+      reply.send(result);
+    }
+  );
 
   // Advance to next round
-  server.post("/api/tournament/next", async (req, reply) => {
-    const { tournamentId } = req.body as any;
-    const result = advanceRound(tournamentId);
-    reply.send(result);
-  });
+  server.post(
+    "/api/tournament/next",
+    async (
+      req: FastifyRequest<{ Body: AdvanceRoundBody }>,
+      reply: FastifyReply
+    ) => {
+      const { tournamentId } = req.body;
+      const result: Tournament | { error: string } | {message: string} = advanceRound(tournamentId);
+      reply.send(result);
+    }
+  );
 }
