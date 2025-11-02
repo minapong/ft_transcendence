@@ -1,0 +1,13 @@
+#hash{
+	background: rgb(197, 197, 255);
+	color: rgb(0, 0, 0);
+	font-size: 2rem;
+	transition: 0.51s all;
+
+}
+
+#hash:hover{
+	color: red;
+	transition: 0.51s all;
+	transform: translate(10px);
+}
