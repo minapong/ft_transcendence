@@ -28,7 +28,6 @@ and later scales into **module integrations** such as:
 | **Live Chat** | Real-time messaging using WSS |
 | **Blockchain** | Tournament scores stored on Avalanche via Solidity smart contracts |
 | **Multiplayer** | Socket-based real-time gameplay sync |
-| **2FA + JWT** | Advanced authentication (Cybersecurity module) |
 
 ---
 
@@ -57,10 +56,10 @@ npm run dev
 
 | Name             | Role                                         |
 | ---------------- | -------------------------------------------- |
-| **Hashir**       | SPA, Tournament, Matchmaking, UI integration |
-| **Abdul Rehman** | Pong gameplay logic                          |
-| **Natalia**      | Docker & HTTPS configuration                 |
-| **Santiago**     | JWT + 2FA & GDPR / Account Deletion          |
+| **Hashir**       | SPA,  UI integration |
+| **Abdul Rehman** | Pong gameplay logic                            |
+| **Natalia**      | Docker & HTTPS configuration                   |
+| **Santiago**     | Tournament, Matchmaking, AI Oponent, Dashboard |
 ---
 
 
