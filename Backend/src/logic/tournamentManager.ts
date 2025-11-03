@@ -44,7 +44,7 @@ export function recordMatchResult(
 	tournamentId: number,
 	matchIndex: number,
 	winner: string
-): { success: true; match: Match } | { error: string } {
+): { success: true; match: Match } | { error: string } | { message: string} {
 	const t = tournaments.find(t => t.id === tournamentId);
 	if (!t) return { error: "Tournament not found" };
 
@@ -58,6 +58,14 @@ export function recordMatchResult(
 
 	match.winner = winner;
 	match.status = "finished";
+
+	//Auto-check if round can advance
+	if (t.matches.every(m => m.status === "finished")) {
+		const result = advanceRound(tournamentId);
+		if ("message" in result) {
+			return { message: result.message }; // Tournament finished
+		}
+	}
 
 	return { success: true, match };
 }
