@@ -1,0 +1,29 @@
+import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
+
+export default defineConfig({
+	appType: "spa",
+	esbuild: {
+		jsx: "transform",
+		jsxFactory: "createReactor",
+		jsxFragment: "Fragment"
+	},
+	resolve: {
+		alias: {
+			reactor: "/src/reactor",
+			components: "/src/components",
+			pages: "/src/pages",
+			layouts: "/src/layouts",
+		},
+	},
+	server: {
+		port: 5173,
+		open: true,
+	},
+	build: {
+		outDir: "dist",
+		emptyOutDir: true,
+	},
+	plugins: [tailwindcss()],
+
+});
