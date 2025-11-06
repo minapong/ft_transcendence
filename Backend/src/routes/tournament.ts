@@ -44,7 +44,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
       reply: FastifyReply
     ) => {
       const { tournamentId, matchIndex, winner } = req.body;
-      const result: { success: true; match: Match } | { error: string } =
+      const result: { success: true; match: Match } | { error: string } | {message: string}=
         recordMatchResult(tournamentId, matchIndex, winner);
       reply.send(result);
     }
