@@ -1,25 +1,26 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
-  createTournament,
-  recordMatchResult,
-  advanceRound,
-  Tournament,
-  Match
+	createTournament,
+	recordMatchResult,
+	advanceRound,
+	Tournament,
+	Match,
+	getTournament
 } from "../logic/tournamentManager";
 
 // Define types for each route body
 type StartTournamentBody = {
-  players: string[];
+	players: string[];
 };
 
 type ReportResultBody = {
-  tournamentId: number;
-  matchIndex: number;
-  winner: string;
+	tournamentId: number;
+	matchIndex: number;
+	winner: string;
 };
 
 type AdvanceRoundBody = {
-  tournamentId: number;
+	tournamentId: number;
 };
 
 export async function registerTournamentRoutes(server: FastifyInstance) {
@@ -62,4 +63,17 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
       reply.send(result);
     }
   );
+
+    // Advance to next round
+	server.post(
+		"/api/tournament/get",
+		async (
+		  req: FastifyRequest<{ Body: AdvanceRoundBody }>,
+		  reply: FastifyReply
+		) => {
+		  const { tournamentId } = req.body;
+		  const result: Tournament | { error: string } = getTournament(tournamentId);
+		  reply.send(result);
+		}
+	  );
 }
