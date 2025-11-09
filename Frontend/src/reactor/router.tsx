@@ -4,7 +4,6 @@
 
 import { MainLayout } from "layouts/MainLayout";
 import notfound from "pages/notFound";
-import Home from "pages/Home";
 
 // 1️⃣ Build routes dynamically from /src/pages
 function buildRoutes() {
@@ -17,11 +16,9 @@ function buildRoutes() {
 			.replace(/index\.tsx$/, "")
 			.replace(/\.tsx$/, "")
 			.toLowerCase();
-		// if (route === "") route = "/";
-		route = route.replace(/\/+$/, "") || "/";
+		if (route === "") route = "/";
 		routes[route] = (pages[path] as any).default;
 	}
-    if (routes["/home"]) routes["/"] = routes["/home"];
 
 	console.log("🧭 routes:", routes);
 	return routes;

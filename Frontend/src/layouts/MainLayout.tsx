@@ -6,6 +6,9 @@ export function MainLayout(Page: () => HTMLElement) {
 		<div className="relative min-h-screen flex flex-col text-thunder font-serif bg-slate-950 overflow-hidden">
 			{/* 🪓 Top Header */}
 			<Header />
+			<div className="relative z-30">
+				<Header />
+			</div>
 
 			{/* 🌄 Background Image — Misty Mountains */}
 			<div className="absolute inset-0 bg-[url('/images/misty_mountains.jpg')] bg-cover bg-center bg-fixed brightness-[0.6] contrast-[1.2]"></div>
