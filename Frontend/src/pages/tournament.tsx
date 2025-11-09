@@ -30,7 +30,7 @@ function Greeting() {
 				backgroundSize: "auto"
 			}}
 		>
-			<div ref={el => (hashirBox = el)} style={cardStyle("linear-gradient(135deg, #00e0ff, #0078ff)")}>Tournament</div>
+			<div ref={el => (hashirBox = el)} style={cardStyle("linear-gradient(135deg, #ff00b3ff, #ff006aff)")}>Tournament</div>
 
 			{/* Ambient neon lights */}
 			<div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#000000] via-[#0a0022] to-[#000000] opacity-80 blur-[120px]"></div>

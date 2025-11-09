@@ -2,7 +2,7 @@
 export default function button(){
 	return(
 		<div>
-			<button style="color:red">jhasdkj</button>
+			<button style="color:white">jhasdkj</button>
 		</div>
 	);
 
