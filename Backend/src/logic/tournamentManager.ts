@@ -20,12 +20,31 @@ export function createTournament(players: string[]): Tournament | { error: strin
 		return { error: "Need at least 2 players to start a tournament." };
 	}
 
-	players = [...players].sort(() => Math.random() - 0.5);
+	const seen = new Set<string>();
+	let cleanPlayers: string[] = [];
+  
+ 	for (const name of players) {
+		const trimmed = name.trim();
+		if (!trimmed) {
+			return { error: "Player name cannot be empty" };
+		}
+		const key = trimmed.toUpperCase();
+		if (key === "AWIN") {
+			return { error: "Name 'AWIN' is reserved for automatic wins" };
+		}
+		if (seen.has(key)) {
+			return { error: `Duplicate name: '${trimmed}'` };
+		}
+		cleanPlayers.push(trimmed);
+		seen.add(key);
+	}
+
+	cleanPlayers = [...cleanPlayers].sort(() => Math.random() - 0.5);
 
 	const matches: Match[] = [];
-	for (let i = 0; i < players.length; i += 2) {
-		const p1 = players[i];
-		const p2 = players[i + 1] || "AWIN"; // Automatic WIN - AWIN
+	for (let i = 0; i < cleanPlayers.length; i += 2) {
+		const p1 = cleanPlayers[i];
+		const p2 = cleanPlayers[i + 1] || "AWIN"; // Automatic WIN - AWIN
 		if (p2 === "AWIN")
 			matches.push({ p1, p2, winner: p1, status: "finished" });
 		else
