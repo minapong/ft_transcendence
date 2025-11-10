@@ -36,7 +36,7 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
     let scoreLeft = 0;
     let scoreRight = 0;
 
-    const winingScore = 7;
+    const winingScore = 1;
 
     const scoreLeftDisplay = document.getElementById('scoreLeft');
     const scoreRightDisplay = document.getElementById('scoreRight');
@@ -180,18 +180,16 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
         
     }
 
-    function checkWinner() {
-        if (scoreLeft >= winingScore) {
-            showWinner("Left Player Wins! 🏆");
-			onWin(p1);
-			return;  // Left wins
+	function checkWinner() {
+		if (scoreLeft >= winingScore) {
+		  showWinner(`${p1} Wins! 🏆`);
+		  return;
 		}
-        else if (scoreRight >= winingScore) {
-            showWinner("Right Player Wins! 🏆");
-			onWin(p2);
-			return;
+		if (scoreRight >= winingScore) {
+		  showWinner(`${p2} Wins! 🏆`);
+		  return;
 		}
-    }
+	  }
 
     function showWinner(message) {
         // Stop ball movement
@@ -213,16 +211,12 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
         winnerMsg.style.borderRadius = "10px";
         document.body.appendChild(winnerMsg);
 
-        // Restart after 3 seconds
-        // setTimeout(() => {
-        //     scoreLeft = 0;
-        //     scoreRight = 0;
-        //     scoreLeftDisplay.textContent = scoreLeft.toString();
-        //     scoreRightDisplay.textContent = scoreRight.toString();
-        //     winnerMsg.remove();
-        //     resetBall();
-        // }, 3000);
-    }
+        //Restart after 3 seconds
+		setTimeout(() => {
+			winnerMsg.remove();
+			onWin(p1 === "Left Player Wins!" ? p1 : p2);  // Call onWin NOW
+		  }, 2000);
+		}
 
     // Start moving
     moveBall();

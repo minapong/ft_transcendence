@@ -9,51 +9,64 @@ export default function ActiveTournamentPage() {
 	}
   
 	const tournament = JSON.parse(tournamentData);
+
 	const pendingMatches = tournament.matches.filter((m: any) => m.status === "pending");
   
 	// ———— ON LOAD: Check if we just came back from Pong ————
 	const gameResult = localStorage.getItem("pongResult");
 	if (gameResult) {
-	  const { winner, matchIndex } = JSON.parse(gameResult);
-	  localStorage.removeItem("pongResult"); // clear
-  
-	  // Reuse your existing handleStartGame logic (but skip random)
-	  (async () => {
-		try {
-		  const resultRes = await fetch("http://localhost:3000/api/tournament/result", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ tournamentId: tournament.id, matchIndex, winner }),
-		  });
-		  if (!resultRes.ok) throw new Error();
-  
-		  const getRes = await fetch("http://localhost:3000/api/tournament/get", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ tournamentId: tournament.id }),
-		  });
-		  const fresh = await getRes.json();
-  
-		  const allDone = fresh.matches.every((m: any) => m.status === "finished");
-		  if (allDone) {
-			const nextRes = await fetch("http://localhost:3000/api/tournament/next", {
+		const { winner, matchIndex } = JSON.parse(gameResult);
+		localStorage.removeItem("pongResult");
+	  
+		(async () => {
+		  try {
+			// 1. Record result
+			await fetch("http://localhost:3000/api/tournament/result", {
+			  method: "POST",
+			  headers: { "Content-Type": "application/json" },
+			  body: JSON.stringify({ tournamentId: tournament.id, matchIndex, winner }),
+			});
+	  
+			// 2. Get updated state
+			const getRes = await fetch("http://localhost:3000/api/tournament/get", {
 			  method: "POST",
 			  headers: { "Content-Type": "application/json" },
 			  body: JSON.stringify({ tournamentId: tournament.id }),
 			});
-			const nextData = await nextRes.json();
-			localStorage.setItem("tournament", JSON.stringify(nextData.message ? { ...fresh, isOver: true } : nextData));
-		  } else {
-			localStorage.setItem("tournament", JSON.stringify(fresh));
+			const fresh = await getRes.json();
+	  
+			let finalTournament = fresh;
+	  
+			// 3. Check if round is complete
+			const allFinished = fresh.matches.every((m: any) => m.status === "finished");
+			if (allFinished) {
+			  // 4. Advance to next round
+			  const nextRes = await fetch("http://localhost:3000/api/tournament/next", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ tournamentId: tournament.id }),
+			  });
+			  const nextData = await nextRes.json();
+	  
+			  if (nextData.message) {
+				// Tournament over
+				finalTournament = { ...fresh, isOver: true };
+			  } else {
+				// New round
+				finalTournament = nextData;
+			  }
+			}
+	  
+			// 5. Save and reload
+			localStorage.setItem("tournament", JSON.stringify(finalTournament));
+			window.location.reload();
+		  } catch (err) {
+			alert("Failed to save result");
+			window.location.reload();
 		  }
-  
-		  window.location.reload();
-		} catch (err) {
-		  alert("Failed to save result");
-		  window.location.reload();
-		}
-	  })();
-	  return <div>Loading result...</div>;
+		})();
+	  
+		return <div>Saving result...</div>;
 	}
   
 	// ———— NORMAL VIEW ————
