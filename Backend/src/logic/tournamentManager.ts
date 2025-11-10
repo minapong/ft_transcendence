@@ -20,13 +20,35 @@ export function createTournament(players: string[]): Tournament | { error: strin
 		return { error: "Need at least 2 players to start a tournament." };
 	}
 
-	players = [...players].sort(() => Math.random() - 0.5);
+	const seen = new Set<string>();
+	let cleanPlayers: string[] = [];
+  
+ 	for (const name of players) {
+		const trimmed = name.trim();
+		if (!trimmed) {
+			return { error: "Player name cannot be empty" };
+		}
+		const key = trimmed.toUpperCase();
+		if (key === "AWIN") {
+			return { error: "Name 'AWIN' is reserved for automatic wins" };
+		}
+		if (seen.has(key)) {
+			return { error: `Duplicate name: '${trimmed}'` };
+		}
+		cleanPlayers.push(trimmed);
+		seen.add(key);
+	}
+
+	cleanPlayers = [...cleanPlayers].sort(() => Math.random() - 0.5);
 
 	const matches: Match[] = [];
-	for (let i = 0; i < players.length; i += 2) {
-		const p1 = players[i];
-		const p2 = players[i + 1] || "AWIN"; // Automatic WIN - AWIN
-		matches.push({ p1, p2, winner: null, status: "pending" });
+	for (let i = 0; i < cleanPlayers.length; i += 2) {
+		const p1 = cleanPlayers[i];
+		const p2 = cleanPlayers[i + 1] || "AWIN"; // Automatic WIN - AWIN
+		if (p2 === "AWIN")
+			matches.push({ p1, p2, winner: p1, status: "finished" });
+		else
+			matches.push({ p1, p2, winner: null, status: "pending" });
 	}
 
 	const tournament: Tournament = {
@@ -44,13 +66,17 @@ export function recordMatchResult(
 	tournamentId: number,
 	matchIndex: number,
 	winner: string
-): { success: true; match: Match } | { error: string } {
+): { success: true; match: Match } | { error: string } | { message: string} {
 	const t = tournaments.find(t => t.id === tournamentId);
 	if (!t) return { error: "Tournament not found" };
 
 	const match = t.matches[matchIndex];
 	if (!match) return { error: "Match not found" };
 	if (match.status === "finished") return { error: "Match already finished" };
+
+	if (winner !== match.p1 && winner !== match.p2) {
+		return { error: `Invalid winner: ${winner} was not part of this match` };
+	}
 
 	match.winner = winner;
 	match.status = "finished";
@@ -60,7 +86,7 @@ export function recordMatchResult(
 
 export function advanceRound(
 	tournamentId: number
-): Tournament | { error?: string; message?: string } {
+): Tournament |  {error: string} | {message: string}  {
 	const t = tournaments.find(t => t.id === tournamentId);
 	if (!t) return { error: "Tournament not found" };
 
@@ -79,11 +105,20 @@ export function advanceRound(
 	for (let i = 0; i < winners.length; i += 2) {
 		const p1 = winners[i];
 		const p2 = winners[i + 1] || "AWIN";
-		nextMatches.push({ p1, p2, winner: null, status: "pending" });
+		if (p2 === "AWIN")
+			nextMatches.push({ p1, p2, winner: p1, status: "finished" });
+		else
+			nextMatches.push({ p1, p2, winner: null, status: "pending" });
 	}
 
 	t.round++;
 	t.matches = nextMatches;
 
+	return t;
+}
+
+export function getTournament(tournamentId: number): Tournament | { error: string } {
+	const t = tournaments.find(t => t.id === tournamentId);
+	if (!t) return { error: "Tournament not found" };
 	return t;
 }
