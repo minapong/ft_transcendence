@@ -2,7 +2,7 @@
 // 🔥 Reactor Router v3 — ft_transcendence 
 // ==========================================
 
-import { MainLayout } from "layouts/MainLayout";
+import { MainLayout } from "layouts/rootLayout";
 
 
 // 1️⃣ Build routes dynamically from /src/pages

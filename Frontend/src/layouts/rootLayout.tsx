@@ -1,12 +1,11 @@
 import { Header } from "components/layout/Header";
 // import { Side } from "components/Side";
 
-export function MainLayout(Page: () => HTMLElement) {
+export function MainLayout({children}) {
 	return(
 		<div>
 			<Header/>
-			{/* <Side/> */}
-			<main id="spa-root">{Page()}</main>
+			<main id="spa-root">{children}</main>
 		</div>
 	);
 	
