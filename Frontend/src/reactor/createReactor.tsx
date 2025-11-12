@@ -8,6 +8,7 @@
 //
 // ================================================================
 
+
 export function createReactor(tag: any, props: any, ...children: any[]) {
 	if (typeof tag === "function") return tag({ ...(props || {}), children });
 
@@ -49,5 +50,21 @@ function attachChild(parent: HTMLElement, child: any) {
 // expose aliases so the TypeScript JSX compiler knows what to call
 // attach globally for runtime use (Vite/TSX looks for this name)
 (window as any).createReactor = createReactor;
+
+// ================================================================
+// JSX Runtime hooks for TypeScript "react-jsx" mode (added for dev mode
+// ================================================================
+export function jsx(type: any, props: any, key?: any) {
+	return createReactor(type, { ...props, key });
+  }
+  
+  export const jsxs = jsx;
+  
+  export const Fragment = (props: any) => props.children;
+  
+  export function jsxDEV(type: any, props: any, key?: any, isStatic?: any, source?: any, self?: any) {
+	return createReactor(type, { ...props, key });
+  }
+  
 
 

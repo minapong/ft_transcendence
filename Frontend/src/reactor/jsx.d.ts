@@ -11,3 +11,12 @@ declare module "reactor/createReactor" {
 declare module "reactor/router" {
 	export function createRouter(type: any, props: any): any;
 }
+
+//for dev mode
+declare module "reactor/jsx-dev-runtime" {
+	export const jsx: any;
+	export const jsxs: any;
+	export const jsxDEV: any;
+	export const Fragment: any;
+  }
+  

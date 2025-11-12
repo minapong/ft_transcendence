@@ -16,16 +16,21 @@
     "noFallthroughCasesInSwitch": true,
 	
 	// user specific
-	"jsx": "preserve",
+	// "jsx": "preserve",
+  // For development Vite uses "preserve", but for build we need actual jsx transform.
+  // The correct mode for a custom runtime is "react-jsx"
+  "jsx": "react-jsx",
 	"jsxImportSource": "reactor",
 
 	"baseUrl":"./src",
 	"paths": {
-		"reactor":["reactor"],
+		// "reactor":["reactor"],
+    "reactor": ["reactor/index.tsx"],
+    "reactor/*": ["reactor/*"],
 		"components": ["components"],
 		"layouts": ["layouts"],
 		"pages": ["pages"]
-	},
-},
+	  },
+  },
   "include": ["src"]
 }
