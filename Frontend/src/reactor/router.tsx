@@ -3,7 +3,7 @@
 // ==========================================
 
 import { MainLayout } from "layouts/MainLayout";
-import notfound from "pages/notFound";
+
 
 // 1️⃣ Build routes dynamically from /src/pages
 function buildRoutes() {
@@ -42,7 +42,7 @@ function resolvePage(routes: Record<string, any>, rawPath: string) {
 	path = path.split(/[?#]/)[0];
 	
 	// ✅ unified 404 handling
-	const Page = routes[path] ?? routes["/notfound"] ?? notfound;
+	const Page = routes[path] ?? routes["/notfound"] ;
 	if (!routes[path]) {
 		history.replaceState({}, "", "/notfound");
 	}
@@ -70,8 +70,6 @@ export function renderRoute() {
 		}
 	} catch (err) {
 		console.error("⚠️ renderRoute error:", err);
-		const fallback = notfound();
-		(inner || root)?.replaceChildren(fallback);
 	}
 }
 
