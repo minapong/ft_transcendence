@@ -1,4 +1,5 @@
 // import Link form "react"
+import a from "@/assets/a.jpg";
 
 export function Header() {
 	return (
@@ -9,8 +10,8 @@ export function Header() {
 				<a href="/contact" className="active:scale-130 bg-linear-to-br hover:from-cyan-100 hover:text-cyan-900 hover:to-cyan-400 from-cyan-900 to-cyan-600 text-white border-4 border-cyan-200 text-2xl font-bold px-2 py-1 rounded-xl shadow-2xl hover:scale-110 transition-all duration-150 cursor-pointer hover:shadow-cyan-500/50 hover:shadow-2xl">Contact</a>
 				<a href="/tournament/start" className="active:scale-90 bg-linear-to-br hover:from-cyan-100 hover:text-cyan-900 hover:to-cyan-400 from-cyan-900 to-cyan-600 text-white border-4 border-cyan-200 text-2xl font-bold px-2 py-1 rounded-xl shadow-2xl hover:scale-110 transition-all duration-150 cursor-pointer hover:shadow-cyan-500/50 hover:shadow-2xl">Tournament</a>
 				<a href="/santiago" className="active:scale-90 bg-linear-to-br hover:from-cyan-100 hover:text-cyan-900 hover:to-cyan-400 from-cyan-900 to-cyan-600 text-white border-4 border-cyan-200 text-2xl font-bold px-2 py-1 rounded-xl shadow-2xl hover:scale-110 transition-all duration-150 cursor-pointer hover:shadow-cyan-500/50 hover:shadow-2xl">Santiago</a>
-				{/* <Link/> */}
 				</nav>
+			<img src={a} alt="" />
 		</div>
 	);
 }

@@ -27,22 +27,49 @@ It must run flawlessly on the latest stable version of **Mozilla Firefox**.
 
 ## 🧩 Folder Structure
 ```bash
-frontend/
-├── src/
-│   ├── assets/           # images, icons
-│   ├── components/       # UI components
-│   ├── pages/            # SPA views (Home, Game, Tournament)
-│   ├── game/             # Pong and other games logic
-│   ├── styles/           # Tailwind setup
-│   ├── utils/            # helpers, constants
-│   └── main.tsx          # SPA entry point
+src/
+├── app/                    # App entry & global setup
+│   ├── index.css           # Global styles
+│   └── main.tsx            # Root entry, mounts the app
 │
-├── public/
-│   └── index.html
+├── assets/                 # Imported images, icons, fonts (bundled by Vite)
+│   └── a.jpg
 │
-├── package.json
-├── tsconfig.json
-└── README.md
+├── components/             # Reusable building blocks
+│   ├── layout/             # Page structure (header, nav, footer, sidebar)
+│   │   ├── Header.tsx
+│   │   ├── Nav.tsx
+│   │   ├── Side.tsx
+│   │   └── footer.tsx
+│   ├── ui/                 # Small reusable UI parts (buttons, inputs, etc.)
+│   │   ├── Buton.tsx
+│   │   └── Greeting.tsx
+│   └── main.tsx            # (Temp) — consider moving or removing
+│
+├── layouts/                # Page wrappers combining layout parts
+│   └── MainLayout.tsx
+│
+├── pages/                  # Route-level views
+│   ├── contact.tsx
+│   ├── index.tsx
+│   ├── login.tsx
+│   ├── notfound.tsx
+│   ├── santiago.tsx
+│   └── tournament/         # Feature-specific routes
+│       ├── active.tsx
+│       └── start.tsx
+│
+├── reactor/                # Custom JSX/React-like runtime
+│   ├── createReactor.md
+│   ├── createReactor.tsx
+│   ├── index.tsx
+│   ├── jsx-dev-runtime.ts
+│   ├── jsx.d.ts
+│   └── router.tsx
+│
+└── styles/                 # CSS modules & global style definitions
+    └── abc.css
+
 ````
 
 ---

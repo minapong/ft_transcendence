@@ -1,4 +1,4 @@
-import { Header } from "components/Header";
+import { Header } from "components/layout/Header";
 // import { Side } from "components/Side";
 
 export function MainLayout(Page: () => HTMLElement) {

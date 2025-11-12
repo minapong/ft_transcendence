@@ -1,7 +1,7 @@
 // Greeting.tsx
 import { jsxDEV } from "reactor/jsx-dev-runtime";
-import Nav from "./Nav"
-import Footer from "./footer"
+import Nav from "./layout/Nav"
+import Footer from "./layout/footer"
 import "./abc.css"
 function Main() {
 	return (
