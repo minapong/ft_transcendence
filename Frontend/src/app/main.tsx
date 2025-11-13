@@ -1,4 +1,4 @@
 import { renderRoute } from "reactor"
-import "./index.css"
+import "./global.css"
 
-    renderRoute();
+renderRoute();
