@@ -3,7 +3,7 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
 {
     // Select the ball element
     const ball = document.getElementById('ball');
-    const game = document.getElementById('game_board');
+    // const game = document.getElementById('game_board');
     const left_p = document.getElementById('left_p');
     const right_p = document.getElementById('right_p');
     const pause = document.getElementById("pauseBtn");
@@ -14,18 +14,18 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
     const gameWidth = 800;
     const gameHeight = 500;
 
-    // the ball initial position
-    let x = gameWidth / 2;
-    let y = gameHeight / 2;
-    // the ball speed
-    let dx = (Math.random() > 0.5 ? 3 : -3);
-    let dy = (Math.random() > 0.5 ? 3 : -3);
-
     // Width = Height = 16 px
     const ballSize = 16;
 
-    let paddleY_Left = (gameHeight / 2);
-    let paddleY_Right = (gameHeight / 2);
+    // the ball initial position
+    let x = gameWidth / 2 - ballSize / 2;
+    let y = gameHeight / 2 - ballSize / 2;
+    // the ball speed
+    let dx = (Math.random() > 0.5 ? 1 : -1);
+    let dy = (Math.random() > 0.5 ? 1 : -1);
+
+    let paddleY_Left = (gameHeight / 2) - 48;
+    let paddleY_Right = (gameHeight / 2) - 48;
     const paddleSpeed = 6;
 
     let upPressed = false;
@@ -36,7 +36,7 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
     let scoreLeft = 0;
     let scoreRight = 0;
 
-    const winingScore = 1;
+    const winingScore = 2;
 
     const scoreLeftDisplay = document.getElementById('scoreLeft');
     const scoreRightDisplay = document.getElementById('scoreRight');
@@ -85,32 +85,32 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
         y += dy;
 
         if (
-            x <= 16 + 6 && // paddle left edge + paddle width
-            x >= 16 + 2 &&
-            y + ballSize >= paddleY_Left - 40 && // ball bottom >= paddle top
-            y <= paddleY_Left + 60 // ball top <= paddle bottom
+            x <= 16 + 12 && // paddle left edge + paddle width
+            x >= 16 + 8 &&
+            y + ballSize >= paddleY_Left && // ball bottom >= paddle top
+            y <= paddleY_Left + 96 // ball top <= paddle bottom
         ) {
             dx = -dx; // reverse horizontal direction
-            x = 16 + 6; // prevent the ball from "sticking" inside paddle
+            x = 16 + 12; // prevent the ball from "sticking" inside paddle
         }
         if (
-            x + ballSize >= 778 &&       // ball reached right paddle left edge
-            x + ballSize <= 782 &&     
-            y + ballSize >= paddleY_Right - 40 && // ball bottom >= paddle top
-            y <= paddleY_Right + 60         // ball top <= paddle bottom
+            x + ballSize >= 800 - 16 - 12 - 8 - 8 &&  // ball reached right paddle left edge
+            x + ballSize <= 800 - 16 - 8 - 8 - 8 &&     
+            y + ballSize >= paddleY_Right && // ball bottom >= paddle top
+            y <= paddleY_Right + 96         // ball top <= paddle bottom
         ) {
             dx = -dx;              // reverse horizontal direction
-            x = 778 - ballSize;    // prevent sticking inside paddle
+            x = 800 - 16 - 12 - 8 - 8 - ballSize;    // prevent sticking inside paddle
         }
         if (y <= 0)
         {
             dy = -dy;
             y = 0;
         }
-        else if (y + ballSize >= gameHeight)
+        else if (y + ballSize >= gameHeight - 8 - 8)
         {
             dy = -dy;
-            y = gameHeight - ballSize;
+            y = gameHeight - ballSize - 8 - 8;
         }
 
         ball.style.left = x + 'px';
@@ -139,44 +139,48 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
 
     function movePaddle() 
     {
-        if (wPressed && paddleY_Left - 55 > 0) 
+        if (wPressed && paddleY_Left > 0) 
             paddleY_Left -= paddleSpeed;
-        if (sPressed && paddleY_Left + 60 < gameHeight) 
+        if (sPressed && paddleY_Left + 96 + 8 + 8 < gameHeight) 
             paddleY_Left += paddleSpeed;
 
         left_p.style.top = paddleY_Left + 'px';
 
-        if (upPressed && paddleY_Right - 55 > 0) 
+        if (upPressed && paddleY_Right > 0) 
             paddleY_Right -= paddleSpeed;
-        if (downPressed && paddleY_Right + 60 < gameHeight) 
+        if (downPressed && paddleY_Right + 96 + 8 + 8 < gameHeight) 
             paddleY_Right += paddleSpeed;
 
         right_p.style.top = paddleY_Right + 'px';
     }
 
     function resetBall() {
-        x = gameWidth / 2;
-        y = gameHeight / 2;
+        x = gameWidth / 2  - ballSize / 2;
+        y = gameHeight / 2  - ballSize / 2;
         dx = 0;
         dy = 0;
-        if (scoreLeft === winingScore || scoreRight === winingScore)
+        // if (scoreLeft === winingScore || scoreRight === winingScore)
+        // {
+        //     isPaused = true;
+        //     // delay of 5 seconds after the winning
+        //     setTimeout(() => {
+        //         isPaused = false;
+        //         moveBall();
+        //     }, 5000)
+        // }
+        
+        if (scoreLeft !== winingScore && scoreRight !== winingScore)
         {
-            isPaused = true;
-            // delay of 5 seconds after the winning
-            setTimeout(() => {
-                isPaused = false;
-                moveBall();
-            }, 5000)
-        }
-        ball.style.left = x + 'px';
-        ball.style.top = y + 'px';
+            ball.style.left = x + 'px';
+            ball.style.top = y + 'px';
 
-        // Randomize direction
-        // Wait 1 second, then start moving again
-    setTimeout(() => {
-        dx = (Math.random() > 0.5 ? 3 : -3);
-        dy = (Math.random() > 0.5 ? 3 : -3);
-    }, 1000);
+            // Randomize direction
+            // Wait 1 second, then start moving again
+            setTimeout(() => {
+                dx = (Math.random() > 0.5 ? 1 : -1);
+                dy = (Math.random() > 0.5 ? 1 : -1);
+            }, 1000);
+        }
         
     }
 
@@ -189,7 +193,7 @@ export function pongLogic(p1: string, p2: string, onWin: (winner: string) => voi
 		  showWinner(`${p2} Wins! 🏆`);
 		  return;
 		}
-	  }
+	}
 
     function showWinner(message) {
         // Stop ball movement

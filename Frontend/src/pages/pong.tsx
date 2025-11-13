@@ -33,13 +33,13 @@ export default function PongGame() {
             <div id="game_board" className="bg-gray-800 border-8 border-white rounded-lg w-[800px] h-[500px] relative">
             
                 {/* Left paddle */}
-                <div id="left_p" className="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-24 bg-white"></div>
+                <div id="left_p" className="absolute left-4 top-1/2 w-3 h-24 bg-white"></div>
 
                 {/* Right paddle */}
-                <div id="right_p" className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-24 bg-white"></div>
+                <div id="right_p" className="absolute right-4 top-1/2 w-3 h-24 bg-white"></div>
 
                 {/* Ball */}
-                <div id="ball" className="absolute w-4 h-4 bg-white rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                <div id="ball" className="absolute w-4 h-4 bg-white rounded-full top-1/2 left-1/2"></div>
             
             </div>
             <button id="pauseBtn" className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400">
