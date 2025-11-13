@@ -9,71 +9,81 @@ export default function ActiveTournamentPage() {
 	}
   
 	const tournament = JSON.parse(tournamentData);
+
 	const pendingMatches = tournament.matches.filter((m: any) => m.status === "pending");
   
-	const handleStartGame = async (matchIndex: number) => {
+	// ———— ON LOAD: Check if we just came back from Pong ————
+	const gameResult = localStorage.getItem("pongResult");
+	if (gameResult) {
+		const { winner, matchIndex } = JSON.parse(gameResult);
+		localStorage.removeItem("pongResult");
+	  
+		(async () => {
+		  try {
+			// 1. Record result
+			await fetch("http://localhost:3000/api/tournament/result", {
+			  method: "POST",
+			  headers: { "Content-Type": "application/json" },
+			  body: JSON.stringify({ tournamentId: tournament.id, matchIndex, winner }),
+			});
+	  
+			// 2. Get updated state
+			const getRes = await fetch("http://localhost:3000/api/tournament/get", {
+			  method: "POST",
+			  headers: { "Content-Type": "application/json" },
+			  body: JSON.stringify({ tournamentId: tournament.id }),
+			});
+			const fresh = await getRes.json();
+	  
+			let finalTournament = fresh;
+	  
+			// 3. Check if round is complete
+			const allFinished = fresh.matches.every((m: any) => m.status === "finished");
+			if (allFinished) {
+			  // 4. Advance to next round
+			  const nextRes = await fetch("http://localhost:3000/api/tournament/next", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ tournamentId: tournament.id }),
+			  });
+			  const nextData = await nextRes.json();
+	  
+			  if (nextData.message) {
+				// Tournament over
+				finalTournament = { ...fresh, isOver: true };
+			  } else {
+				// New round
+				finalTournament = nextData;
+			  }
+			}
+	  
+			// 5. Save and reload
+			localStorage.setItem("tournament", JSON.stringify(finalTournament));
+			window.location.reload();
+		  } catch (err) {
+			alert("Failed to save result");
+			window.location.reload();
+		  }
+		})();
+	  
+		return <div>Saving result...</div>;
+	}
+  
+	// ———— NORMAL VIEW ————
+	const handleStartGame = (matchIndex: number) => {
 	  const match = tournament.matches[matchIndex];
 	  if (!match || match.status !== "pending") return;
   
-	  console.log(`Starting match: ${match.p1} vs ${match.p2}`);
-	  const winner = Math.random() < 0.5 ? match.p1 : match.p2;
+	  // Save match info
+	  localStorage.setItem("currentMatch", JSON.stringify({
+		p1: match.p1,
+		p2: match.p2,
+		matchIndex,
+		tournamentId: tournament.id
+	  }));
   
-	  try {
-		// 1. Record result
-		const resultRes = await fetch("http://localhost:3000/api/tournament/result", {
-		  method: "POST",
-		  headers: { "Content-Type": "application/json" },
-		  body: JSON.stringify({
-			tournamentId: tournament.id,
-			matchIndex,
-			winner,
-		  }),
-		});
-  
-		if (!resultRes.ok) throw new Error("Failed to record result");
-  
-		// 2. GET fresh tournament from backend 
-		const getRes = await fetch("http://localhost:3000/api/tournament/get", {
-		  method: "POST",
-		  headers: { "Content-Type": "application/json" },
-		  body: JSON.stringify({ tournamentId: tournament.id }),
-		});
-  
-		if (!getRes.ok) throw new Error("Failed to fetch updated tournament");
-		const freshTournament = await getRes.json();
-  
-		// 3. Check if round is complete using updated data
-		const allFinished = freshTournament.matches.every((m: any) => m.status === "finished");
-  
-		if (allFinished) {
-		  // 4. Advance round
-		  const nextRes = await fetch("http://localhost:3000/api/tournament/next", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ tournamentId: tournament.id }),
-		  });
-  
-		  if (!nextRes.ok) throw new Error("Failed to advance round");
-		  const nextData = await nextRes.json();
-  
-		  if (nextData.message) {
-			// Tournament over
-			freshTournament.isOver = true;
-			localStorage.setItem("tournament", JSON.stringify(freshTournament));
-		  } else {
-			// New round
-			localStorage.setItem("tournament", JSON.stringify(nextData));
-		  }
-		} else {
-		  // Just save updated state
-		  localStorage.setItem("tournament", JSON.stringify(freshTournament));
-		}
-  
-		window.location.reload();
-	  } catch (err: any) {
-		console.error("Backend error:", err);
-		alert("Error: " + err.message);
-	  }
+	  // Go to Pong page
+	  window.location.href = "/pong";  // or your route
 	};
   
 	return (
