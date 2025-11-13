@@ -1,12 +1,11 @@
 import { Header } from "components/layout/Header";
-// import { Side } from "components/Side";
-
-export function MainLayout({children}) {
-	return(
+ 
+export default function rootLayout({ children }) {
+	console.log("children on first load:", children);
+	return (
 		<div>
-			<Header/>
+			<Header />
 			<main id="spa-root">{children}</main>
 		</div>
 	);
-	
 }

@@ -1,11 +1,11 @@
 // ==========================================
-// 🔥 Reactor Router v3 — ft_transcendence 
+//  Reactor Router v3 — ft_transcendence 
 // ==========================================
 
-import { MainLayout } from "layouts/rootLayout";
+import rootLayout  from "../layouts/rootLayout";
 
 
-// 1️⃣ Build routes dynamically from /src/pages
+// Build routes dynamically from /src/pages
 function buildRoutes() {
 	const pages = import.meta.glob("/src/pages/**/*.tsx", { eager: true });
 	const routes: Record<string, any> = {};
@@ -24,7 +24,7 @@ function buildRoutes() {
 	return routes;
 }
 
-// 2️⃣ Normalize + resolve target page
+// Normalize + resolve target page
 function resolvePage(routes: Record<string, any>, rawPath: string) {
 	const original = rawPath;
 
@@ -41,17 +41,23 @@ function resolvePage(routes: Record<string, any>, rawPath: string) {
 	// strip query/hash if present (for later enhancement)
 	path = path.split(/[?#]/)[0];
 	
-	// ✅ unified 404 handling
+	// unified 404 handling
 	const Page = routes[path] ?? routes["/notfound"] ;
-	if (!routes[path]) {
-		history.replaceState({}, "", "/notfound");
-	}
+	//any logic ig u want custom behaviour of browser url when 404 occurs
+	// if (!routes[path]) {
+	// 	history.replaceState({}, "", "/notfound");
+	// }
+	//any logic ig u want custom behaviour of browser url when 404 occurs
 	return Page;
 }
-
-// 3️⃣ Core render routine
+let routesCache: Record<string,any> | null = null
+const getRoutes = () => {
+	if (!routesCache) routesCache = buildRoutes();
+	return routesCache;
+}
+// Core render routine
 export function renderRoute() {
-	const routes = buildRoutes();
+	const routes = getRoutes();
 	const path = window.location.pathname;
 	const Page = resolvePage(routes, path);
 
@@ -65,15 +71,15 @@ export function renderRoute() {
 			// Layout already exists → swap only inner content
 			inner.replaceChildren(Page());
 		} else {
+			root.replaceChildren(rootLayout({ children: Page() }));
 			// First render → mount full layout
-			root.replaceChildren(MainLayout(Page));
 		}
 	} catch (err) {
 		console.error("⚠️ renderRoute error:", err);
 	}
 }
 
-// 4️⃣ Intercept in-app link clicks
+// Intercept in-app link clicks
 document.addEventListener("click", e => {
 	const link = (e.target as HTMLElement).closest("a");
 	if (link && link.getAttribute("href")?.startsWith("/")) {
@@ -83,7 +89,7 @@ document.addEventListener("click", e => {
 	}
 });
 
-// 5️⃣ Handle browser navigation (Back / Forward)
+// browser navigation (Back / Forward)
 window.addEventListener("popstate", ()=> {
 	renderRoute()
 });
