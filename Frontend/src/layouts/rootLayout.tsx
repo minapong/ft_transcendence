@@ -5,7 +5,7 @@ export default function rootLayout({ children }) {
 	return (
 		<div>
 			<Header />
-			<main id="spa-root">{children}</main>
+			<main className="w-screen h-screen bg-linear-to-br from-blue-950 via-blue-900 to-cyan-900 overflow-hidden" id="spa-root">{children}</main>
 		</div>
 	);
 }
