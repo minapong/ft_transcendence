@@ -1,4 +1,3 @@
-
 export default function contact(){
 	return(
 		<div className="w-screen h-screen flex justify-center items-center text-3xl bg-linear-to-br from-blue-950 via-blue-900 to-cyan-900  relative overflow-hidden">
