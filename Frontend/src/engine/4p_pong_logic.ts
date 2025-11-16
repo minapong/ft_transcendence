@@ -3,7 +3,6 @@ export function pongLogic()
 {
     // Select the ball element
     const ball = document.getElementById('ball');
-    // const game = document.getElementById('game_board');
     const left_p = document.getElementById('left_p');
     const right_p = document.getElementById('right_p');
     const upper_p = document.getElementById('upper_p');
@@ -46,8 +45,6 @@ export function pongLogic()
 
     let scoreRed = 0;
     let scoreBlue = 0;
-    // let scoreUp = 0;
-    // let scoreDown = 0;
 
     const winingScore = 7;
 
@@ -229,10 +226,10 @@ export function pongLogic()
 
         // Randomize direction
         // Wait 1 second, then start moving again
-    setTimeout(() => {
-        dx = (Math.random() > 0.5 ? 1.5 : -1.5);
-        dy = (Math.random() > 0.5 ? 2 : -2);
-    }, 1000);
+        setTimeout(() => {
+            dx = (Math.random() > 0.5 ? 1.5 : -1.5);
+            dy = (Math.random() > 0.5 ? 2 : -2);
+        }, 1000);
         
     }
 
