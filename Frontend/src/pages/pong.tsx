@@ -1,26 +1,52 @@
-import {pongLogic} from "../engine/pong_logic"
-
+import { pongLogic } from "../engine/pong_logic";
 
 export default function PongGame() {
-	// Read match info
-	const matchData = localStorage.getItem("currentMatch");
-	if (!matchData) {
-	  alert("No match found. Go back.");
-	  window.location.href = "/tournament/active";
-	  return <div>Error</div>;
-	}
-  
-	const { p1, p2, matchIndex } = JSON.parse(matchData);
-  
-	// Start game
-	setTimeout(() => {
-	  pongLogic(p1, p2, (winner: string) => {
-		// Save result
-		localStorage.setItem("pongResult", JSON.stringify({ winner, matchIndex }));
-		// Go back
-		window.location.href = "/tournament/active";
-	  });
-	}, 0);
+    // Read match info from localStorage (tournament mode)
+    const matchData = localStorage.getItem("currentMatch");
+
+    // Read query params (free play mode)
+    const params = new URLSearchParams(window.location.search);
+    const useAI = params.get("useAI") === "true";
+    const aiDifficulty = (params.get("difficulty") || "medium") as "easy" | "medium" | "hard";
+	const single_p1 = (params.get("p1") || "Player 1");
+	const single_p2 = params.get("p2") || (useAI ? "AI" : "Player 2");
+
+    let p1: string;
+    let p2: string;
+    let matchIndex: number | null = null;
+
+    if (matchData) {
+        // Tournament match
+        const parsed = JSON.parse(matchData);
+        p1 = parsed.p1;
+        p2 = parsed.p2;
+        matchIndex = parsed.matchIndex;
+    } else {
+        // Free play (AI or 2p)
+        p1 = single_p1;
+        p2 = single_p2;
+    }
+
+	let cleanup = () => {};
+
+    // Start game
+    setTimeout(() => {
+        pongLogic(p1, p2, (winner: string) => {
+            if (matchIndex !== null) {
+                // Tournament mode → store result
+                localStorage.setItem("pongResult", JSON.stringify({ winner, matchIndex }));
+				localStorage.removeItem("currentMatch");
+                window.location.href = "/tournament/active";
+            } else {
+                // Free play mode → simply return to menu
+                window.location.href = "/single_game";
+            }
+        }, useAI, aiDifficulty);
+    }, 0);
+
+	window.addEventListener("beforeunload", () => {
+		cleanup();
+	});
 
 	return(
         <div className="bg-gray-900 flex flex-col items-center justify-center h-screen">

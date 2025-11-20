@@ -43,6 +43,10 @@ export function pongLogic(
     const scoreLeftDisplay = document.getElementById('scoreLeft');
     const scoreRightDisplay = document.getElementById('scoreRight');
 
+	// Show player names
+	if (scoreLeftDisplay) scoreLeftDisplay.textContent = `${p1}: 0`;
+	if (scoreRightDisplay) scoreRightDisplay.textContent = `${p2}: 0`;
+
     // AI Setup
     let aiPlayer: PongAI | null = null;
     let gameEnded = false;
@@ -73,55 +77,51 @@ export function pongLogic(
         aiPlayer.start(getGameState, simulateKeyPress);
     }
 
-	document.addEventListener('keydown', (e) => {
-		// Block human control of right paddle if AI is active
-		if (useAI && e.isTrusted) {
-			if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-				e.preventDefault();
-				return;
-			}
+	// Define handlers
+	const keydownHandler = (e: KeyboardEvent) => {
+		if (useAI && e.isTrusted && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+			e.preventDefault();
+			return;
 		}
-	
-		// Right paddle controls (AI OR human)
+
 		if (e.key === 'ArrowUp') upPressed = true;
 		if (e.key === 'ArrowDown') downPressed = true;
-	
-		// Left paddle — always human
 		if (e.key === 'w') wPressed = true;
 		if (e.key === 's') sPressed = true;
-	});
+	};
 
-	document.addEventListener('keyup', (e) => {
-		if (useAI && e.isTrusted) {
-			if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-				e.preventDefault();
-				return;
-			}
+	const keyupHandler = (e: KeyboardEvent) => {
+		if (useAI && e.isTrusted && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+			e.preventDefault();
+			return;
 		}
-	
+
 		if (e.key === 'ArrowUp') upPressed = false;
 		if (e.key === 'ArrowDown') downPressed = false;
-	
 		if (e.key === 'w') wPressed = false;
 		if (e.key === 's') sPressed = false;
-	});
+	};
 
-    pause.addEventListener("click", () => {
-        isPaused = !isPaused;
-
-        if (isPaused) {
-            pause.textContent = "▶️ Resume";
-            if (aiPlayer) {
-                aiPlayer.stop(simulateKeyPress);
-            }
-        } else {
-            pause.textContent = "⏸️ Pause";
-            if (aiPlayer) {
-                aiPlayer.start(getGameState, simulateKeyPress);
-            }
-            moveBall();
-        }
-    });
+	const pauseHandler = () => {
+		isPaused = !isPaused;
+	
+		if (isPaused) {
+			pause.textContent = "▶️ Resume";
+			if (aiPlayer) {
+				aiPlayer.stop(simulateKeyPress);
+			}
+		} else {
+			pause.textContent = "⏸️ Pause";
+			if (aiPlayer) {
+				aiPlayer.start(getGameState, simulateKeyPress);
+			}
+			moveBall();
+		}
+	};
+	// Attach
+	document.addEventListener('keydown', keydownHandler);
+	document.addEventListener('keyup', keyupHandler);
+	pause.addEventListener("click", pauseHandler);
 
     function moveBall() {
         if (isPaused) 
@@ -167,14 +167,14 @@ export function pongLogic(
 
         if (x < 0) {
             scoreRight++;
-            scoreRightDisplay.textContent = scoreRight.toString();
+            scoreRightDisplay.textContent = `${p2}: ${scoreRight}`;
             checkWinner();
             resetBall();
         }
 
         if (x + BALL_SIZE > GAME_WIDTH) {
             scoreLeft++;
-            scoreLeftDisplay.textContent = scoreLeft.toString();
+            scoreLeftDisplay.textContent = `${p1}: ${scoreLeft}`;
             checkWinner();
             resetBall();
         }
@@ -259,4 +259,13 @@ export function pongLogic(
     }
 
     moveBall();
+
+	return () => {
+		alert("Cleanup called");
+		gameEnded = true;
+		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
+		document.removeEventListener('keydown', keydownHandler);
+		document.removeEventListener('keyup', keyupHandler);
+		pause.removeEventListener("click", pauseHandler);
+	};
 }
