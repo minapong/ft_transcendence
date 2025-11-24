@@ -1,9 +1,10 @@
 // ==========================================
 // ⚡ Reactor Hooks — Tiny React-like system
 // ==========================================
-
+import {renderRoute} from "."
 let hooks:any[]=[] // storage for all of our hooks
 let hookIndex = 0; //indexing through that storage
+let pendingEffects: Array<() => void> = [];
 
 export function resetHooks() {
     hookIndex = 0; //on every rerender hooks are reset to read from begining of array
@@ -23,7 +24,8 @@ export function useState(initial: any) {
         typeof value  === "function" ? value(hooks[idx]) : value;
 
 		// trigger rerender
-		import("./render").then(m => m.renderRoute());
+		renderRoute();
+		// import("./render").then(m => m.renderRoute());
 	};
 
 	return [hooks[idx], setState];
@@ -39,9 +41,15 @@ export function useEffect(cb: () => void, deps: any[]) {
 	const hasChanged =
 		!prev || deps.some((d, i) => d !== prev[i]);
 
-	if (hasChanged) cb();
+	if (hasChanged) pendingEffects.push(cb);
 
 	hooks[idx] = deps;
+}
+
+export function flushEffects() {
+	const effects = pendingEffects;
+	pendingEffects = [];
+	for (const fn of effects) fn();
 }
 
 // -----------------------------

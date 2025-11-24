@@ -1,11 +1,14 @@
-import { Header } from "components/layout/Header";
- 
-export default function rootLayout({ children }) {
-	console.log("children on first load:", children);
-	return (
-		<div>
-			<Header />
-			<main className="w-screen h-screen bg-linear-to-br from-blue-950 via-blue-900 to-cyan-900 overflow-hidden" id="spa-root">{children}</main>
-		</div>
-	);
+import { Header } from "@/components/layout/Header";
+import { Sidebar } from "@/components/layout/Sidebar";
+
+export default function RootLayout({ children }) {
+  return (
+    <div className="app-shell flex flex-col">
+      <Header />
+      <div className="shell-body flex flex-1 ">
+        <Sidebar className="main-pane flex-1"/>
+        <main className="main-pane flex-1">{children}</main>
+      </div>
+    </div>
+  );
 }

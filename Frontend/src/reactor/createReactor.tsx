@@ -9,30 +9,55 @@
 // ================================================================
 
 
-export function createReactor(tag: any, props: any, ...children: any[]) {
-	if (typeof tag === "function") return tag({ ...(props || {}), children });
-
-	const el = document.createElement(tag);
-	// so it just takes all actual key values from object.entries object entries make it in an array than for loop lables them key value
+function applyProps(el: HTMLElement, props: any) {
 	for (const [key, value] of Object.entries(props || {})) {
 		if (key === "style" && typeof value === "object") {
 			Object.assign(el.style, value);
 		}
-		else if (key === "ref" && typeof value === "function") {
-			value(el);
+		else if (key === "ref") {
+			if (typeof value === "function") {
+				value(el);
+			} else if (value && typeof value === "object" && "current" in value) {
+				(value as { current: any }).current = el;
+			}
 		}
-		// 🎯 ONE single event rule
 		else if (key.startsWith("on") && typeof value === "function") {
-			const event = key.slice(2).toLowerCase(); // onClick → "click"
+			const event = key.slice(2).toLowerCase();
 			el.addEventListener(event, value);
 		}
 		else if (key !== "children" && value != null && value !== false) {
-			// Known DOM property → assign directly
 			if (key in el) (el as any)[key] = value;
-			// Otherwise treat as attribute
 			else el.setAttribute(key, String(value));
 		}
 	}
+}
+
+export function createReactor(tag: any, props: any, ...children: any[]) {
+	if (typeof tag === "function") {
+		const rendered = tag({ ...(props || {}), children });
+	
+		if (rendered instanceof HTMLElement) {
+			const p = props || {};
+	
+			// merge className
+			if (p.className) {
+				rendered.className = rendered.className
+					? rendered.className + " " + p.className
+					: p.className;
+			}
+	
+			// apply props except className/children
+			const { className, children: _c, ...rest } = p;
+			applyProps(rendered, rest);
+		}
+	
+		return rendered;
+	}
+	
+	
+
+	const el = document.createElement(tag);
+	applyProps(el, props);
 
 	for (const child of children.flat()) attachChild(el, child);
 	return el;

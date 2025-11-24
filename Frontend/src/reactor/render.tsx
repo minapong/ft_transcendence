@@ -1,5 +1,5 @@
 import rootLayout from "../layouts/rootLayout";
-import { resetHooks } from "./hooks";
+import { resetHooks, flushEffects } from "./hooks";
 import { getRoutes, resolvePage } from "./router/routes";
 
 export function renderRoute() {
@@ -16,6 +16,8 @@ export function renderRoute() {
     else root.replaceChildren(rootLayout({ children: Page() }));
   } catch (err) {
     console.error("⚠️ renderRoute error:", err);
+  } finally {
+    flushEffects();
   }
 }
 

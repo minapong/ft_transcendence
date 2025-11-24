@@ -1,9 +1,53 @@
-export default function login(){
-	return(
-		<div className="w-screen h-screen flex justify-center items-center text-3xl bg-linear-to-br from-blue-950 via-blue-900 to-cyan-900 relative overflow-hidden">
-            <div className="absolute inset-0 bg-cyan-500 rounded-lg blur-3xl opacity-30 animate-pulse"></div>
-			<button onClick={() => alert("Test alert!")}>Test Alert</button>
-            <div className="relative bg-cyan-500 text-white border-4 border-cyan-300 text-5xl font-bold px-8 py-6 rounded-xl shadow-2xl hover:scale-110 transition-all duration-300 cursor-pointer hover:shadow-cyan-500/50 hover:shadow-2xl">Login</div>
-        </div>
-	);
+import { useEffect, useRef } from "@/reactor";
+import * as BABYLON from "babylonjs";
+
+export default function Scene() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+	console.log("canvasRef", canvasRef.current);
+
+    const engine = new BABYLON.Engine(canvas, true);
+
+    const createScene = () => {
+      const scene = new BABYLON.Scene(engine);
+
+      const camera = new BABYLON.ArcRotateCamera(
+        "camera",
+        Math.PI / 2,
+        Math.PI / 3,
+        5,
+        BABYLON.Vector3.Zero(),
+        scene
+      );
+      camera.attachControl(canvas, true);
+
+      const light = new BABYLON.HemisphericLight(
+        "light",
+        new BABYLON.Vector3(0, 1, 0),
+        scene
+      );
+
+      BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+
+      return scene;
+    };
+
+    const scene = createScene();
+
+    engine.runRenderLoop(() => scene.render());
+    window.addEventListener("resize", engine.resize);
+
+    return () => {
+      engine.dispose();
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style="width:100vw;height:100vh;display:block;"
+    ></canvas>
+  );
 }

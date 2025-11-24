@@ -1,36 +1,27 @@
-// tsconfig.ts
 {
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client","node"],
+    "types": ["vite/client", "node"],
     "skipLibCheck": true,
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "noEmit": true,
-
-    /* Linting */
-    // "strict": true,
     "noFallthroughCasesInSwitch": true,
-	
-	// user specific
-	// "jsx": "preserve",
-  // For development Vite uses "preserve", but for build we need actual jsx transform.
-  // The correct mode for a custom runtime is "react-jsx"
-  "jsx": "react-jsx",
-	"jsxImportSource": "reactor",
+    "jsx": "preserve",
+    "jsxImportSource": "reactor",
 
-	"baseUrl":"./src",
-	"paths": {
-		// "reactor":["reactor"],
-    "reactor": ["reactor/index.tsx"],
-    "reactor/*": ["reactor/*"],
-		"components": ["components"],
-		"layouts": ["layouts"],
-		"pages": ["pages"]
-	  },
+    "baseUrl": ".",                      
+    "paths": {
+      "@/*": ["src/*"],
+      "reactor": ["src/reactor/index.tsx"],
+      "reactor/*": ["src/reactor/*"],
+      "components": ["src/components"],
+      "layouts": ["src/layouts"],
+      "pages": ["src/pages"]
+    }
   },
+
   "include": ["src"]
 }
