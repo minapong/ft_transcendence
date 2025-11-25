@@ -1,4 +1,4 @@
-import { renderRoute,initRouter } from "reactor"
+import { renderRoute,initRouter } from "@/Reactor"
 import "./global.css"
 
 initRouter();

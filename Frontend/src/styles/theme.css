@@ -1,13 +1,12 @@
-:root {
-    --color-primary: #ffffff;
-  
-    --color-accent: #22d3ee;
-    --color-accent-soft: #0ea5e9;
-  
-    --border-soft: rgba(255, 255, 255, 0.05);
-    --border-strong: rgba(34, 211, 238, 0.4);
-  
-    --bg-app: linear-gradient(135deg, #0f172a 0%, #0b1224 45%, #0c1428 100%);
-    --bg-header: linear-gradient(90deg, #0b1224 0%, #0e172f 50%, #111a34 100%);
-    --bg-panel: rgba(15,23,42,0.65);
-  }
+@theme {
+  --color-primary: #ffffff;
+  --color-accent: #22d3ee;
+  --color-accent-soft: #0ea5e9;
+  --border-soft: rgba(255, 255, 255, 0.05);
+  --border-strong: rgba(34, 211, 238, 0.4);
+  --bg-app: linear-gradient(135deg, #0f172a 0%, #0b1224 45%, #0c1428 100%);
+  --bg-header: linear-gradient(90deg, #0b1224 0%, #0e172f 50%, #111a34 100%);
+  --bg-panel: rgba(15, 23, 42, 0.65);
+  --color-prime: #22d3ee;
+  --spacing-offset: 10vh;
+}

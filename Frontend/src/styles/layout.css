@@ -13,7 +13,6 @@
 }
 
 .header-bar {
-  @apply h-16 px-6 flex items-center justify-between border-b shadow-lg backdrop-blur;
   border-color: var(--border-soft);
   box-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 15%, transparent);
   background: var(--bg-header);
@@ -27,7 +26,6 @@
 }
 
 .main-pane {
-  @apply flex-1 overflow-y-auto p-8 border-l;
   border-color: var(--border-soft);
   background: linear-gradient(
     180deg,

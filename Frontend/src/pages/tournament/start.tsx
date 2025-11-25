@@ -73,7 +73,7 @@ export default function TournamentPage() {
 	};
   
 	return (
-	  <div className="w-screen h-screen flex flex-col items-center justify-center gap-4 bg-gray-900 text-white p-4">
+	  <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-900 text-white p-4">
 		<h1 className="text-4xl font-bold mb-6">New Tournament</h1>
   
 		<input className="px-4 py-2 rounded text-white bg-gray-800 focus:outline-none" placeholder="Player 1" />

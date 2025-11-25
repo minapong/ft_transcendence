@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "@/reactor";
+import { useEffect, useRef } from "@/Reactor";
 import * as BABYLON from "babylonjs";
 
 export default function Scene() {

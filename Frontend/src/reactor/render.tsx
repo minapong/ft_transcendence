@@ -1,4 +1,4 @@
-import rootLayout from "../layouts/rootLayout";
+import rootLayout from "@/components/layout/RootLayout";
 import { resetHooks, flushEffects } from "./hooks";
 import { getRoutes, resolvePage } from "./router/routes";
 

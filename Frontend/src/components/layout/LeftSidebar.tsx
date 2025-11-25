@@ -6,7 +6,7 @@ const links = [
 	{ label: "Contact", href: "/contact" },
   ];
   
-  export function Sidebar() {
+  export default function Sidebar() {
 	return (
 	  <aside className="nav-panel">
 		<div className="px-1 space-y-0.5">
