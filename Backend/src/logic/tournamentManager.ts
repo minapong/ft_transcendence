@@ -1,124 +1,129 @@
-
-export interface Match {
-	p1: string;
-	p2: string;
-	winner: string | null;
-	status: "pending" | "finished";
+import {
+    insertTournament,
+    getTournamentById,
+    insertTournamentPlayer,
+    insertMatch,
+    insertMatchPlayer,
+    getMatchesForTournament,
+    recordMatchWinner,
+    getRegisteredPlayers,
+    getMatchPlayers,
+    getMatchDTO,
+    getTournamentWithMatches,
+    updateTournamentState
+} from "./tournamentRepo";
+export interface MatchDTO {
+    id: number;
+    p1: { id: number; name: string };
+    p2: { id: number; name: string };
+    winnerId: number | null;
+    status: "pending" | "finished";
+    round: number;
+    matchNumber: number;
 }
 
-export interface Tournament {
-	id: number;
-	round: number;
-	matches: Match[];
-	isOver: boolean;
+export interface TournamentDTO {
+    id: number;
+    name: string;
+    currentRound: number;
+    state: "waiting" | "active" | "finished";
+    matches: MatchDTO[];
+    winnerId: number | null;
 }
 
-const tournaments: Tournament[] = [];
-
-export function createTournament(players: string[]): Tournament | { error: string } {
-	if (players.length < 2) {
-		return { error: "Need at least 2 players to start a tournament." };
-	}
-
-	const seen = new Set<string>();
-	let cleanPlayers: string[] = [];
-  
- 	for (const name of players) {
-		const trimmed = name.trim();
-		if (!trimmed) {
-			return { error: "Player name cannot be empty" };
-		}
-		const key = trimmed.toUpperCase();
-		if (key === "AWIN") {
-			return { error: "Name 'AWIN' is reserved for automatic wins" };
-		}
-		if (seen.has(key)) {
-			return { error: `Duplicate name: '${trimmed}'` };
-		}
-		cleanPlayers.push(trimmed);
-		seen.add(key);
-	}
-
-	cleanPlayers = [...cleanPlayers].sort(() => Math.random() - 0.5);
-
-	const matches: Match[] = [];
-	for (let i = 0; i < cleanPlayers.length; i += 2) {
-		const p1 = cleanPlayers[i];
-		const p2 = cleanPlayers[i + 1] || "AWIN"; // Automatic WIN - AWIN
-		if (p2 === "AWIN")
-			matches.push({ p1, p2, winner: p1, status: "finished" });
-		else
-			matches.push({ p1, p2, winner: null, status: "pending" });
-	}
-
-	const tournament: Tournament = {
-		id: tournaments.length + 1,
-		round: 1,
-		matches,
-		isOver: false,
-	};
-
-	tournaments.push(tournament);
-	return tournament;
+// Create a tournament
+export function createTournament(name: string) {
+    const idOrError = insertTournament(name);
+    if (typeof idOrError !== "number") throw new Error(idOrError.error);
+    return getTournamentById(idOrError);
 }
 
-export function recordMatchResult(
-	tournamentId: number,
-	matchIndex: number,
-	winner: string
-): { success: true; match: Match } | { error: string } | { message: string} {
-	const t = tournaments.find(t => t.id === tournamentId);
-	if (!t) return { error: "Tournament not found" };
+// Register a user to a tournament
+export function registerUserToTournament(tournamentId: number, userId: number) {
+    const tournament = getTournamentById(tournamentId);
+    if (!tournament) throw new Error("Tournament not found");
+    if (tournament.state !== "waiting") throw new Error("Tournament already started");
 
-	const match = t.matches[matchIndex];
-	if (!match) return { error: "Match not found" };
-	if (match.status === "finished") return { error: "Match already finished" };
-
-	if (winner !== match.p1 && winner !== match.p2) {
-		return { error: `Invalid winner: ${winner} was not part of this match` };
-	}
-
-	match.winner = winner;
-	match.status = "finished";
-
-	return { success: true, match };
+    return insertTournamentPlayer(tournamentId, userId);
 }
 
-export function advanceRound(
-	tournamentId: number
-): Tournament |  {error: string} | {message: string}  {
-	const t = tournaments.find(t => t.id === tournamentId);
-	if (!t) return { error: "Tournament not found" };
+// Start tournament: only allowed if full quantity is registered
+export function startTournament(tournamentId: number, maxPlayers: number) {
+    const tournament = getTournamentById(tournamentId);
+    if (!tournament) throw new Error("Tournament not found");
+    if (tournament.state !== "waiting") throw new Error("Tournament already started");
 
-	if (t.matches.some(m => m.status !== "finished")) {
-		return { error: "Not all matches are finished" };
-	}
+    const players = getRegisteredPlayers(tournamentId);
+    if (players.length !== maxPlayers) {
+        throw new Error(`Cannot start tournament. Required ${maxPlayers}, but ${players.length} registered.`);
+    }
 
-	const winners = t.matches.map(m => m.winner).filter(Boolean) as string[];
+    // Shuffle first round
+    const shuffled = [...players].sort(() => Math.random() - 0.5);
 
-	if (winners.length === 1) {
-		t.isOver = true;
-		return { message: `Tournament finished! Winner: ${winners[0]}` };
-	}
+    let matchNumber = 1;
+    const round = 1;
 
-	const nextMatches: Match[] = [];
-	for (let i = 0; i < winners.length; i += 2) {
-		const p1 = winners[i];
-		const p2 = winners[i + 1] || "AWIN";
-		if (p2 === "AWIN")
-			nextMatches.push({ p1, p2, winner: p1, status: "finished" });
-		else
-			nextMatches.push({ p1, p2, winner: null, status: "pending" });
-	}
+    for (let i = 0; i < shuffled.length; i += 2) {
+        const p1 = shuffled[i];
+        const p2 = shuffled[i + 1];
 
-	t.round++;
-	t.matches = nextMatches;
+        insertMatch(
+            tournamentId,
+            p1.id,
+            p2.id,
+            round,
+            matchNumber++
+        );
+    }
 
-	return t;
+    return updateTournamentState(tournamentId, "active", round);
 }
 
-export function getTournament(tournamentId: number): Tournament | { error: string } {
-	const t = tournaments.find(t => t.id === tournamentId);
-	if (!t) return { error: "Tournament not found" };
-	return t;
+// Advance round
+export function advanceRound(tournamentId: number) {
+    const tournament = getTournamentWithMatches(tournamentId);
+    if (!tournament) throw new Error("Tournament not found"); // <-- added check
+
+    // Check all matches finished
+    const unfinished = tournament.matches.filter((m : MatchDTO) => m.status === "pending");
+    if (unfinished.length) throw new Error("Not all matches are finished");
+
+    // Collect winners
+    const winners = tournament.matches.map((m: MatchDTO) => m.winnerId).filter(Boolean) as number[];
+
+    if (winners.length === 1) {
+        // Tournament finished
+        return updateTournamentState(tournamentId, "finished", tournament.currentRound, winners[0]);
+    }
+
+    const nextRound = tournament.currentRound + 1;
+    let matchNumber = 1;
+
+    for (let i = 0; i < winners.length; i += 2) {
+        const p1 = winners[i];
+        const p2 = winners[i + 1];
+
+        insertMatch(
+            tournamentId,
+            p1,
+            p2,
+            nextRound,
+            matchNumber++
+        );
+    }
+
+    return updateTournamentState(tournamentId, "active", nextRound);
 }
+
+// Record match result
+export function recordMatchResult(matchId: number, winnerId: number) {
+    const matchPlayers = getMatchPlayers(matchId);
+    const validIds = matchPlayers.map((p: { id: number}) => p.id);
+
+    if (!validIds.includes(winnerId)) throw new Error("Invalid winner for this match");
+
+    recordMatchWinner(matchId, winnerId);
+    return getMatchDTO(matchId);
+}
+
