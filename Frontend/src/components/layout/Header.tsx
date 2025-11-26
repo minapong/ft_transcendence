@@ -1,6 +1,6 @@
 export default function Header() {
 	return (
-	  <header className="h-offset px-6 flex items-center justify-between shadow-lg backdrop-blur">
+	  <header className="h-height-offset px-6 flex items-center justify-between shadow-lg backdrop-blur">
 		<div className="flex items-center gap-4">
 		  <div className="logo-mark" />
 		  <div className="flex flex-col leading-tight">

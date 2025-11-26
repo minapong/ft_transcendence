@@ -32,6 +32,5 @@
 }
 
 .nav-link {
-  @apply px-3 py-1.5 flex items-center justify-between rounded-lg text-sm text-primary font-semibold transition border-border-soft;
+  @apply px-3 py-1.5 flex items-center justify-between rounded-lg text-sm  font-semibold transition border-border-soft;
 }
- 

@@ -47,7 +47,8 @@ export default function Scene() {
   return (
     <canvas
       ref={canvasRef}
-      style="width:100vw;height:100vh;display:block;"
+      // style="width:100vw;height:100vh;display:block;"
+      className="h-body-screenHeight w-width-screen"
     ></canvas>
   );
 }
