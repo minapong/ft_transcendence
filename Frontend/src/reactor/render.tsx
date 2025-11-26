@@ -1,23 +1,24 @@
 import rootLayout from "@/components/layout/RootLayout";
-import { resetHooks, flushEffects } from "./hooks";
+import { resetHooks, flushEffects,runPendingRefs } from "./hooks";
 import { getRoutes, resolvePage } from "./router/routes";
-
+ 
 export function renderRoute() {
   resetHooks();
+  
   const routes = getRoutes();
   const Page = resolvePage(routes, window.location.pathname);
-
   const root = document.getElementById("app");
   if (!root) return;
-
   const inner = document.getElementById("spa-root");
   try {
-    if (inner) inner.replaceChildren(Page());
-    else root.replaceChildren(rootLayout({ children: Page() }));
+    const pageEl = Page();
+    if (inner) inner.replaceChildren(pageEl);
+    else root.replaceChildren(rootLayout({ children: pageEl }));
+
+    runPendingRefs();
+    flushEffects();
   } catch (err) {
     console.error("⚠️ renderRoute error:", err);
-  } finally {
-    flushEffects();
   }
 }
 
@@ -30,5 +31,11 @@ export function initRouter() {
       renderRoute();
     }
   });
+  // back/forward
+  document.addEventListener("DOMContentLoaded", () => {});
+
   window.addEventListener("popstate", renderRoute);
+
+  // INITIAL RENDER — do it immediately
+  renderRoute();
 }

@@ -15,8 +15,8 @@
     "baseUrl": ".",                      
     "paths": {
       "@/*": ["src/*"],
-      "reactor": ["src/Reactor/index.tsx"],
-      "reactor/*": ["src/Reactor/*"],
+      "Reactor": ["src/Reactor/index.tsx"],
+      "Reactor/*": ["src/Reactor/*"],
       "components": ["src/components"],
       "layouts": ["src/layouts"],
       "pages": ["src/pages"]

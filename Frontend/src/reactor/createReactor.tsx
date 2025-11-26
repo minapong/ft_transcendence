@@ -7,7 +7,8 @@
 // and have it become a real DOM element.
 //
 // ================================================================
-
+import {resetHooks} from "@/Reactor/hooks"
+import { pendingRefSetters } from "./hooks";
 
 function applyProps(el: HTMLElement, props: any) {
 	for (const [key, value] of Object.entries(props || {})) {
@@ -16,9 +17,9 @@ function applyProps(el: HTMLElement, props: any) {
 		}
 		else if (key === "ref") {
 			if (typeof value === "function") {
-				value(el);
+				pendingRefSetters.push(() => value(el));
 			} else if (value && typeof value === "object" && "current" in value) {
-				(value as { current: any }).current = el;
+				pendingRefSetters.push(() => { value.current = el; });
 			}
 		}
 		else if (key.startsWith("on") && typeof value === "function") {
@@ -34,31 +35,24 @@ function applyProps(el: HTMLElement, props: any) {
 
 export function createReactor(tag: any, props: any, ...children: any[]) {
 	if (typeof tag === "function") {
+		resetHooks();
 		const rendered = tag({ ...(props || {}), children });
-	
 		if (rendered instanceof HTMLElement) {
 			const p = props || {};
-	
 			// merge className
 			if (p.className) {
 				rendered.className = rendered.className
 					? rendered.className + " " + p.className
 					: p.className;
 			}
-	
 			// apply props except className/children
 			const { className, children: _c, ...rest } = p;
 			applyProps(rendered, rest);
 		}
-	
 		return rendered;
 	}
-	
-	
-
 	const el = document.createElement(tag);
 	applyProps(el, props);
-
 	for (const child of children.flat()) attachChild(el, child);
 	return el;
 }
