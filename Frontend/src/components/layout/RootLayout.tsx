@@ -3,11 +3,11 @@ import  LeftSidebar from "@/components/layout/LeftSidebar";
 
 export default function RootLayout({ children }) {
   return (
-    <div className="app-shell flex flex-col">
+    <div className="min-h-screen bg-linear-to-br text-slate-100 from-start via-mid to-end flex flex-col">
       <Header />
       <div className="flex">
           <LeftSidebar />
-          <main className="main-pane flex-1">{children}</main>
+          <main className=" flex-1">{children}</main>
       </div>
     </div>
   );

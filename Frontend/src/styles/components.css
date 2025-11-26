@@ -1,82 +1,37 @@
 .logo-mark {
-    @apply h-10 w-10 rounded-xl border shadow-inner;
-    border-color: var(--border-strong);
-    box-shadow: inset 0 0 8px color-mix(in srgb, var(--color-accent) 25%, transparent);
-    background: radial-gradient(
-      circle at 30% 30%,
+  @apply h-10 w-10 rounded-xl border shadow-inner;
+  border-color: var(--border-strong);
+  box-shadow: inset 0 0 8px color-mix(in srgb, var(--color-accent) 25%, transparent);
+  background: radial-gradient(circle at 30% 30%,
       color-mix(in srgb, var(--color-accent) 60%, transparent),
-      color-mix(in srgb, var(--color-accent-soft) 30%, transparent)
-    );
-  }
-  
-  .logo-subtitle {
-    @apply text-[11px] uppercase tracking-[0.35em];
-    color: color-mix(in srgb, var(--color-accent) 50%, transparent);
-  }
-  
-  .logo-title {
-    @apply text-xl font-semibold;
-    color: var(--color-primary);
-  }
-  
-  .primary-btn {
-    @apply px-3 py-2 text-sm font-semibold rounded-lg shadow-md transition;
-    color: var(--color-primary);
-    background: var(--color-accent);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 35%, transparent);
-  }
-  .primary-btn:hover { background: var(--color-accent-soft); }
-  
-  .avatar-shell {
-    @apply w-10 h-10 rounded-full cursor-pointer transition;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--border-soft);
-    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15);
-  }
-  .avatar-shell:hover {
-    box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 30%, transparent);
-  }
-  
-  .nav-title {
-    @apply text-xs uppercase tracking-[0.3em];
-    color: color-mix(in srgb, var(--color-primary) 40%, transparent);
-  }
-  .nav-subtitle {
-    @apply text-xl font-semibold;
-    color: var(--color-primary);
-  }
-  
-  .nav-link {
-    @apply flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold transition;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-soft);
-    color: var(--color-primary);
-  }
-  .nav-link:hover {
-    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-    border-color: var(--border-strong);
-  }
-  
-  .nav-dot {
-    @apply h-2 w-2 rounded-full transition;
-    background: color-mix(in srgb, var(--color-accent) 60%, transparent);
-  }
-  .nav-link:hover .nav-dot { background: var(--color-accent); }
-  
-  .nav-arrow {
-    @apply text-xs transition;
-    color: color-mix(in srgb, var(--color-primary) 40%, transparent);
-  }
-  .nav-link:hover .nav-arrow {
-    color: color-mix(in srgb, var(--color-accent-soft) 80%, white);
-  }
-  
-  .help-card {
-    @apply p-4 rounded-xl text-sm shadow-inner;
-    border: 1px solid var(--border-strong);
-    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    color: var(--color-primary);
-    box-shadow: inset 0 0 12px color-mix(in srgb, var(--color-accent) 25%, transparent);
-  }
-  
+      color-mix(in srgb, var(--color-accent-soft) 30%, transparent));
+}
+
+.logo-subtitle {
+  @apply text-[11px] uppercase tracking-[0.35em];
+  color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+.primary-btn {
+  @apply text-primary bg-accent  px-3 py-2 text-sm font-semibold rounded-lg shadow-md transition;
+}
+
+.primary-btn:hover {
+  @apply bg-accent-soft;
+}
+
+.avatar-shell {
+  @apply w-10 h-10 rounded-full cursor-pointer transition;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-soft);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.avatar-shell:hover {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.nav-link {
+  @apply px-3 py-1.5 flex items-center justify-between rounded-lg text-sm text-primary font-semibold transition border-border-soft;
+}
+ 
