@@ -1,9 +1,33 @@
+# FROM node:20-bullseye-slim
+# WORKDIR /app
+# COPY package*.json tsconfig.json ./
+# RUN apt-get update && apt-get install -y sqlite3 build-essential && npm install
+# # RUN npm install
+# COPY . .
+# EXPOSE 3000
+# CMD ["sh", "-c", "npm run migrate && npm run dev"]
+# # CMD ["npm", "run", "dev"]
+
 FROM node:20-bullseye-slim
+
 WORKDIR /app
+
+# Install system packages needed for sqlite and building native modules
+RUN apt-get update && \
+    apt-get install -y sqlite3 libssl-dev build-essential && \
+    apt-get clean
+
+# Copy package manifests first to leverage Docker cache
 COPY package*.json tsconfig.json ./
-RUN apt-get update && apt-get install -y sqlite3 build-essential && npm install
-# RUN npm install
+
+# Install node modules (pulls prisma if package.json includes it)
+RUN npm install
+
+# Copy remaining source
 COPY . .
+
 EXPOSE 3000
-CMD ["sh", "-c", "npm run migrate && npm run dev"]
-# CMD ["npm", "run", "dev"]
+
+# On container start: generate Prisma client, run migrations, start dev server
+CMD sh -c "npx prisma generate && npm run migrate && node --loader ts-node/esm src/index.ts"
+

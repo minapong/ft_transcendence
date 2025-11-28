@@ -1,6 +1,9 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors"; // ✅ import the CORS plugin
 
+import { prisma } from "./db/prisma";               // ✅ Prisma client
+import apiRoutes from "./routes/api.routes";        // ✅ New unified API routes
+
 import { registerTournamentRoutes } from "./routes/tournament";
 import { registerMatchmakingRoutes } from "./routes/matchmaking";
 
@@ -21,10 +24,24 @@ server.get("/", async () => {
 registerTournamentRoutes(server);
 registerMatchmakingRoutes(server);
 
+//Register Prisma-based API routes
+server.register(apiRoutes, { prefix: "/api" });
+
 server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
-  if (err) throw err;
+	if (err){ process.exit(1); throw err; }
   console.log(`Server listening at ${address}, hot reload is working!`);
 });
 }
+
+// Gracefully shutdown Prisma on exit
+process.on("SIGINT", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
 
 start();
