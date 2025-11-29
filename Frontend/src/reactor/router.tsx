@@ -3,7 +3,7 @@
 // ==========================================
 
 import rootLayout  from "../layouts/rootLayout";
-
+import { withHooks } from "./hooks";
 
 // Build routes dynamically from /src/pages
 function buildRoutes() {
@@ -67,11 +67,13 @@ export function renderRoute() {
 	const inner = document.getElementById("spa-root");
 
 	try {
+		const WrappedPage = withHooks(Page);
 		if (inner) {
 			// Layout already exists → swap only inner content
-			inner.replaceChildren(Page());
+			inner.replaceChildren(WrappedPage());
+
 		} else {
-			root.replaceChildren(rootLayout({ children: Page() }));
+			root.replaceChildren(rootLayout({ children: WrappedPage() }));
 			// First render → mount full layout
 		}
 	} catch (err) {

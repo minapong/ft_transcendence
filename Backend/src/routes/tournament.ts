@@ -5,9 +5,13 @@ import {
     startTournament,
     recordMatchResult,
     advanceRound,
-    TournamentDTO,
-    MatchDTO
+	getTournament,
+	getActiveTournament,
 } from "../logic/tournamentManager";
+
+import { 
+	MatchDTO, 
+} from "../types/tournament";
 
 // Request body types
 type StartTournamentBody = { name: string; maxPlayers: number; tournamentId?: number };
@@ -22,9 +26,9 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
         req: FastifyRequest<{ Body: StartTournamentBody }>,
         reply: FastifyReply
     ) => {
-        const { name } = req.body;
+        const { name, maxPlayers } = req.body;
         try {
-            const tournament = createTournament(name);
+            const tournament = createTournament(name, maxPlayers);
             reply.send({ success: true, tournament });
         } catch (err: any) {
             reply.status(400).send({ error: err.message });
@@ -48,11 +52,11 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
         req: FastifyRequest<{ Body: StartTournamentBody }>,
         reply: FastifyReply
     ) => {
-        const { tournamentId, maxPlayers } = req.body;
+        const { tournamentId} = req.body;
         if (!tournamentId) return reply.status(400).send({ error: "tournamentId is required" });
 
         try {
-            const tournamentOrNull = startTournament(tournamentId, maxPlayers);
+            const tournamentOrNull = startTournament(tournamentId);
             if (!tournamentOrNull) return reply.status(400).send({ error: "Unable to start tournament" });
 
             reply.send({ success: true, tournament: tournamentOrNull });
@@ -102,12 +106,25 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
     ) => {
         const { tournamentId } = req.body;
         try {
-            const tournamentOrNull = startTournament(tournamentId, 0); 
-            if (!tournamentOrNull) return reply.status(404).send({ error: "Tournament not found" });
-
+            const tournamentOrNull = getTournament(tournamentId); 
+            if (!tournamentOrNull) {
+				return reply.status(404).send({ error: "Tournament not found" });
+			}
             reply.send({ success: true, tournament: tournamentOrNull });
         } catch (err: any) {
             reply.status(400).send({ error: err.message });
         }
     });
+
+	server.get("/api/tournament/active", async (_req: FastifyRequest, reply: FastifyReply) => {
+		try {
+		  const activeTournament = getActiveTournament();
+		  if (!activeTournament) {
+			return reply.status(404).send({ error: "No active tournament" });
+		  }
+		  reply.send({ success: true, tournament: activeTournament });
+		} catch (err: any) {
+		  reply.status(400).send({ error: err.message });
+		}
+	  });
 }
