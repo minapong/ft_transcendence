@@ -15,4 +15,4 @@ export const RIGHT_PADDLE_X = PLAYABLE_WIDTH - 16 - PADDLE_WIDTH;
 
 export const GAME_SPEED = 3;
 
-export const WIN_SCORE = 3;
+export const WIN_SCORE = 1;

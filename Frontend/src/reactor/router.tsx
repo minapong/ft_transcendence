@@ -95,3 +95,8 @@ document.addEventListener("click", e => {
 window.addEventListener("popstate", ()=> {
 	renderRoute()
 });
+
+export function navigate(path: string) {
+    history.pushState({}, "", path);
+    renderRoute();
+}

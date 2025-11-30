@@ -106,16 +106,21 @@ import {
 		return info.lastInsertRowid as number;
 	}
 	
-	export function getMatchesForTournament(tournamentId: number) {
+	export function getMatchesForTournament(tournamentId: number): MatchDTO[] {
 		if (!tournamentId) return [];
+	
+		// Get all match IDs for this tournament
 		const stmt = db.prepare(`
-			SELECT tm.*, m.winner_id 
-			FROM tournament_matches tm
-			JOIN matches m ON m.id = tm.match_id
-			WHERE tm.tournament_id = ?
-			ORDER BY tm.round_number, tm.match_number_in_round
+			SELECT match_id
+			FROM tournament_matches
+			WHERE tournament_id = ?
+			ORDER BY round_number, match_number_in_round
 		`);
-		return stmt.all(tournamentId);
+	
+		const rows = stmt.all(tournamentId) as { match_id: number }[];
+	
+		// Map each match ID to a full MatchDTO 
+		return rows.map(row => getMatchDTO(row.match_id));
 	}
 	
 	export function recordMatchWinner(matchId: number, winnerId: number) {
@@ -161,36 +166,34 @@ import {
 				tm.round_number,
 				tm.match_number_in_round,
 				m.winner_id,
-	
+
 				p1.user_id AS p1_id,
-				u1.username AS p1_name,
-	
+				p1.username AS p1_name,
+
 				p2.user_id AS p2_id,
-				u2.username AS p2_name
-	
+				p2.username AS p2_name
+
 			FROM tournament_matches tm
 			JOIN matches m ON m.id = tm.match_id
-	
+
 			LEFT JOIN (
-				SELECT mp.*, u1.username
+				SELECT mp.user_id, u.username
 				FROM match_players mp
-				JOIN users u1 ON u1.id = mp.user_id
+				JOIN users u ON u.id = mp.user_id
 				WHERE mp.match_id = ?
 				ORDER BY mp.id ASC
 				LIMIT 1
-			) p1
-	
+			) p1 ON 1=1
+
 			LEFT JOIN (
-				SELECT mp.*, u2.username
+				SELECT mp.user_id, u.username
 				FROM match_players mp
-				JOIN users u2 ON u2.id = mp.user_id
+				JOIN users u ON u.id = mp.user_id
 				WHERE mp.match_id = ?
 				ORDER BY mp.id DESC
 				LIMIT 1
-			) p2
-	
-			ON 1=1   -- dummy join condition
-	
+			) p2 ON 1=1
+
 			WHERE tm.match_id = ?
 		`);
 		const m = stmt.get(matchId, matchId, matchId) as MatchRow;
@@ -238,24 +241,39 @@ import {
 		const tournament = getTournamentById(tournamentId);
 		if (!tournament) return null;
 	  
-		const matches = getMatchesForTournament(tournamentId).map((m) => mapMatchRow(m as MatchRow));
-	  
+		const matches = getMatchesForTournament(tournamentId);
+		const registeredPlayers = getRegisteredPlayers(tournamentId) || [];
+
+		const winnerMatch = matches.find(m => m.winnerId === tournament.winner_id);
+		const winnerName =
+			winnerMatch?.p1.id === tournament.winner_id
+				? winnerMatch.p1.name
+				: winnerMatch?.p2.name ?? null;
+
 		return {
 		  id: tournament.id,
 		  name: tournament.name,
 		  currentRound: tournament.current_round,
 		  state: tournament.state,
 		  matches,
+		  winnerName,
 		  winnerId: tournament.winner_id,
+		  max_players: tournament.max_players,
+		  registeredPlayers,
 		};
 	}
 
-	export function get_ActiveTournament(): TournamentRow | undefined {
-		const stmt = db.prepare(`
-			SELECT * FROM tournaments
+	export function get_ActiveTournament(): TournamentDTO | null {
+		const row = db.prepare(`
+			SELECT id 
+			FROM tournaments
 			WHERE state IN ('waiting', 'active')
 			ORDER BY id ASC
 			LIMIT 1
-		`);
-		return stmt.get() as TournamentRow | undefined;
+		`).get() as { id: number } | undefined;
+	
+		if (!row) return null;
+	
+		// Reuse the full DTO builder
+		return getTournamentWithMatches(row.id);
 	}

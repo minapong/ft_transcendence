@@ -85,34 +85,51 @@ export function startTournament(tournamentId: number) {
 export function advanceRound(tournamentId: number) {
     const tournament = getTournamentWithMatches(tournamentId);
     if (!tournament) throw new Error("Tournament not found");
-    
-    // Check all matches finished
-    const unfinished = tournament.matches.filter((m: MatchDTO) => m.status === "pending");
+
+    // Get matches for the current round
+    const currentRoundMatches = tournament.matches.filter(
+        (m: MatchDTO) => m.round === tournament.currentRound
+    );
+
+    // Check all current-round matches are finished
+    const unfinished = currentRoundMatches.filter((m: MatchDTO) => m.status === "pending");
     if (unfinished.length) throw new Error("Not all matches are finished");
-    
-    // Collect winners
-    const winners = tournament.matches.map((m: MatchDTO) => m.winnerId).filter(Boolean) as number[];
-    
+
+    // Collect winners only from current round
+    const winners = currentRoundMatches
+        .map((m: MatchDTO) => m.winnerId)
+        .filter(Boolean) as number[];
+
     if (winners.length === 1) {
         // Tournament finished
-        return updateTournamentState(tournamentId, "finished", tournament.currentRound, winners[0]);
+        return updateTournamentState(
+            tournamentId,
+            "finished",
+            tournament.currentRound,
+            winners[0]
+        );
     }
 
     const nextRound = tournament.currentRound + 1;
     let matchNumber = 1;
-    
-    for (let i = 0; i < winners.length; i += 2) {
-        const p1 = winners[i];
-        const p2 = winners[i + 1];
-        insertMatch(
-            tournamentId,
-            p1,
-            p2,
-            nextRound,
-            matchNumber++
-        );
-    }
-    
+
+    // Sort winners by their previous match number to preserve order
+    const winnersByIndex = currentRoundMatches
+        .filter(m => m.winnerId)
+        .sort((a, b) => (a.matchNumber ?? 0) - (b.matchNumber ?? 0));
+
+	for (let i = 0; i < winnersByIndex.length; i += 2) {
+		const p1 = winnersByIndex[i].winnerId!;
+		const p2 = winnersByIndex[i + 1]?.winnerId;
+	
+		if (!p2) {
+			// Odd player out → automatically advances to next round
+			insertMatch(tournamentId, p1, 0, nextRound, matchNumber++); // 0 or null as placeholder
+		} else {
+			insertMatch(tournamentId, p1, p2, nextRound, matchNumber++);
+		}
+	}
+
     return updateTournamentState(tournamentId, "active", nextRound);
 }
 
@@ -128,7 +145,7 @@ export function recordMatchResult(matchId: number, winnerId: number) {
 }
 
 export function getTournament(tournamentId: number) {
-	return getTournamentById(tournamentId);
+	return getTournamentWithMatches(tournamentId);
 }
 
 export function getActiveTournament() {

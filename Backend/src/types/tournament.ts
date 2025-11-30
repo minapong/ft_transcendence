@@ -12,7 +12,7 @@ export interface MatchDTO {
     winnerId: number | null;
     status: "finished" | "pending";
     round: number;
-    matchNumber: number;
+    matchNumber?: number;
 }
 
 export interface TournamentDTO {
@@ -20,8 +20,11 @@ export interface TournamentDTO {
     name: string;
     currentRound: number;
     state: "waiting" | "active" | "finished";
-    matches: MatchDTO[];
+    matches: MatchDTO[] | [];
     winnerId: number | null;
+	winnerName: string | null;
+	max_players: number;
+	registeredPlayers: PlayerDTO[] | [],
 }
 
 // Database row types (internal to repo layer)
