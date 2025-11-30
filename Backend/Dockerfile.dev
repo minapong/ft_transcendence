@@ -29,5 +29,5 @@ COPY . .
 EXPOSE 3000
 
 # On container start: generate Prisma client, run migrations, start dev server
-CMD sh -c "npx prisma generate && npm run migrate && node --loader ts-node/esm src/index.ts"
+CMD sh -c "npx prisma generate && npm run migrate && npm run dev"
 

@@ -104,12 +104,12 @@ model Match {
 model MatchPlayer {
   id        Int    @id @default(autoincrement())
   match_id  Int
-  user_id   Int
+  user_id   Int?
   score     Int    @default(0)
   is_winner Boolean @default(false)
 
   match     Match  @relation(fields: [match_id], references: [id], onDelete: Cascade)
-  user      User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 /* =====================

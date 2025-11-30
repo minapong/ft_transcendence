@@ -6,7 +6,7 @@ export const MatchRepo = {
 
   addPlayerToMatch: (matchId: number, userId: number | null, score = 0, isWinner = false) =>
     prisma.matchPlayer.create({
-      data: { match_id: matchId, user_id: userId, score, is_winner: isWinner }
+      data: { match_id: matchId, user_id: userId ?? null, score, is_winner: isWinner }
     }),
 
   finalizeMatch: (matchId: number, winnerUserId: number | null) =>

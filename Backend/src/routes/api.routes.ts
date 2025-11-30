@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { TournamentRepo } from '../repositories/tournament.repo';
-import { MatchService } from '../services/match.service';
+import { MatchService } from '../services/match.services';
 import { MatchRepo } from '../repositories/match.repo';
 import { UserRepo } from '../repositories/user.repo';
 
