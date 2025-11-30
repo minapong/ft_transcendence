@@ -21,24 +21,24 @@ export function resetHooks() {
 // -----------------------------
 //  useState
 // -----------------------------
-// export function useState(initial: any) {
-// 	const idx = hookIndex++;    // on every useState call index is iterated to store new func
-// 	if (hooks[idx] === undefined) hooks[idx] = initial; //checks if its first render than sets initial which is useState(initial)
-// 	const setState = (value: any) => {
-// 		hooks[idx] = typeof value === "function" ? value(hooks[idx]) : value;
-// 			// trigger rerender
-// 		renderRoute();
-// 		console.log("triggered");
-// 	};
-// 	return [hooks[idx], setState];
-// }
+export function useStatse(initial: any) {
+	const idx = hookIndex++;    // on every useState call index is iterated to store new func
+	if (hooks[idx] === undefined) hooks[idx] = initial; //checks if its first render than sets initial which is useState(initial)
+	const setState = (value: any) => {
+		hooks[idx] = typeof value === "function" ? value(hooks[idx]) : value;
+			// trigger rerender
+		renderRoute();
+		console.log("triggered");
+	};
+	return [hooks[idx], setState];
+}
+type StateEntry = { value: any };
+
 export function useState(initial: any) {
 	const idx = hookIndex++;
-  
 	if (!hooks[idx]) {
 	  hooks[idx] = { value: initial } as StateEntry;
 	}
-  
 	const setState = (newValue: any) => {
 	  const entry = hooks[idx] as StateEntry;
   
@@ -108,19 +108,16 @@ export function useRef(initial: any) {
 	if (!hooks[idx]) hooks[idx] = { current: initial };
 	return hooks[idx];
 }
-
 // -----------------------------
 //  useMemo
 // -----------------------------
 export function useMemo(fn: () => any, deps: any[]) {
 	const idx = hookIndex++;
 	const prev = hooks[idx];
-
 	if (!prev || deps.some((d, i) => d !== prev.deps[i])) {
 		const value = fn();
 		hooks[idx] = { value, deps };
 		return value;
 	}
-
 	return prev.value;
 }
