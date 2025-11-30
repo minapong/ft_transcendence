@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS tournaments (
   created_at DATETIME DEFAULT (datetime('now')),
   finished_at DATETIME,
   winner_id INTEGER,
+  max_players INTEGER DEFAULT 4,
   FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
