@@ -2,6 +2,7 @@ const pages = import.meta.glob("/src/pages/**/*.tsx", { eager: true });
 type RouteMap = Record<string, any>;
 let cache: RouteMap | null = null;
 
+// Retrieves all routes by dynamically importing page components.
 export function getRoutes(): RouteMap {
   if (cache) return cache;
   const routes: RouteMap = {};
@@ -19,6 +20,7 @@ export function getRoutes(): RouteMap {
   return routes;
 }
 
+// Resolves the page component for a given path, normalizing the path and handling not found cases.
 export function resolvePage(routes: RouteMap, rawPath: string) {
   const original = rawPath;
   let path = rawPath.toLowerCase().replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";

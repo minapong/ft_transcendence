@@ -10,6 +10,7 @@
 import {resetHooks} from "@/Reactor/hooks"
 import { pendingRefSetters } from "./hooks";
 
+// Applies properties to a DOM element, including styles, event listeners, and refs.
 function applyProps(el: HTMLElement, props: any) {
 	for (const [key, value] of Object.entries(props || {})) {
 		if (key === "style" && typeof value === "object") {
@@ -33,6 +34,7 @@ function applyProps(el: HTMLElement, props: any) {
 	}
 }
 
+// Creates a custom element or component, applying props and attaching children.
 export function createReactor(tag: any, props: any, ...children: any[]) {
 	if (typeof tag === "function") {
 		resetHooks();
@@ -57,6 +59,7 @@ export function createReactor(tag: any, props: any, ...children: any[]) {
 	return el;
 }
 
+// Attaches a child node to a parent DOM element, handling various child types.
 function attachChild(parent: HTMLElement, child: any) {
 	if (child == null || child === false) return;
 	if (typeof child === "string" || typeof child === "number")

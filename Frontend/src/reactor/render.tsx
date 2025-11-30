@@ -1,10 +1,11 @@
 import rootLayout from "@/components/layout/RootLayout";
-import { resetHooks, flushEffects,runPendingRefs } from "./hooks";
+import { resetHooks, flushEffects, runPendingRefs } from "./hooks";
 import { getRoutes, resolvePage } from "./router/routes";
- 
+
+// Renders the current route by resolving the page component and updating the DOM.
 export function renderRoute() {
   resetHooks();
-  
+
   const routes = getRoutes();
   const Page = resolvePage(routes, window.location.pathname);
   const root = document.getElementById("app");
@@ -16,12 +17,15 @@ export function renderRoute() {
     else root.replaceChildren(rootLayout({ children: pageEl }));
 
     runPendingRefs();
+    console.log("flushing before")
     flushEffects();
+    console.log("flushing åfter")
   } catch (err) {
     console.error("⚠️ renderRoute error:", err);
   }
 }
 
+// Initializes the router by setting up event listeners for navigation and rendering the initial route.
 export function initRouter() {
   document.addEventListener("click", (e) => {
     const link = (e.target as HTMLElement).closest("a");
@@ -31,11 +35,8 @@ export function initRouter() {
       renderRoute();
     }
   });
+
   // back/forward
-  document.addEventListener("DOMContentLoaded", () => {});
-
   window.addEventListener("popstate", renderRoute);
-
-  // INITIAL RENDER — do it immediately
   renderRoute();
 }

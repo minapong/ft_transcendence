@@ -59,15 +59,11 @@
 // }
 
 
-import { useEffect, useRef } from "@/Reactor";
+import { useEffect, useRef } from "Reactor";
 import * as BABYLON from "babylonjs";
 
 export default function Scene() {
   const canvasRef = useRef(null);
-  console.log("bugging")
-  useEffect(() => {
-    console.log("EFFECT EXECUTED");
-  });
 
   return (
     <div>
