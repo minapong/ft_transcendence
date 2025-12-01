@@ -20,7 +20,7 @@ Reactor is a lightweight, React-like library for building web applications with 
   - Updates the DOM efficiently by replacing children elements.
 
 ### Utility Functions
-- `resetHooks`: Resets the hook index for the next render cycle.
+- `resetHooks`: Reset hook index and clear stored hooks when the route changes.
 - `flushEffects`: Executes all pending side effects.
 - `runPendingRefs`: Updates all pending references.
 

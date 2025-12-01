@@ -7,7 +7,6 @@
 // and have it become a real DOM element.
 //
 // ================================================================
-import {resetHooks} from "@/Reactor/hooks"
 import { pendingRefSetters } from "./hooks";
 
 // Applies properties to a DOM element, including styles, event listeners, and refs.
@@ -37,7 +36,6 @@ function applyProps(el: HTMLElement, props: any) {
 // Creates a custom element or component, applying props and attaching children.
 export function createReactor(tag: any, props: any, ...children: any[]) {
 	if (typeof tag === "function") {
-		resetHooks();
 		const rendered = tag({ ...(props || {}), children });
 		if (rendered instanceof HTMLElement) {
 			const p = props || {};
