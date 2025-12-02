@@ -7,7 +7,7 @@ export default function RootLayout({ children }) {
       <Header />
       <div className="flex">
           <LeftSidebar />
-          <main className=" flex-1">{children}</main>
+          <main id="spa-root" className=" flex-1">{children}</main>
       </div>
     </div>
   );

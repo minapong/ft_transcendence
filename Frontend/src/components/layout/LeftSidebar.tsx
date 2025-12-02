@@ -4,6 +4,8 @@ const links = [
 	{ label: "Tournament", href: "/tournament/start" },
 	{ label: "Pong", href: "/pong" },
 	{ label: "Contact", href: "/contact" },
+	{ label: "timer", href: "/timer" },
+	{ label: "counterPage", href: "/counterPage" },
   ];
   
   export default function Sidebar() {

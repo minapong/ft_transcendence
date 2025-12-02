@@ -1,14 +1,15 @@
+import {useState} from "Reactor"
 export default function TournamentPage() {
+	const [a,b]=useState(0);
 	const handleStartTournament = async () => {
 	  // Get all inputs
 	  const inputs = Array.from(document.querySelectorAll<HTMLInputElement>("input"));
 	  const rawNames = inputs.map(i => i.value);
-	  
 	  // ———— VALIDATION ————
 	  const seen = new Set<string>();
 	  const errors: string[] = [];
 	  const cleanNames: string[] = [];
-  
+	
 	  for (let i = 0; i < rawNames.length; i++) {
 		const raw = rawNames[i];
 		const trimmed = raw.trim();
@@ -75,7 +76,7 @@ export default function TournamentPage() {
 	return (
 	  <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-900 text-white p-4">
 		<h1 className="text-4xl font-bold mb-6">New Tournament</h1>
-  
+		<div onCLick={()=>b(a+1)}>{a}</div>
 		<input className="px-4 py-2 rounded text-white bg-gray-800 focus:outline-none" placeholder="Player 1" />
 		<input className="px-4 py-2 rounded text-white bg-gray-800 focus:outline-none" placeholder="Player 2" />
 		<input className="px-4 py-2 rounded text-white bg-gray-800 focus:outline-none" placeholder="Player 3" />
