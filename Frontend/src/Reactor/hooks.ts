@@ -1,15 +1,25 @@
 // ==========================================
-// ⚡ Reactor Hooks — Tiny React-like system
+// ⚡ Reactor HooksV2 — Tiny React-like system
 // ==========================================
+
+// the main trick to make hooks work accross all pages uniquely is to give each page
+// its own hooks storage (map) so that hooks indexing never collapse
+
 import { renderRoute } from ".";
 
-type StateEntry = { kind: "state"; value: any };
+// type safety for all three hooks 
+type StateEntry = { kind: "state"; value: any }; 
 type MemoEntry = { kind: "memo"; value: any; deps: any[] };
 type RefEntry = { kind: "ref"; current: any };
+// type safety for all four hooks 
 
 type HookEntry = StateEntry | MemoEntry | RefEntry;
 
+// unique storage for only useEffects
 type EffectEntry = { deps?: any[]; cleanup: (() => void) | null };
+// unique storage for only useeffects
+
+
 type HookContext = {
 	hooks: HookEntry[];
 	effects: EffectEntry[];
@@ -18,6 +28,7 @@ type HookContext = {
 
 const contextMap = new Map<string, HookContext>();
 const DEFAULT_KEY = "__default__";
+let activeHookKey = DEFAULT_KEY;
 
 function getContext(key: string): HookContext {
 	let ctx = contextMap.get(key);
@@ -32,7 +43,7 @@ let hooks = getContext(DEFAULT_KEY).hooks;
 let effects = getContext(DEFAULT_KEY).effects;
 let pendingEffects = getContext(DEFAULT_KEY).pendingEffects;
 let hookIndex = 0;
-let lastPageKey: string | null = null;
+let trackedKey: string | null = null;
 
 export let pendingRefSetters: Array<() => void> = [];
 
@@ -42,12 +53,13 @@ export function runPendingRefs() {
 	for (const fn of list) fn();
 }
 
-// Reset index for a render; swap to page-specific hook store and cleanup old effects when navigating.
-export function resetHooks(pageKey?: string) {
+// Reset index for a render; optionally track a key to clean up when that keyed view is replaced.
+export function resetHooks(pageKey?: string, opts?: { track?: boolean }) {
 	const nextKey = pageKey ?? DEFAULT_KEY;
-	const prevKey = lastPageKey ?? DEFAULT_KEY;
+	const shouldTrack = opts?.track !== false;
+	const prevKey = shouldTrack ? (trackedKey ?? DEFAULT_KEY) : null;
 
-	if (nextKey !== prevKey) {
+	if (shouldTrack && prevKey && nextKey !== prevKey) {
 		const prevCtx = getContext(prevKey);
 		cleanupEffects(prevCtx);
 		prevCtx.pendingEffects.length = 0;
@@ -58,7 +70,8 @@ export function resetHooks(pageKey?: string) {
 	hooks = ctx.hooks;
 	effects = ctx.effects;
 	pendingEffects = ctx.pendingEffects;
-	lastPageKey = nextKey;
+	activeHookKey = nextKey;
+	if (shouldTrack) trackedKey = nextKey;
 	hookIndex = 0;
 }
 
@@ -73,12 +86,17 @@ export function useState(initial: any) {
 		hooks[idx] = entry;
 	}
 
+	const stateKey = activeHookKey;
 	const setState = (newValue: any) => {
 		entry!.value = typeof newValue === "function" ? newValue(entry!.value) : newValue;
-		renderRoute();
+		renderRoute(stateKey);
 	};
 
 	return [entry.value, setState];
+}
+
+export function getActiveHookKey() {
+	return activeHookKey;
 }
 // -----------------------------
 //  useEffect

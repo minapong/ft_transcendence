@@ -60,7 +60,11 @@ function App() {
 initRouter();
 ```
 
-## Future Improvements
-
-- Add support for a virtual DOM to improve performance.
-  
+```
+renderSubtree() performs the full lifecycle:
+  1.Reset context for hooks
+  2.Render component → run hooks → collect DOM
+  3.Write DOM into container
+  4.Assign refs
+  5.Execute effects
+```
