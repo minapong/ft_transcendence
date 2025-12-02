@@ -66,3 +66,18 @@ function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key:
   runPendingRefs(); // after all dom is made now run ref.current = elemtent for every queued ref
   flushEffects(); // at last after ref flush all the effects execute all effect callback
 }
+
+// Programmatic navigation helper so any code can trigger a route change.
+export function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean }) {
+  const target = normalizePath(path.startsWith("/") ? path : `/${path}`);
+  const current = normalizePath(window.location.pathname);
+
+  const shouldUpdateHistory = opts?.replace || target !== current;
+
+  if (shouldUpdateHistory) {
+    const method = opts?.replace ? "replaceState" : "pushState";
+    history[method]({}, "", target);
+  }
+
+  renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
+}
