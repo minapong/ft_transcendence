@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
-import { joinQueue, getActiveMatches, getQueue, Player } from "../logic/matchmakingManager"
+import { joinQueue, getActiveMatches, getQueue, Player } from "../logic/matchmakingManager.ts"
 
 interface JoinQueueBody {
   id: string

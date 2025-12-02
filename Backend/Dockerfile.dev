@@ -25,6 +25,7 @@ RUN npm install
 
 # Copy remaining source
 COPY . .
+COPY script ./script
 
 EXPOSE 3000
 

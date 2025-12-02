@@ -6,7 +6,7 @@ import {
 	Tournament,
 	Match,
 	getTournament
-} from "../logic/tournamentManager";
+} from "../logic/tournamentManager.ts";
 
 // Define types for each route body
 type StartTournamentBody = {

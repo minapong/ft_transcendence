@@ -1,7 +1,12 @@
 // script/migrate.js
-const fs = require('fs');
-const path = require('path');
-const Database = require('better-sqlite3');
+import fs from 'fs';
+import path from 'path';
+import Database from 'better-sqlite3';
+import { fileURLToPath } from 'url';
+
+// ESM-compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const MIGRATION_SQL_PATH = path.join(__dirname, '..', 'migrations', '000_init.sql');
 const DB_DIR = path.join(__dirname, '..', 'database');
@@ -11,12 +16,11 @@ function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-function run() {
+export function run() {
   ensureDir(DB_DIR);
 
   const sql = fs.readFileSync(MIGRATION_SQL_PATH, 'utf8');
 
-  // open database (creates file if not exists)
   const db = new Database(DB_PATH);
   try {
     db.exec('PRAGMA foreign_keys = ON;');
@@ -30,7 +34,7 @@ function run() {
   }
 }
 
-if (require.main === module) run();
-
-module.exports = run;
-
+// ESM equivalent of “run if executed directly”
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  run();
+}

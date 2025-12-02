@@ -1,6 +1,6 @@
-import { prisma } from '../db/prisma';
-import { MatchRepo } from '../repositories/match.repo';
-import { StatsRepo } from '../repositories/stats.repo';
+import { prisma } from '../db/prisma.ts';
+import { MatchRepo } from '../repositories/match.repo.ts';
+import { StatsRepo } from '../repositories/stats.repo.ts';
 
 export const MatchService = {
   createMatchWithPlayers: async (players: { userId: number | null; score?: number | null; isWinner?: boolean }[]) => {
