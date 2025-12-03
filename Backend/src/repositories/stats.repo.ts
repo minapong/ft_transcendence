@@ -1,4 +1,4 @@
-import { prisma } from '../db/prisma.ts';
+import { prisma } from '../db/prisma.js';
 
 export const StatsRepo = {
   getByUserId: (userId: number) =>

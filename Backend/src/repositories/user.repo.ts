@@ -1,4 +1,4 @@
-import { prisma } from '../db/prisma.ts';
+import { prisma } from '../db/prisma.js';
 
 export const UserRepo = {
   create: (data: { email: string; username: string; password_hash: string }) =>

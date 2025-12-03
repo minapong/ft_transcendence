@@ -2,7 +2,7 @@
     "compilerOptions": {
       "target": "ES2021", //ES2020
       "module": "ESNext",
-      "rootDir": "./src",
+      "rootDir": ".",
       "outDir": "./dist",
       "moduleResolution": "Node",
       "esModuleInterop": true,
@@ -11,6 +11,6 @@
       "skipLibCheck": true,
       "resolveJsonModule": true
     },
-    "include": ["src/**/*", "script"]
+    "include": ["src/**/*", "script/**/*"]
   }
   

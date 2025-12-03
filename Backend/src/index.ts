@@ -1,11 +1,11 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors"; // ✅ import the CORS plugin
 
-import { prisma } from "./db/index.ts";               // ✅ Prisma client
-import apiRoutes from "./routes/api.routes.ts";        // ✅ New unified API routes
+import { prisma } from "./db/prisma.js";               // ✅ Prisma client
+import apiRoutes from "./routes/api.routes.js";        // ✅ New unified API routes
 
-import { registerTournamentRoutes } from "./routes/tournament.ts";
-import { registerMatchmakingRoutes } from "./routes/matchmaking.ts";
+import { registerTournamentRoutes } from "./routes/tournament.js";
+import { registerMatchmakingRoutes } from "./routes/matchmaking.js";
 
 const server = Fastify({ logger: true });
 

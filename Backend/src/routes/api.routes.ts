@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { TournamentRepo } from '../repositories/tournament.repo.ts';
-import { MatchService } from '../services/match.services.ts';
-import { MatchRepo } from '../repositories/match.repo.ts';
-import { UserRepo } from '../repositories/user.repo.ts';
+import { TournamentRepo } from '../repositories/tournament.repo.js';
+import { MatchService } from '../services/match.services.js';
+import { MatchRepo } from '../repositories/match.repo.js';
+import { UserRepo } from '../repositories/user.repo.js';
 
 export default async function apiRoutes(app: FastifyInstance) {
   app.get('/api/users/:id', async (req: any, reply) => {
