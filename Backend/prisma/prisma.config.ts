@@ -1,16 +1,31 @@
-import type { Config } from "@prisma/client";
 
-// SQLite file path (same as before)
-const databaseUrl = process.env.DATABASE_URL || "file:./data/transcendence.db";
+import { defineConfig } from '@prisma/config';
 
-const config: Config = {
-  sources: [
-    {
-      name: "db",
+ const databaseUrl = process.env.DATABASE_URL || "file:./data/transcendence.db";
+
+export default defineConfig({
+  datasource: {
+    // equivalent of old url
+    db: {
       provider: "sqlite",
-      connectionString: databaseUrl,
-    },
-  ],
-};
+      url: databaseUrl,
+    }
+  },
+});
 
-export default config;
+
+
+// // SQLite file path (same as before)
+// const databaseUrl = process.env.DATABASE_URL || "file:./data/transcendence.db";
+
+// const config: Config = {
+//   sources: [
+//     {
+//       name: "db",
+//       provider: "sqlite",
+//       connectionString: databaseUrl,
+//     },
+//   ],
+// };
+
+// export default config;
