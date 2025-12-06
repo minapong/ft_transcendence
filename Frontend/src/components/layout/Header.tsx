@@ -1,24 +1,34 @@
-const links = [
-	{label:"Home", href:"/"},
-	{label:"Login", href:"/login"},
-	{label:"Tournament",href:"/tournament/start"},
-	{label:"Pong",href:"/single_game"},
-	{label:"Contact",href:"/contact"},
-]
 
-const linkStyle =
-	"active:scale-90 bg-linear-to-br hover:from-cyan-100 hover:text-cyan-900 hover:to-cyan-400 from-cyan-900 to-cyan-600 text-white border-4 border-cyan-200 text-2xl font-bold px-2 py-1 rounded-xl shadow-2xl hover:scale-110 transition-all duration-150 cursor-pointer hover:shadow-cyan-500/50 hover:shadow-2xl";
-
-export function Header() {
+import {useState} from "Reactor"
+export default function Header() {
+	const [a,b] = useState(0);
+	const [c,d] = useState(0);
 	return (
-		<div className="bg-linear-to-r from-blue-950 via-blue-900 to-cyan-900 text-white h-[7vh] flex items-center shadow-lg shadow-cyan-500/50 border-b-2 border-cyan-500/60 backdrop-blur-md">
-			<nav className="flex justify-around items-center w-full px-8 gap-4">
-			{links.map((link)=>(
-				<a href={link.href} className={linkStyle}>{link.label}</a>
-			))}
-			</nav>
-			
+	  <header className="h-height-offset px-6 flex items-center justify-between shadow-lg backdrop-blur">
+		<div className="flex items-center gap-4">
+		  <div className="logo-mark" />
+		  <div className="flex flex-col leading-tight">
+			<span className="logo-subtitle">Transcendence</span>
+			<span className="text-xl font-semibold text-primary">Control Center</span>
+		  </div>
 		</div>
+		<div onClick={() => b(prev => {
+			const next = prev + 1;
+			console.log(next);
+			return next;
+		})}>{a}</div>
+		<div onClick={() => d(prev => {
+			const next = prev + 1;
+			console.log(next);
+			return next;
+		})}>{c}</div>
+		<div className="flex items-center gap-4">
+		  <button className="primary-btn color-primary">
+			Settings
+		  </button>
+		  <div className="avatar-shell" />
+		</div>
+	  </header>
 	);
-}
-
+  }
+  

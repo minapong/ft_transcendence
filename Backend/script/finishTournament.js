@@ -3,7 +3,7 @@ const Database = require("better-sqlite3");
 const path = require("path");
 
 // Change this to the tournament you want to finish
-const TOURNAMENT_ID = 7;
+const TOURNAMENT_ID = 10;
 
 const dbPath = path.join(process.cwd(), "database", "transcendence.db");
 console.log("[SCRIPT] Using database:", dbPath);

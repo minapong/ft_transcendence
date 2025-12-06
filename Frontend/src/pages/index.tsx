@@ -1,14 +1,33 @@
+import { animate } from "motion";
 
-export default () => {
-	var abc = "api/route"
+import {useEffect,useState,useRef} from "Reactor"
+import Button from "@/components/ui/Buton"
+export default function Home() {
+  const [aRehman,setaRehman] = useState(0);
+  const [boxTransform, setBoxTransform] = useState("");
+  const boxRef = useRef<HTMLElement | null>(null);
+    useEffect(() => {
+      console.log("EFFECT EXECUTED in index");
+    });
 
-	fetch(`https://jsonplaceholder.typicode.com/todos/${abc}`)
-      .then(response => response.json())
-      .then(json => console.log(json))
-	return(
-		<div className="w-screen h-screen flex justify-center items-center text-3xl bg-linear-to-br from-blue-950 via-blue-900 to-cyan-900  relative overflow-hidden">
-			<div className="absolute top-0 right-0 left-0 bottom-0 bg-cyan-500 rounded-lg blur-3xl opacity-40 animate-pulse">{abc}</div>
-			<div onClick={() => alert("Test alert!")} className="relative bg-cyan-300 text-white border-8 border-cyan-500 text-5xl font-bold px-8 py-6 rounded-xl shadow-2xl hover:scale-110 transition-all duration-100 cursor-pointer hover:shadow-cyan-500/50 hover:shadow-2xl">Home Sweet Home</div>
-		</div>
-	);
-}
+  return (
+    <div className="h-body-screenHeight w-width-screen flex justify-around items-center flex-col">
+      <div id="box" className="w-32 h-32 bg-blue-500 rounded-xl cursor-pointer flex items-center justify-center text-white text-xl"
+        ref={boxRef}
+        style={{ transform: boxTransform }}
+        onClick={() => {
+          const box = boxRef.current;
+          if (!box) return;
+          const controls = animate(box, { x: 150, rotate: 45, scale: 1.2 }, { duration: 0.5 });
+          controls.finished.then(() => {
+            // persist the final transform so rerenders keep the visual state
+            setBoxTransform(getComputedStyle(box).transform || "");
+          });
+        }}>
+        Tap
+      </div>
+      <Button></Button>
+     <div className="w-[40px] h-[40px] bg-aqua-400 text-3xl text-white" onClick={()=>{setaRehman(prev => prev+1);console.log("aRehman clicked")}}>{aRehman}</div>
+    </div>
+  );
+}  

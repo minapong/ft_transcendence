@@ -119,9 +119,9 @@ export default function ActiveTournamentPage() {
     );
   }
 
-  const pendingMatches = tournament.matches.filter(
-    (m: any) => m.status === "pending"
-  );
+	const pendingMatches = tournament.matches.filter(
+    	(m: any) => m.status === "pending"
+	);
 	// Check if we can show the "Advance Round" button
 	const canAdvanceRound =
 		pendingMatches.length === 0 && tournament?.state !== "finished";

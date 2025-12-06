@@ -3,10 +3,10 @@ import { navigate } from "../../reactor/router";
 
 export default function TournamentPage() {
   // Simulate logged-in user
-  const user = { id: 7, name: "santiago", isAdmin: false };
+  const user = { id: 7, name: "santiago", isAdmin: true };
 
   const [tournament, setTournament] = useState<any>(null);
-  const [max_players, setMax_players] = useState<number>(4);
+  const [max_players, setMax_players] = useState<number>(null);
   const [tournamentName, setTournamentName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -126,7 +126,7 @@ export default function TournamentPage() {
 	!user.isAdmin &&
 	tournament?.state === "waiting" &&
 	!isRegistered &&
-	(tournament.registeredPlayers?.length || 0) < (tournament.max_players || max_players);
+	(tournament.registeredPlayers?.length || 0) < (tournament?.max_players ?? max_players);
 
 	return (
 		<div className="w-screen h-screen flex flex-col items-center justify-center gap-4 bg-gray-900 text-white p-4">
@@ -152,7 +152,7 @@ export default function TournamentPage() {
 				<label className="text-lg">
 				  Players:
 				  <select 
-					value={max_players} 
+					value={max_players}
 					onChange={e => setMax_players(Number(e.target.value))}
 					className="ml-2 bg-gray-800 text-white px-3 py-2 rounded border border-gray-700"
 				  >
@@ -183,10 +183,10 @@ export default function TournamentPage() {
 			  <div className="bg-gray-800 p-6 rounded-lg w-full">
 				<p className="text-xl mb-2 font-bold">Name: {tournament.name} - ID:  {tournament.id}</p>
 				<p className="text-lg">Status: <span className="capitalize font-semibold">{tournament.state}</span></p>
-				<p className="text-lg">Registered: {tournament.registeredPlayers?.length || 0}/{tournament.max_players || max_players}</p>
+				<p className="text-lg">Registered: {tournament.registeredPlayers?.length || 0}/{tournament?.max_players ?? max_players}</p>
 			  </div>
 	
-			  {user.isAdmin && tournament.state === "waiting" && (tournament.registeredPlayers?.length || 0) === (tournament.max_players || max_players) && (
+			  {user.isAdmin && tournament.state === "waiting" && (tournament.registeredPlayers?.length || 0) === (tournament?.max_players ?? max_players) && (
 				<button 
 				  onClick={handleStartTournament} 
 				  className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded font-semibold transition w-full"
