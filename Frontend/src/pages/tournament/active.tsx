@@ -1,11 +1,10 @@
-import { useState, useEffect } from "../../reactor/hooks";
-import { navigate } from "../../reactor/router";
+import {useState, useEffect, navigate} from "Reactor"
 
 // Temporary placeholder user — replace with real login context later
 const mockUser = { id: 3, name: "Player1" };
 
 export default function ActiveTournamentPage() {
-  const [tournament, setTournament] = useState<any | null>(null);
+  const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
   const [savingResult, setSavingResult] = useState(false);
 

@@ -1,19 +1,19 @@
-import { useState, useEffect } from "../../reactor/hooks";
-import { navigate } from "../../reactor/router";
+import {useState, useEffect, navigate} from "Reactor"
 
 export default function TournamentPage() {
   // Simulate logged-in user
   const user = { id: 7, name: "santiago", isAdmin: true };
 
-  const [tournament, setTournament] = useState<any>(null);
-  const [max_players, setMax_players] = useState<number>(null);
-  const [tournamentName, setTournamentName] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [tournament, setTournament] = useState(null);
+  const [max_players, setMax_players] = useState(0);
+  const [tournamentName, setTournamentName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // Fetch active tournament on load
   useEffect(() => {
-    let mounted = true;
+	console.log("Tournament fetch triggered");
+	let mounted = true;
 
     const loadTournament = async () => {
       setLoading(true);
@@ -42,7 +42,7 @@ export default function TournamentPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  },[]);
 
   const refreshTournament = async () => {
     try {

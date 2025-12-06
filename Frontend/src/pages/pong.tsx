@@ -1,5 +1,5 @@
 import { pongLogic } from "../engine/pong_logic";
-import { navigate } from "../reactor/router";
+import { navigate } from "Reactor";
 
 export default function PongGame() {
     // Read match info from localStorage (tournament mode)

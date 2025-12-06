@@ -4,7 +4,7 @@ const links = [
   { label: "Home", href: "/" },
   { label: "Login", href: "/login" },
   { label: "Tournament", href: "/tournament/start" },
-  { label: "Pong", href: "/pong" },
+  { label: "Pong", href: "/single_game" },
   { label: "Contact", href: "/contact" },
   { label: "Timer", href: "/timer" },
   { label: "Counter Page", href: "/counterPage" },
