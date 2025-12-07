@@ -17,9 +17,11 @@ export default function Sidebar() {
   return (
     <aside
       className={`
-        bg-navpanel border-r border-border-soft
-        h-body-screenHeight transition-all duration-300
-        overflow-hidden
+        bg-navpanel border-r border-border-soft sticky
+        top-[var(--header-height)]
+        h-[calc(100vh-var(--header-height))]
+        max-h-[calc(100vh-var(--header-height))]
+        transition-all duration-300 overflow-hidden
         ${open ? "min-w-[240px] p-6" : "min-w-[60px] p-4"}
       `}
     >

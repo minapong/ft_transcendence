@@ -4,6 +4,7 @@
   --color-accent-soft: #0093d7;
   --color-border-soft: rgba(255, 255, 255, 0.05);
   --color-border-strong: rgba(34, 211, 238, 0.4);
+  --header-height: clamp(68px, 8vh, 82px);
   
   --color-navpanel: #00143c;
 
