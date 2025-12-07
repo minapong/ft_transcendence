@@ -106,9 +106,13 @@ export function useEffect(cb: () => void | (() => void), deps?: any[]) {
 	const prev = effects[idx];
 
 	const queue = () => {
-		if (prev?.cleanup) prev.cleanup();
+		// Record the effect before running it so rerenders triggered inside the cb
+		// see a stable entry instead of thinking it's a brand-new effect.
+		const prevCleanup = prev?.cleanup;
+		effects[idx] = { deps, cleanup: null };
+		if (prevCleanup) prevCleanup();
 		const cleanup = cb() || null;
-		effects[idx] = { deps, cleanup };
+		effects[idx]!.cleanup = cleanup;
 	};
 
 	if (deps === undefined) {
