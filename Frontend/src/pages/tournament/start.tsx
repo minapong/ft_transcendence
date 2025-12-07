@@ -5,7 +5,7 @@ export default function TournamentPage() {
   const user = { id: 7, name: "santiago", isAdmin: true };
 
   const [tournament, setTournament] = useState(null);
-  const [max_players, setMax_players] = useState(0);
+  const [max_players, setMax_players] = useState(4);
   const [tournamentName, setTournamentName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -56,7 +56,11 @@ export default function TournamentPage() {
 
   const handleCreateTournament = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/tournament/create", {
+		if (max_players === 0) {
+			setError("Please select number of players");
+			return;
+		}
+		const res = await fetch("http://localhost:3000/api/tournament/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: tournamentName, max_players }),
@@ -152,12 +156,12 @@ export default function TournamentPage() {
 				<label className="text-lg">
 				  Players:
 				  <select 
-					value={max_players}
+					value={(max_players)}
 					onChange={e => setMax_players(Number(e.target.value))}
 					className="ml-2 bg-gray-800 text-white px-3 py-2 rounded border border-gray-700"
 				  >
-					<option value={4}>4 Players</option>
-					<option value={8}>8 Players</option>
+					<option value="4">4 Players</option>
+					<option value="8">8 Players</option>
 				  </select>
 				</label>
 			  </div>

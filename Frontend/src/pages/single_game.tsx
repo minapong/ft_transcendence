@@ -1,18 +1,20 @@
+import {navigate} from "Reactor"
+
+
 export default function SingleGame() {
 
     function start2P() {
         const p1 = (document.getElementById("p1") as HTMLInputElement).value || "Player 1";
         const p2 = (document.getElementById("p2") as HTMLInputElement).value || "Player 2";
 
-        window.location.href = `/pong?mode=2p&p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}`;
-    }
+		navigate(`/pong?mode=2p&p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}`);
+	}
 
     function startAI() {
         const p1 = (document.getElementById("p1_ai") as HTMLInputElement).value || "Player";
         const difficulty = (document.getElementById("difficulty") as HTMLSelectElement).value;
 
-        window.location.href =
-            `/pong?mode=ai&p1=${encodeURIComponent(p1)}&useAI=true&difficulty=${difficulty}`;
+		navigate(`/pong?mode=ai&p1=${encodeURIComponent(p1)}&useAI=true&difficulty=${difficulty}`);
     }
 
     function start4P() {
@@ -21,10 +23,9 @@ export default function SingleGame() {
         const p3 = (document.getElementById("t2p1") as HTMLInputElement).value || "P3";
         const p4 = (document.getElementById("t2p2") as HTMLInputElement).value || "P4";
 
-        window.location.href =
-            `/4p_pong?p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}&p3=${encodeURIComponent(p3)}&p4=${encodeURIComponent(p4)}`;
+		navigate(`/4p_pong?p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}&p3=${encodeURIComponent(p3)}&p4=${encodeURIComponent(p4)}`);
     }
-
+	
     return (
         <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
             <h1 className="text-4xl font-bold mb-10">Single Game</h1>

@@ -5,7 +5,7 @@ import Button from "@/components/ui/Buton"
 export default function Home() {
   const [aRehman,setaRehman] = useState(0);
   const [boxTransform, setBoxTransform] = useState("");
-  const boxRef = useRef<HTMLElement | null>(null);
+  const boxRef = useRef(null);
     useEffect(() => {
       console.log("EFFECT EXECUTED in index");
 	  setaRehman(prev=>prev+1);
