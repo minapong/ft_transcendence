@@ -8,7 +8,8 @@ export default function Home() {
   const boxRef = useRef<HTMLElement | null>(null);
     useEffect(() => {
       console.log("EFFECT EXECUTED in index");
-    });
+	  setaRehman(prev=>prev+1);
+    },[]);
 
   return (
     <div className="h-body-screenHeight w-width-screen flex justify-around items-center flex-col">
@@ -27,7 +28,7 @@ export default function Home() {
         Tap
       </div>
       <Button></Button>
-     <div className="w-[40px] h-[40px] bg-aqua-400 text-3xl text-white" onClick={()=>{setaRehman(prev => prev+1);console.log("aRehman clicked")}}>{aRehman}</div>
+     <div className="w-[40px] h-[40px] bg-aqua-400 text-3xl text-white">{aRehman}</div>
     </div>
   );
 }  
