@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from "Reactor";
 
+let logCounter = 0;
+
 export default function HookStressLab() {
-	console.log("🔁 Render triggered");
+	console.log(`${++logCounter} 🔁 Render triggered`);
 
 	// --------------------------
 	// 1) STATE TESTS
@@ -22,7 +24,7 @@ export default function HookStressLab() {
 	// 3) MEMO TEST
 	// --------------------------
 	const expensive = useMemo(() => {
-		console.log("⚙️ Heavy memo recalculated");
+		console.log(`${++logCounter} ⚙️ Heavy memo recalculated`);
 		let s = 0;
 		for (let i = 0; i < 50000; i++) s += i * count;
 		return s;
@@ -34,26 +36,26 @@ export default function HookStressLab() {
 
 	// a) runs EVERY render
 	useEffect(() => {
-		console.log("🌍 effect: no deps (runs each render)");
-		return () => console.log("🧹 cleanup: no deps");
+		console.log(`${++logCounter} 🌍 effect: no deps (runs each render)`);
+		return () => console.log(`${++logCounter} 🧹 cleanup: no deps`);
 	});
 
 	// b) runs ONCE
 	useEffect(() => {
-		console.log("🚀 effect: [] (mount only)");
-		return () => console.log("🧹 cleanup: [] (unmount)");
+		console.log(`${++logCounter} 🚀 effect: [] (mount only)`);
+		return () => console.log(`${++logCounter} 🧹 cleanup: [] (unmount)`);
 	}, []);
 
 	// c) runs when `mode` changes
 	useEffect(() => {
-		console.log("🎛 effect: [mode] →", mode);
-		return () => console.log("🧹 cleanup: [mode]");
+		console.log(`${++logCounter} 🎛 effect: [mode] →`, mode);
+		return () => console.log(`${++logCounter} 🧹 cleanup: [mode]`);
 	}, [mode]);
 
 	// d) runs when flip changes
 	useEffect(() => {
-		console.log("🔄 effect: [flip] changed");
-		return () => console.log("🧹 cleanup: [flip]");
+		console.log(`${++logCounter} 🔄 effect: [flip] changed`);
+		return () => console.log(`${++logCounter} 🧹 cleanup: [flip]`);
 	}, [flip]);
 
 	// --------------------------
@@ -64,7 +66,7 @@ export default function HookStressLab() {
 
 			{/* HEADER */}
 			<div className="text-4xl font-bold text-center">
-				🧪 Hook Stress Lab <span className="text-amber-400">v2</span>
+					🧪 Hook Stress Lab <span className="text-amber-400">v2</span>
 			</div>
 
 			{/* RENDER COUNT */}
