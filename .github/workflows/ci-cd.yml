@@ -2,7 +2,9 @@ name: Build, Push and Deploy (self-hosted deploy)
 
 on:
   push:
-    branches: [ Dev ]
+    branches: [ Dev, Natalia-CICD ]
+  pull_request:
+    branches: [ Dev, Main ]
 
 permissions:
   contents: read
@@ -61,6 +63,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.APP_FRONTEND }}:${{ steps.set-tag.outputs.sha }}
 
   deploy:
+    if: github.event_name == 'push'
     needs: build-and-push
     # this job must run on your self-hosted runner running on the VM
     runs-on: [ self-hosted, dev-runner ]
