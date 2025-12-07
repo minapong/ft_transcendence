@@ -50,7 +50,7 @@ export function initRouter() {
   });
 
 	// back/forward
-	window.addEventListener("popstate", renderRoute);
+	window.addEventListener("popstate", () => renderRoute()); //temp fix for prod
 	renderRoute();
 }
 
