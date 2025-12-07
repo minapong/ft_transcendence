@@ -78,7 +78,8 @@ export function resetHooks(pageKey?: string, opts?: { track?: boolean }) {
 // -----------------------------
 //  useState
 // -----------------------------
-export function useState(initial: any) {
+export function useState<T>(initial: T) //temp fix for prod 
+{ 
 	const idx = hookIndex++;
 	let entry = hooks[idx] as StateEntry | undefined;
 	if (!entry || entry.kind !== "state") {
@@ -87,12 +88,23 @@ export function useState(initial: any) {
 	}
 
 	const stateKey = activeHookKey;
-	const setState = (newValue: any) => {
-		entry!.value = typeof newValue === "function" ? newValue(entry!.value) : newValue;
-		renderRoute(stateKey);
-	};
+	const setState = (newValue:  T | ((v: T) => T)) => //temp fix for prod 
+	{  
+		const next = typeof newValue === "function"
+            ? (newValue as (v: T) => T)(entry!.value)
+            : newValue;
 
-	return [entry.value, setState];
+        entry!.value = next;
+        renderRoute(stateKey);
+    };
+
+    return [entry.value as T, setState] as const;
+	// {
+	// 	entry!.value = typeof newValue === "function" ? newValue(entry!.value) : newValue;
+	// 	renderRoute(stateKey);
+	// };
+
+	// return [entry.value, setState];
 }
 
 export function getActiveHookKey() {
@@ -134,27 +146,30 @@ export function flushEffects() {
 // -----------------------------
 //  useRef
 // -----------------------------
-export function useRef(initial: any) {
+export function useRef<T>(initial: T) //temp fix for prod
+{
 	const idx = hookIndex++;
 	let entry = hooks[idx] as RefEntry | undefined;
 	if (!entry || entry.kind !== "ref") {
 		entry = { kind: "ref", current: initial };
 		hooks[idx] = entry;
 	}
-	return entry;
+	return entry as { current: T }; //temp fix for prod
 }
+
 // -----------------------------
 //  useMemo
 // -----------------------------
-export function useMemo(fn: () => any, deps: any[]) {
+export function useMemo<T>(fn: () => T, deps: any[]) //temp fix for prod
+{
 	const idx = hookIndex++;
 	const prev = hooks[idx] as MemoEntry | undefined;
 	if (!prev || prev.kind !== "memo" || depsChanged(prev.deps, deps)) {
 		const value = fn();
 		hooks[idx] = { kind: "memo", value, deps };
-		return value;
+		return value as T; //temp fix for prod
 	}
-	return prev.value;
+	return prev.value as T; //temp fix for prod
 }
 
 function depsChanged(prev: any[] | undefined, next: any[]) {
