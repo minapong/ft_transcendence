@@ -21,6 +21,7 @@ build/
 certs/
 *.pem
 *.key
+Backend/database/*
 
 # System / Editor files
 .DS_Store
