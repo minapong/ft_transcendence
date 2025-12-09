@@ -34,7 +34,7 @@ function applyProps(el: HTMLElement, props: any) {
 		}
 		else if (key.startsWith("on") && typeof value === "function") {
 			const event = key.slice(2).toLowerCase();
-			el.addEventListener(event, value);
+			el.addEventListener(event, value as EventListener); //temp fix for prod
 		}
 		else if (key !== "children" && value != null && value !== false) {
 			if (key in el) (el as any)[key] = value;
