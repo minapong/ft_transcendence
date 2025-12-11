@@ -3,10 +3,11 @@ import { TournamentRepo } from '../repositories/tournament.repo.js';
 import { MatchService } from '../services/match.services.js';
 import { MatchRepo } from '../repositories/match.repo.js';
 import { UserRepo } from '../repositories/user.repo.js';
+import { prisma } from '../db/prisma.js';
 
 export default async function apiRoutes(app: FastifyInstance) {
   app.get('/api/users/:id', async (req: any, reply) => {
-    const u = await UserRepo.findById(Number(req.params.id));
+    const u = await prisma.UserRepo.findById(Number(req.params.id));
     return reply.send(u);
   });
 
