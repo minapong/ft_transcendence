@@ -23,6 +23,8 @@ COPY package*.json ./
 
 COPY prisma ./prisma
 
+COPY tsconfig.json ./
+
 COPY .env .env
 # Install node modules (pulls prisma if package.json includes it)
 RUN npm install
