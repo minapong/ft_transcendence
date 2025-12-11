@@ -23,7 +23,7 @@ COPY package*.json ./
 
 COPY prisma ./prisma
 
-# COPY prisma.config.js . 
+COPY prisma.config.js . 
 
 COPY .env .env
 # Install node modules (pulls prisma if package.json includes it)
