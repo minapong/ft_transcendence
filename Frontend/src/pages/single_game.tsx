@@ -7,14 +7,26 @@ export default function SingleGame() {
         const p1 = (document.getElementById("p1") as HTMLInputElement).value || "Player 1";
         const p2 = (document.getElementById("p2") as HTMLInputElement).value || "Player 2";
 
-		navigate(`/pong?mode=2p&p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}`);
+		navigate("/pong", {
+			state: {
+			  mode: "2p",
+			  p1,
+			  p2
+			}
+		});
 	}
 
     function startAI() {
         const p1 = (document.getElementById("p1_ai") as HTMLInputElement).value || "Player";
         const difficulty = (document.getElementById("difficulty") as HTMLSelectElement).value;
 
-		navigate(`/pong?mode=ai&p1=${encodeURIComponent(p1)}&useAI=true&difficulty=${difficulty}`);
+		navigate("/pong", {
+			state: {
+			  mode: "ai",
+			  p1,
+			  difficulty
+			}
+		  });
     }
 
     function start4P() {
@@ -23,7 +35,15 @@ export default function SingleGame() {
         const p3 = (document.getElementById("t2p1") as HTMLInputElement).value || "P3";
         const p4 = (document.getElementById("t2p2") as HTMLInputElement).value || "P4";
 
-		navigate(`/4p_pong?p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}&p3=${encodeURIComponent(p3)}&p4=${encodeURIComponent(p4)}`);
+		navigate("/pong", {
+			state: {
+			  mode: "4p",
+			  p1,
+			  p2,
+			  p3,
+			  p4,
+			}
+		});
     }
 	
     return (

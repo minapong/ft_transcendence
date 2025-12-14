@@ -16,6 +16,7 @@ build/
 
 # SQLite database
 *.sqlite
+Backend/database/*
 
 # Certificates
 certs/

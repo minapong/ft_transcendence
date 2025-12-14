@@ -1,42 +1,64 @@
 import { pongLogic } from "../engine/pong_logic";
 import { navigate } from "Reactor";
 
+type NavState =
+  | {
+      mode: "ai";
+      p1: string;
+      difficulty: "easy" | "medium" | "hard";
+    }
+  | {
+      mode: "2p";
+      p1: string;
+      p2: string;
+    }
+  | null;
+
 export default function PongGame() {
     // Read match info from localStorage (tournament mode)
     const matchData = localStorage.getItem("currentMatch");
 
     // Read query params (free play mode)
-    const params = new URLSearchParams(window.location.search);
-    const useAI = params.get("useAI") === "true";
-    const aiDifficulty = (params.get("difficulty") || "medium") as "easy" | "medium" | "hard";
-	const single_p1 = (params.get("p1") || "Player 1");
-	const single_p2 = params.get("p2") || (useAI ? "AI" : "Player 2");
+	const navState = history.state as NavState;
+	
+	let p1Name: string;
+	let p2Name: string;
+	let useAI = false;
+	let aiDifficulty: "easy" | "medium" | "hard" = "medium";
+	let matchIndex: number | null = null;
+	let p1Id = 0;
+	let p2Id = 0;
 
-    let p1Name: string;
-    let p2Name: string;
-	let p1Id: number;
-	let p2Id: number;
-    let matchIndex: number | null = null;
-
-    if (matchData) {
-        // Tournament match
-        const parsed = JSON.parse(matchData);
-        p1Name = parsed.p1.name;
-        p2Name = parsed.p2.name;
+	if (matchData) {
+		// Tournament
+		const parsed = JSON.parse(matchData);
+		p1Name = parsed.p1.name;
+		p2Name = parsed.p2.name;
 		p1Id = parsed.p1.id;
 		p2Id = parsed.p2.id;
-        matchIndex = parsed.matchId;
-    } else {
-        // Free play (AI or 2p)
-        p1Name = single_p1;
-        p2Name = single_p2;
-    }
-
-	let cleanup = () => {};
+		matchIndex = parsed.matchId;
+	  } else if (navState?.mode === "ai") {
+		// Free play vs AI
+		p1Name = navState.p1;
+		p2Name = "AI";
+		useAI = true;
+		aiDifficulty = navState.difficulty;
+	  } else if (navState?.mode === "2p") {
+		// Free play 2P
+		p1Name = navState.p1;
+		p2Name = navState.p2;
+	  } else {
+		// Invalid entry 
+		navigate("/single_game", { replace: true });
+		return null;
+	  }
 
     // Start game
     setTimeout(() => {
-        pongLogic(p1Name, p2Name, (winner: string) => {
+        pongLogic(
+			p1Name, 
+			p2Name, 
+			(winner: string) => {
             if (matchIndex !== null) {
                 // Tournament mode → store result
 				const winnerId = winner === p1Name ? p1Id : p2Id;
@@ -44,15 +66,13 @@ export default function PongGame() {
 				localStorage.removeItem("currentMatch");
 				navigate("/tournament/active");
             } else {
-                // Free play mode → simply return to menu
+                // Free play mode → return to single page
                 navigate("/single_game");
             }
-        }, useAI, aiDifficulty);
+        }, 
+		useAI, 
+		aiDifficulty);
     }, 0);
-
-	window.addEventListener("beforeunload", () => {
-		cleanup();
-	});
 
 	return(
         <div className="bg-gray-900 flex flex-col items-center justify-center h-screen">

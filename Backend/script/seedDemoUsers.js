@@ -11,10 +11,10 @@ try {
   db.pragma("foreign_keys = ON");
 
   const demoUsers = [
-    { id: 5, email: "santiago@demo.com", username: "santiago", password_hash: "demo_hash" },
-    { id: 6, email: "natalia@demo.com", username: "natalia", password_hash: "demo_hash" },
-    { id: 7, email: "abdulrehman@demo.com", username: "abdulrehman", password_hash: "demo_hash" },
-    { id: 8, email: "malik@demo.com", username: "malik", password_hash: "demo_hash" }
+    { id: 1, email: "santiago@demo.com", username: "santiago", password_hash: "demo_hash" },
+    { id: 2, email: "natalia@demo.com", username: "natalia", password_hash: "demo_hash" },
+    { id: 3, email: "abdulrehman@demo.com", username: "abdulrehman", password_hash: "demo_hash" },
+    { id: 4, email: "malik@demo.com", username: "malik", password_hash: "demo_hash" }
   ];
 
   const stmt = db.prepare(`
