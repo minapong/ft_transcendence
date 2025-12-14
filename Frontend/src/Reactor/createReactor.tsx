@@ -62,8 +62,8 @@ export function createReactor(tag: any, props: any, ...children: any[]) {
 		return rendered;
 	}
 	const el = document.createElement(tag);
-	applyProps(el, props);
 	for (const child of children.flat()) attachChild(el, child);
+	applyProps(el, props);
 	return el;
 }
 
