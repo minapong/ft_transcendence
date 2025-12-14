@@ -1,7 +1,7 @@
 # Configuration
 COMPOSE_BASE = Docker/docker-compose.yml
 COMPOSE_DEV = Docker/docker-compose.dev.yml
-COMPOSE_PROD = Docker/docker-compose.prod.yml
+COMPOSE_PROD = ./docker-compose.prod.yml
 
 # Container names (optional; for clarity)
 PROJECT_NAME = game_app
@@ -19,7 +19,7 @@ build-dev:
 
 build-prod:
 	@echo "🏗️  Building production images..."
-	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_BASE) -f $(COMPOSE_PROD) build
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) build
 
 # ==============================================================================
 # 🚀 Run Targets
@@ -31,7 +31,7 @@ dev: build-dev
 
 prod: build-prod
 	@echo "🌐 Starting production environment..."
-	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_BASE) -f $(COMPOSE_PROD) up -d
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) up -d
 
 # ==============================================================================
 # 🧹 Cleanup Targets
@@ -40,11 +40,18 @@ prod: build-prod
 clean:
 	@echo "🧼 Stopping and removing containers..."
 	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) down
-	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_BASE) -f $(COMPOSE_PROD) down
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) down
 
 fclean: clean
 	@echo "🔥 Removing all images and volumes..."
 	docker system prune -af --volumes
+	@if docker volume inspect game_app_dev_backend_node_modules >/dev/null 2>&1; then \
+		echo "💿🧹Removing game_app_dev_backend_node_modules..."; \
+		docker volume rm game_app_dev_backend_node_modules; \
+	else \
+		echo "Volume game_app_dev_backend_node_modules does not exist."; \
+	fi
+
 
 # ==============================================================================
 # 🔁 Rebuild Target
