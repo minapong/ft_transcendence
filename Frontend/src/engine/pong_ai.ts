@@ -4,6 +4,11 @@ import {
 	BALL_SIZE, 
 	PADDLE_SPEED, 
 	PADDLE_HEIGHT,
+	PADDLE_WIDTH,
+	LEFT_PADDLE_X,
+	RIGHT_PADDLE_X,
+	PLAYABLE_HEIGHT,
+	PLAYABLE_WIDTH,
 	GAME_SPEED,
 	WIN_SCORE,
   } from './pong_parameters';
@@ -22,11 +27,11 @@ export class PongAI {
     private currentAction: 'up' | 'down' | 'none' = 'none';
     
     // Game constants
-    private readonly GAME_WIDTH = GAME_WIDTH;
-    private readonly GAME_HEIGHT = GAME_HEIGHT;
+    private readonly GAME_WIDTH = PLAYABLE_WIDTH;
+    private readonly GAME_HEIGHT = PLAYABLE_HEIGHT;
     private readonly PADDLE_HEIGHT = PADDLE_HEIGHT;
     private readonly BALL_SIZE = BALL_SIZE;
-    private readonly PADDLE_X = 772; // Right paddle X position
+    private readonly PADDLE_X = RIGHT_PADDLE_X; // Right paddle X position
     
     // Observation interval (1 second = 1000ms)
     private readonly OBSERVATION_INTERVAL = 1000;

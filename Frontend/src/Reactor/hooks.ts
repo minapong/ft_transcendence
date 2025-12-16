@@ -128,7 +128,9 @@ export function useEffect(cb: () => void | (() => void), deps?: any[]) {
 	};
 
 	if (deps === undefined) {
-		pendingEffects.push(queue);
+		if (!prev) {
+			pendingEffects.push(queue);
+		}
 		return;
 	}
 

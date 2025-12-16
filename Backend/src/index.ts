@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors"; // ✅ import the CORS plugin
 
 import { registerTournamentRoutes } from "./routes/tournament";
-import { registerMatchmakingRoutes } from "./routes/matchmaking";
+// import { registerMatchmakingRoutes } from "./routes/matchmaking";
 
 const server = Fastify({ logger: true });
 
@@ -19,7 +19,7 @@ server.get("/", async () => {
 });
 
 registerTournamentRoutes(server);
-registerMatchmakingRoutes(server);
+// registerMatchmakingRoutes(server);
 
 server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
   if (err) throw err;

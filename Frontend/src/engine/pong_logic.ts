@@ -5,6 +5,11 @@ import {
 	BALL_SIZE, 
 	PADDLE_SPEED, 
 	PADDLE_HEIGHT,
+	PADDLE_WIDTH,
+	LEFT_PADDLE_X,
+	RIGHT_PADDLE_X,
+	PLAYABLE_HEIGHT,
+	PLAYABLE_WIDTH,
 	GAME_SPEED,
 	WIN_SCORE,
   } from './pong_parameters';
@@ -24,8 +29,12 @@ export function pongLogic(
 
     let isPaused = false;
 
-    let x = GAME_WIDTH / 2 - BALL_SIZE / 2;
-    let y = GAME_HEIGHT / 2 - BALL_SIZE / 2;
+
+
+	// Initial ball position (centered in playable area)
+	let x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
+	let y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
+
     let dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
     let dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 
@@ -42,6 +51,10 @@ export function pongLogic(
 
     const scoreLeftDisplay = document.getElementById('scoreLeft');
     const scoreRightDisplay = document.getElementById('scoreRight');
+
+	// Show player names
+	if (scoreLeftDisplay) scoreLeftDisplay.textContent = `${p1}: 0`;
+	if (scoreRightDisplay) scoreRightDisplay.textContent = `${p2}: 0`;
 
     // AI Setup
     let aiPlayer: PongAI | null = null;
@@ -73,55 +86,51 @@ export function pongLogic(
         aiPlayer.start(getGameState, simulateKeyPress);
     }
 
-	document.addEventListener('keydown', (e) => {
-		// Block human control of right paddle if AI is active
-		if (useAI && e.isTrusted) {
-			if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-				e.preventDefault();
-				return;
-			}
+	// Define handlers
+	const keydownHandler = (e: KeyboardEvent) => {
+		if (useAI && e.isTrusted && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+			e.preventDefault();
+			return;
 		}
-	
-		// Right paddle controls (AI OR human)
+
 		if (e.key === 'ArrowUp') upPressed = true;
 		if (e.key === 'ArrowDown') downPressed = true;
-	
-		// Left paddle — always human
 		if (e.key === 'w') wPressed = true;
 		if (e.key === 's') sPressed = true;
-	});
+	};
 
-	document.addEventListener('keyup', (e) => {
-		if (useAI && e.isTrusted) {
-			if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-				e.preventDefault();
-				return;
-			}
+	const keyupHandler = (e: KeyboardEvent) => {
+		if (useAI && e.isTrusted && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+			e.preventDefault();
+			return;
 		}
-	
+
 		if (e.key === 'ArrowUp') upPressed = false;
 		if (e.key === 'ArrowDown') downPressed = false;
-	
 		if (e.key === 'w') wPressed = false;
 		if (e.key === 's') sPressed = false;
-	});
+	};
 
-    pause.addEventListener("click", () => {
-        isPaused = !isPaused;
-
-        if (isPaused) {
-            pause.textContent = "▶️ Resume";
-            if (aiPlayer) {
-                aiPlayer.stop(simulateKeyPress);
-            }
-        } else {
-            pause.textContent = "⏸️ Pause";
-            if (aiPlayer) {
-                aiPlayer.start(getGameState, simulateKeyPress);
-            }
-            moveBall();
-        }
-    });
+	const pauseHandler = () => {
+		isPaused = !isPaused;
+	
+		if (isPaused) {
+			pause.textContent = "▶️ Resume";
+			if (aiPlayer) {
+				aiPlayer.stop(simulateKeyPress);
+			}
+		} else {
+			pause.textContent = "⏸️ Pause";
+			if (aiPlayer) {
+				aiPlayer.start(getGameState, simulateKeyPress);
+			}
+			moveBall();
+		}
+	};
+	// Attach
+	document.addEventListener('keydown', keydownHandler);
+	document.addEventListener('keyup', keyupHandler);
+	pause.addEventListener("click", pauseHandler);
 
     function moveBall() {
         if (isPaused) 
@@ -129,34 +138,40 @@ export function pongLogic(
         x += dx;
         y += dy;
 
+		/// Left Paddle
         if (
-            x <= 16 + 12 &&
-            x >= 16 + 8 &&
-            y + BALL_SIZE >= paddleY_Left &&
-            y <= paddleY_Left + PADDLE_HEIGHT
+            x <= LEFT_PADDLE_X + PADDLE_WIDTH &&
+            x >= LEFT_PADDLE_X + PADDLE_WIDTH - 8 &&
+            y + BALL_SIZE >= paddleY_Left && // Ball's bottom edge >= Paddle's top edge
+            y <= paddleY_Left + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
         ) {
             dx = -dx;
-            x = 16 + 12;
+            x = LEFT_PADDLE_X + PADDLE_WIDTH;
         }
+
+		/// Right Paddle
         if (
-            x + BALL_SIZE >= GAME_WIDTH - 16 - 12 - 8 - 8 &&
-            x + BALL_SIZE <= GAME_WIDTH - 16 - 8 - 8 - 8 &&
-            y + BALL_SIZE >= paddleY_Right &&
-            y <= paddleY_Right + PADDLE_HEIGHT
+            x + BALL_SIZE >= RIGHT_PADDLE_X &&
+            x + BALL_SIZE <= RIGHT_PADDLE_X + 8 &&
+            y + BALL_SIZE >= paddleY_Right && // Ball's bottom edge >= Paddle's top edge
+            y <= paddleY_Right + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
         ) {
             dx = -dx;
-            x = GAME_WIDTH - 16 - 12 - 8 - 8 - BALL_SIZE;
+            x = RIGHT_PADDLE_X - BALL_SIZE;
         }
+
+		/// Top Wall
         if (y <= 0)
         {
             dy = -dy;
             y = 0;
         }
-        else if (y + BALL_SIZE >= GAME_HEIGHT - 8 - 8)
-        {
-            dy = -dy;
-            y = GAME_HEIGHT - BALL_SIZE - 8 - 8;
-        }
+
+		/// Bottom Wall
+		else if (y + BALL_SIZE >= PLAYABLE_HEIGHT) {
+			dy = -dy;
+			y = PLAYABLE_HEIGHT - BALL_SIZE;
+		}
 
         ball.style.left = x + 'px';
         ball.style.top = y + 'px';
@@ -167,14 +182,14 @@ export function pongLogic(
 
         if (x < 0) {
             scoreRight++;
-            scoreRightDisplay.textContent = scoreRight.toString();
+            scoreRightDisplay.textContent = `${p2}: ${scoreRight}`;
             checkWinner();
             resetBall();
         }
 
-        if (x + BALL_SIZE > GAME_WIDTH) {
+        if (x + BALL_SIZE > PLAYABLE_WIDTH) {
             scoreLeft++;
-            scoreLeftDisplay.textContent = scoreLeft.toString();
+            scoreLeftDisplay.textContent = `${p1}: ${scoreLeft}`;
             checkWinner();
             resetBall();
         }
@@ -185,7 +200,7 @@ export function pongLogic(
         // Left paddle - always controlled by human (W/S keys)
         if (wPressed && paddleY_Left > 0) 
             paddleY_Left -= PADDLE_SPEED;
-        if (sPressed && paddleY_Left + PADDLE_HEIGHT + 8 + 8 < GAME_HEIGHT) 
+        if (sPressed && paddleY_Left + PADDLE_HEIGHT < PLAYABLE_HEIGHT)  
             paddleY_Left += PADDLE_SPEED;
 
         left_p.style.top = paddleY_Left + 'px';
@@ -193,15 +208,15 @@ export function pongLogic(
         // Right paddle - controlled by human Arrow keys OR AI (AI simulates Arrow keys)
         if (upPressed && paddleY_Right > 0) 
             paddleY_Right -= PADDLE_SPEED;
-        if (downPressed && paddleY_Right + PADDLE_HEIGHT + 8 + 8 < GAME_HEIGHT) 
+        if (downPressed && paddleY_Right + PADDLE_HEIGHT < PLAYABLE_HEIGHT)
             paddleY_Right += PADDLE_SPEED;
 
         right_p.style.top = paddleY_Right + 'px';
     }
 
     function resetBall() {
-        x = GAME_WIDTH / 2  - BALL_SIZE / 2;
-        y = GAME_HEIGHT / 2  - BALL_SIZE / 2;
+        x = PLAYABLE_WIDTH / 2  - BALL_SIZE / 2;
+        y = PLAYABLE_HEIGHT / 2  - BALL_SIZE / 2;
         dx = 0;
         dy = 0;
         
@@ -259,4 +274,13 @@ export function pongLogic(
     }
 
     moveBall();
+
+	return () => {
+		alert("Cleanup called");
+		gameEnded = true;
+		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
+		document.removeEventListener('keydown', keydownHandler);
+		document.removeEventListener('keyup', keyupHandler);
+		pause.removeEventListener("click", pauseHandler);
+	};
 }

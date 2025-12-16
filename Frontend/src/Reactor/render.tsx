@@ -68,16 +68,23 @@ function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key:
 }
 
 // Programmatic navigation helper so any code can trigger a route change.
-export function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean }) {
-  const target = normalizePath(path.startsWith("/") ? path : `/${path}`);
-  const current = normalizePath(window.location.pathname);
-
-  const shouldUpdateHistory = opts?.replace || target !== current;
-
-  if (shouldUpdateHistory) {
-    const method = opts?.replace ? "replaceState" : "pushState";
-    history[method]({}, "", target);
+export function navigate(
+	path: string,
+	opts?: {
+	  replace?: boolean;
+	  triggerLayout?: boolean;
+	  state?: any;
+	}
+  ) {
+	const target = normalizePath(path.startsWith("/") ? path : `/${path}`);
+	const current = normalizePath(window.location.pathname);
+  
+	const shouldUpdateHistory = opts?.replace || target !== current;
+  
+	if (shouldUpdateHistory) {
+	  const method = opts?.replace ? "replaceState" : "pushState";
+	  history[method](opts?.state ?? {}, "", target);
+	}
+  
+	renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
   }
-
-  renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
-}
