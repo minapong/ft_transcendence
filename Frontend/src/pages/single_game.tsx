@@ -35,7 +35,7 @@ export default function SingleGame() {
         const p3 = (document.getElementById("t2p1") as HTMLInputElement).value || "P3";
         const p4 = (document.getElementById("t2p2") as HTMLInputElement).value || "P4";
 
-		navigate("/pong", {
+		navigate("/4p_pong", {
 			state: {
 			  mode: "4p",
 			  p1,
