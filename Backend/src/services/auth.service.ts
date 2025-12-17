@@ -6,19 +6,16 @@ function hashPassword(password: string): string {
 }
 
 export const AuthService = {
-  async signup(email: string, username: string, password: string) {
-    const existing = await UserRepo.findByEmail(email)
-    if (existing) {
-      throw new Error("EMAIL_ALREADY_EXISTS")
+    async login(email: string, password: string) {
+    const user = await UserRepo.findByEmail(email)
+    if (!user) {
+      throw new Error("INVALID_CREDENTIALS")
     }
 
     const passwordHash = hashPassword(password)
-
-    const user = await UserRepo.create({
-      email,
-      username,
-      passwordHash
-    })
+    if (user.passwordHash !== passwordHash) {
+      throw new Error("INVALID_CREDENTIALS")
+    }
 
     return {
       id: user.id,
