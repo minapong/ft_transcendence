@@ -1,5 +1,5 @@
 import { pongLogic } from "../engine/pong_logic";
-import { navigate } from "Reactor";
+import { navigate, useEffect } from "Reactor";
 
 type NavState =
   | {
@@ -54,25 +54,48 @@ export default function PongGame() {
 	  }
 
     // Start game
-    setTimeout(() => {
-        pongLogic(
-			p1Name, 
-			p2Name, 
-			(winner: string) => {
-            if (matchIndex !== null) {
-                // Tournament mode → store result
+	useEffect(() => {
+		const overlay = document.getElementById("winnerOverlay")!;
+		const text = document.getElementById("winnerText")!;
+		let winTimeout: number | null = null;
+		
+		const cleanup = pongLogic(
+		  p1Name,
+		  p2Name,
+		  (winner: string) => {
+			text.textContent = `${winner} Wins! 🏆`;
+			overlay.classList.remove("hidden");
+	  
+			winTimeout = window.setTimeout(() => {
+			  if (matchIndex !== null) {
 				const winnerId = winner === p1Name ? p1Id : p2Id;
-				localStorage.setItem("pongResult", JSON.stringify({ matchId: matchIndex , winnerId }));
+				localStorage.setItem(
+				  "pongResult",
+				  JSON.stringify({ matchId: matchIndex, winnerId })
+				);
 				localStorage.removeItem("currentMatch");
 				navigate("/tournament/active");
-            } else {
-                // Free play mode → return to single page
-                navigate("/single_game");
-            }
-        }, 
-		useAI, 
-		aiDifficulty);
-    }, 0);
+			  } else {
+				navigate("/single_game");
+			  }
+			}, 2000);
+		  },
+		  useAI,
+		  aiDifficulty
+		);
+		
+		// Hide overlay initially
+		overlay.classList.add("hidden");
+
+		// Cleanup function runs on unmount
+		return () => {
+			if (winTimeout !== null) {
+				clearTimeout(winTimeout);
+				winTimeout = null;
+			}
+			cleanup();
+		};
+	  }, []);
 
 	return(
         <div className="bg-gray-900 flex flex-col items-center justify-center h-screen">
@@ -97,6 +120,12 @@ export default function PongGame() {
             <button id="pauseBtn" className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400">
                 ⏸️ Pause
             </button>
+			<div
+				id="winnerOverlay"
+				className="hidden absolute inset-0 flex bg-black/70 items-center justify-center text-white text-4xl font-bold z-50"
+			>
+				<div id="winnerText"></div>
+			</div>
         </div>
 	);
 }

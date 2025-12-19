@@ -88,9 +88,10 @@ export function pongLogic(
 
 	// Define handlers
 	const keydownHandler = (e: KeyboardEvent) => {
-		if (useAI && e.isTrusted && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+		if ((e.key === "ArrowUp" || e.key === "ArrowDown")) {
 			e.preventDefault();
-			return;
+			if (useAI && e.isTrusted)
+				return;
 		}
 
 		if (e.key === 'ArrowUp') upPressed = true;
@@ -100,9 +101,10 @@ export function pongLogic(
 	};
 
 	const keyupHandler = (e: KeyboardEvent) => {
-		if (useAI && e.isTrusted && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+		if ((e.key === "ArrowUp" || e.key === "ArrowDown")) {
 			e.preventDefault();
-			return;
+			if (useAI && e.isTrusted)
+				return;
 		}
 
 		if (e.key === 'ArrowUp') upPressed = false;
@@ -132,9 +134,10 @@ export function pongLogic(
 	document.addEventListener('keyup', keyupHandler);
 	pause.addEventListener("click", pauseHandler);
 
+	let animationId: number | null = null;
+
     function moveBall() {
-        if (isPaused) 
-            return;
+		if (isPaused || gameEnded) return;
         x += dx;
         y += dy;
 
@@ -178,7 +181,7 @@ export function pongLogic(
 
         movePaddle();
 
-        requestAnimationFrame(moveBall);
+		animationId = requestAnimationFrame(moveBall);
 
         if (x < 0) {
             scoreRight++;
@@ -194,93 +197,89 @@ export function pongLogic(
             resetBall();
         }
     }
+	function clampPaddle(pos: number, speed: number, min: number, max: number, length: number, movingPositive: boolean): number {
+		if (movingPositive) {
+			if (pos + speed + length >= max) return max - length;
+			return pos + speed;
+		} else {
+			if (pos - speed <= min) return min;
+			return pos - speed;
+		}
+	}
 
-    function movePaddle() 
-    {
-        // Left paddle - always controlled by human (W/S keys)
-        if (wPressed && paddleY_Left > 0) 
-            paddleY_Left -= PADDLE_SPEED;
-        if (sPressed && paddleY_Left + PADDLE_HEIGHT < PLAYABLE_HEIGHT)  
-            paddleY_Left += PADDLE_SPEED;
+	function movePaddle() {
+		// Left paddle (W / S)
+		if (wPressed)
+			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
+		if (sPressed)
+			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
+		left_p.style.top = `${paddleY_Left}px`;
 
-        left_p.style.top = paddleY_Left + 'px';
+		// Right paddle (Arrow Up / Down or AI)
+		if (upPressed)
+			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
+		if (downPressed)
+			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
 
-        // Right paddle - controlled by human Arrow keys OR AI (AI simulates Arrow keys)
-        if (upPressed && paddleY_Right > 0) 
-            paddleY_Right -= PADDLE_SPEED;
-        if (downPressed && paddleY_Right + PADDLE_HEIGHT < PLAYABLE_HEIGHT)
-            paddleY_Right += PADDLE_SPEED;
+		right_p.style.top = `${paddleY_Right}px`;
+	}
 
-        right_p.style.top = paddleY_Right + 'px';
-    }
+	let resetTimeout: number | null = null;
 
-    function resetBall() {
-        x = PLAYABLE_WIDTH / 2  - BALL_SIZE / 2;
-        y = PLAYABLE_HEIGHT / 2  - BALL_SIZE / 2;
-        dx = 0;
-        dy = 0;
-        
-        if (scoreLeft !== WIN_SCORE && scoreRight !== WIN_SCORE)
-        {
-            ball.style.left = x + 'px';
-            ball.style.top = y + 'px';
+	function resetBall() {
+		x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
+		y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
+		dx = 0;
+		dy = 0;
+	
+		ball.style.left = x + 'px';
+		ball.style.top = y + 'px';
+	
+		if (scoreLeft !== WIN_SCORE && scoreRight !== WIN_SCORE) {
+			resetTimeout = window.setTimeout(() => {
+				dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
+				dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
+				resetTimeout = null;
+			}, 1000);
+		}
+	}
 
-            setTimeout(() => {
-                dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
-                dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
-            }, 1000);
-        }
-    }
+	function checkWinner() {
+		if (scoreLeft >= WIN_SCORE) {
+			showWinner(p1);
+		}
+		else if (scoreRight >= WIN_SCORE) {
+			showWinner(p2);
+		}
+	}
 
-    function checkWinner() {
-        if (scoreLeft >= WIN_SCORE) {
-            showWinner(`${p1} Wins! 🏆`);
-            return;
-        }
-        if (scoreRight >= WIN_SCORE) {
-            showWinner(`${p2} Wins! 🏆`);
-            return;
-        }
-    }
-
-    function showWinner(message: string) {
-        gameEnded = true;
-        
-        if (aiPlayer) {
-            aiPlayer.stop(simulateKeyPress);
-        }
-        
-        dx = 0;
-        dy = 0;
-
-        const winnerMsg = document.createElement("div");
-        winnerMsg.textContent = message;
-        winnerMsg.style.position = "absolute";
-        winnerMsg.style.top = "50%";
-        winnerMsg.style.left = "50%";
-        winnerMsg.style.transform = "translate(-50%, -50%)";
-        winnerMsg.style.fontSize = "32px";
-        winnerMsg.style.fontWeight = "bold";
-        winnerMsg.style.color = "yellow";
-        winnerMsg.style.backgroundColor = "rgba(0,0,0,0.6)";
-        winnerMsg.style.padding = "20px";
-        winnerMsg.style.borderRadius = "10px";
-        document.body.appendChild(winnerMsg);
-
-        setTimeout(() => {
-            winnerMsg.remove();
-            onWin(message.includes(p1) ? p1 : p2);
-        }, 2000);
-    }
+	function showWinner(winner: string) {
+		gameEnded = true;
+		isPaused = true;
+		dx = 0;
+		dy = 0;
+	
+		if (animationId !== null) cancelAnimationFrame(animationId);
+		if (resetTimeout !== null) clearTimeout(resetTimeout);
+	
+		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
+	
+		onWin(winner);
+	}
 
     moveBall();
 
 	return () => {
-		alert("Cleanup called");
 		gameEnded = true;
+		isPaused = true;
+	
+		if (animationId !== null) cancelAnimationFrame(animationId);
+		if (resetTimeout !== null) clearTimeout(resetTimeout);
+	
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
+	
 		document.removeEventListener('keydown', keydownHandler);
 		document.removeEventListener('keyup', keyupHandler);
-		pause.removeEventListener("click", pauseHandler);
+		pause.removeEventListener('click', pauseHandler);
 	};
 }

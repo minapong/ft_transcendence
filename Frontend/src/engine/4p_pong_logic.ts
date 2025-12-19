@@ -32,7 +32,7 @@ export function pong4PLogic(
 	let y = P4_GAME_HEIGHT / 2 - P4_BALL_SIZE / 2;
 
 	let dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
-	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
+	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.75;
 
 	let paddleY_Left = P4_GAME_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
 	let paddleY_Right = P4_GAME_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
@@ -86,6 +86,8 @@ export function pong4PLogic(
 
 	/* ---------------- game loop ---------------- */
 
+	let animationId: number | null = null;
+
 	function moveBall() {
 		if (isPaused || isWin) return;
 
@@ -136,7 +138,7 @@ export function pong4PLogic(
 		ball.style.top = `${y}px`;
 
 		movePaddles();
-		requestAnimationFrame(moveBall);
+		animationId = requestAnimationFrame(moveBall);
 
 		// Ball exits RED team side (left OR bottom) → Blue scores
 		if (x < 0 || y + P4_BALL_SIZE > P4_PLAYABLE_HEIGHT) {
@@ -189,15 +191,18 @@ export function pong4PLogic(
 		upper_p.style.left = `${paddleX_Upper}px`;
 	}
 
+	let resetTimeout: number | null = null;
+
 	function resetBall() {
 		x = P4_GAME_WIDTH / 2 - P4_BALL_SIZE / 2;
 		y = P4_GAME_HEIGHT / 2 - P4_BALL_SIZE / 2;
 		dx = 0;
 		dy = 0;
-
-		setTimeout(() => {
+	
+		resetTimeout = window.setTimeout(() => {
 			dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
 			dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
+			resetTimeout = null;
 		}, 1000);
 	}
 
@@ -212,9 +217,17 @@ export function pong4PLogic(
 	
 	function endGame(winner: "red" | "blue") {
 		isWin = true;
+		isPaused = true;
 		dx = 0;
 		dy = 0;
-
+	
+		if (animationId !== null) cancelAnimationFrame(animationId);
+		if (resetTimeout !== null) clearTimeout(resetTimeout);
+	
+		document.removeEventListener('keydown', keydownHandler);
+		document.removeEventListener('keyup', keyupHandler);
+		pause.removeEventListener('click', pauseHandler);
+	
 		onWin(winner);
 	}
 
@@ -225,7 +238,10 @@ export function pong4PLogic(
 	return () => {
 		isWin = true;
 		isPaused = true;
-
+	
+		if (animationId !== null) cancelAnimationFrame(animationId);
+		if (resetTimeout !== null) clearTimeout(resetTimeout);
+	
 		document.removeEventListener('keydown', keydownHandler);
 		document.removeEventListener('keyup', keyupHandler);
 		pause.removeEventListener('click', pauseHandler);
