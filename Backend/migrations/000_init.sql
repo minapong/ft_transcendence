@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS matches (
   winner_id INTEGER,
   ai_difficulty TEXT DEFAULT NULL, -- 'easy', 'medium', 'hard' or NULL
   is_ai_game INTEGER DEFAULT 0,     -- 0 = false, 1 = true
+  game_name TEXT NOT NULL DEFAULT 'pong', -- 'pong', 'connect4'
   FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
