@@ -1,5 +1,5 @@
 import { pong4PLogic } from "../engine/4p_pong_logic";
-import { navigate } from "Reactor";
+import { navigate, useEffect } from "Reactor";
 
 type NavState4P = {
 	mode: "4p";
@@ -20,32 +20,36 @@ export default function Pong4PGame() {
 	const teamRed = `${navState.p1} & ${navState.p2}`;
 	const teamBlue = `${navState.p3} & ${navState.p4}`;
 
-	let cleanup = () => {};
+	useEffect(() => {
+		const overlay = document.getElementById("winnerOverlay")!;
+		const text = document.getElementById("winnerText")!;
+		let winTimeout: number | null = null;
 
-	setTimeout(() => {
-		cleanup = pong4PLogic((winner) => {
-			const overlay = document.getElementById("winnerOverlay")!;
-			const text = document.getElementById("winnerText")!;
-	
-			text.textContent =
-				winner === "red"
-					? "Red Team Wins!"
-					: "Blue Team Wins!";
-	
+		// Start the game
+		const cleanup = pong4PLogic((winner) => {
+			text.textContent = winner === "red" ? "Red Team Wins! 🏆" : "Blue Team Wins! 🏆";
 			overlay.classList.remove("hidden");
-	
-			// Auto-navigate after 2 seconds
-			setTimeout(() => {
+
+			winTimeout = window.setTimeout(() => {
 				navigate("/single_game");
 			}, 2000);
 		});
-	}, 0);
-	
-	
-	window.addEventListener("beforeunload", () => cleanup());
+
+		// Hide overlay initially
+		overlay.classList.add("hidden");
+
+		// Cleanup function runs on unmount
+		return () => {
+			if (winTimeout !== null) {
+				clearTimeout(winTimeout);
+				winTimeout = null;
+			}
+			cleanup();
+		};
+	}, []); // Run only once on mount/unmount
 
 	return (
-		<div className="bg-gray-900 flex flex-col items-center justify-center h-screen">
+		<div className="bg-gray-900 flex flex-col items-center justify-center h-full">
 			<div className="flex justify-between w-[800px] text-white text-xl font-bold mb-2">
 				<div className="text-left">
 					<div>Red Team</div>
@@ -73,6 +77,7 @@ export default function Pong4PGame() {
 				<div id="upper_p" className="absolute top-4 left-1/2 w-24 h-3 bg-white"></div>
 				<div id="lower_p" className="absolute bottom-4 left-1/2 w-24 h-3 bg-white"></div>
 				<div id="ball" className="absolute w-4 h-4 bg-white rounded-full top-1/2 left-1/2"></div>
+
 			</div>
 
 			<button
@@ -83,10 +88,7 @@ export default function Pong4PGame() {
 			</button>
 
 			<button
-				onClick={() => {
-					if (cleanup) cleanup();
-					navigate("/single_game");
-				}}
+				onClick={() => {navigate("/single_game");}}
 				className="mt-6 text-cyan-400 underline hover:text-cyan-200"
 			>
 				← Back to menu
@@ -94,10 +96,11 @@ export default function Pong4PGame() {
 
 			<div
 				id="winnerOverlay"
-				className="hidden absolute inset-0 bg-black/70 hidden items-center justify-center text-white text-4xl font-bold z-50"
+				className="hidden absolute inset-0 flex bg-black/70 items-center justify-center text-white text-4xl font-bold z-50"
 			>
 				<div id="winnerText"></div>
 			</div>
+
 		</div>
 	);
 }

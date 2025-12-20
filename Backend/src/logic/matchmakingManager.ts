@@ -1,49 +1,83 @@
-// // logic/matchmakingManager.ts
-// import { Match } from "../logic/tournamentManager.js"
+import crypto from "crypto"
+import { recordConnect4Game } from "./matchmakingRepo";
 
-// export interface Player {
-// 	id: string
-// 	name: string
-// }
 
-// const matchmakingQueue: Player[] = []
-// const activeMatches: Match[] = []
-// let matchCounter = 1
+export interface Player {
+  id: string
+  name: string
+}
 
-// export function joinQueue(player: Player): { match?: Match; waiting?: true } {
-// 	// to prevent duplicate addition to the queue (playing with yourself)
-// 	if (matchmakingQueue.find(p => p.id === player.id)) {
-// 		return { waiting: true }
-// 	}
+export interface ActiveMatch {
+  id: string
+  game: "connect4"
+  p1: Player
+  p2: Player
+  createdAt: number
+}
 
-// 	matchmakingQueue.push(player)
-// 	console.log(`Added ${player.name} to queue`)
-// 	console.log("Current queue:", matchmakingQueue.map(p => p.name))
+const queue: Player[] = []
+const activeMatches = new Map<string, ActiveMatch>()
 
-// 	// when 2 players are available → create a match
-// 	if (matchmakingQueue.length >= 2) {
-// 		const p1 = matchmakingQueue.shift()!
-// 		const p2 = matchmakingQueue.shift()!
+export function joinQueue(player: Player) {
+  // prevent duplicates
+  if (queue.find(p => p.id === player.id)) {
+    return { status: "waiting" as const }
+  }
 
-// 		const match: Match = {
-// 			p1: p1.name,
-// 			p2: p2.name,
-// 			winner: null,
-// 			status: "pending",
-// 		}
+  queue.push(player)
 
-// 		activeMatches.push(match)
-// 		console.log(`Match created: ${match.p1} vs ${match.p2}`)
-// 		return { match }
-// 	}
+  if (queue.length < 2) {
+    return { status: "waiting" as const }
+  }
 
-// 	return { waiting: true }
-// }
+  const p1 = queue.shift()!
+  const p2 = queue.shift()!
 
-// export function getActiveMatches() {
-// 	return activeMatches
-// }
+  const match: ActiveMatch = {
+    id: crypto.randomUUID(),
+    game: "connect4",
+    p1,
+    p2,
+    createdAt: Date.now(),
+  }
 
-// export function getQueue() {
-// 	return matchmakingQueue
-// }
+  activeMatches.set(match.id, match)
+
+  return {
+    status: "matched" as const,
+    match,
+  }
+}
+
+export function getMatch(matchId: string) {
+  return activeMatches.get(matchId)
+}
+
+
+export function finishMatch(matchId: string, winnerId: number) {
+	const match = activeMatches.get(matchId);
+	if (!match) throw new Error("Match not found");
+
+	// Persist game to DB
+	recordConnect4Game(
+		Number(match.p1.id),
+		Number(match.p2.id),
+		winnerId
+	);
+
+	// Remove from active matches
+	removeActiveMatch(matchId);
+	return { success: true };
+}
+
+export function removeActiveMatch(matchId: string) {
+	activeMatches.delete(matchId);
+}
+
+export function getQueue() {
+  return queue
+}
+
+export function getActiveMatches() {
+  return Array.from(activeMatches.values())
+}
