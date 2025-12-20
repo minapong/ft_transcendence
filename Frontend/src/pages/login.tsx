@@ -58,42 +58,36 @@
 //   );
 // }
 
-
-import { useState } from "Reactor";
+import { useRef } from "Reactor";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = async () => {
+    const email = emailRef.current?.value || "";
+    const password = passwordRef.current?.value || "";
+
     if (!email || !password) {
       alert("Missing email or password");
       return;
     }
 
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        alert(data.error || "Login failed");
-        return;
-      }
-
-      // ✅ save auth info
-      localStorage.setItem("auth", JSON.stringify(data));
-
-      // ✅ go home
-      window.location.href = "/";
-    } catch (err) {
-      console.error(err);
-      alert("Network error");
+    if (!res.ok) {
+      alert(data.error || "Login failed");
+      return;
     }
+
+    localStorage.setItem("auth", JSON.stringify(data));
+    window.location.href = "/";
   };
 
   return (
@@ -101,18 +95,16 @@ export default function LoginPage() {
       <h1 className="text-3xl font-bold">Sign In</h1>
 
       <input
-        className="px-4 py-2 rounded text-black"
-        placeholder="Email"
-        value={email}
-        onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
+        ref={emailRef}
+        className="px-4 py-2 rounded text-gray"
+        placeholder="Email" 
       />
 
       <input
+        ref={passwordRef}
         type="password"
-        className="px-4 py-2 rounded text-black"
+        className="px-4 py-2 rounded text-gray"
         placeholder="Password"
-        value={password}
-        onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
       />
 
       <button

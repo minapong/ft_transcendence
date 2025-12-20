@@ -9,11 +9,13 @@ export const AuthService = {
     async login(email: string, password: string) {
     const user = await UserRepo.findByEmail(email)
     if (!user) {
+      // console.error("INVALID_Email:", email);
       throw new Error("INVALID_CREDENTIALS")
     }
 
     const passwordHash = hashPassword(password)
     if (user.passwordHash !== passwordHash) {
+      // console.error("INVALID_Password:", password);
       throw new Error("INVALID_CREDENTIALS")
     }
 

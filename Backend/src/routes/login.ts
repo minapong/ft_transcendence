@@ -23,12 +23,12 @@ export async function registerLoginRoutes(server: FastifyInstance) {
         const result = await AuthService.login(email, password);
         reply.send(result);
       } catch (err: any) {
-        // if (err.message === "INVALID_CREDENTIALS") {
-        //   return reply.code(401).send({ error: "Invalid credentials" });
-        // }
+        if (err.message === "INVALID_CREDENTIALS") {
+          return reply.code(401).send({ error: "Invalid credentials" });
+        }
         // reply.code(500).send({ error: "Internal server error" });
-        console.error("LOGIN ERROR:", err);
-        reply.code(500).send({ error: "Internal server error" });
+        // console.error("LOGIN ERROR:", err);
+        // reply.code(500).send({ error: "Internal server error" });
       }
     }
   );
