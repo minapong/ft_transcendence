@@ -55,16 +55,17 @@ const links = [
 
 export default function Sidebar() {
   const [open, setOpen] = useState(true);
-  const [activePath, setActivePath] = useState("/");
+  const [activePath, setActivePath] = useState(() =>
+    normalizePath(window.location.pathname)
+  );
   const sidebarAnim = useRef(null);
   const contentAnim = useRef(null);
   const sidebarRef = useRef(null);
   const contentRef = useRef(null);
 
   const widthTarget = open ? 240 : 60;
-  const paddingLeft = open ? 24 : 16;
-  const paddingRight = open ? 24 : 16;
-  const easer = [0.25, 0.1, 0.25, 1];
+  const paddingLeft = open ? 24 : 12;
+  const paddingRight = open ? 24 : 12;
   const widthDuration = 0.3;
   const contentDuration = 0.2;
   const contentDelay = open ? widthDuration * 0.6 : 0;
@@ -112,20 +113,30 @@ export default function Sidebar() {
   }, [open]);
 
   useEffect(() => {
-    // Set active path based on current location
-    setActivePath(window.location.pathname);
+    const handlePathChange = () =>
+      setActivePath(normalizePath(window.location.pathname));
+    handlePathChange();
+    window.addEventListener("popstate", handlePathChange);
+    
+    return () => {
+      window.removeEventListener("popstate", handlePathChange);
+    };
   }, []);
 
   return (
     <aside
       id="sidebar"
       ref={sidebarRef}
+      style={{
+        width: `${widthTarget}px`,
+        paddingLeft: `${paddingLeft}px`,
+        paddingRight: `${paddingRight}px`,
+      }}
       className="
         bg-navpanel border-r border-border-soft sticky left-0
         top-[var(--header-height)]
         h-[calc(100vh-var(--header-height))]
         overflow-hidden relative
-        w-[240px] pl-6 pr-6
       "
     >
       {/* Collapse button */}
@@ -152,7 +163,7 @@ export default function Sidebar() {
         />
       </button>
 
-      {/* CONTENT */}
+      {/* HEADER CONTENT */}
       <div
         ref={contentRef}
         className="mt-6 space-y-4 will-change-[transform,opacity]"
@@ -168,53 +179,65 @@ export default function Sidebar() {
           </p>
           <p className="text-xl font-semibold text-primary">Quick Access</p>
         </div>
+      </div>
 
-        <nav className="flex flex-col gap-1.5">
-          {links.map((link) => {
-            const isActive = activePath === link.href;
-            return (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setActivePath(link.href)}
-                className={`
-                  group relative overflow-hidden
-                  px-3 py-2.5 rounded-lg
-                  flex items-center justify-between
-                  transition-all duration-300
-                  active:scale-[0.98]
-                  ${isActive 
-                    ? 'bg-accent/10 border border-accent/40 text-accent shadow-[0_0_12px_rgba(var(--color-accent-soft-rgb),0.25)] ring-1 ring-accent/30' 
-                    : 'text-accent bg-white/5 border border-border-soft hover:bg-accent-soft hover:text-black hover:border-accent-soft hover:shadow-[0_0_8px_rgba(var(--color-accent-soft-rgb),0.3)]'
-                  }
-                `}
-              >
-                <span className="flex items-center gap-4 relative z-10">
-                  <span 
-                    className={`
-                      ${isActive ? link.iconActive : link.icon} 
-                      text-xl 
-                      transition-all duration-200 
-                      group-hover:scale-110
-                      ${isActive ? 'translate-y-[2px]' : 'translate-y-[1px]'}
-                    `} 
-                  />
-                  <span className="font-medium">{link.label}</span>
-                </span>
-                <span 
+      <nav className={`mt-6 flex flex-col gap-1.5 ${open ? "" : "items-center"}`}>
+        {links.map((link) => {
+          const isActive = activePath === link.href;
+          return (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setActivePath(normalizePath(link.href))}
+              title={open ? undefined : link.label}
+              className={`
+                group relative overflow-hidden
+                ${open ? "px-3" : "px-2"} py-2.5 rounded-lg
+                flex items-center
+                transition-all duration-300
+                active:scale-[0.98]
+                ${open ? "justify-between w-full" : "justify-center w-auto"}
+                ${isActive
+                  ? 'bg-accent/10 border border-accent/40 text-accent shadow-[0_0_12px_rgba(var(--color-accent-soft-rgb),0.25)] ring-1 ring-accent/30'
+                  : 'text-accent bg-white/5 border border-border-soft hover:bg-accent-soft hover:text-black hover:border-accent-soft hover:shadow-[0_0_8px_rgba(var(--color-accent-soft-rgb),0.3)]'
+                }
+              `}
+            >
+              <span className={`flex items-center ${open ? "gap-4" : "gap-0"} relative z-10`}>
+                <span
                   className={`
-                    icon-[solar--arrow-right-bold] 
-                    text-xl 
+                    ${isActive ? link.iconActive : link.icon}
+                    text-xl
                     transition-all duration-200
-                    ${isActive ? 'opacity-80' : 'opacity-50 group-hover:opacity-100'}
+                    group-hover:scale-110
+                    ${isActive ? "translate-y-[2px]" : "translate-y-[1px]"}
+                  `}
+                />
+                <span className={open ? "font-medium" : "sr-only"}>
+                  {link.label}
+                </span>
+              </span>
+              {open && (
+                <span
+                  className={`
+                    icon-[solar--arrow-right-bold]
+                    text-xl
+                    transition-all duration-200
+                    ${isActive ? "opacity-80" : "opacity-50 group-hover:opacity-100"}
                     group-hover:translate-x-0.5
                   `}
                 />
-              </a>
-            );
-          })}
-        </nav>
-      </div>
+              )}
+            </a>
+          );
+        })}
+      </nav>
     </aside>
   );
+}
+
+function normalizePath(rawPath: string) {
+  let path =
+    rawPath.toLowerCase().replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
+  return path.split(/[?#]/)[0];
 }
