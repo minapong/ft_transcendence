@@ -2,18 +2,60 @@ import { useEffect, useRef, useState } from "Reactor";
 import { animate } from "motion";
 
 const links = [
-  { label: "Home", href: "/" },
-  { label: "Login", href: "/login" },
-  { label: "Tournament", href: "/tournament/start" },
-  { label: "Pong", href: "/single_game" },
-  { label: "Connect4", href: "/connect4_single"},
-  { label: "Contact", href: "/contact" },
-  { label: "Timer", href: "/timer" },
-  { label: "Counter Page", href: "/counterPage" },
+  { 
+    label: "Home", 
+    href: "/", 
+    icon: "icon-[solar--home-smile-bold-duotone]",
+    iconActive: "icon-[solar--home-smile-linear]"
+  },
+  { 
+    label: "Login", 
+    href: "/login", 
+    icon: "icon-[solar--login-3-bold-duotone]",
+    iconActive: "icon-[solar--login-3-linear]"
+  },
+  { 
+    label: "Tournament", 
+    href: "/tournament/start", 
+    icon: "icon-[solar--cup-star-bold-duotone]",
+    iconActive: "icon-[solar--cup-star-linear]"
+  },
+  { 
+    label: "Pong", 
+    href: "/single_game", 
+    icon: "icon-[solar--gameboy-bold-duotone]",
+    iconActive: "icon-[solar--gameboy-linear]"
+  },
+  { 
+    label: "Connect4", 
+    href: "/connect4_single", 
+    icon: "icon-[solar--widget-5-bold-duotone]",
+    iconActive: "icon-[solar--widget-5-linear]"
+  },
+  { 
+    label: "Contact", 
+    href: "/contact", 
+    icon: "icon-[solar--chat-round-call-bold-duotone]",
+    iconActive: "icon-[solar--chat-round-call-linear]"
+  },
+  { 
+    label: "Timer", 
+    href: "/timer", 
+    icon: "icon-[solar--clock-circle-bold-duotone]",
+    iconActive: "icon-[solar--clock-circle-linear]"
+  },
+  { 
+    label: "Counter Page", 
+    href: "/counterPage", 
+    icon: "icon-[solar--chart-square-bold-duotone]",
+    iconActive: "icon-[solar--chart-square-linear]"
+  },
 ];
+
 
 export default function Sidebar() {
   const [open, setOpen] = useState(true);
+  const [activePath, setActivePath] = useState("/");
   const sidebarAnim = useRef(null);
   const contentAnim = useRef(null);
   const sidebarRef = useRef(null);
@@ -22,7 +64,7 @@ export default function Sidebar() {
   const widthTarget = open ? 240 : 60;
   const paddingLeft = open ? 24 : 16;
   const paddingRight = open ? 24 : 16;
-  const easer = [0.25, 0.1, 0.25, 1]; 
+  const easer = [0.25, 0.1, 0.25, 1];
   const widthDuration = 0.3;
   const contentDuration = 0.2;
   const contentDelay = open ? widthDuration * 0.6 : 0;
@@ -50,7 +92,11 @@ export default function Sidebar() {
           opacity: open ? 1 : 0,
           x: open ? 0 : -12,
         },
-        { duration: contentDuration, ease:[0.25, 0.1, 0.25, 1], delay: contentDelay }
+        {
+          duration: contentDuration,
+          ease: [0.25, 0.1, 0.25, 1],
+          delay: contentDelay,
+        }
       ).finished.then(() => {
         // Toggle pointer events AFTER animation completes
         if (content) {
@@ -64,6 +110,11 @@ export default function Sidebar() {
       contentAnim.current?.cancel?.();
     };
   }, [open]);
+
+  useEffect(() => {
+    // Set active path based on current location
+    setActivePath(window.location.pathname);
+  }, []);
 
   return (
     <aside
@@ -79,7 +130,7 @@ export default function Sidebar() {
     >
       {/* Collapse button */}
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
         className={`
           absolute top-4 z-20 pointer-events-auto
           flex items-center justify-center
@@ -119,23 +170,49 @@ export default function Sidebar() {
         </div>
 
         <nav className="flex flex-col gap-1.5">
-          {links.map(link => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="
-                hover:bg-accent-soft hover:text-black
-                text-accent bg-white/5 nav-link border px-3 py-2
-                rounded-lg flex justify-between
-              "
-            >
-              <span className="flex items-center gap-2">
-                <span className="bg-accent h-2 w-2 rounded-full" />
-                {link.label}
-              </span>
-              <span className="text-xs">→</span>
-            </a>
-          ))}
+          {links.map((link) => {
+            const isActive = activePath === link.href;
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setActivePath(link.href)}
+                className={`
+                  group relative overflow-hidden
+                  px-3 py-2.5 rounded-lg
+                  flex items-center justify-between
+                  transition-all duration-300
+                  active:scale-[0.98]
+                  ${isActive 
+                    ? 'bg-accent/10 border border-accent/40 text-accent shadow-[0_0_12px_rgba(var(--color-accent-soft-rgb),0.25)] ring-1 ring-accent/30' 
+                    : 'text-accent bg-white/5 border border-border-soft hover:bg-accent-soft hover:text-black hover:border-accent-soft hover:shadow-[0_0_8px_rgba(var(--color-accent-soft-rgb),0.3)]'
+                  }
+                `}
+              >
+                <span className="flex items-center gap-4 relative z-10">
+                  <span 
+                    className={`
+                      ${isActive ? link.iconActive : link.icon} 
+                      text-xl 
+                      transition-all duration-200 
+                      group-hover:scale-110
+                      ${isActive ? 'translate-y-[2px]' : 'translate-y-[1px]'}
+                    `} 
+                  />
+                  <span className="font-medium">{link.label}</span>
+                </span>
+                <span 
+                  className={`
+                    icon-[solar--arrow-right-bold] 
+                    text-xl 
+                    transition-all duration-200
+                    ${isActive ? 'opacity-80' : 'opacity-50 group-hover:opacity-100'}
+                    group-hover:translate-x-0.5
+                  `}
+                />
+              </a>
+            );
+          })}
         </nav>
       </div>
     </aside>
