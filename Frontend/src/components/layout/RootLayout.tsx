@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import LeftSidebar from "@/components/layout/LeftSidebar";
+import ModalRoot from "@/Reactor/ModalRoot";
 
 export default function RootLayout({ children }) {
   return (
@@ -16,6 +17,8 @@ export default function RootLayout({ children }) {
           {children}
         </main>
       </div>
+
+      <ModalRoot />
     </div>
   );
 }

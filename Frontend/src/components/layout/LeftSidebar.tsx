@@ -16,9 +16,6 @@ export default function Sidebar() {
   const [open, setOpen] = useState(true);
   const [activePath, setActivePath] = useState(normalizePath(window.location.pathname));
   const sidebarRef = useRef<HTMLElement | null>(null);
-  const baseLinkClasses = "group rounded-lg flex items-center relative z-0 isolate overflow-visible transition-colors active:scale-[0.98]";
-  const inactiveLinkClasses = "bg-[var(--sidebar-link-bg)] border border-[var(--sidebar-link-border)] text-[var(--sidebar-link-text)] hover:bg-[var(--sidebar-link-hover-bg)] hover:text-[var(--sidebar-link-hover-text)]";
-  const activeLinkClasses = "text-[var(--sidebar-active-text)] bg-[color-mix(in_srgb,var(--sidebar-active-glow)_12%,transparent)] border border-[color-mix(in_srgb,var(--sidebar-active-glow)_50%,transparent)] shadow-[0_10px_22px_rgba(0,0,0,0.35),0_0_18px_color-mix(in_srgb,var(--sidebar-active-glow)_35%,transparent)] before:content-[''] before:absolute before:-inset-2 before:rounded-[inherit] before:bg-[radial-gradient(60%_60%_at_25%_50%,color-mix(in_srgb,var(--sidebar-active-glow)_60%,transparent),transparent_70%),radial-gradient(80%_80%_at_70%_50%,color-mix(in_srgb,var(--sidebar-active-hot)_35%,transparent),transparent_75%)] before:blur-[16px] before:opacity-[0.85] before:-z-10 before:pointer-events-none after:content-[''] after:absolute after:inset-0 after:rounded-[inherit] after:bg-[linear-gradient(120deg,color-mix(in_srgb,var(--sidebar-active-glow)_18%,transparent),transparent_45%,color-mix(in_srgb,var(--sidebar-active-sheen)_22%,transparent))] after:opacity-70 after:pointer-events-none after:-z-10";
 
   useEffect(() => {
     const onPop = () =>
@@ -39,7 +36,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`
-        sticky left-0 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]
+        sticky left-0 border-r sidebar-shell
         top-[var(--header-height)]
         h-[calc(100vh-var(--header-height))]
         overflow-hidden relative
@@ -54,11 +51,9 @@ export default function Sidebar() {
         className={`
           absolute top-3 sm:top-4 z-20
           h-8 w-8 rounded-md
-          border border-[var(--sidebar-toggle-border)] bg-[var(--sidebar-toggle-bg)]
-          text-[var(--sidebar-toggle-text)]
+          border sidebar-toggle
           flex items-center justify-center
           transition-all duration-300
-          hover:bg-[var(--sidebar-toggle-hover-bg)] hover:text-[var(--sidebar-toggle-hover-text)]
           active:scale-95
           ${open ? "right-4" : "right-2"}
         `}
@@ -109,27 +104,29 @@ export default function Sidebar() {
               }}
               
               className={`
-                ${baseLinkClasses}
+                sidebar-link group rounded-lg flex items-center transition-colors active:scale-[0.98]
                 ${open ? "px-3 py-2.5 justify-between w-full" : "p-2.5 justify-center"}
-                ${isActive ? activeLinkClasses : inactiveLinkClasses}
+                ${isActive ? "sidebar-link--active" : ""}
               `}
             >
-              <span className={`relative z-10 flex items-center ${open ? "gap-4" : ""}`}>
-                <span
-                  className={`
-                    ${isActive ? link.iconActive : link.icon}
-                    ${isActive ? "text-[var(--sidebar-active-glow)] drop-shadow-[0_0_10px_color-mix(in_srgb,var(--sidebar-active-glow)_60%,transparent)] drop-shadow-[0_0_16px_color-mix(in_srgb,var(--sidebar-active-hot)_30%,transparent)]" : ""}
-                    text-xl transition-transform duration-200
-                    group-hover:scale-110
-                  `}
-                />
+              <span className={`sidebar-link__content flex items-center ${open ? "gap-4" : ""}`}>
+                <span className={`sidebar-icon-shell ${isActive ? "sidebar-icon-shell--active" : ""}`}>
+                  <span
+                    className={`
+                      ${isActive ? link.iconActive : link.icon}
+                      ${isActive ? "sidebar-icon--active" : ""}
+                      text-xl transition-transform duration-200
+                      group-hover:scale-110
+                    `}
+                  />
+                </span>
                 <span className={open ? "font-medium" : "sr-only"}>
                   {link.label}
                 </span>
               </span>
 
               {open && (
-                <span className="relative z-10 icon-[solar--arrow-right-bold] text-xl opacity-50 group-hover:opacity-100" />
+                <span className="sidebar-link__icon icon-[solar--arrow-right-bold] text-xl opacity-50 group-hover:opacity-100" />
               )}
             </a>
           );
