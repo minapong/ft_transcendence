@@ -7,6 +7,22 @@
   --header-height: clamp(68px, 8vh, 82px);
   
   --color-navpanel: #00143c;
+  --sidebar-bg: var(--color-navpanel);
+  --sidebar-border: var(--color-border-soft);
+  --sidebar-toggle-bg: rgba(255, 255, 255, 0.05);
+  --sidebar-toggle-border: var(--color-border-strong);
+  --sidebar-toggle-text: var(--color-accent-soft);
+  --sidebar-toggle-hover-bg: var(--color-accent-soft);
+  --sidebar-toggle-hover-text: #000000;
+  --sidebar-link-bg: rgba(255, 255, 255, 0.05);
+  --sidebar-link-border: var(--color-border-soft);
+  --sidebar-link-text: var(--color-accent);
+  --sidebar-link-hover-bg: var(--color-accent-soft);
+  --sidebar-link-hover-text: #000000;
+  --sidebar-active-text: var(--color-primary);
+  --sidebar-active-glow: var(--color-accent);
+  --sidebar-active-sheen: var(--color-accent-soft);
+  --sidebar-active-hot: #ff1f4b;
 
   /* relative heights */
   --spacing-height-offset: 10vh;
