@@ -1,12 +1,12 @@
 generator client {
-  provider = "prisma-client"
-  output = "../src/generated/prisma"
-  moduleFormat = "esm" 
+  provider = "prisma-client-js"
+  moduleFormat = "esm"
 }
 
 datasource db {
   provider = "sqlite"
 }
+
 
 /* =====================
    USER

@@ -1,13 +1,10 @@
 import { defineConfig } from "@prisma/config";
 import dotenv from "dotenv";
 
-dotenv.config(); 
+dotenv.config();
 
 export default defineConfig({
   datasource: {
-    db: {
-      provider: "sqlite",
-      url: process.env.DATABASE_URL || "file:./database/transcendence.db",
-    }
-  }
+    url: process.env.DATABASE_URL,
+  },
 });
