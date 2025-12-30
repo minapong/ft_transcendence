@@ -1,41 +1,85 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { joinQueue, getActiveMatches, getQueue, Player, finishMatch } from "../logic/matchmakingManager";
+import {
+  joinQueue,
+  getActiveMatches,
+  getQueue,
+  finishMatch,
+  startMatch,
+  getActiveMatchForUser,
+} from "../logic/matchmakingManager";
 
-interface JoinQueueBody {
-	id: string;
-	name: string;
+// Define the body types for the requests
+export interface JoinQueueBody {
+  userId: number; // User's ID
+  username: string; // Username of the player
 }
 
-interface FinishMatchBody {
-	matchId: string;
-	winnerId: number;
+export interface StartMatchBody {
+  matchId: string; // ID of the match to start
+}
+
+export interface FinishMatchBody {
+  matchId: string; // ID of the match to finish
+  winnerId: number; // ID of the winner
 }
 
 export async function registerMatchmakingRoutes(server: FastifyInstance) {
-	server.post("/api/matchmaking/join", async (req: FastifyRequest<{ Body: JoinQueueBody }>, reply: FastifyReply) => {
-		const { id, name } = req.body;
-		if (!id || !name) return reply.code(400).send({ error: "Missing player info" });
 
-		const result = joinQueue({ id, name } as Player);
-		reply.send(result);
-	});
+  // Route: join queue
+  server.post(
+    "/api/matchmaking/join",
+    async (
+      req: FastifyRequest<{ Body: JoinQueueBody }>, 
+      reply: FastifyReply
+    ) => {
+      const { userId, username } = req.body;
+      reply.send(joinQueue({ id: userId, name: username }));
+    }
+  );
 
-	server.get("/api/matchmaking/active", async (_req, reply) => reply.send(getActiveMatches()));
-	server.get("/api/matchmaking/queue", async (_req, reply) => reply.send(getQueue()));
+  // Route: get active match for user
+  server.get(
+    "/api/matchmaking/active/:userId",
+    async (
+      req: FastifyRequest<{ Params: { userId: string } }>,
+      reply: FastifyReply
+    ) => {
+      const userId = Number(req.params.userId);
+      reply.send(getActiveMatchForUser(userId));
+    }
+  );
 
-	server.post("/api/matchmaking/finish", async (req: FastifyRequest<{ Body: FinishMatchBody }>, reply: FastifyReply) => {
-		const { matchId, winnerId } = req.body;
+  // Route: start match
+  server.post(
+    "/api/matchmaking/start",
+    async (
+      req: FastifyRequest<{ Body: StartMatchBody }>,
+      reply: FastifyReply
+    ) => {
+      const { matchId } = req.body;
+      reply.send(startMatch(matchId));
+    }
+  );
 
-		if (!matchId || !winnerId) {
-			return reply.code(400).send({ error: "Missing matchId or winnerId" });
-		}
+  // Route: finish match
+  server.post(
+    "/api/matchmaking/finish",
+    async (
+      req: FastifyRequest<{ Body: FinishMatchBody }>, 
+      reply: FastifyReply
+    ) => {
+      const { matchId, winnerId } = req.body;
+      reply.send(finishMatch(matchId, winnerId));
+    }
+  );
 
-		try {
-			const result = finishMatch(matchId, winnerId);
-			reply.send(result);
-		} catch (err: any) {
-			reply.code(400).send({ error: err.message });
-		}
-	});
-	
+  // Route: get matchmaking queue (no body, no params)
+  server.get("/api/matchmaking/queue", async (_req: FastifyRequest, reply: FastifyReply) => {
+    reply.send(getQueue());
+  });
+
+  // Route: get all active matches (no body, no params)
+  server.get("/api/matchmaking/all", async (_req: FastifyRequest, reply: FastifyReply) => {
+    reply.send(getActiveMatches());
+  });
 }
