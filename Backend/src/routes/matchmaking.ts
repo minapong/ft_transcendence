@@ -2,84 +2,112 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
   joinQueue,
   getActiveMatches,
-  getQueue,
-  finishMatch,
-  startMatch,
   getActiveMatchForUser,
+  startMatch,
+  finishMatch,
 } from "../logic/matchmakingManager";
 
-// Define the body types for the requests
+// ─────────────────────────────────────────────
+// Request body types
+// ─────────────────────────────────────────────
 export interface JoinQueueBody {
-  userId: number; // User's ID
-  username: string; // Username of the player
+  userId: number;
+  username: string;
 }
 
 export interface StartMatchBody {
-  matchId: string; // ID of the match to start
+  matchId: string;
 }
 
 export interface FinishMatchBody {
-  matchId: string; // ID of the match to finish
-  winnerId: number; // ID of the winner
+  matchId: string;
+  winnerId: number;
 }
 
+// ─────────────────────────────────────────────
+// Routes
+// ─────────────────────────────────────────────
 export async function registerMatchmakingRoutes(server: FastifyInstance) {
 
-  // Route: join queue
+  // Join queue
   server.post(
     "/api/matchmaking/join",
-    async (
-      req: FastifyRequest<{ Body: JoinQueueBody }>, 
-      reply: FastifyReply
-    ) => {
+    async (req: FastifyRequest<{ Body: JoinQueueBody }>, reply: FastifyReply) => {
       const { userId, username } = req.body;
-      reply.send(joinQueue({ id: userId, name: username }));
+      try {
+        const result = joinQueue({ id: userId, name: username });
+        reply.send(result);
+      } catch (err: any) {
+        console.error("Error joining queue:", err);
+        reply.status(400).send({ error: err.message });
+      }
     }
   );
 
-  // Route: get active match for user
+  // Get active match for a user
   server.get(
     "/api/matchmaking/active/:userId",
-    async (
-      req: FastifyRequest<{ Params: { userId: string } }>,
-      reply: FastifyReply
-    ) => {
-      const userId = Number(req.params.userId);
-      reply.send(getActiveMatchForUser(userId));
+    async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
+      try {
+        const userId = Number(req.params.userId);
+        const match = getActiveMatchForUser(userId);
+        if (!match) {
+          return reply.status(404).send({ error: "No active match found for user" });
+        }
+        reply.send(match);
+      } catch (err: any) {
+        console.error("Error getting active match:", err);
+        reply.status(400).send({ error: err.message });
+      }
     }
   );
 
-  // Route: start match
+  // Start match
   server.post(
     "/api/matchmaking/start",
-    async (
-      req: FastifyRequest<{ Body: StartMatchBody }>,
-      reply: FastifyReply
-    ) => {
-      const { matchId } = req.body;
-      reply.send(startMatch(matchId));
+    async (req: FastifyRequest<{ Body: StartMatchBody }>, reply: FastifyReply) => {
+      try {
+        const { matchId } = req.body;
+        if (!matchId) return reply.status(400).send({ error: "matchId is required" });
+
+        const match = startMatch(matchId);
+        if (!match) return reply.status(404).send({ error: "Match not found" });
+
+        reply.send(match);
+      } catch (err: any) {
+        console.error("Error starting match:", err);
+        reply.status(400).send({ error: err.message });
+      }
     }
   );
 
-  // Route: finish match
+  // Finish match
   server.post(
     "/api/matchmaking/finish",
-    async (
-      req: FastifyRequest<{ Body: FinishMatchBody }>, 
-      reply: FastifyReply
-    ) => {
-      const { matchId, winnerId } = req.body;
-      reply.send(finishMatch(matchId, winnerId));
+    async (req: FastifyRequest<{ Body: FinishMatchBody }>, reply: FastifyReply) => {
+      try {
+        const { matchId, winnerId } = req.body;
+        if (!matchId || winnerId === undefined) {
+          return reply.status(400).send({ error: "matchId and winnerId are required" });
+        }
+
+        const result = finishMatch(matchId, winnerId);
+        reply.send(result);
+      } catch (err: any) {
+        console.error("Error finishing match:", err);
+        reply.status(400).send({ error: err.message });
+      }
     }
   );
 
-  // Route: get matchmaking queue (no body, no params)
-  server.get("/api/matchmaking/queue", async (_req: FastifyRequest, reply: FastifyReply) => {
-    reply.send(getQueue());
-  });
-
-  // Route: get all active matches (no body, no params)
-  server.get("/api/matchmaking/all", async (_req: FastifyRequest, reply: FastifyReply) => {
-    reply.send(getActiveMatches());
+  // Get all active matches (debug/admin)
+  server.get("/api/matchmaking/all", async (_req, reply) => {
+    try {
+      const matches = getActiveMatches();
+      reply.send(matches);
+    } catch (err: any) {
+      console.error("Error getting all active matches:", err);
+      reply.status(400).send({ error: err.message });
+    }
   });
 }

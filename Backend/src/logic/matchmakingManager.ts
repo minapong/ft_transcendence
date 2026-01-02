@@ -1,169 +1,162 @@
 import crypto from "crypto";
-import { recordConnect4Game } from "./matchmakingRepo";
+import {
+  insertActiveMatch,
+  updateActiveMatchStatus,
+  deleteActiveMatch,
+  getActiveMatchDTO,
+  getActiveMatchById,
+  recordConnect4Game,
+  enqueuePlayer,
+  dequeueTwoPlayers,
+  isUserQueued,
+  removeFromQueue,
+  ActiveMatchDTO,
+  MatchStatus,
+  Player,
+} from "./matchmakingRepo";
 
-export interface Player {
-  id: number;
-  name: string;
-}
-
-export type MatchStatus = "matched" | "started" | "finished" | "abandoned";
-
-export interface ActiveMatch {
-  id: string;
-  game: "connect4";
-  p1: Player;
-  p2: Player;
-  createdAt: number;
-  status: MatchStatus;
-  startedAt?: number;
-  timeout?: NodeJS.Timeout;
-}
-
-const queue: Player[] = [];
-const activeMatches = new Map<string, ActiveMatch>();
-const activeGameByUser = new Map<number, string>();
-
+// ─────────────────────────────────────────────
+// In-memory state for auto-abandon timeouts only
+// ─────────────────────────────────────────────
+const activeMatchTimeouts = new Map<string, NodeJS.Timeout>();
 const MATCH_START_TIMEOUT = 2 * 60 * 1000; // 2 minutes
 
 // ─────────────────────────────────────────────
-// Queue
+// Join Queue
 // ─────────────────────────────────────────────
-
 export function joinQueue(player: Player) {
-  if (activeGameByUser.has(player.id)) {
-    return { status: "already_active" as const };
-  }
+  // 1 Check if player already has an active match (DB-backed)
+  const existing = getActiveMatchDTO(player.id);
+  if (existing) return { status: "already_active" as const, match: existing };
 
-  if (queue.find(p => p.id === player.id)) {
+  // 2 Check if player is already queued
+  if (isUserQueued(player.id, "connect4")) return { status: "waiting" as const };
+
+  // 3 Enqueue player
+  enqueuePlayer(player.id, "connect4");
+
+  // 4 Attempt to match two players
+  const pair = dequeueTwoPlayers("connect4");
+  if (!pair) return { status: "waiting" as const };
+
+  const [p1Id, p2Id] = pair;
+
+  // Ensure this request is one of the matched
+  if (player.id !== p1Id && player.id !== p2Id) {
+    enqueuePlayer(player.id, "connect4");
     return { status: "waiting" as const };
   }
 
-  queue.push(player);
+  const p1: Player = p1Id === player.id ? player : { id: p1Id, name: "Player" };
+  const p2: Player = p2Id === player.id ? player : { id: p2Id, name: "Player" };
 
-  if (queue.length < 2) {
-    return { status: "waiting" as const };
-  }
-
-  const p1 = queue.shift()!;
-  const p2 = queue.shift()!;
-
-  const match: ActiveMatch = {
+  const match: ActiveMatchDTO = {
     id: crypto.randomUUID(),
     game: "connect4",
     p1,
     p2,
-    createdAt: Date.now(),
+    createdAt: Date.now(), // number
     status: "matched",
   };
 
-  // Timeout if not started
-  match.timeout = setTimeout(() => {
+  // Persist match in DB
+  insertActiveMatch(match);
+
+  // Set up auto-abandon timeout
+  const timeout = setTimeout(() => {
     abandonMatch(match.id, null);
   }, MATCH_START_TIMEOUT);
+  activeMatchTimeouts.set(match.id, timeout);
 
-  activeMatches.set(match.id, match);
-  activeGameByUser.set(p1.id, match.id);
-  activeGameByUser.set(p2.id, match.id);
-
-  return {
-    status: "matched" as const,
-    match,
-  };
+  return { status: "matched" as const, match };
 }
 
 // ─────────────────────────────────────────────
-// Queries
+// Get Active Match for a User
 // ─────────────────────────────────────────────
+export function getActiveMatchForUser(userId: number): ActiveMatchDTO | null {
+  const match = getActiveMatchDTO(userId);
+  if (!match) return null;
 
-export function getActiveMatchForUser(userId: number) {
-  const matchId = activeGameByUser.get(userId);
-  if (!matchId) return null;
-  return activeMatches.get(matchId) || null;
-}
-
-export function getActiveMatches() {
-  return Array.from(activeMatches.values());
-}
-
-export function getQueue() {
-  return queue;
-}
-
-// ─────────────────────────────────────────────
-// Start match
-// ─────────────────────────────────────────────
-
-export function startMatch(matchId: string) {
-  const match = activeMatches.get(matchId);
-  if (!match) throw new Error("Match not found");
-  if (match.status !== "matched") return match;
-
-  if (match.timeout) {
-    clearTimeout(match.timeout);
-    match.timeout = undefined;
+  // Ensure timeout exists if match is still waiting
+  if (!activeMatchTimeouts.has(match.id) && match.status === "matched") {
+    const timeout = setTimeout(() => {
+      abandonMatch(match.id, null);
+    }, MATCH_START_TIMEOUT);
+    activeMatchTimeouts.set(match.id, timeout);
   }
-
-  match.status = "started";
-  match.startedAt = Date.now();
 
   return match;
 }
 
 // ─────────────────────────────────────────────
-// Finish match
+// Start Match
 // ─────────────────────────────────────────────
+export function startMatch(matchId: string) {
+  const match = getActiveMatchById(matchId);
+  if (!match) throw new Error("Match not found");
+  if (match.status !== "matched") return match;
 
+  // Clear timeout
+  const timeout = activeMatchTimeouts.get(match.id);
+  if (timeout) {
+    clearTimeout(timeout);
+    activeMatchTimeouts.delete(match.id);
+  }
+
+  match.status = "started";
+  match.startedAt = Date.now(); // number
+
+  updateActiveMatchStatus(match.id, "started");
+
+  return match;
+}
+
+// ─────────────────────────────────────────────
+// Finish Match
+// ─────────────────────────────────────────────
 export function finishMatch(matchId: string, winnerId: number) {
-  const match = activeMatches.get(matchId);
+  const match = getActiveMatchById(matchId);
   if (!match) throw new Error("Match not found");
 
   match.status = "finished";
+  recordConnect4Game(match.p1.id, match.p2.id, winnerId);
 
-  recordConnect4Game(
-    match.p1.id,
-    match.p2.id,
-    winnerId
-  );
+  cleanupMatch(match.id);
 
-  cleanupMatch(matchId);
   return { success: true };
 }
 
 // ─────────────────────────────────────────────
-// Abandon
+// Abandon Match
 // ─────────────────────────────────────────────
-
 export function abandonMatch(matchId: string, leaverId: number | null) {
-  const match = activeMatches.get(matchId);
+  const match = getActiveMatchById(matchId);
   if (!match) return;
 
   match.status = "abandoned";
 
   let winnerId: number | null = null;
-
   if (leaverId !== null) {
     winnerId = leaverId === match.p1.id ? match.p2.id : match.p1.id;
   }
 
   if (winnerId !== null) {
-    recordConnect4Game(
-      match.p1.id,
-      match.p2.id,
-      winnerId
-    );
+    recordConnect4Game(match.p1.id, match.p2.id, winnerId);
   }
 
-  cleanupMatch(matchId);
+  cleanupMatch(match.id);
 }
 
+// ─────────────────────────────────────────────
+// Cleanup helper
+// ─────────────────────────────────────────────
 function cleanupMatch(matchId: string) {
-  const match = activeMatches.get(matchId);
-  if (!match) return;
+  // Clear timeout
+  const timeout = activeMatchTimeouts.get(matchId);
+  if (timeout) clearTimeout(timeout);
+  activeMatchTimeouts.delete(matchId);
 
-  if (match.timeout) clearTimeout(match.timeout);
-
-  activeGameByUser.delete(match.p1.id);
-  activeGameByUser.delete(match.p2.id);
-
-  activeMatches.delete(matchId);
+  // Remove from DB
+  deleteActiveMatch(matchId);
 }
