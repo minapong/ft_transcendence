@@ -1,0 +1,15 @@
+# pack-refs with: peeled fully-peeled sorted 
+39c0ff764b37820169f8af2023ca956a4c17d400 refs/remotes/origin/2P-Pong
+d6620084e5454fec5ad2f06382bf608d10f940dd refs/remotes/origin/4P-Pong
+2d632411b60a327d0fa16edd7e0c0cec91efc6d4 refs/remotes/origin/Dev
+6d32b69a7d4801e188df26281e45025ef228ebe2 refs/remotes/origin/Fixed-Natalia-PrismaDB
+8e39f853830063a7e7d74e4b07683a7713652c1f refs/remotes/origin/Natalia-CICD
+0ef0220a54fdbcccd01f4e88c012a920e679efd9 refs/remotes/origin/Natalia-DB
+08f45cb7ee512c4c1884786b38afdd8439657446 refs/remotes/origin/Natalia-PrismaDB
+8b1935bac83484cc0fbd499a3173465e55f6483a refs/remotes/origin/Natalia-SignUp
+83eadf8eb967433112a01341be0f30a81f008ace refs/remotes/origin/Natalia-miniPrisma
+97282b3f2929bc048955ef4cc0d700a8a99bc3d4 refs/remotes/origin/SPA-reactor
+a5f5876d285c7a01bde7086aa14b011dd6a2db18 refs/remotes/origin/dropdown_fix
+509fcb81a15d4d737ac3dab8be95b7e1f29e732b refs/remotes/origin/main
+2d632411b60a327d0fa16edd7e0c0cec91efc6d4 refs/remotes/origin/matchmaking_addition
+c53c3a1159ef88025130ea91aeab3ee896796480 refs/remotes/origin/mvp-1

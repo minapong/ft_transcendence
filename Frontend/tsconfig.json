@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client", "node"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "jsx": "preserve",
+    "jsxImportSource": "reactor",
+
+    "baseUrl": ".",                      
+    "paths": {
+      "@/*": ["src/*"],
+      "Reactor": ["src/Reactor/index.tsx"],
+      "Reactor/*": ["src/Reactor/*"],
+      "components": ["src/components"],
+      "layouts": ["src/layouts"],
+      "pages": ["src/pages"]
+    }
+  },
+
+  "include": ["src"]
+}
