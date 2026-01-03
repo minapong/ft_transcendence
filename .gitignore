@@ -1,8 +1,31 @@
-**/node_modules/
-**/*.env.*
-**/dist/
-**/build/
-**/.env
-**/.DS_Store
 
+# Node dependencies
+node_modules/
 
+# Environment files
+.env
+Backend/.env
+Frontend/.env
+.env.*
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+
+# SQLite database
+*.sqlite
+Backend/database/*
+!Backend/database/Readme.md
+
+# Certificates
+certs/
+*.pem
+*.key
+
+# System / Editor files
+.DS_Store
+.vscode/
+.idea/

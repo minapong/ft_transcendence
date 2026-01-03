@@ -1,0 +1,20 @@
+@theme {
+  --color-primary: #ffffff;
+  --color-accent: #22d3ee;
+  --color-accent-soft: #0093d7;
+  --color-border-soft: rgba(255, 255, 255, 0.05);
+  --color-border-strong: rgba(34, 211, 238, 0.4);
+  
+  --color-navpanel: #00143c;
+
+  /* relative heights */
+  --spacing-height-offset: 10vh;
+  --spacing-body-screenHeight: 90vh;
+  --spacing-width-offset:15vw;
+  --spacing-width-screen:85vw;
+
+  /* gradeint */
+  --color-start:#0f172a;
+  --color-mid: #0b1224;
+  --color-end:#0c1428;
+} 
