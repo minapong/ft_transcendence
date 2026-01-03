@@ -42,7 +42,7 @@ export default function Sidebar() {
         overflow-hidden relative
         pt-12 sm:pt-14
         transition-[width,padding] duration-300 ease-out
-        ${open ? "w-56 sm:w-64 lg:w-72 px-4 sm:px-6" : "w-12 sm:w-14 px-2 sm:px-3"}
+        ${open ? "w-56 sm:w-64 lg:w-72 px-4 sm:px-6" : "w-12 sm:w-16 px-2 sm:px-10"}
       `}
       ref={sidebarRef}
     >

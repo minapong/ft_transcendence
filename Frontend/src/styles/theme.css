@@ -18,7 +18,7 @@
   --sidebar-link-border: var(--color-border-soft);
   --sidebar-link-text: var(--color-accent);
   --sidebar-link-hover-bg: var(--color-accent-soft);
-  --sidebar-link-hover-text: #000000;
+--sidebar-link-hover-text: #ffffff;
   --sidebar-active-text: var(--color-primary);
   --sidebar-active-glow: var(--color-accent);
   --sidebar-active-sheen: var(--color-accent-soft);
