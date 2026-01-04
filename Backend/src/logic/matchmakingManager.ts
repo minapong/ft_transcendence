@@ -4,52 +4,67 @@ import {
   updateActiveMatchStatus,
   deleteActiveMatch,
   getActiveMatchDTO,
-  getActiveMatchById,
+  getActiveMatchFull,
   recordConnect4Game,
   enqueuePlayer,
   dequeueTwoPlayers,
   isUserQueued,
-  removeFromQueue,
   isUserValid,
   ActiveMatchDTO,
-  MatchStatus,
   Player,
+  cleanupQueue,
+  getExpiredActiveMatches,
 } from "./matchmakingRepo";
 
 // ─────────────────────────────────────────────
-// In-memory state for auto-abandon timeouts only
+// Time constants (in seconds)
 // ─────────────────────────────────────────────
-const activeMatchTimeouts = new Map<string, NodeJS.Timeout>();
-const MATCH_START_TIMEOUT = 2 * 60 * 1000; // 2 minutes
+const MAX_QUEUE_TIME_SECONDS = 10 * 60;        // 10 minutes in queue
+const MAX_MATCHED_TIME_SECONDS = 5 * 60;       // 5 minutes waiting to start
+const MAX_STARTED_TIME_SECONDS = 5 * 60;       // 5 minutes max game duration
+
+// ─────────────────────────────────────────────
+// Helper: Clean up expired matches and queue
+// ─────────────────────────────────────────────
+function cleanupExpiredMatchesAndQueue() {
+  // Clean expired entries from queue
+  cleanupQueue("connect4", MAX_QUEUE_TIME_SECONDS);
+
+  // Clean expired active matches
+  const expiredMatchIds = getExpiredActiveMatches(
+    MAX_MATCHED_TIME_SECONDS,
+    MAX_STARTED_TIME_SECONDS
+  );
+
+  for (const matchId of expiredMatchIds) {
+    deleteActiveMatch(matchId);
+  }
+}
 
 // ─────────────────────────────────────────────
 // Join Queue
 // ─────────────────────────────────────────────
 export function joinQueue(player: Player) {
-  // 1 Check if player already has an active match (DB-backed)
   if (!player?.id) {
     throw new Error("joinQueue called without valid player.id");
   }
   if (!isUserValid(player.id)) {
     throw new Error(`User ${player.id} does not exist`);
   }
+
   const existing = getActiveMatchDTO(player.id);
   if (existing) return { status: "already_active" as const, match: existing };
 
-  // 2 Check if player is already queued
   if (isUserQueued(player.id, "connect4")) return { status: "waiting" as const };
 
-  // 3 Enqueue player
   enqueuePlayer(player.id, "connect4");
-  if (!isUserQueued(player.id, "connect4")) return { status: "idle" as const }; //Check if user was indeed queued
+  if (!isUserQueued(player.id, "connect4")) return { status: "idle" as const };
 
-  // 4 Attempt to match two players
-  const pair = dequeueTwoPlayers("connect4");
+  const pair = dequeueTwoPlayers("connect4", MAX_QUEUE_TIME_SECONDS);
   if (!pair) return { status: "waiting" as const };
 
   const [p1Id, p2Id] = pair;
 
-  // Ensure this request is one of the matched
   if (player.id !== p1Id && player.id !== p2Id) {
     enqueuePlayer(player.id, "connect4");
     return { status: "waiting" as const };
@@ -63,18 +78,11 @@ export function joinQueue(player: Player) {
     game: "connect4",
     p1,
     p2,
-    createdAt: Date.now(), // number
+    createdAt: Date.now(),
     status: "matched",
   };
 
-  // Persist match in DB
   insertActiveMatch(match);
-
-  // Set up auto-abandon timeout
-  const timeout = setTimeout(() => {
-    abandonMatch(match.id, null);
-  }, MATCH_START_TIMEOUT);
-  activeMatchTimeouts.set(match.id, timeout);
 
   return { status: "matched" as const, match };
 }
@@ -83,96 +91,50 @@ export function joinQueue(player: Player) {
 // Get Active Match for a User
 // ─────────────────────────────────────────────
 export function getActiveMatchForUser(userId: number): ActiveMatchDTO | null {
+  cleanupExpiredMatchesAndQueue();
+
   const match = getActiveMatchDTO(userId);
-  if (!match) return null;
-
-  // Ensure timeout exists if match is still waiting
-  if (!activeMatchTimeouts.has(match.id) && match.status === "matched") {
-    const timeout = setTimeout(() => {
-      abandonMatch(match.id, null);
-    }, MATCH_START_TIMEOUT);
-    activeMatchTimeouts.set(match.id, timeout);
-  }
-
-  return match;
+  return match ?? null;
 }
+
 // ─────────────────────────────────────────────
 // Check if user is Queued
 // ─────────────────────────────────────────────
-export function isQueued(user_id: number) {
-  if (isUserQueued(user_id, "connect4"))
-      return (true);
-  return(false);
+export function isQueued(user_id: number): boolean {
+  cleanupExpiredMatchesAndQueue();
+
+  return isUserQueued(user_id, "connect4");
 }
 
 // ─────────────────────────────────────────────
 // Start Match
 // ─────────────────────────────────────────────
 export function startMatch(matchId: string) {
-  const match = getActiveMatchById(matchId);
+  const match = getActiveMatchFull({ matchId });
   if (!match) throw new Error("Match not found");
   if (match.status !== "matched") return match;
 
-  // Clear timeout
-  const timeout = activeMatchTimeouts.get(match.id);
-  if (timeout) {
-    clearTimeout(timeout);
-    activeMatchTimeouts.delete(match.id);
-  }
-
   match.status = "started";
-  match.startedAt = Date.now(); // number
+  match.startedAt = Date.now();
 
-  updateActiveMatchStatus(match.id, "started");
+  updateActiveMatchStatus(matchId, "started");
 
   return match;
 }
 
 // ─────────────────────────────────────────────
-// Finish Match
+// Finish Match (normal completion with winner)
 // ─────────────────────────────────────────────
 export function finishMatch(matchId: string, winnerId: number) {
-  const match = getActiveMatchById(matchId);
-  if (!match) throw new Error("Match not found");
+  const match = getActiveMatchFull({ matchId });
+// If match no longer exists (e.g. timed out and cleaned up), we ignore
+  if (!match) {
+    return { success: true, alreadyCleaned: true };
+  }
 
-  match.status = "finished";
   recordConnect4Game(match.p1.id, match.p2.id, winnerId);
 
-  cleanupMatch(match.id);
+  deleteActiveMatch(matchId);
 
   return { success: true };
-}
-
-// ─────────────────────────────────────────────
-// Abandon Match
-// ─────────────────────────────────────────────
-export function abandonMatch(matchId: string, leaverId: number | null) {
-  const match = getActiveMatchById(matchId);
-  if (!match) return;
-
-  match.status = "abandoned";
-
-  let winnerId: number | null = null;
-  if (leaverId !== null) {
-    winnerId = leaverId === match.p1.id ? match.p2.id : match.p1.id;
-  }
-
-  if (winnerId !== null) {
-    recordConnect4Game(match.p1.id, match.p2.id, winnerId);
-  }
-
-  cleanupMatch(match.id);
-}
-
-// ─────────────────────────────────────────────
-// Cleanup helper
-// ─────────────────────────────────────────────
-function cleanupMatch(matchId: string) {
-  // Clear timeout
-  const timeout = activeMatchTimeouts.get(matchId);
-  if (timeout) clearTimeout(timeout);
-  activeMatchTimeouts.delete(matchId);
-
-  // Remove from DB
-  deleteActiveMatch(matchId);
 }

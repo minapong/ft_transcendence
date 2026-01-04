@@ -1,10 +1,19 @@
 import { useEffect, useState, useRef } from "Reactor";
 import { navigate } from "Reactor";
 
-const mockUser = { id: 3, name: "Player1" };
+const mockUser = { id: 3, name: "Player2" };
 
-type Player = { id: number; name: string };
-type Match = { id: string; p1: Player; p2: Player; status: "matched" | "started" | "finished" };
+type Player = { 
+  id: number; 
+  name: string 
+};
+
+type Match = { 
+  id: string; 
+  p1: Player; 
+  p2: Player; 
+  status: "matched" | "started" | "finished" 
+};
 
 export default function Connect4Single() {
   const [status, setStatus] = useState<"loading" | "idle" | "waiting" | "matched">("loading");
@@ -153,7 +162,15 @@ export default function Connect4Single() {
               Start Game
             </button>
           )}
-          {match.status === "started" && <p className="text-xl">Game started! You can play now.</p>}
+          {match.status === "started" && match.p1.id === mockUser.id && 
+            <p className="text-xl">Game started! You can play now.</p> && (
+            <button onClick={startGame} className="bg-green-500 px-6 py-3 rounded text-xl">
+              Re-Start Game
+            </button>
+          )}
+          {match.status === "started" && match.p1.id !== mockUser.id && 
+            <p className="text-xl">Game started! You can play now on Host Session.</p>
+          }
         </div>
       )}
     </div>

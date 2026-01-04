@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
   joinQueue,
-  getActiveMatches,
   getActiveMatchForUser,
   startMatch,
   finishMatch,
@@ -107,16 +106,4 @@ export async function registerMatchmakingRoutes(server: FastifyInstance) {
       }
     }
   );
-
-
-  // Get all active matches (debug/admin)
-  server.get("/api/matchmaking/all", async (_req, reply) => {
-    try {
-      const matches = getActiveMatches();
-      reply.send(matches);
-    } catch (err: any) {
-      console.error("Error getting all active matches:", err);
-      reply.status(400).send({ error: err.message });
-    }
-  });
 }

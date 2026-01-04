@@ -18,56 +18,55 @@ export default function Connect4Game() {
 
   const { matchId, p1, p2 } = navState;
 
-  useEffect(() => {
-    const overlay = document.getElementById("winnerOverlay")!;
-    const text = document.getElementById("winnerText")!;
-    let winTimeout: number | null = null;
+useEffect(() => {
+  const overlay = document.getElementById("winnerOverlay")!;
+  const text = document.getElementById("winnerText")!;
+  let winTimeout: number | null = null;
 
-    // Finish match callback
-    async function onFinish(winnerId: number) {
-      try {
-        const res = await fetch("http://localhost:3000/api/matchmaking/finish", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ matchId, winnerId }),
-        });
+  // end the finish request without waiting or blocking UI
+  const finishMatch = (winnerId: number) => {
+    fetch("http://localhost:3000/api/matchmaking/finish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId, winnerId }),
+      keepalive: true, // allows request to complete even if page unloads
+    })
+      .catch((err) => {
+        // Silently ignore network errors
+        console.warn("[Connect4] Failed to send finishMatch (network/offline):", err);
+      });
+  };
 
-        if (!res.ok) {
-          const err = await res.json();
-          console.error("[Connect4] error finishing match:", err);
-        }
-
-      } catch (err) {
-        console.error("[Connect4] fetch error:", err);
-      }
+  const cleanup = connect4Logic((winner) => {
+    // Show winner message
+    if (winner === "R") {
+      text.textContent = `${p1.name} Wins! 🏆`;
+      finishMatch(p1.id);
+    } else if (winner === "Y") {
+      text.textContent = `${p2.name} Wins! 🏆`;
+      finishMatch(p2.id);
+    } else {
+      text.textContent = "Draw!";
     }
 
-    const cleanup = connect4Logic((winner) => {
-      text.textContent =
-        winner === "R" ? `${p1.name} Wins! 🏆` :
-        winner === "Y" ? `${p2.name} Wins! 🏆` :
-        "Draw!";
-      overlay.classList.remove("hidden");
+    overlay.classList.remove("hidden");
 
-      // Call backend to finish match
-      if (winner === "R") onFinish(p1.id);
-      else if (winner === "Y") onFinish(p2.id);
+    // navigate after 2 seconds — no dependency on server response
+    winTimeout = window.setTimeout(() => {
+      navigate("/connect4_single", { replace: true });
+    }, 2000);
+  });
 
-      winTimeout = window.setTimeout(() => {
-        navigate("/connect4_single", { replace: true });
-      }, 2000);
-    });
+  // Hide overlay on mount
+  overlay.classList.add("hidden");
 
-    overlay.classList.add("hidden");
-
-    return () => {
-      if (winTimeout !== null) {
-        clearTimeout(winTimeout);
-        winTimeout = null;
-      }
-      cleanup();
-    };
-  }, [matchId, p1, p2]);
+  return () => {
+    if (winTimeout !== null) {
+      clearTimeout(winTimeout);
+    }
+    cleanup();
+  };
+}, [matchId, p1, p2]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center py-6">

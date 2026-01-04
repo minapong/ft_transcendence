@@ -15,8 +15,6 @@ if (!fs.existsSync(dbDir)) {
 
 const db = new Database(dbPath);
 
-const QUEUE_TIMEOUT_SECONDS = 240;
-
 export type MatchStatus = "matched" | "started" | "finished" | "abandoned";
 
 export interface Player {
@@ -31,33 +29,32 @@ export interface ActiveMatchDTO {
   p2: { id: number; name: string };
   status: MatchStatus;
   createdAt: number;           // epoch ms
-  startedAt?: number;           // epoch ms
-  timeout?: NodeJS.Timeout;     // in-memory only
+  startedAt?: number;          // epoch ms
+  timeout?: NodeJS.Timeout;    // in-memory only
 }
 
 // ─────────────────────────────────────────────
 // Queue persistence
 // ─────────────────────────────────────────────
 
-export function cleanupQueue(game: string): void {
+// Accepts timeout in seconds
+export function cleanupQueue(game: string, timeoutSeconds: number): void {
   db.prepare(`
     DELETE FROM matchmaking_queue
     WHERE game_name = ?
       AND joined_at < datetime('now', ?)
-  `).run(game, `-${QUEUE_TIMEOUT_SECONDS} seconds`);
+  `).run(game, `-${timeoutSeconds} seconds`);
 }
 
 export function enqueuePlayer(userId: number, game: string): void {
-  // cleanupQueue(game);
-
   db.prepare(`
     INSERT OR REPLACE INTO matchmaking_queue (user_id, game_name, joined_at)
     VALUES (?, ?, datetime('now'))
   `).run(userId, game);
 }
 
-export function dequeueTwoPlayers(game: string): [number, number] | null {
-  cleanupQueue(game);
+export function dequeueTwoPlayers(game: string, queueTimeoutSeconds: number): [number, number] | null {
+  cleanupQueue(game, queueTimeoutSeconds);
 
   const rows = db.prepare(`
     SELECT user_id
@@ -114,7 +111,6 @@ export function recordConnect4Game(
   }
 
   const insert = db.transaction(() => {
-    // 1. Create finished match
     const matchStmt = db.prepare(`
       INSERT INTO matches (game_name, winner_id, finished_at)
       VALUES ('connect4', ?, datetime('now'))
@@ -122,7 +118,6 @@ export function recordConnect4Game(
     const matchInfo = matchStmt.run(winnerId);
     const matchId = matchInfo.lastInsertRowid as number;
 
-    // 2. Insert players
     const mpStmt = db.prepare(`
       INSERT INTO match_players (match_id, user_id, is_winner)
       VALUES (?, ?, ?)
@@ -137,7 +132,6 @@ export function recordConnect4Game(
   return insert();
 }
 
-// Insert an active match into DB
 export function insertActiveMatch(match: ActiveMatchDTO) {
   const stmt = db.prepare(`
     INSERT INTO active_matches
@@ -147,7 +141,6 @@ export function insertActiveMatch(match: ActiveMatchDTO) {
   stmt.run(match.id, match.game, match.p1.id, match.p2.id, match.status);
 }
 
-// Update match status
 export function updateActiveMatchStatus(matchId: string, status: MatchStatus) {
   const stmt = db.prepare(`
     UPDATE active_matches
@@ -158,7 +151,6 @@ export function updateActiveMatchStatus(matchId: string, status: MatchStatus) {
   stmt.run(status, status, matchId);
 }
 
-// Delete finished/abandoned match
 export function deleteActiveMatch(matchId: string) {
   db.prepare(`
     DELETE FROM active_matches
@@ -166,7 +158,6 @@ export function deleteActiveMatch(matchId: string) {
   `).run(matchId);
 }
 
-// check if a user exists
 export function isUserValid(userId: number): boolean {
   const row = db.prepare(`
     SELECT 1 FROM users WHERE id = ?
@@ -175,8 +166,55 @@ export function isUserValid(userId: number): boolean {
   return !!row;
 }
 
-// Fetch active match for a user
-export function getActiveMatchDTO(userId: number): ActiveMatchDTO | null {
+
+
+// ─────────────────────────────────────────────
+// New: Get expired active matches
+// ─────────────────────────────────────────────
+export function getExpiredActiveMatches(
+  maxMatchedSeconds: number,
+  maxStartedSeconds: number
+): string[] {
+  const matched = db
+    .prepare(`
+      SELECT match_id FROM active_matches
+      WHERE status = 'matched'
+        AND created_at < datetime('now', ?)
+    `)
+    .all(`-${maxMatchedSeconds} seconds`) as { match_id: string }[];
+
+  const started = db
+    .prepare(`
+      SELECT match_id FROM active_matches
+      WHERE status = 'started'
+        AND started_at < datetime('now', ?)
+    `)
+    .all(`-${maxStartedSeconds} seconds`) as { match_id: string }[];
+
+  return [...matched.map(r => r.match_id), ...started.map(r => r.match_id)];
+}
+
+// ─────────────────────────────────────────────
+// Unified: Get active match (by match_id OR by user_id) with full player names
+// ─────────────────────────────────────────────
+export function getActiveMatchFull(
+  params: { matchId?: string; userId?: number }
+): ActiveMatchDTO | null {
+  if (!params.matchId && !params.userId) {
+    throw new Error("Must provide either matchId or userId");
+  }
+
+  let whereClause = "";
+  const queryParams: any[] = [];
+
+  if (params.matchId) {
+    whereClause = "WHERE am.match_id = ?";
+    queryParams.push(params.matchId);
+  } else if (params.userId) {
+    whereClause = "WHERE (am.p1_id = ? OR am.p2_id = ?) AND am.status IN ('matched', 'started')";
+    queryParams.push(params.userId, params.userId);
+  }
+
   const stmt = db.prepare(`
     SELECT 
       am.match_id,
@@ -196,12 +234,12 @@ export function getActiveMatchDTO(userId: number): ActiveMatchDTO | null {
     LEFT JOIN users u1 ON u1.id = am.p1_id
     LEFT JOIN users u2 ON u2.id = am.p2_id
 
-    WHERE (am.p1_id = ? OR am.p2_id = ?)
-      AND am.status IN ('matched','started')
+    ${whereClause}
+
     LIMIT 1
   `);
 
-  const row = stmt.get(userId, userId) as {
+  const row = stmt.get(...queryParams) as {
     match_id: string;
     game_name: "connect4";
     status: MatchStatus;
@@ -211,7 +249,7 @@ export function getActiveMatchDTO(userId: number): ActiveMatchDTO | null {
     p1_name: string;
     p2_id: number;
     p2_name: string;
-  };
+  } | undefined;
 
   if (!row) return null;
 
@@ -222,38 +260,10 @@ export function getActiveMatchDTO(userId: number): ActiveMatchDTO | null {
     p2: { id: row.p2_id, name: row.p2_name },
     status: row.status,
     createdAt: new Date(row.created_at).getTime(),
-    startedAt: row.started_at ? new Date(row.started_at).getTime() : undefined
+    startedAt: row.started_at ? new Date(row.started_at).getTime() : undefined,
   };
 }
 
-export function getActiveMatchById(matchId: string): ActiveMatchDTO | null {
-  const stmt = db.prepare(`
-    SELECT *
-    FROM active_matches
-    WHERE match_id = ?
-  `);
-
-  const row = stmt.get(matchId) as {
-    match_id: string;
-    game_name: "connect4";
-    status: MatchStatus;
-    created_at: string;
-    started_at?: string;
-    p1_id: number;
-    p1_name: string;
-    p2_id: number;
-    p2_name: string;
-  };
-
-  if (!row) return null;
-
-  return {
-    id: row.match_id,
-    game: row.game_name,
-    p1: { id: row.p1_id, name: "Player" },
-    p2: { id: row.p2_id, name: "Player" },
-    createdAt: new Date(row.created_at).getTime(),
-    startedAt: row.started_at ? new Date(row.started_at).getTime() : undefined,
-    status: row.status as MatchStatus,
-  };
+export function getActiveMatchDTO(userId: number): ActiveMatchDTO | null {
+  return getActiveMatchFull({ userId });
 }
