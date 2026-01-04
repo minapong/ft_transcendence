@@ -18,55 +18,63 @@ export default function Connect4Game() {
 
   const { matchId, p1, p2 } = navState;
 
-useEffect(() => {
-  const overlay = document.getElementById("winnerOverlay")!;
-  const text = document.getElementById("winnerText")!;
-  let winTimeout: number | null = null;
+  useEffect(() => {
+    const overlay = document.getElementById("winnerOverlay")!;
+    const text = document.getElementById("winnerText")!;
+    const turnIndicator = document.getElementById("turnIndicator")!;
+    let winTimeout: number | null = null;
 
-  // end the finish request without waiting or blocking UI
-  const finishMatch = (winnerId: number) => {
-    fetch("http://localhost:3000/api/matchmaking/finish", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ matchId, winnerId }),
-      keepalive: true, // allows request to complete even if page unloads
-    })
-      .catch((err) => {
-        // Silently ignore network errors
+    // Fire-and-forget finish match
+    const finishMatch = (winnerId: number) => {
+      fetch("http://localhost:3000/api/matchmaking/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId, winnerId }),
+        keepalive: true,
+      }).catch((err) => {
         console.warn("[Connect4] Failed to send finishMatch (network/offline):", err);
       });
-  };
+    };
 
-  const cleanup = connect4Logic((winner) => {
-    // Show winner message
-    if (winner === "R") {
-      text.textContent = `${p1.name} Wins! 🏆`;
-      finishMatch(p1.id);
-    } else if (winner === "Y") {
-      text.textContent = `${p2.name} Wins! 🏆`;
-      finishMatch(p2.id);
-    } else {
-      text.textContent = "Draw!";
-    }
+    const cleanup = connect4Logic(
+      (winner) => {
+        // Show winner message
+        if (winner === "R") {
+          text.textContent = `${p1.name} Wins! 🏆`;
+          finishMatch(p1.id);
+        } else if (winner === "Y") {
+          text.textContent = `${p2.name} Wins! 🏆`;
+          finishMatch(p2.id);
+        } else {
+          text.textContent = "Draw!";
+        }
 
-    overlay.classList.remove("hidden");
+        overlay.classList.remove("hidden");
 
-    // navigate after 2 seconds — no dependency on server response
-    winTimeout = window.setTimeout(() => {
-      navigate("/connect4_single", { replace: true });
-    }, 2000);
-  });
+        winTimeout = window.setTimeout(() => {
+          navigate("/connect4_single", { replace: true });
+        }, 2000);
+      },
+      (currentPlayer) => {
+        // Update turn indicator color
+        if (currentPlayer === "R") {
+          turnIndicator.className = "w-8 h-8 rounded-full bg-red-500 shadow-lg shadow-red-500/50 animate-pulse";
+        } else {
+          turnIndicator.className = "w-8 h-8 rounded-full bg-yellow-400 shadow-lg shadow-yellow-400/50 animate-pulse";
+        }
+      }
+    );
 
-  // Hide overlay on mount
-  overlay.classList.add("hidden");
+    // Hide overlay on mount
+    overlay.classList.add("hidden");
 
-  return () => {
-    if (winTimeout !== null) {
-      clearTimeout(winTimeout);
-    }
-    cleanup();
-  };
-}, [matchId, p1, p2]);
+    return () => {
+      if (winTimeout !== null) {
+        clearTimeout(winTimeout);
+      }
+      cleanup();
+    };
+  }, [matchId, p1, p2]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center py-6">
@@ -83,13 +91,19 @@ useEffect(() => {
       </div>
 
       {/* Turn indicator */}
-      <div className="flex items-center gap-2 mb-6">
-        <span>Turn:</span>
-        <div className={`w-6 h-6 rounded-full ${p1.name}`}></div>
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-lg font-medium">Turn:</span>
+        <div
+          id="turnIndicator"
+          className="w-8 h-8 rounded-full bg-red-500 shadow-lg shadow-red-500/50 animate-pulse"
+        ></div>
       </div>
 
       {/* Board */}
-      <div className="grid grid-cols-7 grid-rows-6 gap-2 p-2 bg-blue-900 rounded-lg max-w-[720px] w-full aspect-[7/6]" id="board">
+      <div
+        className="grid grid-cols-7 grid-rows-6 gap-2 p-2 bg-blue-900 rounded-lg max-w-[720px] w-full aspect-[7/6]"
+        id="board"
+      >
         {Array.from({ length: 42 }).map((_, i) => (
           <div
             key={i}
