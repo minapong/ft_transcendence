@@ -1,48 +1,13 @@
 import {useState, useEffect, navigate} from "Reactor"
 
 // Temporary placeholder user — replace with real login context later
-const mockUser = { id: 2, name: "Player1" };
+const mockUser = { id: 3, name: "Player1" };
 
 export default function ActiveTournamentPage() {
   const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [savingResult, setSavingResult] = useState(false);
 
-  // 1️ Handle: we returned from Pong
-
-  useEffect(() => {
-	const gameResultRaw = localStorage.getItem("pongResult");
-	if (!gameResultRaw || !tournament?.id) return; // nothing to process
-  
-	const { matchId, winnerId } = JSON.parse(gameResultRaw);
-	localStorage.removeItem("pongResult");
-	setSavingResult(true);
-  
-	(async () => {
-	  try {
-		// 1. Save match result
-		const resultRes = await fetch("http://localhost:3000/api/tournament/result", {
-		  method: "POST",
-		  headers: { "Content-Type": "application/json" },
-		  body: JSON.stringify({ matchId, winnerId }),
-		});
-		const resultData = await resultRes.json();
-		console.log("Result reported", resultData);
-  
-		// 2. Reload tournament
-		await loadActiveTournament();
-  
-	  } catch (err) {
-		console.error("Failed to save result ", err);
-		alert("There was an issue updating the result");
-	  } finally {
-		setSavingResult(false);
-	  }
-	})();
-  }, [tournament?.id]);
-
-  // 2️ Load active tournament on mount
-
+  // Load active tournament on mount
   async function loadActiveTournament() {
     setLoading(true);
     try {
@@ -65,10 +30,8 @@ export default function ActiveTournamentPage() {
     loadActiveTournament();
   }, []);
 
-  // 3️ Start Game
-
+  // Start Game
   function handleStartGame(match: any) {
-    // Only players of this match may start it
     const isPlayer =
       match.p1.id === mockUser.id || match.p2.id === mockUser.id;
 
@@ -77,35 +40,48 @@ export default function ActiveTournamentPage() {
       return;
     }
 
-    // Store match info for Pong
-    localStorage.setItem(
-      "currentMatch",
-      JSON.stringify({
+    // Pass match data via navigation state (no localStorage)
+    navigate("/pong", {
+      state: {
+        mode: "tournament",
         matchId: match.id,
         p1: match.p1,
         p2: match.p2,
         tournamentId: tournament.id,
-      })
-    );
+      },
+    });
+  }
 
-    navigate("/pong");
-	}
+  // Manual advance round handler
+  async function handleAdvanceRound() {
+    if (!tournament) return;
 
-  // 4️ Render
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3000/api/tournament/next", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId: tournament.id }),
+      });
+      const data = await res.json();
 
+      if (data?.tournament) {
+        setTournament(data.tournament);
+      } else {
+        alert("Unable to advance round: " + (data?.error ?? "unknown error"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to advance round");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (loading) {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white">
         <p className="text-xl">Loading active tournament...</p>
-      </div>
-    );
-  }
-
-  if (savingResult) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-white">
-        <p className="text-xl">Saving result...</p>
       </div>
     );
   }
@@ -118,41 +94,13 @@ export default function ActiveTournamentPage() {
     );
   }
 
-	const pendingMatches = tournament.matches.filter(
-    	(m: any) => m.status === "pending"
-	);
-	// Check if we can show the "Advance Round" button
-	const canAdvanceRound =
-		pendingMatches.length === 0 && tournament?.state !== "finished";
+  const pendingMatches = tournament.matches.filter(
+    (m: any) => m.status === "pending"
+  );
 
-	// Manual advance round handler
-	async function handleAdvanceRound() {
-		if (!tournament) return;
+  const canAdvanceRound =
+    pendingMatches.length === 0 && tournament?.state !== "finished";
 
-	setSavingResult(true);
-	try {
-		const res = await fetch("http://localhost:3000/api/tournament/next", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ tournamentId: tournament.id }),
-		});
-		const data = await res.json();
-		console.log("Advance round result:", data);
-
-		if (data?.tournament) {
-			setTournament(data.tournament);
-		} else {
-			alert("Unable to advance round: " + (data?.error ?? "unknown error"));
-		}
-	} catch (err) {
-		console.error(err);
-		alert("Failed to advance round");
-	} finally {
-		setSavingResult(false);
-	}
-	}
-
-	
   return (
     <div className="w-screen min-h-screen flex flex-col items-center gap-8 py-12 bg-gray-900 text-white">
 
@@ -203,20 +151,19 @@ export default function ActiveTournamentPage() {
           </p>
         </div>
       ) : (
-		<div className="flex flex-col items-center gap-4">
-		  <p className="text-xl text-gray-400">No pending matches.</p>
-	  
-		  {/* Manual advance round button */}
-		  {canAdvanceRound === true && (
-			<button
-			  onClick={handleAdvanceRound}
-			  className="mt-4 px-4 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-500"
-			>
-			  Advance Round
-			</button>
-		  )}
-		</div>
-	  )}
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-xl text-gray-400">No pending matches.</p>
+
+          {canAdvanceRound && (
+            <button
+              onClick={handleAdvanceRound}
+              className="mt-4 px-4 py-2 bg-green-600 text-white font-bold rounded hover:bg-green-500"
+            >
+              Advance Round
+            </button>
+          )}
+        </div>
+      )}
 
       <button
         className="text-cyan-400 underline hover:text-cyan-200 mt-8"

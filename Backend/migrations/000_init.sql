@@ -51,6 +51,36 @@ CREATE TABLE IF NOT EXISTS friends (
 CREATE INDEX IF NOT EXISTS idx_friends_user ON friends(user_id);
 CREATE INDEX IF NOT EXISTS idx_friends_friend ON friends(friend_id);
 
+-- matchmaking queue (ephemeral state)
+CREATE TABLE IF NOT EXISTS matchmaking_queue (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  game_name TEXT NOT NULL, -- 'connect4'
+  joined_at DATETIME DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(user_id, game_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_matchmaking_queue_game_time
+ON matchmaking_queue(game_name, joined_at);
+
+-- active matches table (persistent for matchmaking)
+CREATE TABLE IF NOT EXISTS active_matches (
+  match_id TEXT PRIMARY KEY,
+  game_name TEXT NOT NULL,
+  p1_id INTEGER NOT NULL,
+  p2_id INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'matched', -- matched, started, finished, abandoned
+  created_at DATETIME DEFAULT (datetime('now')),
+  started_at DATETIME,
+  timeout_ts DATETIME,
+  FOREIGN KEY (p1_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (p2_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_active_matches_user
+ON active_matches(p1_id, p2_id);
+
 -- matches
 CREATE TABLE IF NOT EXISTS matches (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
