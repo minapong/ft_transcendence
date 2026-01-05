@@ -2,7 +2,7 @@ import {useState, useEffect, navigate} from "Reactor"
 
 export default function TournamentPage() {
   // Simulate logged-in user
-  const user = { id: 3, name: "santiago", isAdmin: false };
+  const user = { id: 3, name: "santiago", isAdmin: true };
 
   const [tournament, setTournament] = useState(null);
   const [max_players, setMax_players] = useState(4);

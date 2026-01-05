@@ -14,7 +14,7 @@ import {
 } from "../types/tournament";
 
 // Request body types
-type StartTournamentBody = { name: string; maxPlayers: number; tournamentId?: number };
+type StartTournamentBody = { name: string; max_players: number; tournamentId?: number };
 type RegisterUserBody = { tournamentId: number; userId: number };
 type ReportResultBody = { matchId: number; winnerId: number };
 type AdvanceRoundBody = { tournamentId: number };
@@ -26,9 +26,9 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
         req: FastifyRequest<{ Body: StartTournamentBody }>,
         reply: FastifyReply
     ) => {
-        const { name, maxPlayers } = req.body;
+        const { name, max_players } = req.body;
         try {
-            const tournament = createTournament(name, maxPlayers);
+            const tournament = createTournament(name, max_players);
             reply.send({ success: true, tournament });
         } catch (err: any) {
             reply.status(400).send({ error: err.message });
