@@ -1,114 +1,186 @@
-
 # 🏓 ft_transcendence
 
+*This project has been created as part of the 42 curriculum by Hashir, Natalia, Abdul Rehman, and Santiago.*
+
+---
+
+## 📑 Table of Contents
+
+- [🧭 Overview](#-overview)
+- [🧱 Core Team](#-core-team)
+- [🧩 Module Status](#-module-status-sorted)
+- [📊 Module Totals](#-module-totals--current-state)
+- [⚙️ Tech Stack](#️-tech-stack)
+- [🌿 Branches (Remotes)](#-branches-remotes)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Quick Start](#-quick-start)
+- [🧪 Environment](#-environment)
+- [📝 Notes (Important)](#-notes-important)
+
+---
+
 ## 🧭 Overview
-**ft_transcendence** is a full-stack web application inspired by the legendary **Pong** game —  
-reimagined with real-time multiplayer, authentication, live chat, blockchain integration, cybersecurity, and 3D visuals.  
-Built as part of the **42 Network Transcendence project**, this repository includes the complete base setup and modular expansions.
+
+**ft_transcendence** is a full-stack web application inspired by the classic **Pong** game.
+The project focuses on real-time gameplay logic, multiplayer experiences, AI opponents,
+and tournament systems, while following the **ft_transcendence v19.x** subject requirements.
+
+This repository reflects the **current development state**.
+All modules below match their **real implementation status**.
 
 ---
 
-## 🧱 BASE (Mandatory Part)
-| Team Member | Responsibility | Description |
-|--------------|----------------|--------------|
-| **Hashir** | SPA Structure + Backend (Fastify + Node.js) | Builds the TypeScript single-page app and backend API with Fastify integration. |
-| **Natalia** | Docker Setup + SPA Integration | Creates Docker environment, NGINX reverse proxy, and TLS certificates, assisting SPA deployment. |
-| **Abdul Rehman** | Core Pong Gameplay | Implements the base 2-player local Pong with equal paddle speed and stable physics. |
-| **Santiago** | Tournament & Matchmaking Systems + HTTPS (SSL/TLS)| Develops tournament logic, alias reset, and dynamic matchmaking UI integration. |
+## 🧱 Core Team
+
+| Team Member      | Role                              | Focus                                                         |
+| ---------------- | --------------------------------- | ------------------------------------------------------------- |
+| **Hashir**       | Product Architect & Frontend Lead | SPA architecture, custom frontend framework, backend foundation |
+| **Natalia**      | Platform & Data Steward           | Docker environment, SQLite schema & persistence               |
+| **Abdul Rehman** | Gameplay Systems Engineer         | Pong engines, multiplayer logic, second game                  |
+| **Santiago**     | AI & Competitive Systems Strategist | AI opponent, tournament manager, statistics                   |
 
 ---
 
-## 💻 HASHIR – Modules
-1️⃣ **Babylon.js 3D Graphics** *(Major)*  
-2️⃣ **Fastify with Node.js** *(Major – Backend Framework)*  
-3️⃣ **Tailwind CSS** *(Minor – Frontend Styling)*  
+## 🧩 Module Status (Sorted)
+
+> ✅ Completed 🚧 Ongoing 🧪 Final (planned or not started)  
+> **Only ✅ modules count for points**
+
+### ✅ Completed
+
+| Module                     | Owner         | Type          | Notes                                |
+| -------------------------- | ------------- | ------------- | ------------------------------------ |
+| Reactor Frontend Framework | Hashir        | Major (2 pts) | Custom SPA framework & hooks         |
+| Classic Pong               | Abdul Rehman  | Major (2 pts) | Core Pong gameplay                   |
+| Multiplayer Pong (2P / 4P) | Abdul Rehman  | Major (2 pts) | Multiple paddle modes                |
+| Second Game (Connect4)     | Abdul Rehman  | Major (2 pts) | Board logic & win detection          |
+| AI Opponent                | Santiago      | Major (2 pts) | Pong AI decision engine              |
+| Tournament System          | Santiago      | Minor (1 pt)  | Tournament manager & routes          |
+| Statistics                 | Santiago      | Minor (1 pt)  | stats_user aggregation table         |
+
+### 🚧 Ongoing
+
+| Module            | Owner    | Type          | Notes                                |
+| ----------------- | -------- | ------------- | ------------------------------------ |
+| Fastify Backend   | Hashir   | Major (2 pts) | Core server, CORS, tournament routes |
+| User Management   | Natalia  | Major (2 pts) | SQLite schema for users              |
+| ORM / Database    | Natalia  | Minor (1 pt)  | better-sqlite3 + migrations          |
+
+### 🧪 Final
+
+| Module               | Owner   | Type          | Notes                    |
+| -------------------- | ------- | ------------- | ------------------------ |
+| Babylon.js Graphics  | Hashir  | Major (2 pts) | Placeholder import only  |
+| Remote Auth (Google) | Hashir  | Minor (1 pt)  | No OAuth present         |
+| WebSockets           | Natalia | Major (2 pts) | No realtime layer yet    |
 
 ---
 
-## 💬 NATALIA – Modules
-1️⃣ **Live Chat** *(Major)*  
-2️⃣ **User Management + SQLite Database** *(Major + Minor)*  
-3️⃣ **Blockchain (Avalanche + Solidity)** *(Major)*  
+## 📊 Module Totals — Current State
 
----
+### 🔢 Points Breakdown
 
-## 🎮 ABDUL REHMAN – Modules
-1️⃣ **Multiplayer Pong** *(Major)*  
-2️⃣ **Second Game with Matchmaking & History** *(Major)*  
+| Member           | Major (✅) | Minor (✅) | Points        |
+| ---------------- | --------- | --------- | ------------- |
+| **Hashir**       | 1         | 0         | **2**         |
+| **Abdul Rehman** | 3         | 0         | **6**         |
+| **Natalia**      | 0         | 0         | **0**         |
+| **Santiago**     | 1         | 2         | **4**         |
+| **TOTAL**        | **5**     | **2**     | **12 / 14** ❌ |
 
----
-
-## 🧠 SANTIAGO – Modules
-1️⃣ **AI Oponent** *(Major)*  
-2️⃣ **Dashboard** *(Minor)*  
-
----
-
-## ✅ Total Progress
-- **Base foundation complete** (SPA + Backend + Docker + Gameplay + Tournament).  
-- **7+ Major equivalents achieved** → 100% project coverage.  
-- **Future modules** (AI, Analytics, Accessibility) will be integrated progressively.  
+**Status:** ❌ Not evaluation-ready  
+**Missing:** 2 points (1 Major or 2 Minor)
 
 ---
 
 ## ⚙️ Tech Stack
-- **Frontend:** TypeScript, Tailwind CSS, Babylon.js  
-- **Backend:** Node.js + Fastify, SQLite  
-- **DevOps:** Docker, NGINX, HTTPS (TLS 1.2/1.3)  
-- **Blockchain:** Avalanche + Solidity  
-- **Communication:** WebSocket (WSS) for chat and gameplay  
+
+**Frontend**
+
+* TypeScript
+* Custom SPA framework (Reactor)
+* Tailwind CSS
+
+**Backend**
+
+* Node.js
+* Fastify
+* SQLite (better-sqlite3)
+
+**DevOps**
+
+* Docker
+* Docker Compose
 
 ---
 
-## 🌿 Branching Strategy
-| Branch | Purpose |
-|--------|----------|
-| **main** | ✅ Production / Stable release – deployable and tested |
-| **dev** | Integration branch for merging all modules before production |
-| **hashir** | SPA frontend + backend (Fastify) |
-| **natalia** | Docker, HTTPS, blockchain, and database integration |
-| **abdul** | Pong gameplay and second game features |
-| **santiago** | AI Oponent and Dashboard |
+## 🌿 Branches (Remotes)
 
-> All Pull Requests merge into `dev` → then into `main` only after review and testing.  
+| Branch                     | Author        | Last Update |
+| -------------------------- | ------------- | ----------- |
+| origin/2P-Pong             | Abdul Rehman  | 2025-11-11  |
+| origin/4P-Pong             | Abdul Rehman  | 2025-11-29  |
+| origin/Dev                 | Hashir        | 2025-12-20  |
+| origin/Fixed-Natalia-PrismaDB | Hashir    | 2025-12-24  |
+| origin/HEAD                | Hashir        | 2026-01-04  |
+| origin/Natalia-CICD        | Natalia       | 2025-12-07  |
+| origin/Natalia-DB          | Natalia        | 2025-11-23 |
+| origin/Natalia-PrismaDB    | Natalia        | 2025-12-26 |
+| origin/Natalia-SignUp      | Natalia       | 2025-12-25  |
+| origin/Natalia-miniPrisma  | Natalia       | 2025-12-03  |
+| origin/SPA-reactor         | Hashir        | 2026-01-03  |
+| origin/dropdown_fix        | Hashir        | 2025-12-07  |
+| origin/main                | Hashir        | 2026-01-04  |
+| origin/matchmaking_addition | Santiago      | 2026-01-03 |
+| origin/mvp-1               | Hashir        | 2025-11-25  |
 
 ---
 
 ## 📁 Project Structure
+
 ```bash
-Ft_Transcendence/
-├── Frontend/     # SPA (TypeScript + Tailwind + Babylon.js)
-├── Backend/      # Fastify backend + SQLite + WSS
-├── Docker/       # Docker + NGINX + HTTPS setup
-└── README.md     # Root overview (this file)
-````
+ft_transcendence/
+├── Frontend/        # SPA (TypeScript + Reactor + Tailwind)
+├── Backend/         # Fastify backend + SQLite
+├── Docker/          # Docker & NGINX configs
+├── Makefile
+└── Readme.md
+```
 
 ---
 
 ## 🚀 Quick Start
 
 ```bash
-docker compose up --build
+make dev
 ```
----
-
-## 👥 Team
-
-| 👤 Name          | 🧭 Role                                 |
-| :--------------- | :-------------------------------------- |
-| **Hashir**       | 🎨 Frontend & Architecture Lead         |
-| **Natalia**      | 🐳 DevOps & Security Engineer           |
-| **Abdul Rehman** | 🕹️ Gameplay Developer                  |
-| **Santiago**     | 🔐 AI & Matchmaking Engineer 			|
 
 ---
 
-## 🧩 Notes
+## 🧪 Environment
 
-* Repository includes both **mandatory base** and **initial modules**.
-* All future modules will comply with **SPA**, **HTTPS**, and **Docker one-command** rules.
-* Built following **ft_transcendence v16.1** subject compliance.
+Backend `.env`:
+
+```
+NODE_ENV=development
+PORT=3000
+DATABASE_URL="file:./database/transcendence.db"
+```
+
+Frontend `.env`:
+
+```
+VITE_API_URL=http://localhost:3000
+```
 
 ---
 
-© 2025 ft_transcendence Team · A 42 Network Project
+## 📝 Notes (Important)
+
+* ✅ README reflects **actual implementation**, not intentions
+* 🚧 Some modules are still ongoing (see status tables above)
+* 🧪 Final modules are planned but **not started**
+
+---
+
+© 2025 ft_transcendence Team · 42 Network Project
