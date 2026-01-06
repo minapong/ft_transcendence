@@ -36,7 +36,7 @@ export default function Sidebar() {
   return (
     <aside
       className={`
-        sticky left-0 border-r sidebar-shell
+        sticky left-0 sidebar-shell
         top-[var(--header-height)]
         h-[calc(100vh-var(--header-height))]
         overflow-hidden relative
@@ -124,7 +124,6 @@ export default function Sidebar() {
                   {link.label}
                 </span>
               </span>
-
               {open && (
                 <span className="sidebar-link__icon icon-[solar--arrow-right-bold] text-xl opacity-50 group-hover:opacity-100" />
               )}
