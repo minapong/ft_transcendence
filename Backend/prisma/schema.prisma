@@ -1,0 +1,208 @@
+generator client {
+  provider      = "prisma-client-js"
+  moduleFormat  = "esm"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/* =====================
+   USER
+===================== */
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  username      String    @unique
+  password_hash String
+  avatarId      Int?      @unique // selected avatar
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @default(now())
+
+  // Relations
+  selectedAvatar Avatar?          @relation("UserSelectedAvatar", fields: [avatarId], references: [id], onDelete: SetNull)
+  avatars        Avatar[]         @relation("UserAvatars")
+  sessions       UserSession[]
+  friends        Friend[]         @relation("UserFriends")
+  friendedBy     Friend[]         @relation("FriendUsers")
+  matchPlayers   MatchPlayer[]
+  matchesWon     Match[]          @relation("WinnerMatches")
+  stats          StatsUser?
+  tournamentPlayers TournamentPlayer[]
+  tournamentsWon Tournament[]      @relation("TournamentWinner")
+}
+
+/* =====================
+   AVATAR
+===================== */
+model Avatar {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  file_path   String
+  uploaded_at DateTime @default(now())
+
+  user        User     @relation("UserAvatars", fields: [user_id], references: [id], onDelete: Cascade)
+  selectedBy  User?    @relation("UserSelectedAvatar")
+}
+
+/* =====================
+   USER SESSIONS
+===================== */
+model UserSession {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  token      String    @unique
+  created_at DateTime  @default(now())
+  expires_at DateTime?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+/* =====================
+   FRIENDS
+===================== */
+model Friend {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  friend_id  Int
+  status     String   @default("pending") // pending, accepted, blocked
+  created_at DateTime @default(now())
+
+  user   User @relation("UserFriends", fields: [user_id], references: [id], onDelete: Cascade)
+  friend User @relation("FriendUsers", fields: [friend_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, friend_id])
+}
+
+/* =====================
+   MATCHMAKING QUEUE (ephemeral)
+===================== */
+model MatchmakingQueue {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  game_name String   // e.g., "connect4"
+  joined_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, game_name])
+}
+
+/* =====================
+   ACTIVE MATCHES (Connect4 matchmaking)
+===================== */
+model ActiveMatch {
+  match_id   String   @id
+  game_name  String   // currently only "connect4"
+  p1_id      Int
+  p2_id      Int
+  status     String   @default("matched") // matched, started, finished, abandoned
+  created_at DateTime @default(now())
+  started_at DateTime?
+  timeout_ts DateTime?
+
+  p1 User @relation("ActiveMatchP1", fields: [p1_id], references: [id], onDelete: Cascade)
+  p2 User @relation("ActiveMatchP2", fields: [p2_id], references: [id], onDelete: Cascade)
+}
+
+/* =====================
+   MATCHES (finished games: Pong + Connect4)
+===================== */
+model Match {
+  id             Int       @id @default(autoincrement())
+  created_at     DateTime  @default(now())
+  finished_at    DateTime?
+  winner_id      Int?
+  ai_difficulty  String?
+  is_ai_game     Boolean   @default(false)
+  game_name      String    @default("pong") // "pong" or "connect4"
+
+  winner         User?     @relation("WinnerMatches", fields: [winner_id], references: [id], onDelete: SetNull)
+  players        MatchPlayer[]
+  tournamentInfo TournamentMatch[]
+}
+
+/* =====================
+   MATCH PLAYERS
+===================== */
+model MatchPlayer {
+  id        Int     @id @default(autoincrement())
+  match_id  Int
+  user_id   Int?
+  score     Int     @default(0)
+  is_winner Boolean @default(false)
+
+  match Match @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+/* =====================
+   USER STATS (aggregated)
+===================== */
+model StatsUser {
+  user_id               Int @id
+  wins                  Int @default(0)
+  losses                Int @default(0)
+  total_score           Int @default(0)
+  last_match_at         DateTime?
+  tournament_championships Int @default(0)
+  friends_count         Int @default(0)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+/* =====================
+   TOURNAMENTS
+===================== */
+model Tournament {
+  id            Int       @id @default(autoincrement())
+  name          String?
+  current_round Int       @default(0)
+  state         String    @default("waiting") // waiting, active, finished
+  created_at    DateTime  @default(now())
+  finished_at   DateTime?
+  winner_id     Int?
+  max_players   Int       @default(4)
+
+  winner        User?             @relation("TournamentWinner", fields: [winner_id], references: [id], onDelete: SetNull)
+  players       TournamentPlayer[]
+  matches       TournamentMatch[]
+}
+
+/* =====================
+   TOURNAMENT PLAYERS
+===================== */
+model TournamentPlayer {
+  id            Int       @id @default(autoincrement())
+  tournament_id Int
+  user_id       Int?
+  alias         String?
+  joined_at     DateTime  @default(now())
+
+  tournament Tournament @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  user       User?      @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@unique([tournament_id, user_id])
+}
+
+/* =====================
+   TOURNAMENT MATCHES (bracket links)
+===================== */
+model TournamentMatch {
+  id                       Int @id @default(autoincrement())
+  tournament_id            Int
+  match_id                 Int
+  round_number             Int @default(0)
+  match_number_in_round    Int @default(0)
+  next_tournament_match_id Int?
+
+  tournament Tournament @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  match      Match      @relation(fields: [match_id], references: [id], onDelete: Cascade)
+
+  // Self-relation: winner advances to this match
+  nextMatch     TournamentMatch?  @relation("NextMatch", fields: [next_tournament_match_id], references: [id])
+  previousMatches TournamentMatch[] @relation("NextMatch")
+
+  @@unique([tournament_id, match_id])
+}
