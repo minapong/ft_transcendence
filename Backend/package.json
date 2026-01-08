@@ -2,21 +2,25 @@
     "name": "ft_transcendence-backend",
     "version": "1.0.0",
     "main": "dist/index.js",
+    "type": "module",
     "scripts": {
-        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+        "dev": "tsc && node dist/index.js",
         "build": "tsc",
         "start": "node dist/index.js",
-        "migrate": "node script/migrate.js"
+        "migrate": "npx prisma migrate deploy",
+        "prisma:generate": "npx prisma generate",
+        "prisma:studio": "npx prisma studio"
     },
     "dependencies": {
         "@fastify/cors": "^8.5.0",
-        "better-sqlite3": "^12.5.0",
-        "fastify": "^4.29.0",
-        "uuid": "^13.0.0"
+        "@prisma/adapter-better-sqlite3": "^7.2.0",
+        "@prisma/client": "^7.2.0",
+        "better-sqlite3": "^12.4.6",
+        "fastify": "^4.29.0"
     },
     "devDependencies": {
-        "@types/better-sqlite3": "^7.6.13",
-        "@types/node": "^25.0.3",
+        "@prisma/config": "^7.2.0",
+        "prisma": "^7.0.1",
         "ts-node": "^10.9.1",
         "ts-node-dev": "^2.0.0",
         "typescript": "^5.1.3"
