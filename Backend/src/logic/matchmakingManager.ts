@@ -14,7 +14,7 @@ import {
   Player,
   cleanupQueue,
   getExpiredActiveMatches,
-} from "./matchmakingRepo";
+} from "./matchmakingRepo.js";
 
 // ─────────────────────────────────────────────
 // Time constants (in seconds)

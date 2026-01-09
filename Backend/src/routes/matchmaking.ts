@@ -5,7 +5,7 @@ import {
   startMatch,
   finishMatch,
   isQueued,
-} from "../logic/matchmakingManager";
+} from "../logic/matchmakingManager.js";
 
 // ─────────────────────────────────────────────
 // Request body types
