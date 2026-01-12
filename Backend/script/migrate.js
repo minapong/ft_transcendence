@@ -1,43 +1,40 @@
-// Backend/script/migrate.js
-const fs = require("fs");
-const path = require("path");
-const Database = require("better-sqlite3");
+// script/migrate.js
+import fs from 'fs';
+import path from 'path';
+import Database from 'better-sqlite3';
+import { fileURLToPath } from 'url';
 
-const dbPath = path.join(__dirname, "..", "database", "transcendence.db");
-const migrationsDir = path.join(__dirname, "..", "migrations");
+// ESM-compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-console.log("[MIGRATE] DB:", dbPath);
-console.log("[MIGRATE] Migrations:", migrationsDir);
+const MIGRATION_SQL_PATH = path.join(__dirname, '..', 'migrations', '000_init.sql');
+const DB_DIR = path.join(__dirname, '..', 'database');
+const DB_PATH = path.join(DB_DIR, 'transcendence.db');
 
-if (!fs.existsSync(migrationsDir)) {
-  console.error("Migrations directory missing:", migrationsDir);
-  process.exit(1);
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-const db = new Database(dbPath);
+export function run() {
+  ensureDir(DB_DIR);
 
-try {
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
+  const sql = fs.readFileSync(MIGRATION_SQL_PATH, 'utf8');
 
-  const files = fs
-    .readdirSync(migrationsDir)
-    .filter((f) => f.endsWith(".sql"))
-    .sort();
+  const db = new Database(DB_PATH);
+  try {
+    db.exec('PRAGMA foreign_keys = ON;');
+    db.exec(sql);
+    console.log('Migrations applied to', DB_PATH);
+  } catch (err) {
+    console.error('Migration error:', err);
+    process.exit(1);
+  } finally {
+    db.close();
+  }
+}
 
-  db.transaction(() => {
-    for (const file of files) {
-      const full = path.join(migrationsDir, file);
-      const sql = fs.readFileSync(full, "utf8");
-      console.log("[MIGRATE] Applying:", file);
-      db.exec(sql);
-    }
-  })();
-
-  console.log("[MIGRATE] Done.");
-} catch (err) {
-  console.error("[MIGRATE] ERROR:", err);
-  process.exit(1);
-} finally {
-  db.close();
+// ESM equivalent of “run if executed directly”
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  run();
 }

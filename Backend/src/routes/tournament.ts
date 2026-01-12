@@ -7,11 +7,11 @@ import {
     advanceRound,
 	getTournament,
 	getActiveTournament,
-} from "../logic/tournamentManager";
+} from "../logic/tournamentManager.js";
 
 import { 
 	MatchDTO, 
-} from "../types/tournament";
+} from "../types/tournament.js";
 
 // Request body types
 type StartTournamentBody = { name: string; maxPlayers: number; tournamentId?: number };

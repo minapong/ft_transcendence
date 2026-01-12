@@ -12,13 +12,13 @@ import {
 	get_ActiveTournament,
     getTournamentWithMatches,
     updateTournamentState
-} from "./tournamentRepo";
+} from "./tournamentRepo.js";
 
 import {
     PlayerDTO,
     MatchDTO,
     TournamentDTO
-} from "../types/tournament";
+} from "../types/tournament.js";
 
 // Create a tournament
 export function createTournament(name: string, maxPlayers: number = 4) {

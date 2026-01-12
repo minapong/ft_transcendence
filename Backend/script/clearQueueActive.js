@@ -15,15 +15,15 @@ try {
     db.prepare("DELETE FROM matchmaking_queue").run();
 
     console.log("[SCRIPT] Clearing active matches...");
-    db.prepare("DELETE FROM active_matches").run();
+    db.prepare("DELETE FROM  active_matches").run();
 
     console.log("[SCRIPT] Resetting auto-increment counters...");
     db.prepare("DELETE FROM sqlite_sequence WHERE name='matchmaking_queue'").run();
-    db.prepare("DELETE FROM sqlite_sequence WHERE name='active_matches'").run();
+    db.prepare("DELETE FROM sqlite_sequence WHERE name=' active_matches'").run();
   })();
 
   const queueCount = db.prepare("SELECT COUNT(*) as count FROM matchmaking_queue").get().count;
-  const activeCount = db.prepare("SELECT COUNT(*) as count FROM active_matches").get().count;
+  const activeCount = db.prepare("SELECT COUNT(*) as count FROM  active_matches").get().count;
 
   console.log(`[SCRIPT] Queue entries remaining: ${queueCount}`);
   console.log(`[SCRIPT] Active matches remaining: ${activeCount}`);

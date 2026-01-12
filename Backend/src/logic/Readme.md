@@ -7,7 +7,7 @@ Real-time 1v1 matchmaking for Connect4 with automatic cleanup of abandoned games
 
 ### Key Principles
 - **Fully database-backed** — no fragile in-memory timeouts or localStorage  
-- All matchmaking state lives in two db tables: `matchmaking_queue` and `active_matches`
+- All matchmaking state lives in two db tables: `MatchmakingQueue` and `ActiveMatches`
 - **Automatic timeout cleanup** runs on every poll → guarantees no orphan games even after crashes or reloads 
 - Results are recorded permanently in the `matches` table  
 
@@ -35,9 +35,9 @@ When the game ends, the winner is reported → the result is permanently recorde
 | `enqueuePlayer()`                 | `userId: number`, `game: string`                         | void                                   | Insert/replace player in queue with current timestamp                   |
 | `dequeueTwoPlayers()`             | `game: string`, `queueTimeoutSeconds: number`            | `[number, number] \| null`             | Cleanup queue + return oldest two players (or null)                     |
 | `cleanupQueue()`                  | `game: string`, `timeoutSeconds: number`                 | void                                   | Delete queue entries older than timeout                                 |
-| `insertActiveMatch()`             | `match: ActiveMatchDTO`                                  | void                                   | Create new row in active_matches with status "matched"                  |
+| `insertActiveMatch()`             | `match: ActiveMatchDTO`                                  | void                                   | Create new row in ActiveMatches with status "matched"                  |
 | `updateActiveMatchStatus()`       | `matchId: string`, `status: MatchStatus`                 | void                                   | Update status and set started_at timestamp when game begins             |
-| `deleteActiveMatch()`             | `matchId: string`                                        | void                                   | Remove finished or abandoned match from active_matches                  |
+| `deleteActiveMatch()`             | `matchId: string`                                        | void                                   | Remove finished or abandoned match from ActiveMatches                  |
 | `getActiveMatchFull()`            | `{ matchId?: string; userId?: number }`                  | `ActiveMatchDTO \| null`               | Unified query: get full match (with player names) by userId or matchId  |
 | `getExpiredActiveMatches()`       | `maxMatchedSeconds: number`, `maxStartedSeconds: number` | `string[]` (match IDs)                 | Find matched/started games past their timeout (used for cleanup)        |
 | `recordConnect4Game()`            | `p1Id: number`, `p2Id: number`, `winnerId: number`       | `number` (matchId)                     | Insert finished match + player stats into permanent history             |

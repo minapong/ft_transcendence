@@ -5,7 +5,7 @@ import {
 	MatchDTO, 
 	TournamentDTO, 
 	TournamentRow, 
-	MatchRow } from "../types/tournament";
+	MatchRow } from "../types/tournament.js";
 
 	import fs from "fs";
 
