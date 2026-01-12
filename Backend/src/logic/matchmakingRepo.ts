@@ -134,7 +134,7 @@ export function recordConnect4Game(
 
 export function insertActiveMatch(match: ActiveMatchDTO) {
   const stmt = db.prepare(`
-    INSERT INTO active_matches
+    INSERT INTO  active_matches
       (match_id, game_name, p1_id, p2_id, status, created_at)
     VALUES (?, ?, ?, ?, ?, datetime('now'))
   `);
@@ -143,7 +143,7 @@ export function insertActiveMatch(match: ActiveMatchDTO) {
 
 export function updateActiveMatchStatus(matchId: string, status: MatchStatus) {
   const stmt = db.prepare(`
-    UPDATE active_matches
+    UPDATE  active_matches
     SET status = ?,
         started_at = CASE WHEN ? = 'started' THEN datetime('now') ELSE started_at END
     WHERE match_id = ?
@@ -153,7 +153,7 @@ export function updateActiveMatchStatus(matchId: string, status: MatchStatus) {
 
 export function deleteActiveMatch(matchId: string) {
   db.prepare(`
-    DELETE FROM active_matches
+    DELETE FROM  active_matches
     WHERE match_id = ?
   `).run(matchId);
 }

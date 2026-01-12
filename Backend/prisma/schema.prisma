@@ -36,6 +36,14 @@ model User {
 
   created_at    DateTime        @default(now())
   updated_at    DateTime        @default(now())
+
+  //prisma only virtual fields (do not exist in db columns)
+  activeMatchesP1 ActiveMatches[] @relation("ActiveMatchP1") 
+  activeMatchesP2 ActiveMatches[] @relation("ActiveMatchP2")
+
+  matchmakingQueue MatchmakingQueue[]
+
+  @@map("users")
 }
 
 /* =====================
@@ -51,6 +59,8 @@ model Avatar {
 
 
   selectedBy  User?     @relation("UserSelectedAvatar")
+
+  @@map("avatar")
 }
 
 
@@ -64,6 +74,8 @@ model UserSession {
   token      String   @unique
   created_at DateTime @default(now())
   expires_at DateTime?
+
+  @@map("user_session")
 }
 
 /* =====================
@@ -81,6 +93,8 @@ model Friend {
   created_at DateTime @default(now())
 
   @@unique([user_id, friend_id])
+
+  @@map("friend")
 }
 
 /* =====================
@@ -96,8 +110,12 @@ model Match {
   ai_difficulty  String?
   is_ai_game     Boolean     @default(false)
 
+  game_name      String      @default("pong")
+
   players        MatchPlayer[]
   tournamentInfo TournamentMatch[]
+
+  @@map("match")
 }
 
 /* =====================
@@ -112,6 +130,8 @@ model MatchPlayer {
 
   match     Match  @relation(fields: [match_id], references: [id], onDelete: Cascade)
   user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("match_players")
 }
 
 /* =====================
@@ -127,6 +147,8 @@ model StatsUser {
   friends_count           Int     @default(0)
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("stats_user")
 }
 
 /* =====================
@@ -141,10 +163,14 @@ model Tournament {
   finished_at    DateTime?
   winner_id      Int?
 
+  max_players    Int              @default(4)
+
   winner         User?            @relation("TournamentWinner", fields: [winner_id], references: [id], onDelete: SetNull)
 
   players        TournamentPlayer[]
   matches        TournamentMatch[]
+
+  @@map("tournaments")
 }
 
 /* =====================
@@ -161,6 +187,8 @@ model TournamentPlayer {
   user          User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@unique([tournament_id, user_id])
+
+  @@map("tournament_player")
 }
 
 /* =====================
@@ -182,4 +210,47 @@ model TournamentMatch {
   previousMatches          TournamentMatch[] @relation("NextMatch")
 
   @@unique([tournament_id, match_id])
+
+  @@map("tournament_match")
 }
+
+/* =====================
+   MATCHMAKING QUEUE
+===================== */
+model MatchmakingQueue {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  game_name String
+  joined_at DateTime @default(now())
+
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, game_name])
+
+  @@map("matchmaking_queue")
+}
+
+/* =====================
+   ACTIVE MATCHES
+===================== */
+model ActiveMatches {
+  match_id   String   @id
+  game_name  String
+
+  p1_id      Int
+  p2_id      Int
+
+  status     String   @default("matched")
+
+  created_at DateTime @default(now())
+  started_at DateTime?
+  timeout_ts DateTime?
+
+  p1         User     @relation("ActiveMatchP1", fields: [p1_id], references: [id], onDelete: Cascade)
+  p2         User     @relation("ActiveMatchP2", fields: [p2_id], references: [id], onDelete: Cascade)
+
+  @@index([p1_id, p2_id])
+
+  @@map("active_matches")
+}
+
