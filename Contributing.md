@@ -28,30 +28,17 @@ Use these branches as follows:
 - `Dev`: integration branch for all features
 - Feature branches: always branch from `Dev`
 
-## Table of Contents
-1. [What This File Is For](#scope)
-2. [Which Branch Do I Use?](#branching-model)
-3. [First-Time Setup](#one-time-setup)
-4. [Create a Feature Branch](#start-a-feature-branch)
-5. [Work & Commit](#work-and-commit)
-6. [Sync with Dev](#keep-your-branch-updated)
-7. [Open a Pull Request](#open-a-pull-request)
-8. [Release to Main (Maintainers Only)](#release-to-main-maintainers)
+## First-Time Setup
 
-## One-Time Setup
+Clone the repository and install dependencies:
 
-This document covers how we contribute code to this repo:
-
-- All active work merges into `Dev`
-- Only milestone snapshots are merged into `main`
-git pull
+```bash
+git clone <repo-url>
+cd ft_transcendence
+git checkout Dev
 ```
 
-Use these branches as follows:
-
-- `main`: milestone snapshots only, no direct commits
-- `Dev`: integration branch for all features
-- Feature branches: always branch from `Dev`
+## Start a Feature Branch
 
 Feature branch naming:
 
@@ -59,10 +46,20 @@ Feature branch naming:
 <name>/<feature>
 ```
 
+Create and switch to your branch:
+
+```bash
+git checkout -b <name>/<feature>
+```
+
+## Work and Commit
+
+Make your changes and commit regularly:
+
 ```bash
 git status
 git add .
-<name>/<feature>
+git commit -m "[PREFIX] message"
 ```
 
 ## Keep Your Branch Updated
