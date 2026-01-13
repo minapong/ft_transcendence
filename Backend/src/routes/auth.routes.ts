@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
-import { AuthService } from "../services/auth.service.ts"
+import { AuthService } from "../services/auth.service.js"
 
 interface SignupBody {
   email: string
@@ -20,15 +20,15 @@ export async function registerAuthRoutes(server: FastifyInstance) {
         return reply.code(400).send({ error: "Missing fields" })
       }
 
-      try {
-        const user = await AuthService.signup(email, username, password)
-        reply.code(201).send(user)
-      } catch (err: any) {
-        if (err.message === "EMAIL_ALREADY_EXISTS") {
-          return reply.code(409).send({ error: "Email already used" })
-        }
+      // try {
+      //   const user = await AuthService.signup(email, username, password)
+      //   reply.code(201).send(user)
+      // } catch (err: any) {
+      //   if (err.message === "EMAIL_ALREADY_EXISTS") {
+      //     return reply.code(409).send({ error: "Email already used" })
+      //   }
         reply.code(500).send({ error: "Internal error" })
-      }
+      // }
     }
   )
 }

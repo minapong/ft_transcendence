@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
-import { AuthService } from "../services/auth.service"
+import { AuthService } from "../services/auth.service.js"
 
 interface LoginBody {
   email: string;

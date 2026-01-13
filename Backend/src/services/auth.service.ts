@@ -1,4 +1,4 @@
-import { UserRepo } from "../repositories/user.repo"
+import { UserRepo } from "../repositories/user.repo.js"
 import crypto from "crypto"
 import bcrypt from "bcrypt"
 
