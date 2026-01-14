@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
 
     localStorage.setItem("auth", JSON.stringify(data));
-    window.location.href = "/";
+    window.location.href = "/profile/${data.id}";
   };
 
   return (
@@ -55,7 +55,7 @@ export default function LoginPage() {
       </button>
       <p className="text-sm text-gray-400"></p>
         Don`t have an account?{" "}
-        < span
+        <span
          className="text-blue-400 cursor-pointer hover:underline"
          onClick={() => (window.location.href = "/signup")}
         >

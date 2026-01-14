@@ -7,6 +7,8 @@ import apiRoutes from "./routes/api.routes.js";        // ✅ New unified API ro
 import { registerTournamentRoutes } from "./routes/tournament.js";
 import { registerMatchmakingRoutes } from "./routes/matchmaking.js";
 import { registerLoginRoutes } from "./routes/login.js";
+import { registerProfileRoutes } from "./routes/profile.js";
+
 
 const server = Fastify({ logger: true });
 
@@ -25,6 +27,8 @@ server.get("/", async () => {
 registerTournamentRoutes(server);
 registerMatchmakingRoutes(server);
 registerLoginRoutes(server);
+registerProfileRoutes(server);
+
 
 //Register Prisma-based API routes
 server.register(apiRoutes, { prefix: "/api" });
