@@ -24,6 +24,10 @@ server.get("/", async () => {
   return { message: "Hello from Backend!" };
 });
 
+// server.get("/api/users/:id", async (req, reply) => {
+//   return { ok: true, id: (req.params as any).id };
+// });
+
 registerTournamentRoutes(server);
 registerMatchmakingRoutes(server);
 registerLoginRoutes(server);
