@@ -17,9 +17,9 @@ export const LEFT_PADDLE_X = 16;
 export const RIGHT_PADDLE_X = PLAYABLE_WIDTH - 16 - PADDLE_WIDTH;
 
 
-export const GAME_SPEED = 3;
+export const GAME_SPEED = 2;
 
-export const WIN_SCORE = 1;
+export const WIN_SCORE = 3;
 
 // =====================
 // 4 PLAYER (P4) MODE
