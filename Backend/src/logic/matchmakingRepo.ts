@@ -1,26 +1,7 @@
-import Database from "better-sqlite3";
-import path from "path";
-import fs from "fs";
-
-// ─────────────────────────────────────────────
-// DB bootstrap 
-// ─────────────────────────────────────────────
-
-const dbPath = path.join(process.cwd(), "database", "transcendence.db");
-
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-const db = new Database(dbPath);
+import { prisma } from "../db/prisma.js";
+import type { Prisma } from "@prisma/client";
 
 export type MatchStatus = "matched" | "started" | "finished" | "abandoned";
-
-export interface Player {
-  id: number;
-  name: string;
-}
 
 export interface ActiveMatchDTO {
   id: string;
@@ -28,242 +9,221 @@ export interface ActiveMatchDTO {
   p1: { id: number; name: string };
   p2: { id: number; name: string };
   status: MatchStatus;
-  createdAt: number;           // epoch ms
-  startedAt?: number;          // epoch ms
-  timeout?: NodeJS.Timeout;    // in-memory only
+  createdAt: number;        // epoch ms
+  startedAt?: number;       // epoch ms
+  timeout?: NodeJS.Timeout; // in-memory only
 }
 
-// ─────────────────────────────────────────────
-// Queue persistence
-// ─────────────────────────────────────────────
-
-// Accepts timeout in seconds
-export function cleanupQueue(game: string, timeoutSeconds: number): void {
-  db.prepare(`
-    DELETE FROM matchmaking_queue
-    WHERE game_name = ?
-      AND joined_at < datetime('now', ?)
-  `).run(game, `-${timeoutSeconds} seconds`);
+export interface Player {
+  id: number;
+  name: string;
 }
 
-export function enqueuePlayer(userId: number, game: string): void {
-  db.prepare(`
-    INSERT OR REPLACE INTO matchmaking_queue (user_id, game_name, joined_at)
-    VALUES (?, ?, datetime('now'))
-  `).run(userId, game);
+// ------------------------------
+// Queue persistence (MatchmakingQueue)
+// ------------------------------
+
+export async function cleanupQueue(game: string, timeoutSeconds: number): Promise<void> {
+  const cutoff = new Date(Date.now() - timeoutSeconds * 1000);
+
+  await prisma.matchmakingQueue.deleteMany({
+    where: {
+      game_name: game,
+      joined_at: { lt: cutoff },
+    },
+  });
 }
 
-export function dequeueTwoPlayers(game: string, queueTimeoutSeconds: number): [number, number] | null {
-  cleanupQueue(game, queueTimeoutSeconds);
-
-  const rows = db.prepare(`
-    SELECT user_id
-    FROM matchmaking_queue
-    WHERE game_name = ?
-    ORDER BY joined_at ASC
-    LIMIT 2
-  `).all(game) as { user_id: number }[];
-
-  if (rows.length < 2) return null;
-
-  const [p1, p2] = rows.map(r => r.user_id);
-
-  db.prepare(`
-    DELETE FROM matchmaking_queue
-    WHERE game_name = ?
-      AND user_id IN (?, ?)
-  `).run(game, p1, p2);
-
-  return [p1, p2];
+export async function enqueuePlayer(userId: number, game: string): Promise<void> {
+  // @@unique([user_id, game_name]) -> Prisma creates a compound unique selector
+  await prisma.matchmakingQueue.upsert({
+    where: {
+      user_id_game_name: { user_id: userId, game_name: game },
+    },
+    create: {
+      user_id: userId,
+      game_name: game,
+    },
+    update: {
+      // refresh timestamp like your INSERT OR REPLACE
+      joined_at: new Date(),
+    },
+  });
 }
 
-export function isUserQueued(userId: number, game: string): boolean {
-  const row = db.prepare(`
-    SELECT 1
-    FROM matchmaking_queue
-    WHERE user_id = ? AND game_name = ?
-  `).get(userId, game);
+export async function dequeueTwoPlayers(
+  game: string,
+  queueTimeoutSeconds: number
+): Promise<[number, number] | null> {
+  await cleanupQueue(game, queueTimeoutSeconds);
 
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const rows = await tx.matchmakingQueue.findMany({
+      where: { game_name: game },
+      orderBy: { joined_at: "asc" },
+      take: 2,
+      select: { id: true, user_id: true },
+    });
+
+    if (rows.length < 2) return null;
+
+    const [a, b] = rows;
+
+    // delete the exact picked rows (prevents race issues)
+    await tx.matchmakingQueue.deleteMany({
+      where: { id: { in: [a.id, b.id] } },
+    });
+
+    return [a.user_id, b.user_id] as [number, number];
+  });
+}
+
+export async function isUserQueued(userId: number, game: string): Promise<boolean> {
+  const row = await prisma.matchmakingQueue.findUnique({
+    where: {
+      user_id_game_name: { user_id: userId, game_name: game },
+    },
+    select: { id: true },
+  });
   return !!row;
 }
 
-export function removeFromQueue(userId: number, game: string): void {
-  db.prepare(`
-    DELETE FROM matchmaking_queue
-    WHERE user_id = ? AND game_name = ?
-  `).run(userId, game);
+export async function removeFromQueue(userId: number, game: string): Promise<void> {
+  await prisma.matchmakingQueue.deleteMany({
+    where: { user_id: userId, game_name: game },
+  });
 }
 
-// ─────────────────────────────────────────────
-// Match persistence (Connect4)
-// ─────────────────────────────────────────────
+// ------------------------------
+// Match persistence (Match + MatchPlayer)
+// ------------------------------
 
-export function recordConnect4Game(
+export async function recordConnect4Game(
   p1Id: number,
   p2Id: number,
   winnerId: number
-): number {
-  if (!p1Id || !p2Id || !winnerId) {
-    throw new Error("Invalid input");
-  }
-  if (winnerId !== p1Id && winnerId !== p2Id) {
-    throw new Error("Winner must be one of the players");
-  }
+): Promise<number> {
+  if (!p1Id || !p2Id || !winnerId) throw new Error("Invalid input");
+  if (winnerId !== p1Id && winnerId !== p2Id) throw new Error("Winner must be one of the players");
 
-  const insert = db.transaction(() => {
-    const matchStmt = db.prepare(`
-      INSERT INTO matches (game_name, winner_id, finished_at)
-      VALUES ('connect4', ?, datetime('now'))
-    `);
-    const matchInfo = matchStmt.run(winnerId);
-    const matchId = matchInfo.lastInsertRowid as number;
+  const matchId = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const match = await tx.match.create({
+      data: {
+        game_name: "connect4",
+        winner_id: winnerId,
+        finished_at: new Date(),
+        players: {
+          create: [
+            { user_id: p1Id, is_winner: p1Id === winnerId },
+            { user_id: p2Id, is_winner: p2Id === winnerId },
+          ],
+        },
+      },
+      select: { id: true },
+    });
 
-    const mpStmt = db.prepare(`
-      INSERT INTO match_players (match_id, user_id, is_winner)
-      VALUES (?, ?, ?)
-    `);
-
-    mpStmt.run(matchId, p1Id, p1Id === winnerId ? 1 : 0);
-    mpStmt.run(matchId, p2Id, p2Id === winnerId ? 1 : 0);
-
-    return matchId;
+    return match.id;
   });
 
-  return insert();
+  return matchId;
 }
 
-export function insertActiveMatch(match: ActiveMatchDTO) {
-  const stmt = db.prepare(`
-    INSERT INTO  active_matches
-      (match_id, game_name, p1_id, p2_id, status, created_at)
-    VALUES (?, ?, ?, ?, ?, datetime('now'))
-  `);
-  stmt.run(match.id, match.game, match.p1.id, match.p2.id, match.status);
+// ------------------------------
+// Active matches (ActiveMatches)
+// ------------------------------
+
+export async function insertActiveMatch(match: ActiveMatchDTO): Promise<void> {
+  await prisma.activeMatches.create({
+    data: {
+      match_id: match.id,
+      game_name: match.game,
+      p1_id: match.p1.id,
+      p2_id: match.p2.id,
+      status: match.status,
+    },
+  });
 }
 
-export function updateActiveMatchStatus(matchId: string, status: MatchStatus) {
-  const stmt = db.prepare(`
-    UPDATE  active_matches
-    SET status = ?,
-        started_at = CASE WHEN ? = 'started' THEN datetime('now') ELSE started_at END
-    WHERE match_id = ?
-  `);
-  stmt.run(status, status, matchId);
+export async function updateActiveMatchStatus(matchId: string, status: MatchStatus): Promise<void> {
+  await prisma.activeMatches.update({
+    where: { match_id: matchId },
+    data: {
+      status,
+      // emulate your CASE WHEN started
+      started_at: status === "started" ? new Date() : undefined,
+    },
+  });
 }
 
-export function deleteActiveMatch(matchId: string) {
-  db.prepare(`
-    DELETE FROM  active_matches
-    WHERE match_id = ?
-  `).run(matchId);
+export async function deleteActiveMatch(matchId: string): Promise<void> {
+  await prisma.activeMatches.delete({
+    where: { match_id: matchId },
+  });
 }
 
-export function isUserValid(userId: number): boolean {
-  const row = db.prepare(`
-    SELECT 1 FROM users WHERE id = ?
-  `).get(userId);
-
+export async function isUserValid(userId: number): Promise<boolean> {
+  const row = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
   return !!row;
 }
 
-
-
-// ─────────────────────────────────────────────
-// New: Get expired active matches
-// ─────────────────────────────────────────────
-export function getExpiredActiveMatches(
+export async function getExpiredActiveMatches(
   maxMatchedSeconds: number,
   maxStartedSeconds: number
-): string[] {
-  const matched = db
-    .prepare(`
-      SELECT match_id FROM active_matches
-      WHERE status = 'matched'
-        AND created_at < datetime('now', ?)
-    `)
-    .all(`-${maxMatchedSeconds} seconds`) as { match_id: string }[];
+): Promise<string[]> {
+  const matchedCutoff = new Date(Date.now() - maxMatchedSeconds * 1000);
+  const startedCutoff = new Date(Date.now() - maxStartedSeconds * 1000);
 
-  const started = db
-    .prepare(`
-      SELECT match_id FROM active_matches
-      WHERE status = 'started'
-        AND started_at < datetime('now', ?)
-    `)
-    .all(`-${maxStartedSeconds} seconds`) as { match_id: string }[];
+  const [matched, started] = await Promise.all([
+    prisma.activeMatches.findMany({
+      where: { status: "matched", created_at: { lt: matchedCutoff } },
+      select: { match_id: true },
+    }),
+    prisma.activeMatches.findMany({
+      where: { status: "started", started_at: { lt: startedCutoff } },
+      select: { match_id: true },
+    }),
+  ]);
 
-  return [...matched.map(r => r.match_id), ...started.map(r => r.match_id)];
+  return [...matched.map(x => x.match_id), ...started.map(x => x.match_id)];
 }
 
-// ─────────────────────────────────────────────
-// Unified: Get active match (by match_id OR by user_id) with full player names
-// ─────────────────────────────────────────────
-export function getActiveMatchFull(
-  params: { matchId?: string; userId?: number }
-): ActiveMatchDTO | null {
+export async function getActiveMatchFull(params: {
+  matchId?: string;
+  userId?: number;
+}): Promise<ActiveMatchDTO | null> {
   if (!params.matchId && !params.userId) {
     throw new Error("Must provide either matchId or userId");
   }
 
-  let whereClause = "";
-  const queryParams: any[] = [];
-
-  if (params.matchId) {
-    whereClause = "WHERE am.match_id = ?";
-    queryParams.push(params.matchId);
-  } else if (params.userId) {
-    whereClause = "WHERE (am.p1_id = ? OR am.p2_id = ?) AND am.status IN ('matched', 'started')";
-    queryParams.push(params.userId, params.userId);
-  }
-
-  const stmt = db.prepare(`
-    SELECT 
-      am.match_id,
-      am.game_name,
-      am.status,
-      am.created_at,
-      am.started_at,
-
-      u1.id AS p1_id,
-      u1.username AS p1_name,
-
-      u2.id AS p2_id,
-      u2.username AS p2_name
-
-    FROM active_matches am
-
-    LEFT JOIN users u1 ON u1.id = am.p1_id
-    LEFT JOIN users u2 ON u2.id = am.p2_id
-
-    ${whereClause}
-
-    LIMIT 1
-  `);
-
-  const row = stmt.get(...queryParams) as {
-    match_id: string;
-    game_name: "connect4";
-    status: MatchStatus;
-    created_at: string;
-    started_at?: string;
-    p1_id: number;
-    p1_name: string;
-    p2_id: number;
-    p2_name: string;
-  } | undefined;
+  const row = await prisma.activeMatches.findFirst({
+    where: params.matchId
+      ? { match_id: params.matchId }
+      : {
+          status: { in: ["matched", "started"] },
+          OR: [{ p1_id: params.userId! }, { p2_id: params.userId! }],
+        },
+    include: {
+      p1: { select: { id: true, username: true } },
+      p2: { select: { id: true, username: true } },
+    },
+  });
 
   if (!row) return null;
 
   return {
     id: row.match_id,
-    game: row.game_name,
-    p1: { id: row.p1_id, name: row.p1_name },
-    p2: { id: row.p2_id, name: row.p2_name },
-    status: row.status,
-    createdAt: new Date(row.created_at).getTime(),
-    startedAt: row.started_at ? new Date(row.started_at).getTime() : undefined,
+    game: row.game_name as "connect4",
+    p1: { id: row.p1.id, name: row.p1.username },
+    p2: { id: row.p2.id, name: row.p2.username },
+    status: row.status as MatchStatus,
+    createdAt: row.created_at.getTime(),
+    startedAt: row.started_at?.getTime(),
   };
 }
 
-export function getActiveMatchDTO(userId: number): ActiveMatchDTO | null {
+export async function getActiveMatchDTO(userId: number): Promise<ActiveMatchDTO | null> {
   return getActiveMatchFull({ userId });
 }

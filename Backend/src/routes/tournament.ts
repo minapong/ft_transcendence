@@ -28,7 +28,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
     ) => {
         const { name, maxPlayers } = req.body;
         try {
-            const tournament = createTournament(name, maxPlayers);
+            const tournament = await createTournament(name, maxPlayers);
             reply.send({ success: true, tournament });
         } catch (err: any) {
             reply.status(400).send({ error: err.message });
@@ -41,7 +41,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
     ) => {
         const { tournamentId, userId } = req.body;
         try {
-            const playerId = registerUserToTournament(tournamentId, userId);
+            const playerId = await registerUserToTournament(tournamentId, userId);
             reply.send({ success: true, playerId });
         } catch (err: any) {
             reply.status(400).send({ error: err.message });
@@ -56,7 +56,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
         if (!tournamentId) return reply.status(400).send({ error: "tournamentId is required" });
 
         try {
-            const tournamentOrNull = startTournament(tournamentId);
+            const tournamentOrNull = await startTournament(tournamentId);
             if (!tournamentOrNull) return reply.status(400).send({ error: "Unable to start tournament" });
 
             reply.send({ success: true, tournament: tournamentOrNull });
@@ -71,7 +71,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
     ) => {
         const { matchId, winnerId } = req.body;
         try {
-            const matchRaw = recordMatchResult(matchId, winnerId);
+            const matchRaw = await recordMatchResult(matchId, winnerId);
 
             // Ensure status is properly typed
             const match: MatchDTO = {
@@ -91,7 +91,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
     ) => {
         const { tournamentId } = req.body;
         try {
-            const tournamentOrNull = advanceRound(tournamentId);
+            const tournamentOrNull = await advanceRound(tournamentId);
             if (!tournamentOrNull) return reply.status(400).send({ error: "Unable to advance round" });
 
             reply.send({ success: true, tournament: tournamentOrNull });
@@ -106,7 +106,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
     ) => {
         const { tournamentId } = req.body;
         try {
-            const tournamentOrNull = getTournament(tournamentId); 
+            const tournamentOrNull = await getTournament(tournamentId); 
             if (!tournamentOrNull) {
 				return reply.status(404).send({ error: "Tournament not found" });
 			}
@@ -118,7 +118,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
 
 	server.get("/api/tournament/active", async (_req: FastifyRequest, reply: FastifyReply) => {
 		try {
-		  const activeTournament = getActiveTournament();
+		  const activeTournament = await getActiveTournament();
 		  if (!activeTournament) {
 			return reply.status(404).send({ error: "No active tournament" });
 		  }
