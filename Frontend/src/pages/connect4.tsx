@@ -1,80 +1,80 @@
-// import { navigate, useEffect } from "Reactor";
+import { navigate, useEffect } from "Reactor";
 import { connect4Logic } from "../engine/connect4_logic";
 
-// type Player = { id: number; name: string };
-// type NavState = {
-//   matchId: string;
-//   p1: Player;
-//   p2: Player;
-// } | null;
+type Player = { id: number; name: string };
+type NavState = {
+  matchId: string;
+  p1: Player;
+  p2: Player;
+} | null;
 
 export default function Connect4Game() {
-//   const navState = history.state as NavState;
+  const navState = history.state as NavState;
 
-  // if (!navState || !navState.matchId || !navState.p1 || !navState.p2) {
-  //   navigate("/connect4_single", { replace: true });
-  //   return null;
-  // }
+  if (!navState || !navState.matchId || !navState.p1 || !navState.p2) {
+    navigate("/connect4_single", { replace: true });
+    return null;
+  }
 
-  // const { matchId, p1, p2 } = navState;
+  const { matchId, p1, p2 } = navState;
 
-  // useEffect(() => {
-  //   const overlay = document.getElementById("winnerOverlay")!;
-  //   const text = document.getElementById("winnerText")!;
-  //   const turnIndicator = document.getElementById("turnIndicator")!;
-  //   let winTimeout: number | null = null;
+  useEffect(() => {
+    const overlay = document.getElementById("winnerOverlay")!;
+    const text = document.getElementById("winnerText")!;
+    const turnIndicator = document.getElementById("turnIndicator")!;
+    let winTimeout: number | null = null;
 
-  //   // Fire-and-forget finish match
-  //   const finishMatch = (winnerId: number) => {
-  //     fetch("http://localhost:3000/api/matchmaking/finish", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ matchId, winnerId }),
-  //       keepalive: true,
-  //     }).catch((err) => {
-  //       console.warn("[Connect4] Failed to send finishMatch (network/offline):", err);
-  //     });
-  //   };
+    // Fire-and-forget finish match
+    const finishMatch = (winnerId: number) => {
+      fetch("http://localhost:3000/api/matchmaking/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId, winnerId }),
+        keepalive: true,
+      }).catch((err) => {
+        console.warn("[Connect4] Failed to send finishMatch (network/offline):", err);
+      });
+    };
 
-  //   const cleanup = connect4Logic(
-  //     (winner) => {
-  //       // Show winner message
-  //       if (winner === "R") {
-  //         text.textContent = `${p1.name} Wins! 🏆`;
-  //         finishMatch(p1.id);
-  //       } else if (winner === "Y") {
-  //         text.textContent = `${p2.name} Wins! 🏆`;
-  //         finishMatch(p2.id);
-  //       } else {
-  //         text.textContent = "Draw!";
-  //       }
+    const cleanup = connect4Logic(
+      (winner) => {
+        // Show winner message
+        if (winner === "R") {
+          text.textContent = `${p1.name} Wins! 🏆`;
+          finishMatch(p1.id);
+        } else if (winner === "Y") {
+          text.textContent = `${p2.name} Wins! 🏆`;
+          finishMatch(p2.id);
+        } else {
+          text.textContent = "Draw!";
+        }
 
-  //       overlay.classList.remove("hidden");
+        overlay.classList.remove("hidden");
 
-  //       winTimeout = window.setTimeout(() => {
-  //         navigate("/connect4_single", { replace: true });
-  //       }, 2000);
-  //     },
-  //     (currentPlayer) => {
-  //       // Update turn indicator color
-  //       if (currentPlayer === "R") {
-  //         turnIndicator.className = "w-8 h-8 rounded-full bg-red-500 shadow-lg shadow-red-500/50 animate-pulse";
-  //       } else {
-  //         turnIndicator.className = "w-8 h-8 rounded-full bg-yellow-400 shadow-lg shadow-yellow-400/50 animate-pulse";
-  //       }
-  //     }
-  //   );
+        winTimeout = window.setTimeout(() => {
+          navigate("/connect4_single", { replace: true });
+        }, 2000);
+      },
+      (currentPlayer) => {
+        // Update turn indicator color
+        if (currentPlayer === "R") {
+          turnIndicator.className = "w-8 h-8 rounded-full bg-red-500 shadow-lg shadow-red-500/50 animate-pulse";
+        } else {
+          turnIndicator.className = "w-8 h-8 rounded-full bg-yellow-400 shadow-lg shadow-yellow-400/50 animate-pulse";
+        }
+      }
+    );
 
-  //   // Hide overlay on mount
-  //   overlay.classList.add("hidden");
+    // Hide overlay on mount
+    overlay.classList.add("hidden");
 
-  //   return () => {
-  //     if (winTimeout !== null) {
-  //       clearTimeout(winTimeout);
-  //     }
-  //     cleanup();
-  //   };
-  // }, [matchId, p1, p2]);
+    return () => {
+      if (winTimeout !== null) {
+        clearTimeout(winTimeout);
+      }
+      cleanup();
+    };
+  }, [matchId, p1, p2]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center py-6">
