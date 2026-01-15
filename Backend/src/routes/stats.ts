@@ -5,7 +5,7 @@ import {
   getGlobalMatchHistory,
   getUserMatchHistory,
   getUserAchievements,
-} from "../logic/statsManager";
+} from "../logic/statsManager.js";
 
 // ─────────────────────────────────────────────
 // Request parameter types

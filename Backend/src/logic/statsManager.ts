@@ -5,7 +5,7 @@ import {
   getRecentMatchesGlobal,
   getRecentMatchesForUser,
   getUnlockedAchievements,
-} from "./statsRepo";
+} from "./statsRepo.js";
 
 export async function getUserStats(userId: number) {
   const base = await getUserAggregatedStats(userId);

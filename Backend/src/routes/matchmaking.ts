@@ -89,7 +89,7 @@ export async function registerMatchmakingRoutes(server: FastifyInstance) {
       try {
         const userId = Number(req.params.userId);
 
-        const match = getActiveMatchForUser(userId);
+        const match = await getActiveMatchForUser(userId);
         if (match) {
           return reply.send({ state: "active", match });
         }
