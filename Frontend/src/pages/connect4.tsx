@@ -82,11 +82,11 @@ export default function Connect4Game() {
       <div className="flex justify-between w-full max-w-3xl mb-4 px-4">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full bg-red-500"></div>
-          {/*<span>{p1.name}</span>*/}
+          <span>{p1.name}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full bg-yellow-500"></div>
-          {/*<span>{p2.name}</span>*/}
+          <span>{p2.name}</span>
         </div>
       </div>
 
