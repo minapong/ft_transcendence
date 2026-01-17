@@ -1,279 +1,384 @@
-import Database from "better-sqlite3";
-import path from "path";
-import { 
-	PlayerDTO, 
-	MatchDTO, 
-	TournamentDTO, 
-	TournamentRow, 
-	MatchRow } from "../types/tournament.js";
+// src/logic/tournamentRepo.ts
+import { prisma } from "../db/prisma.js";
+import type { Prisma } from "@prisma/client";
+import type { PlayerDTO, MatchDTO, TournamentDTO } from "../types/tournament.js";
 
-	import fs from "fs";
+// ─────────────────────────────────────────────
+// Prisma payload types (precise typing, no `any`)
+// ─────────────────────────────────────────────
+type PrismaTournamentPlayerWithUser = Prisma.TournamentPlayerGetPayload<{
+  include: { user: { select: { id: true; username: true } } };
+}>;
 
-	// Use absolute path from project root, not relative to __dirname
-	// This ensures we use the same DB file as migrations
-	const dbPath = path.join(process.cwd(), "database", "transcendence.db");
-	
-	// Ensure the database directory exists
-	const dbDir = path.dirname(dbPath);
-	if (!fs.existsSync(dbDir)) {
-		fs.mkdirSync(dbDir, { recursive: true });
-	}
-	
-	const db = new Database(dbPath);
+type PrismaTournamentMatchWithMatch = Prisma.TournamentMatchGetPayload<{
+  include: {
+    match: {
+      include: {
+        players: {
+          include: { user: { select: { id: true; username: true } } };
+          orderBy: { id: "asc" };
+        };
+      };
+    };
+  };
+}>;
 
-	
-	export function insertTournament(name: string, maxPlayers: number = 4): number | { error: string } {
-		if (!name || !name.trim()) return { error: "Tournament name cannot be empty" };
-		if (![4, 8, 16].includes(maxPlayers)) return { error: "Max players must be 4, 8, or 16" };
+type PrismaMatchPlayerWithUser = Prisma.MatchPlayerGetPayload<{
+  include: { user: { select: { id: true; username: true } } };
+}>;
 
-		try {
-			const stmt = db.prepare(`INSERT INTO tournaments (name, max_players) VALUES (?, ?)`);
-			const info = stmt.run(name.trim(), maxPlayers);
-			return info.lastInsertRowid as number;
-		} catch (err: any) {
-			return { error: "Database error: " + err.message };
-  		  }
-	}
-	
-	export function getTournamentById(id: number): TournamentRow | undefined {
-		if (!id) return undefined;
-		const stmt = db.prepare(`SELECT * FROM tournaments WHERE id = ?`);
-		return stmt.get(id) as TournamentRow | undefined;
-	}
-	
-	export function insertTournamentPlayer(tournamentId: number, userId: number | null, alias?: string) {
-		if (!tournamentId) throw new Error("Invalid tournament ID");
-	
-		const stmt = db.prepare(`
-			INSERT INTO tournament_players (tournament_id, user_id, alias)
-			VALUES (?, ?, ?)
-		`);
-	
-		try {
-			const info = stmt.run(tournamentId, userId, alias ?? null);
-			return info.lastInsertRowid as number;
-		} catch (err: any) {
-			if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
-				throw new Error("Player is already registered in this tournament");
-			}
-			throw err;
-		}
-	}
-	
-	export function insertMatch(
-		tournamentId: number, 
-		p1Id: number | null, 
-		p2Id: number | null, 
-		roundNumber: number, 
-		matchNumber: number, 
-		nextMatchId?: number
-	) {
-		const insert = db.transaction(() => {
-			// Create the match
-			const matchStmt = db.prepare(`INSERT INTO matches DEFAULT VALUES`);
-			const matchInfo = matchStmt.run();
-			const matchId = matchInfo.lastInsertRowid as number;
-	
-			// Link match to tournament
-			const tournamentMatchStmt = db.prepare(`
-				INSERT INTO tournament_matches 
-				(tournament_id, match_id, round_number, match_number_in_round, next_tournament_match_id)
-				VALUES (?, ?, ?, ?, ?)
-			`);
-			tournamentMatchStmt.run(
-				tournamentId, 
-				matchId, 
-				roundNumber, 
-				matchNumber, 
-				nextMatchId ?? null
-			);
-	
-			// Insert players 
-			if (p1Id !== null) insertMatchPlayer(matchId, p1Id);
-			if (p2Id !== null) insertMatchPlayer(matchId, p2Id);
-	
-			return matchId;
-		});
-	
-		return insert();
-	}
-	
-	export function insertMatchPlayer(matchId: number, userId: number) {
-		const stmt = db.prepare(`
-			INSERT INTO match_players (match_id, user_id) VALUES (?, ?)
-		`);
-		const info = stmt.run(matchId, userId);
-		return info.lastInsertRowid as number;
-	}
-	
-	export function getMatchesForTournament(tournamentId: number): MatchDTO[] {
-		if (!tournamentId) return [];
-	
-		// Get all match IDs for this tournament
-		const stmt = db.prepare(`
-			SELECT match_id
-			FROM tournament_matches
-			WHERE tournament_id = ?
-			ORDER BY round_number, match_number_in_round
-		`);
-	
-		const rows = stmt.all(tournamentId) as { match_id: number }[];
-	
-		// Map each match ID to a full MatchDTO 
-		return rows.map(row => getMatchDTO(row.match_id));
-	}
-	
-	export function recordMatchWinner(matchId: number, winnerId: number) {
-		if (!matchId || !winnerId) throw new Error("Invalid input");
-	
-		const stmt = db.prepare(`UPDATE matches SET winner_id = ? WHERE id = ?`);
-		stmt.run(winnerId, matchId);
-	}
-	
-	// Get all registered players for a tournament
-	export function getRegisteredPlayers(tournamentId: number): PlayerDTO[] {
-		const stmt = db.prepare(`
-			SELECT 
-				tp.user_id as id, 
-				u.username as name
-	
-			FROM tournament_players tp
-			JOIN users u ON u.id = tp.user_id
-			WHERE tp.tournament_id = ?
-			ORDER BY tp.id
-		`);
-		return stmt.all(tournamentId) as PlayerDTO[];
-	}
-	
-	// Get all players for a match
-	export function getMatchPlayers(matchId: number): PlayerDTO[] {
-		const stmt = db.prepare(`
-			SELECT 
-				mp.user_id as id, 
-				u.username as name
-			FROM match_players mp
-			JOIN users u ON u.id = mp.user_id
-			WHERE mp.match_id = ?
-		`);
-		return stmt.all(matchId) as PlayerDTO[];
-	}
-	
-	// Get single match DTO
-	export function getMatchDTO(matchId: number): MatchDTO {
-		const stmt = db.prepare(`
-			SELECT 
-				tm.match_id,
-				tm.round_number,
-				tm.match_number_in_round,
-				m.winner_id,
+// ─────────────────────────────────────────────
+// Helper: Build MatchDTO from TournamentMatch row
+// ─────────────────────────────────────────────
+function toMatchDTO(tm: PrismaTournamentMatchWithMatch): MatchDTO {
+  const m = tm.match;
 
-				p1.user_id AS p1_id,
-				p1.username AS p1_name,
+  // MatchPlayer rows are inserted in order, but we still sort for safety
+  const sortedPlayers = [...(m.players ?? [])].sort((a, b) => a.id - b.id);
 
-				p2.user_id AS p2_id,
-				p2.username AS p2_name
+  const mp1 = sortedPlayers[0];
+  const mp2 = sortedPlayers[1];
 
-			FROM tournament_matches tm
-			JOIN matches m ON m.id = tm.match_id
+  const p1: PlayerDTO =
+    mp1?.user_id != null
+      ? { id: mp1.user_id, name: mp1.user?.username || "Unknown" }
+      : { id: 0, name: "TBD" };
 
-			LEFT JOIN (
-				SELECT mp.user_id, u.username
-				FROM match_players mp
-				JOIN users u ON u.id = mp.user_id
-				WHERE mp.match_id = ?
-				ORDER BY mp.id ASC
-				LIMIT 1
-			) p1 ON 1=1
+  const p2: PlayerDTO =
+    mp2?.user_id != null
+      ? { id: mp2.user_id, name: mp2.user?.username || "Unknown" }
+      : { id: 0, name: "TBD" };
 
-			LEFT JOIN (
-				SELECT mp.user_id, u.username
-				FROM match_players mp
-				JOIN users u ON u.id = mp.user_id
-				WHERE mp.match_id = ?
-				ORDER BY mp.id DESC
-				LIMIT 1
-			) p2 ON 1=1
+  return {
+    id: tm.match_id,
+    p1,
+    p2,
+    winnerId: m.winner_id ?? null,
+    status: m.winner_id ? "finished" : "pending",
+    round: tm.round_number,
+    matchNumber: tm.match_number_in_round, // always present in DB
+  };
+}
 
-			WHERE tm.match_id = ?
-		`);
-		const m = stmt.get(matchId, matchId, matchId) as MatchRow;
-		return {
-			id: m.match_id,
-			p1: { id: m.p1_id!, name: m.p1_name! },
-			p2: { id: m.p2_id!, name: m.p2_name! },
-			winnerId: m.winner_id,
-			status: m.winner_id ? "finished" : "pending",
-			round: m.round_number,
-			matchNumber: m.match_number_in_round
-		};
-	}
-	
-	// Update tournament state and optionally winner
-	export function updateTournamentState(
-		tournamentId: number, 
-		state: "waiting" | "active" | "finished", 
-		currentRound: number, 
-		winnerId?: number
-	): TournamentDTO | null {
-		const stmt = db.prepare(`
-			UPDATE tournaments
-			SET state=?, current_round=?, winner_id=?
-			WHERE id=?
-		`);
-		stmt.run(state, currentRound, winnerId ?? null, tournamentId);
-		return getTournamentWithMatches(tournamentId);
-	}
-	
-	// Get tournament with all matches
-	function mapMatchRow(m: MatchRow): MatchDTO {
-		return {
-		  id: m.match_id,
-		  p1: { id: m.p1_id!, name: m.p1_name! },
-		  p2: { id: m.p2_id!, name: m.p2_name! },
-		  winnerId: m.winner_id,
-		  status: m.winner_id ? "finished" : "pending",
-		  round: m.round_number,
-		  matchNumber: m.match_number_in_round,
-		};
-	}
-	  
-	export function getTournamentWithMatches(tournamentId: number): TournamentDTO | null {
-		const tournament = getTournamentById(tournamentId);
-		if (!tournament) return null;
-	  
-		const matches = getMatchesForTournament(tournamentId);
-		const registeredPlayers = getRegisteredPlayers(tournamentId) || [];
+// ─────────────────────────────────────────────
+// Create tournament
+// ─────────────────────────────────────────────
+export async function insertTournament(
+  name: string,
+  maxPlayers: number = 4
+): Promise<number | { error: string }> {
+  if (!name || !name.trim()) return { error: "Tournament name cannot be empty" };
+  if (![4, 8, 16].includes(maxPlayers)) return { error: "Max players must be 4, 8, or 16" };
 
-		const winnerMatch = matches.find(m => m.winnerId === tournament.winner_id);
-		const winnerName =
-			winnerMatch?.p1.id === tournament.winner_id
-				? winnerMatch.p1.name
-				: winnerMatch?.p2.name ?? null;
+  try {
+    const t = await prisma.tournament.create({
+      data: { name: name.trim(), max_players: maxPlayers },
+      select: { id: true },
+    });
+    return t.id;
+  } catch (err: any) {
+    return { error: "Database error: " + (err?.message ?? String(err)) };
+  }
+}
 
-		return {
-		  id: tournament.id,
-		  name: tournament.name,
-		  currentRound: tournament.current_round,
-		  state: tournament.state,
-		  matches,
-		  winnerName,
-		  winnerId: tournament.winner_id,
-		  max_players: tournament.max_players,
-		  registeredPlayers,
-		};
-	}
+// ─────────────────────────────────────────────
+// Get tournament by ID (subset select, partner-style)
+// ─────────────────────────────────────────────
+export async function getTournamentById(id: number) {
+  if (!id) return undefined;
 
-	export function get_ActiveTournament(): TournamentDTO | null {
-		const row = db.prepare(`
-			SELECT id 
-			FROM tournaments
-			WHERE state IN ('waiting', 'active')
-			ORDER BY id ASC
-			LIMIT 1
-		`).get() as { id: number } | undefined;
-	
-		if (!row) return null;
-	
-		// Reuse the full DTO builder
-		return getTournamentWithMatches(row.id);
-	}
+  return prisma.tournament.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      state: true,
+      current_round: true,
+      max_players: true,
+      winner_id: true,
+    },
+  });
+}
+
+// ─────────────────────────────────────────────
+// Register player
+// ─────────────────────────────────────────────
+export async function insertTournamentPlayer(
+  tournamentId: number,
+  userId: number | null,
+  alias?: string
+): Promise<number> {
+  if (!tournamentId) throw new Error("Invalid tournament ID");
+
+  try {
+    const tp = await prisma.tournamentPlayer.create({
+      data: {
+        tournament_id: tournamentId,
+        user_id: userId,
+        alias: alias ?? null,
+      },
+      select: { id: true },
+    });
+    return tp.id;
+  } catch (err: any) {
+    // @@unique([tournament_id, user_id]) => P2002
+    if (err?.code === "P2002") throw new Error("Player is already registered in this tournament");
+    throw err;
+  }
+}
+
+// ─────────────────────────────────────────────
+// Create match (transaction)
+// ─────────────────────────────────────────────
+export async function insertMatch(
+  tournamentId: number,
+  p1Id: number | null,
+  p2Id: number | null,
+  roundNumber: number,
+  matchNumber: number,
+  nextTournamentMatchId?: number
+): Promise<number> {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const match = await tx.match.create({
+      data: {},
+      select: { id: true },
+    });
+
+    await tx.tournamentMatch.create({
+      data: {
+        tournament_id: tournamentId,
+        match_id: match.id,
+        round_number: roundNumber,
+        match_number_in_round: matchNumber,
+        next_tournament_match_id: nextTournamentMatchId ?? null,
+      },
+    });
+
+    // only create players when IDs are valid
+    const toCreate: { match_id: number; user_id: number }[] = [];
+    if (p1Id != null && p1Id !== 0) toCreate.push({ match_id: match.id, user_id: p1Id });
+    if (p2Id != null && p2Id !== 0) toCreate.push({ match_id: match.id, user_id: p2Id });
+
+    if (toCreate.length) {
+      await tx.matchPlayer.createMany({ data: toCreate });
+    }
+
+    return match.id;
+  });
+}
+
+// ─────────────────────────────────────────────
+// Insert a single match player 
+// ─────────────────────────────────────────────
+export async function insertMatchPlayer(matchId: number, userId: number): Promise<number> {
+  if (!matchId || !userId) throw new Error("Invalid input");
+
+  const mp = await prisma.matchPlayer.create({
+    data: { match_id: matchId, user_id: userId },
+    select: { id: true },
+  });
+
+  return mp.id;
+}
+
+// ─────────────────────────────────────────────
+// Record winner 
+// ─────────────────────────────────────────────
+export async function recordMatchWinner(matchId: number, winnerId: number): Promise<void> {
+  if (!matchId || !winnerId) throw new Error("Invalid input");
+
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    await tx.match.update({
+      where: { id: matchId },
+      data: {
+        winner_id: winnerId,
+        finished_at: new Date(),
+      },
+    });
+
+    await tx.matchPlayer.updateMany({
+      where: { match_id: matchId },
+      data: { is_winner: false },
+    });
+
+    await tx.matchPlayer.updateMany({
+      where: { match_id: matchId, user_id: winnerId },
+      data: { is_winner: true },
+    });
+  });
+}
+
+// ─────────────────────────────────────────────
+// Registered players
+// ─────────────────────────────────────────────
+export async function getRegisteredPlayers(tournamentId: number): Promise<PlayerDTO[]> {
+  const players = await prisma.tournamentPlayer.findMany({
+    where: { tournament_id: tournamentId },
+    include: { user: { select: { id: true, username: true } } },
+    orderBy: { id: "asc" },
+  });
+
+  return players
+    .filter((p: PrismaTournamentPlayerWithUser) => p.user_id != null)
+    .map((p: PrismaTournamentPlayerWithUser) => ({
+      id: p.user_id!,
+      name: p.user?.username || "Guest",
+    }));
+}
+
+// ─────────────────────────────────────────────
+// Players in a match
+// ─────────────────────────────────────────────
+export async function getMatchPlayers(matchId: number): Promise<PlayerDTO[]> {
+  const players = await prisma.matchPlayer.findMany({
+    where: { match_id: matchId },
+    include: { user: { select: { id: true, username: true } } },
+    orderBy: { id: "asc" },
+  });
+
+  return players
+    .filter((p: PrismaMatchPlayerWithUser) => p.user_id != null)
+    .map((p: PrismaMatchPlayerWithUser) => ({
+      id: p.user_id!,
+      name: p.user?.username || "Unknown",
+    }));
+}
+
+// ─────────────────────────────────────────────
+// Get matches for tournament
+// ─────────────────────────────────────────────
+export async function getMatchesForTournament(tournamentId: number): Promise<MatchDTO[]> {
+  if (!tournamentId) return [];
+
+  const rows = await prisma.tournamentMatch.findMany({
+    where: { tournament_id: tournamentId },
+    orderBy: [{ round_number: "asc" }, { match_number_in_round: "asc" }],
+    include: {
+      match: {
+        include: {
+          players: {
+            include: { user: { select: { id: true, username: true } } },
+            orderBy: { id: "asc" },
+          },
+        },
+      },
+    },
+  });
+
+  return rows.map(toMatchDTO);
+}
+
+// ─────────────────────────────────────────────
+// Single match DTO
+// ─────────────────────────────────────────────
+export async function getMatchDTO(matchId: number): Promise<MatchDTO> {
+  const tm = await prisma.tournamentMatch.findFirst({
+    where: { match_id: matchId },
+    include: {
+      match: {
+        include: {
+          players: {
+            include: { user: { select: { id: true, username: true } } },
+            orderBy: { id: "asc" },
+          },
+        },
+      },
+    },
+  });
+
+  if (!tm) throw new Error("Match not found");
+  return toMatchDTO(tm);
+}
+
+// ─────────────────────────────────────────────
+// Update tournament state
+// ─────────────────────────────────────────────
+export async function updateTournamentState(
+  tournamentId: number,
+  state: "waiting" | "active" | "finished",
+  currentRound: number,
+  winnerId?: number
+): Promise<TournamentDTO | null> {
+  await prisma.tournament.update({
+    where: { id: tournamentId },
+    data: {
+      state,
+      current_round: currentRound,
+      winner_id: winnerId ?? null,
+      finished_at: state === "finished" ? new Date() : undefined,
+    },
+  });
+
+  return getTournamentWithMatches(tournamentId);
+}
+
+// ─────────────────────────────────────────────
+// Full tournament with matches & players
+// ─────────────────────────────────────────────
+export async function getTournamentWithMatches(tournamentId: number): Promise<TournamentDTO | null> {
+  const t = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    include: {
+      players: {
+        include: { user: { select: { id: true, username: true } } },
+        orderBy: { id: "asc" },
+      },
+      matches: {
+        orderBy: [{ round_number: "asc" }, { match_number_in_round: "asc" }],
+        include: {
+          match: {
+            include: {
+              players: {
+                include: { user: { select: { id: true, username: true } } },
+                orderBy: { id: "asc" },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!t) return null;
+
+  const matches = t.matches.map(toMatchDTO);
+
+  const registeredPlayers = t.players.map((p: PrismaTournamentPlayerWithUser) => ({
+    id: p.user_id ?? 0,
+    name: p.user?.username || "Guest",
+  }));
+
+  //derive from the match where winnerId appears
+  const winnerMatch = matches.find(m => m.winnerId === (t.winner_id ?? null));
+  const winnerName = winnerMatch
+    ? winnerMatch.p1.id === t.winner_id
+      ? winnerMatch.p1.name
+      : winnerMatch.p2.name
+    : null;
+
+  return {
+    id: t.id,
+    name: t.name ?? "",
+    currentRound: t.current_round,
+    state: t.state , //state is enum in Prisma 
+    matches,
+    winnerId: t.winner_id ?? null,
+    winnerName,
+    max_players: t.max_players,
+    registeredPlayers,
+  };
+}
+
+// ─────────────────────────────────────────────
+// Get active tournament
+// ─────────────────────────────────────────────
+export async function get_ActiveTournament(): Promise<TournamentDTO | null> {
+  const t = await prisma.tournament.findFirst({
+    where: { state: { in: ["waiting", "active"] } },
+    orderBy: { id: "asc" },
+    select: { id: true },
+  });
+
+  if (!t) return null;
+  return getTournamentWithMatches(t.id);
+}

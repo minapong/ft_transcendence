@@ -6,6 +6,9 @@ import apiRoutes from "./routes/api.routes.js";        // ✅ New unified API ro
 
 import { registerTournamentRoutes } from "./routes/tournament.js";
 import { registerMatchmakingRoutes } from "./routes/matchmaking.js";
+import { registerLoginRoutes } from "./routes/login.js";
+import { registerProfileRoutes } from "./routes/profile.js";
+
 
 const server = Fastify({ logger: true });
 
@@ -21,11 +24,19 @@ server.get("/", async () => {
   return { message: "Hello from Backend!" };
 });
 
+// server.get("/api/users/:id", async (req, reply) => {
+//   return { ok: true, id: (req.params as any).id };
+// });
+
 registerTournamentRoutes(server);
 registerMatchmakingRoutes(server);
+registerLoginRoutes(server);
+registerProfileRoutes(server);
+
 
 //Register Prisma-based API routes
 server.register(apiRoutes, { prefix: "/api" });
+// registerStatsRoutes(server);
 
 server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
 	if (err){ process.exit(1); throw err; }

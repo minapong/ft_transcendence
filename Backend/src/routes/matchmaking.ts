@@ -52,7 +52,7 @@ export async function registerMatchmakingRoutes(server: FastifyInstance) {
         const { matchId } = req.body;
         if (!matchId) return reply.status(400).send({ error: "matchId is required" });
 
-        const match = startMatch(matchId);
+        const match = await startMatch(matchId);
         if (!match) return reply.status(404).send({ error: "Match not found" });
 
         reply.send(match);
@@ -73,7 +73,7 @@ export async function registerMatchmakingRoutes(server: FastifyInstance) {
           return reply.status(400).send({ error: "matchId and winnerId are required" });
         }
 
-        const result = finishMatch(matchId, winnerId);
+        const result = await finishMatch(matchId, winnerId);
         reply.send(result);
       } catch (err: any) {
         console.error("Error finishing match:", err);
@@ -89,12 +89,12 @@ export async function registerMatchmakingRoutes(server: FastifyInstance) {
       try {
         const userId = Number(req.params.userId);
 
-        const match = getActiveMatchForUser(userId);
+        const match = await getActiveMatchForUser(userId);
         if (match) {
           return reply.send({ state: "active", match });
         }
 
-        if (isQueued(userId)) {
+        if (await isQueued(userId)) {
           return reply.send({ state: "queued" });
         }
 

@@ -1,18 +1,91 @@
 import { prisma } from '../db/prisma.js';
+import { User } from '../domain/user.js';
 
 export const UserRepo = {
-  create: (data: { email: string; username: string; password_hash: string }) =>
-    prisma.user.create({ data }),
+  async create(data: {
+    email: string;
+    username: string;
+    password_hash: string;
+  }): Promise<User> {
+    const user = await prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.username,
+        password_hash: data.password_hash,
+      },
+    });
 
-  findById: (id: number) =>
-    prisma.user.findUnique({ where: { id } }),
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      passwordHash: user.password_hash,
+    };
+  },
 
-  findByEmail: (email: string) =>
-    prisma.user.findUnique({ where: { email } }),
+  async findById(id: number): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
 
-  update: (id: number, patch: Partial<{ username: string; password_hash: string; avatarId: number | null }>) =>
-    prisma.user.update({ where: { id }, data: patch }),
+    if (!user) return null;
 
-  list: (take = 50, skip = 0) =>
-    prisma.user.findMany({ take, skip, orderBy: { created_at: 'desc' } })
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      passwordHash: user.password_hash,
+    };
+  },
+
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      passwordHash: user.password_hash,
+    };
+  },
+
+  async update(
+    id: number,
+    patch: Partial<{
+      username: string;
+      password_hash: string;
+      avatarId: number | null;
+    }>
+  ): Promise<User> {
+    const user = await prisma.user.update({
+      where: { id },
+      data: patch,
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      passwordHash: user.password_hash,
+    };
+  },
+
+  async list(take = 50, skip = 0): Promise<User[]> {
+    const users = await prisma.user.findMany({
+      take,
+      skip,
+      orderBy: { created_at: 'desc' },
+    });
+
+    return users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      username: u.username,
+      passwordHash: u.password_hash,
+    }));
+  },
 };

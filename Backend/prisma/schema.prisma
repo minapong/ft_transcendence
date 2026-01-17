@@ -151,6 +151,12 @@ model StatsUser {
   @@map("stats_user")
 }
 
+enum TournamentState {
+  waiting
+  active
+  finished
+}
+
 /* =====================
    TOURNAMENTS
 ===================== */
@@ -158,7 +164,7 @@ model Tournament {
   id             Int              @id @default(autoincrement())
   name           String?
   current_round  Int              @default(0)
-  state          String           @default("waiting")
+  state          TournamentState  @default(waiting)
   created_at     DateTime         @default(now())
   finished_at    DateTime?
   winner_id      Int?

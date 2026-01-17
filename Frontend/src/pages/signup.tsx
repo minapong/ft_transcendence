@@ -27,12 +27,12 @@ export default function LoginPage() {
     }
 
     localStorage.setItem("auth", JSON.stringify(data));
-    window.location.href = "/profile/${data.id}";
+    window.location.href = "/";
   };
 
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-900 text-white">
-      <h1 className="text-3xl font-bold">Welcome back to Mina</h1>
+      <h1 className="text-3xl font-bold">Become a Mina Pong resident</h1>
 
       <input
         ref={emailRef}
@@ -51,15 +51,15 @@ export default function LoginPage() {
         onClick={handleLogin}
         className="bg-blue-600 px-4 py-2 rounded font-bold hover:bg-blue-500"
       >
-        Login
+       Sign Up
       </button>
       <p className="text-sm text-gray-400"></p>
-        Don`t have an account?{" "}
-        <span
+      Already have an account?{" "}
+        < span
          className="text-blue-400 cursor-pointer hover:underline"
-         onClick={() => (window.location.href = "/signup")}
+         onClick={() => (window.location.href = "/login")}
         >
-        Register
+        Login
         </span>
     </div>
   );

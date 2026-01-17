@@ -26,5 +26,18 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
   let path = rawPath.toLowerCase().replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
   if (original !== path) history.replaceState({}, "", path);
   path = path.split(/[?#]/)[0];
+
+  if (routes[path]) {
+    return routes[path];
+  }
+  
+  if (path.startsWith("/profile/")) {
+    const id = path.split("/")[2];
+    const ProfilePage = routes["/profile"];
+    if (ProfilePage) {
+      return () => ProfilePage({ id });
+    }
+  }
+
   return routes[path] ?? routes["/notfound"];
 }
