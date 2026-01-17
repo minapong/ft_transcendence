@@ -54,6 +54,13 @@ fclean: clean
 		echo "Volume game_app_dev_backend_node_modules does not exist."; \
 	fi
 
+	@if docker volume inspect game_app_dev_frontend_node_modules >/dev/null 2>&1; then \
+		echo "💿Removing game_app_dev_frontend_node_modules..."; \
+		docker volume rm game_app_dev_frontend_node_modules; \
+	else \
+		echo "Volume game_app_devfrontend_node_modules does not exist."; \
+	fi
+
 
 # ==============================================================================
 # 🔁 Rebuild Target
