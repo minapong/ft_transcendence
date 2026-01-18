@@ -1,4 +1,5 @@
 import { getAuth } from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
 import {useState, useEffect, navigate} from "Reactor"
 
 
@@ -30,7 +31,7 @@ export default function TournamentPage() {
     const loadTournament = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:3000/api/tournament/active");
+        const res = await apiFetch("http://localhost:3000/api/tournament/active");
         if (!mounted) return;
 
         if (res.ok) {
@@ -58,7 +59,7 @@ export default function TournamentPage() {
 
   const refreshTournament = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/tournament/active");
+      const res = await apiFetch("http://localhost:3000/api/tournament/active");
       if (res.ok) {
         const data = await res.json();
         setTournament(data.tournament);
@@ -72,10 +73,10 @@ export default function TournamentPage() {
 			setError("Please select number of players");
 			return;
 		}
-		const res = await fetch("http://localhost:3000/api/tournament/create", {
+		const res = await apiFetch("http://localhost:3000/api/tournament/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: tournamentName, max_players }),
+        body: JSON.stringify({ tournamentId: tournament.id }),
       });
       const data = await res.json();
       if (!res.ok) {

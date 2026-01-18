@@ -1,11 +1,12 @@
 import {useState, useEffect, navigate} from "Reactor"
 import { getAuth } from "@/lib/auth"
+import { apiFetch } from "@/lib/api"
 // Temporary placeholder user — replace with real login context later
 // const mockUser = { id: 6, name: "Player1" };
-const auth = getAuth();
-const currentUser = auth?.user;
 
 export default function ActiveTournamentPage() {
+  const auth = getAuth();
+  const currentUser = auth?.user;
   const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,7 +14,7 @@ export default function ActiveTournamentPage() {
   async function loadActiveTournament() {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/tournament/active");
+      const res = await apiFetch("http://localhost:3000/api/tournament/active");
       const data = await res.json();
 
       if (!data?.tournament) {
@@ -64,7 +65,7 @@ export default function ActiveTournamentPage() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/tournament/next", {
+      const res = await apiFetch("http://localhost:3000/api/tournament/next", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: tournament.id }),
@@ -113,7 +114,7 @@ export default function ActiveTournamentPage() {
       {/* User placeholder */}
       <div className="text-lg font-bold">
         Logged in as:{" "}
-        <span className="text-cyan-400">{currentUser.name} - ID: {currentUser.id}</span>
+        <span className="text-cyan-400">{currentUser.username} - ID: {currentUser.id}</span>
       </div>
 
       <h1 className="text-3xl font-bold">

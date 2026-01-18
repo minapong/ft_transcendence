@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors"; // ✅ import the CORS plugin
-import jwt from "@fastify/jwt"
+import jwt from "@fastify/jwt";
 
 import { prisma } from "./db/prisma.js";               // ✅ Prisma client
 import apiRoutes from "./routes/api.routes.js";        // ✅ New unified API routes
