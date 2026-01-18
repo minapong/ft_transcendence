@@ -6,10 +6,15 @@ import { UserRepo } from '../repositories/user.repo.js';
 
 export default async function apiRoutes(app: FastifyInstance) {
  app.get("/users/:id", async (req: any, reply) => {
-    const u = await UserRepo.findById(Number(req.params.id));
-    if (!u) return reply.code(404).send({ error: "User not found" });
-    return reply.send(u);
-  });
+    const id = Number(req.params.id);
+  if (!Number.isFinite(id)) {
+    return reply.code(400).send({ error: "Invalid user id" });
+  }
+
+  const u = await UserRepo.findById(id);
+  if (!u) return reply.code(404).send({ error: "User not found" });
+  return reply.send(u);
+});
 
   app.post('/tournaments', async (req: any, reply) => {
     const { name } = req.body;

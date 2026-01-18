@@ -24,7 +24,7 @@ export async function registerProfileRoutes(server: FastifyInstance) {
           created_at: true,
         },
       });
-
+       console.log(`searching for user id ${userId}`);
       if (!user) {
         return reply.code(404).send({ error: "User not found" });
       }
