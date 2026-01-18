@@ -10,7 +10,7 @@ export default function TournamentPage() {
 	const user = auth?.user;
 	const token = auth?.token;
 
-  if (!user || !token) {
+  if (!user) {
 	return <div>Please login</div>;
   }
 
@@ -75,8 +75,8 @@ export default function TournamentPage() {
 		}
 		const res = await apiFetch("http://localhost:3000/api/tournament/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tournamentId: tournament.id }),
+        // headers: { "Content-Type": "application/json" }, //apiFetch sets same header
+        body: JSON.stringify({ name: tournamentName, max_players  }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -93,10 +93,10 @@ export default function TournamentPage() {
   const handleRegister = async () => {
     if (!tournament) return;
     try {
-      const res = await fetch("http://localhost:3000/api/tournament/register", {
+      const res = await apiFetch("http://localhost:3000/api/tournament/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tournamentId: tournament.id, userId: user.id }),
+        // headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId: tournament.id}),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -113,9 +113,9 @@ export default function TournamentPage() {
   const handleStartTournament = async () => {
     if (!tournament) return;
     try {
-      const res = await fetch("http://localhost:3000/api/tournament/start", {
+      const res = await apiFetch("http://localhost:3000/api/tournament/start", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        // headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: tournament.id }),
       });
       const data = await res.json();

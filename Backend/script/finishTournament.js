@@ -13,7 +13,7 @@ const prisma = new PrismaClient({
 });
 
 // Change this to the tournament you want to finish
-const TOURNAMENT_ID = 5;
+const TOURNAMENT_ID = 7;
 
 async function main() {
   console.log("[SCRIPT] DATABASE_URL =", process.env.DATABASE_URL);
