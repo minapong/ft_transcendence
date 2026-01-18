@@ -97,67 +97,108 @@ export default function PongGame() {
 		};
 	  }, []);
 
-	return(
-        <div className="bg-gray-900 flex flex-col items-center justify-center h-screen">
-            <div className="flex justify-between w-[800px] text-white text-2xl font-bold mb-2">
-                <span id="scoreLeft">{p1Name}: 0</span>
-                <span id="scoreRight">{p2Name}: 0</span>
-            </div>
+	  return (
+			<div className="bg-gray-900 flex flex-col items-center justify-center min-h-screen px-2">
+				
+				{/* Scoreboard */}
+				<div className="
+				flex justify-between 
+				w-full max-w-[320px] sm:max-w-[500px] lg:max-w-[800px] 
+				text-white 
+				text-lg sm:text-xl lg:text-2xl 
+				font-bold mb-2
+				">
+				<span id="scoreLeft">{p1Name}: 0</span>
+				<span id="scoreRight">{p2Name}: 0</span>
+				</div>
 
-
-			{/* LEFT TOUCH CONTROLS */}
-			<div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 ml-2">
+				{/* LEFT TOUCH CONTROLS */}
+				<div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
 				<button
 					id="left-up"
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+					className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
 				>
 					▲
 				</button>
 				<button
 					id="left-down"
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+					className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
 				>
 					▼
 				</button>
-			</div>
-            
-            {/* Game board */}
-            <div id="game_board" className="bg-gray-800 border-8 border-white rounded-lg w-[800px] h-[500px] relative">
-            
-                {/* Left paddle */}
-                <div id="left_p" className="absolute left-4 top-1/2 w-3 h-24 bg-white"></div>
+				</div>
 
-                {/* Right paddle */}
-                <div id="right_p" className="absolute right-4 top-1/2 w-3 h-24 bg-white"></div>
+				{/* Game board */}
+				<div
+				id="game_board"
+				className="
+					bg-gray-800 border-4 sm:border-6 lg:border-8 border-white rounded-lg relative
+					w-[320px] h-[200px]
+					sm:w-[500px] sm:h-[320px]
+					lg:w-[800px] lg:h-[500px]
+				"
+				>
+				{/* Left paddle */}
+				<div
+					id="left_p"
+					className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
+							w-2 sm:w-3 h-16 sm:h-20 lg:h-24 bg-white"
+				/>
 
-                {/* Ball */}
-                <div id="ball" className="absolute w-4 h-4 bg-white rounded-full top-1/2 left-1/2"></div>
-            
-            </div>
-			{/* RIGHT TOUCH CONTROLS */}
-			<div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 mr-2">
+				{/* Right paddle */}
+				<div
+					id="right_p"
+					className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
+							w-2 sm:w-3 h-16 sm:h-20 lg:h-24 bg-white"
+				/>
+
+				{/* Ball */}
+				<div
+					id="ball"
+					className="absolute 
+							w-3 h-3 sm:w-4 sm:h-4 
+							bg-white rounded-full 
+							top-1/2 left-1/2"
+				/>
+				</div>
+
+				{/* RIGHT TOUCH CONTROLS */}
+				<div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
 				<button
 					id="right-up"
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+					className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
 				>
 					▲
 				</button>
 				<button
 					id="right-down"
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+					className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
 				>
 					▼
 				</button>
-			</div>
-            <button id="pauseBtn" className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400">
-                ⏸️ Pause
-            </button>
-			<div
+				</div>
+
+				{/* Pause button */}
+				<button
+				id="pauseBtn"
+				className="
+					mt-3 sm:mt-4 
+					px-3 sm:px-4 py-1.5 sm:py-2 
+					bg-yellow-500 text-black font-bold rounded 
+					hover:bg-yellow-400 text-sm sm:text-base
+				"
+				>
+				⏸️ Pause
+				</button>
+
+				{/* Winner overlay */}
+				<div
 				id="winnerOverlay"
-				className="hidden absolute inset-0 flex bg-black/70 items-center justify-center text-white text-4xl font-bold z-50"
-			>
+				className="hidden absolute inset-0 flex bg-black/70 items-center justify-center 
+							text-white text-2xl sm:text-3xl lg:text-4xl font-bold z-50"
+				>
 				<div id="winnerText"></div>
+				</div>
 			</div>
-        </div>
-	);
+		);
 }
