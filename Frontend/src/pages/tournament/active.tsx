@@ -1,7 +1,7 @@
 import {useState, useEffect, navigate} from "Reactor"
 
 // Temporary placeholder user — replace with real login context later
-const mockUser = { id: 3, name: "Player1" };
+const mockUser = { id: 6, name: "Player1" };
 
 export default function ActiveTournamentPage() {
   const [tournament, setTournament] = useState(null);

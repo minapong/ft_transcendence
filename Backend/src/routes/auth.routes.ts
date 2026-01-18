@@ -20,7 +20,14 @@ export async function registerAuthRoutes(server: FastifyInstance) {
 
       try {
         const user = await AuthService.signup(email, username, password);
-        return reply.code(201).send(user);
+
+        const token = server.jwt.sign(
+          { userId: user.id, email: user.email },
+          {expiresIn: "1h" }
+        )
+
+        return reply.code(201).send({user, token});
+        
       } catch (err: any) {
         if (err.message === "EMAIL_ALREADY_EXISTS") {
           return reply.code(409).send({ error: "Email already used" });

@@ -31,7 +31,7 @@ export default function SignupPage() {
 
       // Optional: auto-login after signup (recommended UX)
       localStorage.setItem("auth", JSON.stringify(data));
-      window.location.href = "/";
+      window.location.href = `/profile/${data.user.id}`;
     } catch (err) {
       console.error(err);
       alert("Network error");
