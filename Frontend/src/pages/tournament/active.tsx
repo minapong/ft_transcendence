@@ -1,7 +1,9 @@
 import {useState, useEffect, navigate} from "Reactor"
-
+import { getAuth } from "@/lib/auth"
 // Temporary placeholder user — replace with real login context later
-const mockUser = { id: 6, name: "Player1" };
+// const mockUser = { id: 6, name: "Player1" };
+const auth = getAuth();
+const currentUser = auth?.user;
 
 export default function ActiveTournamentPage() {
   const [tournament, setTournament] = useState(null);
@@ -32,8 +34,12 @@ export default function ActiveTournamentPage() {
 
   // Start Game
   function handleStartGame(match: any) {
+    if (!currentUser) {
+      alert("Please login");
+      return; 
+    }
     const isPlayer =
-      match.p1.id === mockUser.id || match.p2.id === mockUser.id;
+      match.p1.id === currentUser.id || match.p2.id === currentUser.id;
 
     if (!isPlayer) {
       alert("You are not a player in this match.");
@@ -107,7 +113,7 @@ export default function ActiveTournamentPage() {
       {/* User placeholder */}
       <div className="text-lg font-bold">
         Logged in as:{" "}
-        <span className="text-cyan-400">{mockUser.name} - ID: {mockUser.id}</span>
+        <span className="text-cyan-400">{currentUser.name} - ID: {currentUser.id}</span>
       </div>
 
       <h1 className="text-3xl font-bold">

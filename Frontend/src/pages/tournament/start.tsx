@@ -1,8 +1,18 @@
+import { getAuth } from "@/lib/auth";
 import {useState, useEffect, navigate} from "Reactor"
+
+const auth = getAuth();
+const user = auth?.user;
+const token = auth?.token;
 
 export default function TournamentPage() {
   // Simulate logged-in user
-  const user = { id: 3, name: "santiago", isAdmin: true };
+  const user = { id: 5, name: "santiago", isAdmin: true };
+
+  if (!user || !token) {
+	return <div>Please login</div>;
+  }
+
 
   const [tournament, setTournament] = useState(null);
   const [max_players, setMax_players] = useState(4);
