@@ -53,6 +53,21 @@ export const UserRepo = {
     };
   },
 
+  async findByUsername(username: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      passwordHash: user.password_hash,
+    };
+  },
+
   async update(
     id: number,
     patch: Partial<{

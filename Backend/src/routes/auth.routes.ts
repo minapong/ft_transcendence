@@ -32,6 +32,13 @@ export async function registerAuthRoutes(server: FastifyInstance) {
         if (err.message === "EMAIL_ALREADY_EXISTS") {
           return reply.code(409).send({ error: "Email already used" });
         }
+        if (err.message === "USERNAME_ALREADY_EXISTS") {
+          return reply.code(409).send({ error: "Username already used" });
+        }
+        if (err?.code === "P2002") {
+          // err.meta.target usually contains ["username"] or ["email"]
+          return reply.code(409).send({ error: "Email or username already used" });
+        }
         console.error("SIGNUP ERROR:", err);
         return reply.code(500).send({ error: "Internal server error" });
       }

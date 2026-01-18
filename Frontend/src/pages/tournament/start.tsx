@@ -1,17 +1,19 @@
 import { getAuth } from "@/lib/auth";
 import {useState, useEffect, navigate} from "Reactor"
 
-const auth = getAuth();
-const user = auth?.user;
-const token = auth?.token;
 
 export default function TournamentPage() {
-  // Simulate logged-in user
-  const user = { id: 5, name: "santiago", isAdmin: true };
+	// Simulate logged-in user
+	//   const user = { id: 5, name: "santiago", isAdmin: true };
+	const auth = getAuth();
+	const user = auth?.user;
+	const token = auth?.token;
 
   if (!user || !token) {
 	return <div>Please login</div>;
   }
+
+  const isAdmin = (user?.username || "").toLowerCase() === "santiago";
 
 
   const [tournament, setTournament] = useState(null);
@@ -137,7 +139,8 @@ export default function TournamentPage() {
 
   const isRegistered = tournament?.registeredPlayers?.some((p: any) => p.id === user.id);
   const canRegister =
-	!user.isAdmin &&
+	// !user.isAdmin &&
+	!isAdmin &&
 	tournament?.state === "waiting" &&
 	!isRegistered &&
 	(tournament.registeredPlayers?.length || 0) < (tournament?.max_players ?? max_players);
@@ -153,7 +156,8 @@ export default function TournamentPage() {
 		  )}
 	
 		  {/* Admin: Create Tournament */}
-		  {!tournament && user.isAdmin && (
+		  {!tournament && isAdmin && (
+
 			<div className="flex flex-col gap-4 items-center">
 			  <input
 				type="text"
@@ -185,7 +189,7 @@ export default function TournamentPage() {
 		  )}
 	
 		  {/* No tournament & not admin */}
-		  {!tournament && !user.isAdmin && (
+		  {!tournament && !isAdmin && (
 			<p className="text-xl text-gray-400 font-semibold text-center">
 			  No Tournament active or open for registration
 			</p>
@@ -200,7 +204,7 @@ export default function TournamentPage() {
 				<p className="text-lg">Registered: {tournament.registeredPlayers?.length || 0}/{tournament?.max_players ?? max_players}</p>
 			  </div>
 	
-			  {user.isAdmin && tournament.state === "waiting" && (tournament.registeredPlayers?.length || 0) === (tournament?.max_players ?? max_players) && (
+			  {isAdmin && tournament.state === "waiting" && (tournament.registeredPlayers?.length || 0) === (tournament?.max_players ?? max_players) && (
 				<button 
 				  onClick={handleStartTournament} 
 				  className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded font-semibold transition w-full"
@@ -218,10 +222,10 @@ export default function TournamentPage() {
 				</button>
 			  )}
 	
-			  {!isRegistered && !user.isAdmin && tournament.state === "waiting" && (tournament.registeredPlayers?.length || 0) >= (tournament.max_players || max_players) && (
+			  {!isRegistered && !isAdmin && tournament.state === "waiting" && (tournament.registeredPlayers?.length || 0) >= (tournament.max_players || max_players) && (
 				<p className="text-red-400 font-semibold">Tournament Full – Cannot Register</p>
 			  )}
-			  {isRegistered && !user.isAdmin && tournament.state === "waiting" && (
+			  {isRegistered && !isAdmin && tournament.state === "waiting" && (
 				<p className="text-yellow-300">You are already registered.</p>
 			  )}
 	

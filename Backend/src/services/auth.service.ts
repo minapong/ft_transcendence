@@ -8,8 +8,11 @@ function hashPassword(password: string): string {
 export const AuthService = {
   
     async signup(email: string, username: string, password: string) {
-    const existing = await UserRepo.findByEmail(email);
-    if (existing) throw new Error("EMAIL_ALREADY_EXISTS");
+    const existingEmail = await UserRepo.findByEmail(email);
+    if (existingEmail) throw new Error("EMAIL_ALREADY_EXISTS");
+
+    const existingUsername = await UserRepo.findByUsername(username);
+    if (existingUsername) throw new Error("USERNAME_ALREADY_EXISTS");
 
     const password_hash = hashPassword(password);
 
