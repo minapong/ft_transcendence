@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
 
     localStorage.setItem("auth", JSON.stringify(data));
-    window.location.href = `/profile/${data.user.id}`;
+    window.location.href = `/me`;
   };
 
   return (
