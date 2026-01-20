@@ -12,7 +12,12 @@ import {
   getTournamentWithMatches,
   updateTournamentState,
   recordMatchWinner,
-} from "./tournamentRepo.js";
+} from "../repositories/tournament.repo.js";
+
+import {
+  updateUserGameStats,
+  updateUserTournamentStats
+} from "../repositories/stats.repo.js"
 
 import type { MatchDTO } from "../types/tournament.js";
 
@@ -92,8 +97,15 @@ export async function advanceRound(tournamentId: number) {
     .filter((id): id is number => id != null);
 
   if (winners.length === 1) {
-    // Tournament finished
-    return await updateTournamentState(tournamentId, "finished", tournament.currentRound, winners[0]);
+    // Tournament finished – award the championship
+    await updateUserTournamentStats(winners[0]);
+
+    return await updateTournamentState(
+      tournamentId,
+      "finished",
+      tournament.currentRound,
+      winners[0]
+    );
   }
 
   const nextRound = tournament.currentRound + 1;
@@ -127,6 +139,23 @@ export async function recordMatchResult(matchId: number, winnerId: number) {
   if (!validIds.includes(winnerId)) throw new Error("Invalid winner for this match");
 
   await recordMatchWinner(matchId, winnerId);
+  
+  // UPDATE USER STATS (both winner and loser)
+  const winnerPlayer = matchPlayers.find(p => p.id === winnerId);
+  const loserPlayer = matchPlayers.find(p => p.id !== winnerId);
+
+  if (!winnerPlayer) {
+    throw new Error("Winner not found in match players");
+  }
+
+  // Winner: +1 win
+  await updateUserGameStats(winnerId, true);
+
+  // Loser: +1 loss (only if valid player exists)
+  if (loserPlayer && loserPlayer.id !== 0) {
+    await updateUserGameStats(loserPlayer.id, false);
+  }
+
   return await getMatchDTO(matchId);
 }
 

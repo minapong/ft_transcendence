@@ -14,7 +14,10 @@ import {
   Player,
   cleanupQueue,
   getExpiredActiveMatches,
-} from "./matchmakingRepo.js";
+} from "../repositories/match.repo.js";
+import {
+  updateUserGameStats
+} from "../repositories/stats.repo.js"
 
 // ─────────────────────────────────────────────
 // Time constants (in seconds)
@@ -127,13 +130,27 @@ export async function startMatch(matchId: string) {
 // ─────────────────────────────────────────────
 export async function finishMatch(matchId: string, winnerId: number) {
   const match = await getActiveMatchFull({ matchId });
-// If match no longer exists (e.g. timed out and cleaned up), we ignore
+
+  // If match no longer exists (e.g. timed out and cleaned up), we ignore
   if (!match) {
     return { success: true, alreadyCleaned: true };
   }
 
+  // Record permanent game history
   await recordConnect4Game(match.p1.id, match.p2.id, winnerId);
 
+  // UPDATE USER STATS (both winner and loser)
+  const loserId = winnerId === match.p1.id ? match.p2.id : match.p1.id;
+
+  // Winner always gets +1 win
+  await updateUserGameStats(winnerId, true);
+
+  // Loser gets +1 loss (only if valid player ID)
+  if (loserId && loserId !== 0) {
+    await updateUserGameStats(loserId, false);
+  }
+
+  // Clean up active match
   await deleteActiveMatch(matchId);
 
   return { success: true };
