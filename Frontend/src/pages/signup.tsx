@@ -1,4 +1,4 @@
-import { useRef } from "Reactor";
+import { useRef, navigate } from "Reactor";
 
 export default function SignupPage() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -31,7 +31,7 @@ export default function SignupPage() {
 
       // Optional: auto-login after signup (recommended UX)
       localStorage.setItem("auth", JSON.stringify(data));
-      window.location.href = `/profile/${data.user.id}`;
+      navigate("/me");
     } catch (err) {
       console.error(err);
       alert("Network error");
@@ -72,7 +72,7 @@ export default function SignupPage() {
         Already have an account?{" "}
         <span
           className="text-blue-400 cursor-pointer hover:underline"
-          onClick={() => (window.location.href = "/login")}
+          onClick={() => (navigate("/login"))}
         >
           Login
         </span>

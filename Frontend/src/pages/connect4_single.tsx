@@ -2,8 +2,6 @@ import { useEffect, useState, useRef } from "Reactor";
 import { navigate } from "Reactor";
 import { getAuth } from "@/lib/auth";
 
-const mockUser = { id: 3, name: "Player2" };
-
 type Player = { 
   id: number; 
   name: string 
@@ -27,7 +25,7 @@ export default function Connect4Single() {
       <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl mb-4">Please login to play matchmaking.</p>
-          <button onClick={() => (window.location.href = "/login")} className="bg-blue-500 px-6 py-3 rounded text-xl">
+          <button onClick={() => (navigate("/login"))} className="bg-blue-500 px-6 py-3 rounded text-xl">
             Go to Login
           </button>
         </div>
