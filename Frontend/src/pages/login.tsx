@@ -1,4 +1,4 @@
-import { useRef } from "Reactor";
+import { useRef, navigate } from "Reactor";
 
 export default function LoginPage() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
 
     localStorage.setItem("auth", JSON.stringify(data));
-    window.location.href = `/me`;
+    navigate("/me");
   };
 
   return (
@@ -57,7 +57,7 @@ export default function LoginPage() {
         Don`t have an account?{" "}
         <span
          className="text-blue-400 cursor-pointer hover:underline"
-         onClick={() => (window.location.href = "/signup")}
+         onClick={() => (navigate("/signup"))}
         >
         Register
         </span>
