@@ -165,6 +165,7 @@ Backend `.env`:
 NODE_ENV=development
 PORT=3000
 DATABASE_URL="file:./database/transcendence.db"
+JWT_SECRET=commercial-deep-water-port
 ```
 
 Frontend `.env`:
