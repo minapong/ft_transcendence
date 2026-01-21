@@ -381,3 +381,19 @@ export async function get_ActiveTournament(): Promise<TournamentDTO | null> {
   if (!t) return null;
   return getTournamentWithMatches(t.id);
 }
+
+export const TournamentRepo = {
+  insertTournament,
+  getTournamentById,
+  insertTournamentPlayer,
+  insertMatch,
+  insertMatchPlayer,
+  recordMatchWinner,
+  getRegisteredPlayers,
+  getMatchPlayers,
+  getMatchesForTournament,
+  getMatchDTO,
+  updateTournamentState,
+  getTournamentWithMatches,
+  get_ActiveTournament,
+};

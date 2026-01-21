@@ -227,3 +227,19 @@ export async function getActiveMatchFull(params: {
 export async function getActiveMatchDTO(userId: number): Promise<ActiveMatchDTO | null> {
   return getActiveMatchFull({ userId });
 }
+
+export const MatchRepo = {
+  cleanupQueue,
+  enqueuePlayer,
+  dequeueTwoPlayers,
+  isUserQueued,
+  removeFromQueue,
+  recordConnect4Game,
+  insertActiveMatch,
+  updateActiveMatchStatus,
+  deleteActiveMatch,
+  isUserValid,
+  getExpiredActiveMatches,
+  getActiveMatchFull,
+  getActiveMatchDTO,
+};
