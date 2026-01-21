@@ -8,10 +8,20 @@ export default function TournamentPage() {
 	//   const user = { id: 5, name: "santiago", isAdmin: true };
 	const auth = getAuth();
 	const user = auth?.user;
-	const token = auth?.token;
 
   if (!user) {
-	return <div>Please login</div>;
+	 if (!user) {
+    return (
+      <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl mb-4">Please login to join tournament.</p>
+          <button onClick={() => (window.location.href = "/login")} className="bg-blue-500 px-6 py-3 rounded text-xl">
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
   }
 
   const isAdmin = (user?.username || "").toLowerCase() === "santiago";
