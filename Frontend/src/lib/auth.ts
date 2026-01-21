@@ -7,7 +7,7 @@ export function logout() {
   disconnectPresenceWS();
 
   // remove auth token/user
-  localStorage.removeItem("auth");
+  sessionStorage.removeItem(AUTH_KEY);
 
   // go to login
   window.location.href = "/login";
@@ -15,7 +15,7 @@ export function logout() {
 
 export function getAuth() {
   try {
-    const raw = localStorage.getItem(AUTH_KEY);
+    const raw = sessionStorage.getItem(AUTH_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -24,9 +24,9 @@ export function getAuth() {
 }
 
 export function setAuth(data: any){
-  localStorage.setItem(AUTH_KEY, JSON.stringify(data));
+  sessionStorage.setItem(AUTH_KEY, JSON.stringify(data));
 }
 
 export function clearAuth() {
-  localStorage.removeItem(AUTH_KEY);
+  sessionStorage.removeItem(AUTH_KEY);
 }

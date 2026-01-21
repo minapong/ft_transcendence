@@ -1,4 +1,6 @@
 import { useRef } from "Reactor";
+import { setAuth } from "@/lib/auth";
+import { connectPresenceWS } from "@/lib/presence";
 
 export default function SignupPage() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -30,7 +32,8 @@ export default function SignupPage() {
       }
 
       // Optional: auto-login after signup (recommended UX)
-      localStorage.setItem("auth", JSON.stringify(data));
+      setAuth(data);
+      connectPresenceWS();
       window.location.href = `/me`;
     } catch (err) {
       console.error(err);

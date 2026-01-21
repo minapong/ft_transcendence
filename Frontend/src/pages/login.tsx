@@ -1,4 +1,5 @@
 import { useRef } from "Reactor";
+import { setAuth } from "@/lib/auth";
 import { connectPresenceWS } from "@/lib/presence";
 
 export default function LoginPage() {
@@ -27,7 +28,7 @@ export default function LoginPage() {
       return;
     }
 
-    localStorage.setItem("auth", JSON.stringify(data));
+    setAuth(data);
     connectPresenceWS();  
     window.location.href = `/me`;
   };
