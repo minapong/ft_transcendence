@@ -134,22 +134,23 @@ export default function PongGame() {
 				className="
 					bg-gray-800 border-4 sm:border-6 lg:border-8 border-white rounded-lg relative
 					w-[320px] h-[200px]
-					sm:w-[500px] sm:h-[320px]
-					lg:w-[800px] lg:h-[500px]
+					sm:w-[400px] sm:h-[280px]
+					lg:w-[600px] lg:h-[380px]
+					xl:w-[800px] xl:h-[500px]
 				"
 				>
 				{/* Left paddle */}
 				<div
 					id="left_p"
 					className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
-							w-2 sm:w-3 h-16 sm:h-20 lg:h-24 bg-white"
+							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
 				/>
 
 				{/* Right paddle */}
 				<div
 					id="right_p"
 					className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
-							w-2 sm:w-3 h-16 sm:h-20 lg:h-24 bg-white"
+							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
 				/>
 
 				{/* Ball */}

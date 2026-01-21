@@ -2,46 +2,21 @@
 // 2 PLAYER (P2) MODE
 // =====================
 
-
-import { useState, useEffect } from "Reactor";
-
-export function useScreenSize() {
-  const [size, setSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-
-  useEffect(() => {
-    const onResize = () => {
-      setSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  return size;
-}
-
-
-const { width, height } = useScreenSize();
-
-export let GAME_WIDTH : Number;
-export let GAME_HEIGHT : Number;
-export let WALL_WIDTH : Number;
+let GAME_WIDTH : Number;
+let GAME_HEIGHT : Number;
+let WALL_WIDTH : Number;
 
 export let BALL_SIZE : Number;
 
-export let PADDLE_HEIGHT : Number;
-export let PADDLE_WIDTH : Number;
+let PADDLE_HEIGHT : Number;
+let PADDLE_WIDTH : Number;
 let PADDLE_DIST : Number;
 
-if (width < 640) 
+function handle_parameters()
 {
-    // mobile layout
+    let width = window.innerWidth;
+
+    if (width < 640) {
     GAME_WIDTH = 320;
     GAME_HEIGHT = 200;
     WALL_WIDTH = 4;
@@ -49,9 +24,8 @@ if (width < 640)
     PADDLE_HEIGHT = 64;
     PADDLE_WIDTH = 8;
     PADDLE_DIST = 8;
-}
-else if (width >= 640 && width < 1024)
-{
+    }
+  else if (width < 1024) {
     GAME_WIDTH = 500;
     GAME_HEIGHT = 320;
     WALL_WIDTH = 6;
@@ -59,10 +33,9 @@ else if (width >= 640 && width < 1024)
     PADDLE_HEIGHT = 80;
     PADDLE_WIDTH = 12;
     PADDLE_DIST = 12;
-}
-else
-{
-    //Large screens
+    }
+
+  else {
     GAME_WIDTH = 800;
     GAME_HEIGHT = 500;
     WALL_WIDTH = 8;
@@ -70,20 +43,26 @@ else
     PADDLE_HEIGHT = 96;
     PADDLE_WIDTH = 12;
     PADDLE_DIST = 16;
+    }
 }
 
-
-export const PADDLE_SPEED = 6;
-
-export const PLAYABLE_WIDTH = Number(GAME_WIDTH) - (2 * Number(WALL_WIDTH));
-export const PLAYABLE_HEIGHT = Number(GAME_HEIGHT) - (2 * Number(WALL_WIDTH));
-export const LEFT_PADDLE_X = PADDLE_DIST;
-export const RIGHT_PADDLE_X = PLAYABLE_WIDTH - Number(PADDLE_DIST) - Number(PADDLE_WIDTH);
+window.addEventListener("resize", () => {
+  handle_parameters();
+});
 
 
-export const GAME_SPEED = 2;
+const PADDLE_SPEED = 6;
 
-export const WIN_SCORE = 3;
+const PLAYABLE_WIDTH = Number(GAME_WIDTH) - (2 * Number(WALL_WIDTH));
+const PLAYABLE_HEIGHT = Number(GAME_HEIGHT) - (2 * Number(WALL_WIDTH));
+const LEFT_PADDLE_X = PADDLE_DIST;
+const RIGHT_PADDLE_X = PLAYABLE_WIDTH - Number(PADDLE_DIST) - Number(PADDLE_WIDTH);
+
+
+const GAME_SPEED = 2;
+
+const WIN_SCORE = 3;
+
 
 // =====================
 // 4 PLAYER (P4) MODE
