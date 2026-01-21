@@ -23,33 +23,29 @@ export default function ProfilePage(props?: { id?: string }) {
   useEffect(() => {
     if (!id) return;
     setOnline(null);
+  
     let alive = true;
+    let seq = 0;
 
-      const t = setInterval(async () => {
+      const fetchStatus = async () => {
+        const mySeq = ++seq;
         try {
           const res = await apiFetch(`http://localhost:3000/api/presence/status/${id}`);
+          if (!res.ok) return;
           const data = await res.json();
-          if (alive) setOnline(!!data.online);
+          if (alive && mySeq === seq) setOnline(!!data.online);
         } catch {
-          if (alive) setOnline(null);
+          if (alive && mySeq === seq) setOnline(null);
         }
-      }, 2000);
+      };
 
-      // run once immediately
-      (async () => {
-        try {
-          const res = await apiFetch(`http://localhost:3000/api/presence/status/${id}`);
-          const data = await res.json();
-          if (alive) setOnline(!!data.online);
-        } catch {
-          if (alive) setOnline(null);
-        }
-      })();
+      fetchStatus();
+      const t = setInterval(fetchStatus, 2000);
 
-    return () => {
-      alive = false;
-      clearInterval(t);
-    };
+      return () => {
+        alive = false;
+        clearInterval(t);
+      };
   }, [id]);
 
   if (!id) return <div>Invalid profile</div>;
