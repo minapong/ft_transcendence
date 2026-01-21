@@ -1,4 +1,5 @@
 import { disconnectPresenceWS } from "@/lib/presence";
+import { useRef, navigate } from "Reactor";
 
 const AUTH_KEY = "auth";
 
@@ -10,7 +11,7 @@ export function logout() {
   sessionStorage.removeItem(AUTH_KEY);
 
   // go to login
-  window.location.href = "/login";
+  navigate("/login");
 }
 
 export function getAuth() {
