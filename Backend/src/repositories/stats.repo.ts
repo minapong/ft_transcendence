@@ -77,3 +77,13 @@ export async function getRecentMatchesForUser(userId: number, limit: number = 10
 export async function getUnlockedAchievements(userId: number, ..._rest: any[]) {
   return [];
 }
+
+export const StatsRepo = {
+  updateUserGameStats,
+  updateUserTournamentStats,
+  getUserAggregatedStats,
+  getLeaderboardData,
+  getRecentMatchesGlobal,
+  getRecentMatchesForUser,
+  getUnlockedAchievements,
+};
