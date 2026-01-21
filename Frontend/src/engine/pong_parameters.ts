@@ -3,19 +3,82 @@
 // =====================
 
 
-export const GAME_WIDTH = 800;
-export const GAME_HEIGHT = 500;
-export const WALL_WIDTH = 8;
+import { useState, useEffect } from "react";
 
-export const BALL_SIZE = 16;
+export function useScreenSize() {
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
-export const PADDLE_HEIGHT = 96;
+  useEffect(() => {
+    const onResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return size;
+}
+
+
+const { width, height } = useScreenSize();
+
+export let GAME_WIDTH : Number;
+export let GAME_HEIGHT : Number;
+export let WALL_WIDTH : Number;
+
+export let BALL_SIZE : Number;
+
+export let PADDLE_HEIGHT : Number;
+export let PADDLE_WIDTH : Number;
+let PADDLE_DIST : Number;
+
+if (width < 640) 
+{
+    // mobile layout
+    GAME_WIDTH = 320;
+    GAME_HEIGHT = 200;
+    WALL_WIDTH = 4;
+    BALL_SIZE = 12;
+    PADDLE_HEIGHT = 64;
+    PADDLE_WIDTH = 8;
+    PADDLE_DIST = 8;
+}
+else if (width >= 640 && width < 1024)
+{
+    GAME_WIDTH = 500;
+    GAME_HEIGHT = 320;
+    WALL_WIDTH = 6;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 80;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 12;
+}
+else
+{
+    //Large screens
+    GAME_WIDTH = 800;
+    GAME_HEIGHT = 500;
+    WALL_WIDTH = 8;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 96;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 16;
+}
+
+
 export const PADDLE_SPEED = 6;
-export const PADDLE_WIDTH = 12;
-export const PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
-export const PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
-export const LEFT_PADDLE_X = 16;
-export const RIGHT_PADDLE_X = PLAYABLE_WIDTH - 16 - PADDLE_WIDTH;
+
+export const PLAYABLE_WIDTH = Number(GAME_WIDTH) - (2 * Number(WALL_WIDTH));
+export const PLAYABLE_HEIGHT = Number(GAME_HEIGHT) - (2 * Number(WALL_WIDTH));
+export const LEFT_PADDLE_X = PADDLE_DIST;
+export const RIGHT_PADDLE_X = PLAYABLE_WIDTH - Number(PADDLE_DIST) - Number(PADDLE_WIDTH);
 
 
 export const GAME_SPEED = 2;
