@@ -3,8 +3,9 @@ import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 
 import websocket from "@fastify/websocket";
-import { registerPresenceWsRoutes } from "./routes/presence.ws.js";
-import { registerPresenceHttpRoutes } from "./routes/presence.http.js";
+import { registerPresenceWs} from "./routes/presence.ws.js";
+import { registerPresenceRoutes } from "./routes/presence.js";
+
 
 import { prisma } from "./db/prisma.js";    
 
@@ -36,8 +37,9 @@ async function start() {
 
     await server.register(websocket); // must be before websocket routes
 
-    registerPresenceWsRoutes(server);
-    registerPresenceHttpRoutes(server);
+    registerPresenceWs(server);
+    // registerPresenceHttpRoutes(server);
+    registerPresenceRoutes(server);
 
     registerTournamentRoutes(server);
     registerMatchmakingRoutes(server);

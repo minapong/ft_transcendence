@@ -1,4 +1,4 @@
-import { getAuth } from "@/lib/auth";
+import { getAuth, logout } from "@/lib/auth";
 
 export async function apiFetch(url: string, options: RequestInit = {}) {
   const auth = getAuth();
@@ -6,7 +6,16 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
 
   const headers = new Headers(options.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (!headers.has("Content-Type") && options.body) headers.set("Content-Type", "application/json");
+ if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
-  return fetch(url, { ...options, headers });
+  const res = await fetch(url, { ...options, headers });
+
+  if (res.status === 401) {
+    console.warn("401 → auto logout");
+    logout(); // closes WS + clears auth + redirects
+    return res;
+  }
+  return res;
 }

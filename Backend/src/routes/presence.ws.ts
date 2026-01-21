@@ -1,49 +1,45 @@
-// src/routes/presence.ws.ts
-import type { FastifyInstance } from "fastify";
-import type { SocketStream } from "@fastify/websocket";
-import { addOnline, removeOnline, onlineUserIds } from "../presence/presence.store.js";
+import { FastifyInstance } from "fastify";
+import { setOnline, setOffline, listOnline } from "../presence/store.js";
 
-function getToken(req: any): string | null {
-  // ws://host/ws/presence?token=...
-  const t = req.query?.token;
-  if (typeof t === "string" && t.length > 0) return t;
+export async function registerPresenceWs(server: FastifyInstance) {
+  server.get(
+    "/ws/presence",
+    { websocket: true },
+    (connection, req) => {
+      try {
+        const token = (req.query as any)?.token;
+        if (!token) {
+          connection.socket.close();
+          return;
+        }
 
-  // Optional fallback: "Authorization: Bearer <token>" (not typical in browser WS)
-  const auth = req.headers?.authorization;
-  if (typeof auth === "string" && auth.startsWith("Bearer ")) return auth.slice(7);
+        const payload = server.jwt.verify(token) as any;
+        const userId = Number(payload.userId);
 
-  return null;
-}
+        if (!Number.isFinite(userId)) {
+          connection.socket.close();
+          return;
+        }
 
-export async function registerPresenceWsRoutes(server: FastifyInstance) {
-  server.get("/ws/presence", { websocket: true }, (conn: SocketStream, req: any) => {
-    const token = getToken(req);
-    if (!token) {
-      conn.socket.close(1008, "Missing token");
-      return;
+        // mark online
+        setOnline(userId);
+
+        // send hello
+        connection.socket.send(
+          JSON.stringify({
+            type: "hello",
+            userId,
+            online: listOnline(),
+          })
+        );
+
+        // cleanup on disconnect
+        connection.socket.on("close", () => {
+          setOffline(userId);
+        });
+      } catch {
+        connection.socket.close();
+      }
     }
-
-    let payload: any;
-    try {
-      payload = server.jwt.verify(token);
-    } catch {
-      conn.socket.close(1008, "Invalid token");
-      return;
-    }
-
-    const userId = Number(payload.userId);
-    if (!Number.isFinite(userId)) {
-      conn.socket.close(1008, "Bad token payload");
-      return;
-    }
-
-    addOnline(userId, conn);
-
-    // Useful debug message for client
-    conn.socket.send(JSON.stringify({ type: "hello", userId, online: onlineUserIds() }));
-
-    conn.socket.on("close", () => {
-      removeOnline(userId, conn);
-    });
-  });
+  );
 }

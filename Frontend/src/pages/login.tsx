@@ -1,4 +1,5 @@
 import { useRef } from "Reactor";
+import { connectPresenceWS } from "@/lib/presence";
 
 export default function LoginPage() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -27,6 +28,7 @@ export default function LoginPage() {
     }
 
     localStorage.setItem("auth", JSON.stringify(data));
+    connectPresenceWS();  
     window.location.href = `/me`;
   };
 
