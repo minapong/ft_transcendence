@@ -26,6 +26,10 @@ export function pongLogic(
     const left_p = document.getElementById('left_p');
     const right_p = document.getElementById('right_p');
     const pause = document.getElementById("pauseBtn");
+	const left_up_But = document.getElementById("left-up");
+	const left_down_But = document.getElementById("left-down");
+	const right_up_But = document.getElementById("right-up");
+	const right_down_But = document.getElementById("right-down");
 
     let isPaused = false;
 
@@ -112,6 +116,31 @@ export function pongLogic(
 		if (e.key === 'w') wPressed = false;
 		if (e.key === 's') sPressed = false;
 	};
+
+	left_up_But.addEventListener("pointerdown", e => {
+		wPressed = true;
+	});
+	left_up_But.addEventListener("pointerup", e => {
+		wPressed = false;
+	});
+	left_down_But.addEventListener("pointerdown", e => {
+		sPressed = true;
+	});
+	left_down_But.addEventListener("pointerup", e => {
+		sPressed = false;
+	});
+	right_up_But.addEventListener("pointerdown", e => {
+		upPressed = true;
+	});
+	right_up_But.addEventListener("pointerup", e => {
+		upPressed = false;
+	});
+	right_down_But.addEventListener("pointerdown", e => {
+		downPressed = true;
+	});
+	right_down_But.addEventListener("pointerup", e => {
+		downPressed = false;
+	});
 
 	const pauseHandler = () => {
 		isPaused = !isPaused;

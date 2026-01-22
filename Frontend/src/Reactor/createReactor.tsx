@@ -62,6 +62,8 @@ export function createReactor(tag: any, props: any, ...children: any[]) {
 		return rendered;
 	}
 	const el = document.createElement(tag);
+	// Append children before applying props so form controls (like <select>)
+	// can correctly pick up their value/selection after options exist.
 	for (const child of children.flat()) attachChild(el, child);
 	applyProps(el, props);
 	return el;

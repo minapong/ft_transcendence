@@ -1,0 +1,11 @@
+"use strict";
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.prisma = void 0;
+var client_1 = require("@prisma/client");
+var adapter_better_sqlite3_1 = require("@prisma/adapter-better-sqlite3");
+var dotenv_1 = require("dotenv");
+dotenv_1.default.config();
+var databaseUrl = (_a = process.env.DATABASE_URL) !== null && _a !== void 0 ? _a : 'file:./database/transcendence.db';
+var adapter = new adapter_better_sqlite3_1.PrismaBetterSqlite3({ url: databaseUrl });
+exports.prisma = new client_1.PrismaClient({ adapter: adapter });

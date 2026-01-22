@@ -1,201 +1,216 @@
-
 # 🏓 ft_transcendence
 
+*This project has been created as part of the 42 curriculum by Hashir, Natalia, Abdul Rehman, and Santiago.*
+
+---
+
+## 📑 Table of Contents
+
+- [🧭 Overview](#-overview)
+- [🧱 Core Team](#-core-team)
+- [🧩 Module Status](#-module-status-sorted)
+- [📊 Status (v2.0.0)](#-status-v200)
+- [📊 Module Totals](#-module-totals--mvp-2)
+- [⚙️ Tech Stack](#️-tech-stack)
+- [🌿 Branches (Remotes)](#-branches-remotes)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Quick Start](#-quick-start)
+- [🧪 Environment](#-environment)
+- [📝 Notes (Important)](#-notes-important)
+
+---
+
 ## 🧭 Overview
-**ft_transcendence** is a full-stack web application inspired by the classic **Pong** game,
-extended with real-time multiplayer, authentication, live chat, security features,
-blockchain experiments, and 3D visuals.
 
-This repository represents a **baseline integrated milestone** of the project.
-Core systems are wired together, but the project is **still under active development**
-and **not yet considered a production-ready release**.
+**ft_transcendence** is a full-stack web application inspired by the classic **Pong** game. The project focuses on gameplay engines (Pong, Connect4), multiplayer experiences, AI opponents, matchmaking, and tournaments while following the **ft_transcendence v19.x** subject requirements.
 
-Built as part of the **42 Network – Transcendence project**.
-
-
-
-## Table of Contents
-1. [🧭 Overview](#-overview)
-2. [🧱 BASE (Mandatory Part)](#-base-mandatory-part)
-3. [🧩 Module Ownership](#-module-ownership)
-4. [📊 Module Points Summary (v19.x compliant)](#-module-points-summary-v19x-compliant)
-5. [📊 Project Status](#-project-status)
-6. [⚙️ Tech Stack](#️-tech-stack)
-7. [🌿 Branching & Workflow Strategy](#-branching--workflow-strategy)
-8. [🏷️ Versioning](#️-versioning)
-9. [📁 Project Structure](#-project-structure)
-10. [🚀 Quick Start](#-quick-start)
-11. [🧪 Environment](#-environment)
-12. [👥 Team](#-team)
-13. [📝 Notes](#-notes)
+This document reflects the v2.0.0 (MVP-2) state. See Changelog for highlights.
 
 ---
 
-## 🧱 BASE (Mandatory Part)
-| Team Member | Responsibility | Description |
-|------------|----------------|-------------|
-| **Hashir** | SPA Structure + Backend (Fastify + Node.js) | TypeScript SPA architecture and backend API using Fastify. |
-| **Natalia** | Docker Setup + SPA Integration | Docker environment, NGINX reverse proxy, HTTPS/TLS configuration. |
-| **Abdul Rehman** | Core Pong Gameplay | Base 2-player Pong with consistent physics and paddle behavior. |
-| **Santiago** | Tournament & Matchmaking + HTTPS | Tournament logic, matchmaking flow, and HTTPS integration. |
+## 🧱 Core Team
+
+| Team Member      | Role                              | Focus                                                         |
+| ---------------- | --------------------------------- | ------------------------------------------------------------- |
+| **Hashir**       | Product Architect & Frontend Lead | SPA architecture, custom frontend framework, backend foundation |
+| **Natalia**      | Platform & Data Steward           | Docker environment, SQLite schema & persistence               |
+| **Abdul Rehman** | Gameplay Systems Engineer         | Pong engines, multiplayer logic, second game                  |
+| **Santiago**     | AI & Competitive Systems Strategist | AI opponent, tournament manager, statistics                   |
 
 ---
 
-## 🧩 Module Ownership
+## 🧩 Module Status (Sorted)
 
-### Hashir
-- **Fastify** *(Major, 2 pts)* — Fastify server with CORS and tournament routes in `Backend/src/index.ts` and `Backend/src/routes/tournament.ts`.
-- **Babylon** *(Major, 2 pts)* — Babylon.js canvas scene scaffold imported in `Frontend/src/pages/login.tsx`.
-- **Remote Auth (Google)** *(Minor, 1 pt)* — No Google OAuth implementation present in the repository.
-- **Reactor Frontend Framework** *(Major, 2 pts)* — Custom React-like SPA library and hooks in `Frontend/src/Reactor/`.
+> ✅ Completed 🚧 Ongoing 🧪 Final (planned or not started)  
+> **Only ✅ modules count for points**
 
-### Arehman
-- **Multiplayer** *(Major, 2 pts)* — Multiplayer Pong engines including four-paddle flow in `Frontend/src/engine/pong_logic.ts` and `Frontend/src/engine/4p_pong_logic.ts`.
-- **1st Game** *(Major, 2 pts)* — Classic Pong gameplay loop and scoring in `Frontend/src/engine/pong_logic.ts`.
-- **2nd Game** *(Major, 2 pts)* — Connect4 board logic and win detection in `Frontend/src/engine/connect4_logic.ts`.
+### ✅ Completed
 
-### Natalia
-- **WebSockets** *(Major, 2 pts)* — No WebSocket server/client handlers are present; current backend exposes HTTP Fastify routes only.
-- **User Management** *(Major, 2 pts)* — SQLite schema for users, sessions, friends, and avatars in `Backend/migrations/000_init.sql`.
-- **ORM / Database** *(Minor, 1 pt)* — Database layer backed by `better-sqlite3` with migrations in `Backend/migrations/`.
+| Module                     | Owner         | Type          | Notes                                |
+| -------------------------- | ------------- | ------------- | ------------------------------------ |
+| Reactor Frontend Framework | Hashir        | Major (2 pts) | Custom SPA framework & hooks         |
+| Classic Pong               | Abdul Rehman  | Major (2 pts) | Core Pong gameplay                   |
+| Multiplayer Pong (2P / 4P) | Abdul Rehman  | Major (2 pts) | Multiple paddle modes                |
+| Second Game (Connect4)     | Abdul Rehman  | Major (2 pts) | Board logic & win detection          |
+| AI Opponent                | Santiago      | Major (2 pts) | Pong AI decision engine              |
+| Fastify Backend            | Hashir        | Major (2 pts) | API server, CORS/JWT, routes         |
+| User Management (JWT)      | Natalia       | Major (2 pts) | Signup, login, auth guard            |
+| Tournament System          | Santiago      | Minor (1 pt)  | Create/register/start/advance/result |
+| Matchmaking (HTTP)         | Santiago      | Minor (1 pt)  | Queue + active matches (Connect4)    |
 
-### Santiago
-- **AI Opponent** *(Major, 2 pts)* — Pong AI decision engine in `Frontend/src/engine/pong_ai.ts`.
-- **Tournament** *(Minor, 1 pt)* — Tournament creation, advancement, and retrieval logic in `Backend/src/logic/tournamentManager.ts` and routes in `Backend/src/routes/tournament.ts`.
-- **Statistics** *(Minor, 1 pt)* — Aggregated player stats table `stats_user` defined in `Backend/migrations/000_init.sql`.
+### 🚧 Ongoing
 
-## 📊 Module Points Summary (v19.x compliant)
+| Module            | Owner    | Type          | Notes                                |
+| ----------------- | -------- | ------------- | ------------------------------------ |
+| Statistics        | Santiago | Minor (1 pt)  | Routes exist; repo queries pending   |
+| ORM / Database    | Natalia  | Minor (1 pt)  | Prisma + SQLite; migrations ongoing  |
 
-| Member | Major | Minor | Total Points |
-| ------ | ----- | ----- | ------------ |
-| Hashir | 3 | 1 | 7 |
-| Arehman | 3 | 0 | 6 |
-| Natalia | 2 | 1 | 5 |
-| Santiago | 1 | 2 | 4 |
-| **Total** | **9** | **4** | **22** |
+### 🧪 Final
 
-Points are distributed to reach and exceed the 14-point minimum; modules are implemented collaboratively, with ownership indicating primary responsibility.
+| Module               | Owner   | Type          | Notes                    |
+| -------------------- | ------- | ------------- | ------------------------ |
+| WebSockets           | Natalia | Major (2 pts) | Realtime gameplay/chat (planned) |
+| Babylon.js Graphics  | Hashir  | Major (2 pts) | Enhanced visuals (planned)       |
+| Remote Auth (Google) | Hashir  | Minor (1 pt)  | Optional OAuth (planned)         |
 
 ---
 
-## 📊 Project Status
+## 📊 Status (v2.0.0)
 
-🟡 **MVP-1 — Connected Baseline**
+- MVP-2 shipped: backend auth, tournaments, matchmaking; frontend login and dashboard skeleton.
+- Realtime (WebSockets) and production statistics remain open items.
 
-- SPA, Fastify backend, Docker/NGINX, gameplay, and tournament routes are wired end-to-end.
-- Features are intentionally thin; behaviour and APIs will change while we harden the stack.
-- Use this milestone as a stable reference point, **not** a production release.
+---
+
+## 📊 Module Totals — MVP-2
+
+### 🔢 Points Breakdown
+
+| Member           | Major (✅) | Minor (✅) | Points |
+| ---------------- | ---------- | ---------- | ------ |
+| **Hashir**       | 2          | 0          | **4**  |
+| **Abdul Rehman** | 3          | 0          | **6**  |
+| **Natalia**      | 1          | 0          | **2**  |
+| **Santiago**     | 1          | 2          | **4**  |
+| **TOTAL**        | **7**      | **2**      | **16 / 14** ✅ |
+
+Notes:
+- Totals include only modules marked ✅ in the Module Status table.
+- Minimum target assumed 14; project currently exceeds the target.
 
 ---
 
 ## ⚙️ Tech Stack
-- **Frontend:** TypeScript, Tailwind CSS, Babylon.js
-- **Backend:** Node.js, Fastify, SQLite
-- **DevOps:** Docker, NGINX, HTTPS (TLS 1.2 / 1.3)
-- **Blockchain:** Avalanche, Solidity
-- **Realtime:** WebSocket (WSS)
+
+**Frontend**
+
+* TypeScript
+* Custom SPA framework (Reactor)
+* Tailwind CSS
+
+**Backend**
+
+* Node.js
+* Fastify (+ @fastify/jwt, CORS)
+* SQLite via Prisma (better-sqlite3 adapter)
+
+**DevOps**
+
+* Docker
+* Docker Compose
 
 ---
 
-## 🌿 Branching & Workflow Strategy
+## 🌿 Branches (Remotes)
 
-| Branch | Purpose |
-|------|---------|
-| **main** | Milestone snapshots with a clean, linear project timeline |
-| **dev** | Active integration branch for all ongoing development |
-| **hashir** | SPA frontend & backend development |
-| **natalia** | Docker, HTTPS, database, blockchain |
-| **abdul** | Gameplay & second game features |
-| **santiago** | AI opponent and dashboard |
-
-Feature branches merge into **`dev`**.
-Milestones are promoted from **`dev` → `main`** as **single, squashed commits**.
-
----
-
-## 🏷️ Versioning
-
-Tags (for example `v1.0.0`) mark **important development milestones**.
-They should **not** be interpreted as user-facing or production releases.
-
-Formal releases will be created only after the project reaches
-feature completeness and production stability.
+| Branch                     | Author        | Last Update |
+| -------------------------- | ------------- | ----------- |
+| origin/2P-Pong             | Abdul Rehman  | 2025-11-11  |
+| origin/4P-Pong             | Abdul Rehman  | 2025-11-29  |
+| origin/Dev                 | Hashir        | 2025-12-20  |
+| origin/Fixed-Natalia-PrismaDB | Hashir    | 2025-12-24  |
+| origin/HEAD                | Hashir        | 2026-01-04  |
+| origin/Natalia-CICD        | Natalia       | 2025-12-07  |
+| origin/Natalia-DB          | Natalia        | 2025-11-23 |
+| origin/Natalia-PrismaDB    | Natalia        | 2025-12-26 |
+| origin/Natalia-SignUp      | Natalia       | 2025-12-25  |
+| origin/Natalia-miniPrisma  | Natalia       | 2025-12-03  |
+| origin/SPA-reactor         | Hashir        | 2026-01-03  |
+| origin/dropdown_fix        | Hashir        | 2025-12-07  |
+| origin/main                | Hashir        | 2026-01-04  |
+| origin/matchmaking_addition | Santiago      | 2026-01-03 |
+| origin/mvp-1               | Hashir        | 2025-11-25  |
 
 ---
 
 ## 📁 Project Structure
+
 ```bash
 ft_transcendence/
-├── Frontend/              # SPA (TypeScript + Tailwind + Babylon.js)
-├── Backend/               # Fastify backend + SQLite
-├── Docker/                # Docker Compose + NGINX config
-├── nginx/                 # NGINX configuration
-├── Makefile               # Helper targets for dev/prod Docker runs
-├── Contributing.md        # Development workflow guide
-└── Readme.md              # This file
+├── Frontend/        # SPA (TypeScript + Reactor + Tailwind)
+├── Backend/         # Fastify backend + SQLite
+├── Docker/          # Docker & NGINX configs
+├── Makefile
+└── Readme.md
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Docker Engine + Docker Compose v2
-- Ports `3000`, `5173`, `80`, `443` available (for dev/prod)
-
-### Dev (hot reload)
 ```bash
 make dev
-# or:
-docker compose -p game_app_dev -f Docker/docker-compose.yml -f Docker/docker-compose.dev.yml up --build
 ```
-
-### Production-style (detached)
-```bash
-make prod
-# or:
-docker compose -p game_app_prod -f docker-compose.prod.yml up --build -d
-```
-
-Environment defaults live in `Backend/.env` and `Frontend/.env`; adjust ports/URLs there if needed.
 
 ---
 
 ## 🧪 Environment
 
-Backend `.env` (default):
+Backend `.env`:
+
 ```
 NODE_ENV=development
 PORT=3000
 DATABASE_URL="file:./database/transcendence.db"
+JWT_SECRET=commercial-deep-water-port
 ```
 
-Frontend `.env` (default):
+Frontend `.env`:
+
 ```
-NODE_ENV=development
 VITE_API_URL=http://localhost:3000
 ```
 
-Keep these values aligned with your local or deployed settings before running Docker or local dev.
+If/when WebSockets are added:
+
+```
+VITE_WS_URL=ws://localhost:3000
+```
 
 ---
 
-## 👥 Team
+## 🧷 Changelog
 
-| Name             | Role                         |
-| ---------------- | ---------------------------- |
-| **Hashir**       | Frontend & Architecture Lead |
-| **Natalia**      | DevOps & Security Engineer   |
-| **Abdul Rehman** | Gameplay Developer           |
-| **Santiago**     | AI & Matchmaking Engineer    |
+- v2.0.0 — MVP-2 (2026-01-22)
+	- Production JWT auth: signup, login, `/api/me`, route guards
+	- Tournament flow stabilized: create/register/start/advance/result
+	- Matchmaking (HTTP): queue + active match lifecycle (Connect4)
+	- Profile lookup `/api/users/:id`; dashboard pages scaffolded
+	- Stats routes present; repository queries pending implementation
+	- WebSockets not yet implemented (planned for realtime gameplay/chat)
+
+- v1.0.0 — MVP-1 (2026-01-04)
+	- Core game integration (Pong, Connect4)
+	- Basic matchmaking and tournament logic
+	- Reactor SPA framework introduced
 
 ---
 
-## 📝 Notes
+## 📝 Notes (Important)
 
-* Repository includes the **mandatory base** and **initial modules**.
-* All future modules must comply with **SPA**, **HTTPS**, and **Docker one-command** rules.
-* Built following **ft_transcendence v19.x** subject requirements.
+* ✅ README reflects v2.0.0 implementation
+* 🚧 Statistics and WebSockets are in progress/planned
+* 🧪 Future modules are listed under Final
 
 ---
 

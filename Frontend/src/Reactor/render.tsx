@@ -2,7 +2,8 @@ import rootLayout from "@/components/layout/RootLayout";
 import { resetHooks, flushEffects, runPendingRefs } from "./hooks";
 import { getRoutes, resolvePage } from "./router/routes";
 
-const LAYOUT_KEY = "__layout__";
+// Shared key so layout-level state (including modals) can trigger a shell re-render.
+export const LAYOUT_KEY = "__layout__";
 
 // Renders the current route by resolving the page component and updating the DOM.
 export function renderRoute(triggerKey?: string) {

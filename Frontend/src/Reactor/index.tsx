@@ -9,3 +9,6 @@ export { resetHooks } from "./hooks";
 
 // Exports custom hooks for state management and effects.
 export {useState,useEffect,useMemo,useRef}from "./hooks"
+
+// Exports global modal helpers.
+export { openModal, closeModal, getCurrentModal, registerModal, resolveModalRenderer } from "./modal";

@@ -24,6 +24,14 @@ export function pong4PLogic(
 	const upper_p = document.getElementById('upper_p') as HTMLElement;
 	const lower_p = document.getElementById('lower_p') as HTMLElement;
 	const pause = document.getElementById('pauseBtn') as HTMLButtonElement;
+	const leftP_up_But = document.getElementById('left-up') as HTMLButtonElement;
+	const leftP_down_But = document.getElementById('left-down') as HTMLButtonElement;
+	const rightP_up_But = document.getElementById('right-up') as HTMLButtonElement;
+	const rightP_down_But = document.getElementById('right-down') as HTMLButtonElement;
+	const topP_left_But = document.getElementById('top-left') as HTMLButtonElement;
+	const topP_right_But = document.getElementById('top-right') as HTMLButtonElement;
+	const bottomP_left_But = document.getElementById('bottom-left') as HTMLButtonElement;
+	const bottomP_right_But = document.getElementById('bottom-right') as HTMLButtonElement;
 
 	let isPaused = false;
 	let isWin = false;
@@ -73,6 +81,59 @@ export function pong4PLogic(
 		if (e.key === 'v') vPressed = false;
 		if (e.key === 'b') bPressed = false;
 	};
+
+	leftP_up_But.addEventListener("pointerdown", e => {
+		wPressed = true;
+	});
+	leftP_up_But.addEventListener("pointerup", e => {
+		wPressed = false;
+	});
+	leftP_down_But.addEventListener("pointerdown", e => {
+		sPressed = true;
+	});
+	leftP_down_But.addEventListener("pointerup", e => {
+		sPressed = false;
+	});
+
+	rightP_up_But.addEventListener("pointerdown", e => {
+		num6Pressed = true;
+	});
+	rightP_up_But.addEventListener("pointerup", e => {
+		num6Pressed = false;
+	});
+	rightP_down_But.addEventListener("pointerdown", e => {
+		num3Pressed = true;
+	});
+	rightP_down_But.addEventListener("pointerup", e => {
+		num3Pressed = false;
+	});
+
+	topP_left_But.addEventListener("pointerdown", e => {
+		vPressed = true;
+	});
+	topP_left_But.addEventListener("pointerup", e => {
+		vPressed = false;
+	});
+	topP_right_But.addEventListener("pointerdown", e => {
+		bPressed = true;
+	});
+	topP_right_But.addEventListener("pointerup", e => {
+		bPressed = false;
+	});
+
+	bottomP_left_But.addEventListener("pointerdown", e => {
+		leftPressed = true;
+	});
+	bottomP_left_But.addEventListener("pointerup", e => {
+		leftPressed = false;
+	});
+	bottomP_right_But.addEventListener("pointerdown", e => {
+		rightPressed = true;
+	});
+	bottomP_right_But.addEventListener("pointerup", e => {
+		rightPressed = false;
+	});
+
 
 	const pauseHandler = () => {
 		isPaused = !isPaused;

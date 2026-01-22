@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+
+/* =====================
+   USER
+===================== */
+model User {
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  username      String          @unique
+  password_hash String
+  avatarId      Int?            @unique
+  avatar        Avatar?         @relation("UserSelectedAvatar", fields: [avatarId], references: [id], onDelete: SetNull)
+
+  // all avatars user owns
+  avatars       Avatar[]        @relation("UserAvatars")
+
+  sessions      UserSession[]
+  friends       Friend[]        @relation("UserFriends")
+  friendedBy    Friend[]        @relation("FriendUsers")
+
+  matchPlayers  MatchPlayer[]
+  matchesWon    Match[]         @relation("WinnerMatches")
+
+  stats         StatsUser?
+
+  tournamentPlayers TournamentPlayer[]
+  tournamentsWon    Tournament[] @relation("TournamentWinner")
+
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @default(now())
+
+  //prisma only virtual fields (do not exist in db columns)
+  activeMatchesP1 ActiveMatches[] @relation("ActiveMatchP1") 
+  activeMatchesP2 ActiveMatches[] @relation("ActiveMatchP2")
+
+  matchmakingQueue MatchmakingQueue[]
+
+  @@map("users")
+}
+
+/* =====================
+   AVATAR
+===================== */
+model Avatar {
+  id          Int       @id @default(autoincrement())
+  user_id     Int
+  user        User      @relation("UserAvatars", fields: [user_id], references: [id], onDelete: Cascade)
+
+  file_path   String
+  uploaded_at DateTime  @default(now())
+
+
+  selectedBy  User?     @relation("UserSelectedAvatar")
+
+  @@map("avatar")
+}
+
+
+/* =====================
+   USER SESSIONS
+===================== */
+model UserSession {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token      String   @unique
+  created_at DateTime @default(now())
+  expires_at DateTime?
+
+  @@map("user_session")
+}
+
+/* =====================
+   FRIENDS
+===================== */
+model Friend {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  friend_id  Int
+
+  user       User     @relation("UserFriends", fields: [user_id], references: [id], onDelete: Cascade)
+  friend     User     @relation("FriendUsers", fields: [friend_id], references: [id], onDelete: Cascade)
+
+  status     String   @default("pending")
+  created_at DateTime @default(now())
+
+  @@unique([user_id, friend_id])
+
+  @@map("friend")
+}
+
+/* =====================
+   MATCHES
+===================== */
+model Match {
+  id             Int         @id @default(autoincrement())
+  created_at     DateTime    @default(now())
+  finished_at    DateTime?
+  winner_id      Int?
+  winner         User?       @relation("WinnerMatches", fields: [winner_id], references: [id], onDelete: SetNull)
+
+  ai_difficulty  String?
+  is_ai_game     Boolean     @default(false)
+
+  game_name      String      @default("pong")
+
+  players        MatchPlayer[]
+  tournamentInfo TournamentMatch[]
+
+  @@map("match")
+}
+
+/* =====================
+   MATCH PLAYERS
+===================== */
+model MatchPlayer {
+  id        Int    @id @default(autoincrement())
+  match_id  Int
+  user_id   Int?
+  score     Int    @default(0)
+  is_winner Boolean @default(false)
+
+  match     Match  @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  user      User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("match_players")
+}
+
+/* =====================
+   USER STATS
+===================== */
+model StatsUser {
+  user_id                 Int     @id
+  wins                    Int     @default(0)
+  losses                  Int     @default(0)
+  total_score             Int     @default(0)
+  last_match_at           DateTime?
+  tournament_championships Int    @default(0)
+  friends_count           Int     @default(0)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("stats_user")
+}
+
+enum TournamentState {
+  waiting
+  active
+  finished
+}
+
+/* =====================
+   TOURNAMENTS
+===================== */
+model Tournament {
+  id             Int              @id @default(autoincrement())
+  name           String?
+  current_round  Int              @default(0)
+  state          TournamentState  @default(waiting)
+  created_at     DateTime         @default(now())
+  finished_at    DateTime?
+  winner_id      Int?
+
+  max_players    Int              @default(4)
+
+  winner         User?            @relation("TournamentWinner", fields: [winner_id], references: [id], onDelete: SetNull)
+
+  players        TournamentPlayer[]
+  matches        TournamentMatch[]
+
+  @@map("tournaments")
+}
+
+/* =====================
+   TOURNAMENT PLAYERS
+===================== */
+model TournamentPlayer {
+  id            Int         @id @default(autoincrement())
+  tournament_id Int
+  user_id       Int?
+  alias         String?
+  joined_at     DateTime    @default(now())
+
+  tournament    Tournament   @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  user          User?        @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@unique([tournament_id, user_id])
+
+  @@map("tournament_player")
+}
+
+/* =====================
+   TOURNAMENT MATCHES
+===================== */
+model TournamentMatch {
+  id                        Int              @id @default(autoincrement())
+  tournament_id             Int
+  match_id                  Int
+  round_number              Int              @default(0)
+  match_number_in_round     Int              @default(0)
+  next_tournament_match_id  Int?
+
+  tournament                Tournament       @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  match                     Match            @relation(fields: [match_id], references: [id], onDelete: Cascade)
+
+  // self relation: a match leads to another match
+  nextMatch                TournamentMatch?  @relation("NextMatch", fields: [next_tournament_match_id], references: [id])
+  previousMatches          TournamentMatch[] @relation("NextMatch")
+
+  @@unique([tournament_id, match_id])
+
+  @@map("tournament_match")
+}
+
+/* =====================
+   MATCHMAKING QUEUE
+===================== */
+model MatchmakingQueue {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  game_name String
+  joined_at DateTime @default(now())
+
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, game_name])
+
+  @@map("matchmaking_queue")
+}
+
+/* =====================
+   ACTIVE MATCHES
+===================== */
+model ActiveMatches {
+  match_id   String   @id
+  game_name  String
+
+  p1_id      Int
+  p2_id      Int
+
+  status     String   @default("matched")
+
+  created_at DateTime @default(now())
+  started_at DateTime?
+  timeout_ts DateTime?
+
+  p1         User     @relation("ActiveMatchP1", fields: [p1_id], references: [id], onDelete: Cascade)
+  p2         User     @relation("ActiveMatchP2", fields: [p2_id], references: [id], onDelete: Cascade)
+
+  @@index([p1_id, p2_id])
+
+  @@map("active_matches")
+}
+
