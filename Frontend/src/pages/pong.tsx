@@ -103,6 +103,23 @@ export default function PongGame() {
                 <span id="scoreLeft">{p1Name}: 0</span>
                 <span id="scoreRight">{p2Name}: 0</span>
             </div>
+
+
+			{/* LEFT TOUCH CONTROLS */}
+			<div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 ml-2">
+				<button
+					id="left-up"
+					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+				>
+					▲
+				</button>
+				<button
+					id="left-down"
+					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+				>
+					▼
+				</button>
+			</div>
             
             {/* Game board */}
             <div id="game_board" className="bg-gray-800 border-8 border-white rounded-lg w-[800px] h-[500px] relative">
@@ -117,6 +134,21 @@ export default function PongGame() {
                 <div id="ball" className="absolute w-4 h-4 bg-white rounded-full top-1/2 left-1/2"></div>
             
             </div>
+			{/* RIGHT TOUCH CONTROLS */}
+			<div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 mr-2">
+				<button
+					id="right-up"
+					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+				>
+					▲
+				</button>
+				<button
+					id="right-down"
+					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
+				>
+					▼
+				</button>
+			</div>
             <button id="pauseBtn" className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400">
                 ⏸️ Pause
             </button>

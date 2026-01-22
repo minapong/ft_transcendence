@@ -1,41 +1,109 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { joinQueue, getActiveMatches, getQueue, Player, finishMatch } from "../logic/matchmakingManager";
+import {
+  joinQueue,
+  getActiveMatchForUser,
+  startMatch,
+  finishMatch,
+  isQueued,
+} from "../logic/matchmakingManager.js";
 
-interface JoinQueueBody {
-	id: string;
-	name: string;
+// ─────────────────────────────────────────────
+// Request body types
+// ─────────────────────────────────────────────
+export interface JoinQueueBody {
+  userId: number;
+  username: string;
 }
 
-interface FinishMatchBody {
-	matchId: string;
-	winnerId: number;
+export interface StartMatchBody {
+  matchId: string;
 }
 
+export interface FinishMatchBody {
+  matchId: string;
+  winnerId: number;
+}
+
+// ─────────────────────────────────────────────
+// Routes
+// ─────────────────────────────────────────────
 export async function registerMatchmakingRoutes(server: FastifyInstance) {
-	server.post("/api/matchmaking/join", async (req: FastifyRequest<{ Body: JoinQueueBody }>, reply: FastifyReply) => {
-		const { id, name } = req.body;
-		if (!id || !name) return reply.code(400).send({ error: "Missing player info" });
 
-		const result = joinQueue({ id, name } as Player);
-		reply.send(result);
-	});
+  // Join queue
+  server.post(
+    "/api/matchmaking/join",
+    async (req: FastifyRequest<{ Body: JoinQueueBody }>, reply: FastifyReply) => {
+      const { userId, username } = req.body;
+      try {
+        const result = joinQueue({ id: userId, name: username });
+        reply.send(result);
+      } catch (err: any) {
+        console.error("Error joining queue:", err);
+        reply.status(400).send({ error: err.message });
+      }
+    }
+  );
 
-	server.get("/api/matchmaking/active", async (_req, reply) => reply.send(getActiveMatches()));
-	server.get("/api/matchmaking/queue", async (_req, reply) => reply.send(getQueue()));
+  // Start match
+  server.post(
+    "/api/matchmaking/start",
+    async (req: FastifyRequest<{ Body: StartMatchBody }>, reply: FastifyReply) => {
+      try {
+        const { matchId } = req.body;
+        if (!matchId) return reply.status(400).send({ error: "matchId is required" });
 
-	server.post("/api/matchmaking/finish", async (req: FastifyRequest<{ Body: FinishMatchBody }>, reply: FastifyReply) => {
-		const { matchId, winnerId } = req.body;
+        const match = await startMatch(matchId);
+        if (!match) return reply.status(404).send({ error: "Match not found" });
 
-		if (!matchId || !winnerId) {
-			return reply.code(400).send({ error: "Missing matchId or winnerId" });
-		}
+        reply.send(match);
+      } catch (err: any) {
+        console.error("Error starting match:", err);
+        reply.status(400).send({ error: err.message });
+      }
+    }
+  );
 
-		try {
-			const result = finishMatch(matchId, winnerId);
-			reply.send(result);
-		} catch (err: any) {
-			reply.code(400).send({ error: err.message });
-		}
-	});
-	
+  // Finish match
+  server.post(
+    "/api/matchmaking/finish",
+    async (req: FastifyRequest<{ Body: FinishMatchBody }>, reply: FastifyReply) => {
+      try {
+        const { matchId, winnerId } = req.body;
+        if (!matchId || winnerId === undefined) {
+          return reply.status(400).send({ error: "matchId and winnerId are required" });
+        }
+
+        const result = await finishMatch(matchId, winnerId);
+        reply.send(result);
+      } catch (err: any) {
+        console.error("Error finishing match:", err);
+        reply.status(400).send({ error: err.message });
+      }
+    }
+  );
+
+  //State checking for a userid
+  server.get(
+    "/api/matchmaking/state/:userId",
+     async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
+      try {
+        const userId = Number(req.params.userId);
+
+        const match = await getActiveMatchForUser(userId);
+        if (match) {
+          return reply.send({ state: "active", match });
+        }
+
+        if (await isQueued(userId)) {
+          return reply.send({ state: "queued" });
+        }
+
+        return reply.send({ state: "idle" });
+
+      } catch (err: any) {
+        console.error("Error getting matchmaking state:", err);
+        reply.status(500).send({ error: "Internal server error" });
+      }
+    }
+  );
 }

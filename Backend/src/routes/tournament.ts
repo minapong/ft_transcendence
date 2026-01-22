@@ -1,3 +1,4 @@
+import { requireAuth } from "../plugins/auth.guard.js";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
     createTournament,
@@ -7,71 +8,72 @@ import {
     advanceRound,
 	getTournament,
 	getActiveTournament,
-} from "../logic/tournamentManager";
+} from "../logic/tournamentManager.js";
 
 import { 
 	MatchDTO, 
-} from "../types/tournament";
+} from "../types/tournament.js";
 
 // Request body types
-type StartTournamentBody = { name: string; maxPlayers: number; tournamentId?: number };
-type RegisterUserBody = { tournamentId: number; userId: number };
+type StartTournamentBody = { name: string; max_players: number; tournamentId?: number };
+type RegisterUserBody = { tournamentId: number};
 type ReportResultBody = { matchId: number; winnerId: number };
 type AdvanceRoundBody = { tournamentId: number };
 type GetTournamentBody = { tournamentId: number };
 
 export async function registerTournamentRoutes(server: FastifyInstance) {
 
-    server.post("/api/tournament/create", async (
-        req: FastifyRequest<{ Body: StartTournamentBody }>,
-        reply: FastifyReply
-    ) => {
-        const { name, maxPlayers } = req.body;
+    server.post<{ Body: StartTournamentBody }>(
+        "/api/tournament/create", 
+         { preHandler: requireAuth }, 
+         async (req, reply) => {
+        const { name, max_players } = req.body;
         try {
-            const tournament = createTournament(name, maxPlayers);
-            reply.send({ success: true, tournament });
+            const tournament = await createTournament(name, max_players);
+            return reply.send({ success: true, tournament });
         } catch (err: any) {
-            reply.status(400).send({ error: err.message });
+            return reply.code(400).send({ error: err.message });
         }
     });
 
-    server.post("/api/tournament/register", async (
-        req: FastifyRequest<{ Body: RegisterUserBody }>,
-        reply: FastifyReply
-    ) => {
-        const { tournamentId, userId } = req.body;
+    server.post<{ Body: RegisterUserBody }>(
+        "/api/tournament/register", 
+         { preHandler: requireAuth }, 
+         async (req,reply) => {
+        const { tournamentId } = req.body;
+        const { userId } = req.user as any; 
         try {
-            const playerId = registerUserToTournament(tournamentId, userId);
-            reply.send({ success: true, playerId });
+            const playerId = await registerUserToTournament(tournamentId, userId);
+            return reply.send({ success: true, playerId });
         } catch (err: any) {
-            reply.status(400).send({ error: err.message });
+            return reply.code(400).send({ error: err.message });
         }
     });
 
-    server.post("/api/tournament/start", async (
-        req: FastifyRequest<{ Body: StartTournamentBody }>,
-        reply: FastifyReply
-    ) => {
+    server.post<{ Body: StartTournamentBody }>(
+        "/api/tournament/start",
+         { preHandler: requireAuth },
+          async (req,reply) => {
         const { tournamentId} = req.body;
         if (!tournamentId) return reply.status(400).send({ error: "tournamentId is required" });
 
         try {
-            const tournamentOrNull = startTournament(tournamentId);
+            const tournamentOrNull = await startTournament(tournamentId);
             if (!tournamentOrNull) return reply.status(400).send({ error: "Unable to start tournament" });
 
-            reply.send({ success: true, tournament: tournamentOrNull });
+            return reply.send({ success: true, tournament: tournamentOrNull });
         } catch (err: any) {
-            reply.status(400).send({ error: err.message });
+            return reply.code(400).send({ error: err.message });
         }
     });
 
-    server.post("/api/tournament/result", async (
-        req: FastifyRequest<{ Body: ReportResultBody }>,
-        reply: FastifyReply
-    ) => {
+    server.post<{ Body: ReportResultBody }>(
+        "/api/tournament/result", 
+         { preHandler: requireAuth },
+          async (req, reply ) => {
         const { matchId, winnerId } = req.body;
         try {
-            const matchRaw = recordMatchResult(matchId, winnerId);
+            const matchRaw = await recordMatchResult(matchId, winnerId);
 
             // Ensure status is properly typed
             const match: MatchDTO = {
@@ -79,52 +81,55 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
                 status: matchRaw.status === "finished" ? "finished" : "pending"
             };
 
-            reply.send({ success: true, match });
+            return reply.send({ success: true, match });
         } catch (err: any) {
-            reply.status(400).send({ error: err.message });
+            return reply.code(400).send({ error: err.message });
         }
     });
 
-    server.post("/api/tournament/next", async (
-        req: FastifyRequest<{ Body: AdvanceRoundBody }>,
-        reply: FastifyReply
-    ) => {
+    server.post<{ Body: AdvanceRoundBody }>(
+        "/api/tournament/next", 
+         { preHandler: requireAuth },
+          async (req, reply) => {
         const { tournamentId } = req.body;
         try {
-            const tournamentOrNull = advanceRound(tournamentId);
+            const tournamentOrNull = await advanceRound(tournamentId);
             if (!tournamentOrNull) return reply.status(400).send({ error: "Unable to advance round" });
 
-            reply.send({ success: true, tournament: tournamentOrNull });
+            return reply.send({ success: true, tournament: tournamentOrNull });
         } catch (err: any) {
-            reply.status(400).send({ error: err.message });
+            return reply.code(400).send({ error: err.message });
         }
     });
 
-    server.post("/api/tournament/get", async (
-        req: FastifyRequest<{ Body: GetTournamentBody }>,
-        reply: FastifyReply
-    ) => {
+    server.post<{ Body: GetTournamentBody }>(
+        "/api/tournament/get",  
+        { preHandler: requireAuth }, 
+        async (req,reply) => {
         const { tournamentId } = req.body;
         try {
-            const tournamentOrNull = getTournament(tournamentId); 
+            const tournamentOrNull = await getTournament(tournamentId); 
             if (!tournamentOrNull) {
 				return reply.status(404).send({ error: "Tournament not found" });
 			}
-            reply.send({ success: true, tournament: tournamentOrNull });
+            return reply.send({ success: true, tournament: tournamentOrNull });
         } catch (err: any) {
-            reply.status(400).send({ error: err.message });
+            return reply.code(400).send({ error: err.message });
         }
     });
 
-	server.get("/api/tournament/active", async (_req: FastifyRequest, reply: FastifyReply) => {
+	server.get(
+        "/api/tournament/active",
+         { preHandler: requireAuth }, 
+         async (_req, reply) => {
 		try {
-		  const activeTournament = getActiveTournament();
+		  const activeTournament = await getActiveTournament();
 		  if (!activeTournament) {
 			return reply.status(404).send({ error: "No active tournament" });
 		  }
-		  reply.send({ success: true, tournament: activeTournament });
+		  return reply.send({ success: true, tournament: activeTournament });
 		} catch (err: any) {
-		  reply.status(400).send({ error: err.message });
+		  return reply.code(400).send({ error: err.message });
 		}
 	  });
 }

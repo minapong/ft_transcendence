@@ -43,13 +43,22 @@ clean:
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) down
 
 fclean: clean
+	@echo "🧹 Removing dist/..."
+	rm -rf Backend/dist/
 	@echo "🔥 Removing all images and volumes..."
 	docker system prune -af --volumes
 	@if docker volume inspect game_app_dev_backend_node_modules >/dev/null 2>&1; then \
-		echo "💿🧹Removing game_app_dev_backend_node_modules..."; \
+		echo "💿Removing game_app_dev_backend_node_modules..."; \
 		docker volume rm game_app_dev_backend_node_modules; \
 	else \
 		echo "Volume game_app_dev_backend_node_modules does not exist."; \
+	fi
+
+	@if docker volume inspect game_app_dev_frontend_node_modules >/dev/null 2>&1; then \
+		echo "💿Removing game_app_dev_frontend_node_modules..."; \
+		docker volume rm game_app_dev_frontend_node_modules; \
+	else \
+		echo "Volume game_app_devfrontend_node_modules does not exist."; \
 	fi
 
 

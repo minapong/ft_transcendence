@@ -1,4 +1,3 @@
-
 # Node dependencies
 node_modules/
 
@@ -18,12 +17,12 @@ build/
 # SQLite database
 *.sqlite
 Backend/database/*
-!Backend/database/Readme.md
 
 # Certificates
 certs/
 *.pem
 *.key
+Backend/database/*
 
 # System / Editor files
 .DS_Store

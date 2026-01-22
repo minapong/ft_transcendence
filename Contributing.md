@@ -1,137 +1,136 @@
 # Contributing to ft_transcendence
 
-Thank you for contributing to **ft_transcendence**.
-
-This document defines the workflow used in this repository.
-Please follow it to keep history clean and collaboration predictable.
+Thanks for contributing. This guide is the single source of truth for our workflow.
 
 ## Table of Contents
-1. [Branching Rules](#branching-rules)
-2. [Development Flow](#development-flow)
-3. [Merging Policy](#merging-policy)
-4. [Commit Messages](#commit-messages)
-5. [Code Quality](#code-quality)
-6. [Questions](#questions)
-7. [Verify a PR Locally Before Merge](#verify-a-pr-locally-before-merge)
-8. [Steps to push to main](#steps-to-push-to-main)
 
----
+1. [What This File Is For](#scope)
+2. [Which Branch Do I Use?](#branching-model)
+3. [First-Time Setup](#one-time-setup)
+4. [Create a Feature Branch](#start-a-feature-branch)
+5. [Work & Commit](#work-and-commit)
+6. [Sync with Dev](#keep-your-branch-updated)
+7. [Open a Pull Request](#open-a-pull-request)
+8. [Release to Main (Maintainers Only)](#release-to-main-maintainers)
 
-## Branching Rules
+## What This File Is For {#scope}
 
-- **`main`**
-  - Milestone snapshots only
-  - No direct commits
-  - One commit per milestone
+This document covers how we contribute code to this repo:
 
-- **`dev`**
-  - Active integration & deployed branch
-  - All feature work is merged here
+- All active work merges into `Dev`
+- Only milestone snapshots are merged into `main`
 
-- **Feature Branches**
-  - Branch from `dev`
-  - Name format:
-    ```
-    <name>/<feature>
-    ```
-    Example:
-    ```
-    hashir/spa-Reactor
-    ```
+## Branching Model
 
----
+Use these branches as follows:
 
-## Development Flow
+- `main`: milestone snapshots only, no direct commits
+- `Dev`: integration branch for all features
+- Feature branches: always branch from `Dev`
 
-1. Create a feature branch from `dev`
-2. Implement the feature
-3. Keep commits small and meaningful
-4. Open a Pull Request **into `dev`**
-5. Ensure CI passes before requesting review
+## First-Time Setup
 
----
-
-## Merging Policy
-
-- Feature branches → **squash merge** into `dev`
-- `dev` → `main` merges are **squashed milestones**
-- Direct commits to `main` are not allowed
-
----
-
-## Commit Messages
-
-Use clear, descriptive commit messages.
-
-Example:
-```
-[Add] tournament bracket UI
-[Fix] WebSocket disconnect handling
-```
-
-Avoid:
-```
-fix
-wip
-temp
-```
-
----
-
-## Code Quality
-
-- Ensure the project builds successfully
-- Do not commit broken or experimental code to `dev`; use a separate branch for that work
-- Follow existing code style and structure
-
----
-
-## Questions
-
-If you are unsure about any rule, ask before pushing.
-
----
-
-## Verify a PR Locally Before Merge
+Clone the repository and install dependencies:
 
 ```bash
-# Fetch the PR and create a local branch
-git fetch origin pull/<PR_NUMBER>/head:pr-<PR_NUMBER>
-
-# Switch to the PR branch
-git switch pr-<PR_NUMBER>
-
-# After review/testing, return to your branch
-git switch dev
+git clone <repo-url>
+cd ft_transcendence
+git checkout Dev
 ```
 
-Use this flow to build, test, and review the change locally before approving or merging.
+## Start a Feature Branch
 
----
+Feature branch naming:
 
-## Steps to push to main
+```
+<name>/<feature>
+```
 
-**1. Switch to main and update:**
+Create and switch to your branch:
+
+```bash
+git checkout -b <name>/<feature>
+```
+
+## Work and Commit
+
+Make your changes and commit regularly:
+
+```bash
+git status
+git add .
+git commit -m "[PREFIX] message"
+```
+
+## Keep Your Branch Updated
+
+Before opening a PR, merge `Dev` into your branch to avoid conflicts:
+
+```bash
+git checkout <name>/<feature>
+git pull origin Dev
+
+```
+
+Resolve conflicts, then commit the merge:
+
+```bash
+git add .
+git commit
+```
+
+## Open a Pull Request
+
+1. Push your branch:
+
+   ```bash
+   git push -u origin <name>/<feature>
+   ```
+
+2. Open a PR on GitHub:
+   - Base: `Dev`
+   - Compare: your branch
+   - Title and description should be clear and specific
+
+## Merge Policy
+
+- Feature branch -> `Dev`: squash merge only
+- `Dev` -> `main`: squash into a single milestone commit
+- Never push directly to `main`
+
+## Commit Message Format
+
+Use one of these prefixes:
+
+```
+[ADD] feature or module
+[FIX] bug fix
+[UPDATE] refactor or improvement
+```
+
+Examples:
+
+```
+
+## Verify a PR Locally
+
+```bash
+git fetch origin pull/<PR_NUMBER>/head:pr-<PR_NUMBER>
+git switch pr-<PR_NUMBER>
+```
+
+After review:
+
+```bash
+git switch Dev
+```
+
+## Release to Main (Maintainers)
+
 ```bash
 git checkout main
 git pull
-```
-
-**2. Merge dev into main (squashed - one commit):**
-```bash
-git merge --squash dev
-```
-
-**3. Create milestone commit:**
-```bash
-git commit -m "MVP 1 — Core Game Integration" \
-  -m "- Integrate Pong and Connect4" \
-  -m "- Add basic matchmaking and tournament logic" \
-  -m "- Produce Reactor (Frontend SPA library)" \
-  -m "- Design database structure"
-```
-
-**4. Push to main:**
-```bash
+git merge --squash Dev
+git commit -m "Milestone: <short title>"
 git push origin main
 ```
