@@ -6,6 +6,7 @@ Reactor is a lightweight, React-like library for building web applications with 
 
 ### Core Features
 - **JSX Runtime**: Allows the use of JSX syntax to create DOM elements and components.
+- **Fragment Support**: Group multiple elements without adding extra DOM nodes using `<Fragment>` or the shorthand `<>...</>` syntax.
 - **Custom Hooks**:
   - `useState`: Manage state within components.
   - `useEffect`: Run side effects based on dependencies.
@@ -58,6 +59,33 @@ function App() {
 }
 
 initRouter();
+```
+
+### Using Fragment
+
+```tsx
+import { Fragment } from "Reactor";
+
+// Explicit Fragment
+function List() {
+  return (
+    <Fragment>
+      <li>Item 1</li>
+      <li>Item 2</li>
+      <li>Item 3</li>
+    </Fragment>
+  );
+}
+
+// Shorthand syntax
+function Header() {
+  return (
+    <>
+      <h1>Title</h1>
+      <p>Subtitle</p>
+    </>
+  );
+}
 ```
 
 ```

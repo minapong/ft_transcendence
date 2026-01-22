@@ -78,7 +78,32 @@ function attachChild(parent: HTMLElement, child: any) {
 	else if (Array.isArray(child)) child.forEach(c => attachChild(parent, c));
 }
 
+// Fragment support - returns children without a wrapper element
+// Usage: <Fragment>...</Fragment> or <>...</>
+export function Fragment({ children }: { children?: any }): DocumentFragment {
+	const fragment = document.createDocumentFragment();
+	const childArray = Array.isArray(children) ? children.flat() : [children];
+	for (const child of childArray) {
+		if (child == null || child === false) continue;
+		if (typeof child === "string" || typeof child === "number") {
+			fragment.appendChild(document.createTextNode(String(child)));
+		} else if (child instanceof Node) {
+			fragment.appendChild(child);
+		} else if (Array.isArray(child)) {
+			child.forEach(c => {
+				if (c == null || c === false) return;
+				if (typeof c === "string" || typeof c === "number") {
+					fragment.appendChild(document.createTextNode(String(c)));
+				} else if (c instanceof Node) {
+					fragment.appendChild(c);
+				}
+			});
+		}
+	}
+	return fragment;
+}
 
 // expose aliases so the TypeScript JSX compiler knows what to call
 // attach globally for runtime use (Vite/TSX looks for this name)
 (window as any).createReactor = createReactor;
+(window as any).Fragment = Fragment;
