@@ -13,6 +13,7 @@ const links = [
 export default function Sidebar() {
   const [open, setOpen] = useState(true);
   const [activePath, setActivePath] = useState(normalizePath(window.location.pathname));
+  const [screen, setScreen] = useState<"mobile" | "tablet" | "desktop">("desktop");
   const sidebarRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -22,37 +23,68 @@ export default function Sidebar() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Removed mount animation to prevent visual "beyond 100%" overflow issues
+  // Screen size tracking
   useEffect(() => {
-    // No-op for now to keep the structure stable
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 640) setScreen("mobile");
+      else if (w < 1024) setScreen("tablet");
+      else setScreen("desktop");
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Lock body scroll on mobile only ( < 640px ) when open
+  // Lock body scroll on mobile/tablet when open
   useEffect(() => {
-    const checkScrollLock = () => {
-      const isMobile = window.innerWidth < 640;
-      if (open && isMobile) {
-        document.body.style.overflow = "hidden";
-      } else {
-        document.body.style.overflow = "";
-      }
-    };
-
-    checkScrollLock();
-    window.addEventListener('resize', checkScrollLock);
+    if (open && (screen === "mobile" || screen === "tablet")) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
     return () => {
       document.body.style.overflow = "";
-      window.removeEventListener('resize', checkScrollLock);
     };
-  }, [open]);
+  }, [open, screen]);
 
-  // Auto-close on link click for mobile/tablet
+  // Auto-close on link click for non-desktop
   const handleLinkClick = (path: string) => {
     setActivePath(normalizePath(path));
-    if (window.innerWidth < 1024) {
+    if (screen !== "desktop") {
       setOpen(false);
     }
   };
+
+  // Determine sidebar classes based on explicit state
+  // Determine sidebar classes based on explicit state
+  const sidebarClass = (() => {
+    if (screen === "mobile") {
+      return `
+        fixed inset-y-0 left-0 z-50
+        w-full
+        ${open ? "translate-x-0" : "-translate-x-full"}
+      `;
+    }
+
+    if (screen === "tablet") {
+      return `
+        fixed inset-y-0 left-0 z-50
+        w-64
+        ${open ? "translate-x-0" : "-translate-x-full"}
+      `;
+    }
+
+    // desktop
+    return `
+      relative h-full translate-x-0
+      ${open ? "w-72 px-6" : "w-16 px-2"}
+    `;
+  })();
+
+  const toggleClass = screen === "desktop"
+    ? "absolute top-3 right-3 left-auto"
+    : "fixed top-3 left-4";
 
   return (
     <>
@@ -65,14 +97,8 @@ export default function Sidebar() {
             z-[70] flex items-center justify-center
             h-8 w-8 rounded-md
             border sidebar-toggle
-            transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
             active:scale-95
-            
-            ${/* Mobile & Tablet (< 1024px): Fixed at top-left, independent of sidebar transform */ ""}
-            fixed top-3 left-4
-            
-            ${/* Desktop (>= 1024px): Absolute inside the sticky container */ ""}
-            lg:absolute lg:top-3 lg:right-3 lg:left-auto
+            ${toggleClass}
           `}
         >
           <span
@@ -84,11 +110,12 @@ export default function Sidebar() {
           />
         </button>
 
-        {/* Backdrop for Mobile & Tablet (< 1024px) when open */}
+        {/* Backdrop for Mobile & Tablet when open */}
         <div
           className={`
-            fixed inset-0 bg-black/60 z-40 lg:hidden transition-opacity duration-500
-            ${open ? "opacity-100" : "opacity-0 pointer-events-none"}
+            fixed inset-0 bg-black/60 z-40 transition-opacity duration-500
+            ${screen !== "desktop" && open ? "opacity-100" : "opacity-0 pointer-events-none"}
+            ${screen === "desktop" ? "hidden" : ""}
           `}
           onClick={() => setOpen(false)}
           aria-hidden="true"
@@ -100,21 +127,9 @@ export default function Sidebar() {
           className={`
             sidebar-shell
             overflow-visible
-            pt-16 sm:pt-14
+            pt-16
             transition-[transform,width,padding] duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-            
-            ${/* 1. Mobile (< 640px): Fixed Full Overlay */ ""}
-            fixed inset-y-0 left-0 z-50
-            w-full
-            ${open ? "translate-x-0" : "-translate-x-full"}
-
-            ${/* 2. Tablet (640px - 1024px): Fixed Partial Overlay */ ""}
-            sm:w-64
-            sm:${open ? "translate-x-0" : "-translate-x-full"}
-
-            ${/* 3. Desktop (>= 1024px): Natural height/width in sticky wrapper */ ""}
-            lg:static lg:h-full lg:translate-x-0
-            lg:${open ? "w-72 px-6" : "w-16 px-2"}
+            ${sidebarClass}
           `}
           ref={sidebarRef}
         >
@@ -191,9 +206,9 @@ function SidebarLink({
         transitionDelay: open ? `${index * 40}ms` : "0ms",
       }}
       className={`
-        sidebar-link group rounded-lg flex items-center transition-all active:scale-[0.98]
+        sidebar-link group rounded-lg flex items-center transition-all
         duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-        ${open ? "px-3 py-2.5 justify-between w-full opacity-100 translate-x-0" : "p-2.5 justify-center"}
+        ${open ? "px-3 py-2.5 justify-between w-full opacity-100 translate-x-0" : "p-1.5 justify-center"}
         ${!open && "lg:opacity-100 lg:translate-x-0"}
         ${!open && "opacity-0 -translate-x-4"}
         ${isActive ? "sidebar-link--active" : ""}
