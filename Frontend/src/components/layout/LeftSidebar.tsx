@@ -142,7 +142,6 @@ export default function Sidebar() {
             >
               {links.map((link, index) => (
                 <SidebarLink
-                  key={link.href}
                   link={link}
                   activePath={activePath}
                   open={open}
@@ -158,19 +157,21 @@ export default function Sidebar() {
   );
 }
 
+interface SidebarLinkProps {
+  link: (typeof links)[0];
+  activePath: string;
+  open: boolean;
+  onLinkClick: (path: string) => void;
+  index: number;
+}
+
 function SidebarLink({
   link,
   activePath,
   open,
   onLinkClick,
   index,
-}: {
-  link: (typeof links)[0];
-  activePath: string;
-  open: boolean;
-  onLinkClick: (path: string) => void;
-  index: number;
-}) {
+}: SidebarLinkProps) {
   const ref = useRef<HTMLAnchorElement>(null);
   const isActive = activePath === link.href;
 
