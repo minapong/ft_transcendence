@@ -1,21 +1,21 @@
 import { PongAI } from './pong_ai'
 
 
-let GAME_WIDTH : Number;
-let GAME_HEIGHT : Number;
-let WALL_WIDTH : Number;
+let GAME_WIDTH : number;
+let GAME_HEIGHT : number;
+let WALL_WIDTH : number;
 
-let BALL_SIZE : Number;
+let BALL_SIZE : number;
 
-let PADDLE_HEIGHT : Number;
-let PADDLE_WIDTH : Number;
-let PADDLE_DIST : Number;
+let PADDLE_HEIGHT : number;
+let PADDLE_WIDTH : number;
+let PADDLE_DIST : number;
 
 
-let PLAYABLE_WIDTH : Number;
-let PLAYABLE_HEIGHT : Number;
-let LEFT_PADDLE_X : Number;
-let RIGHT_PADDLE_X : Number;
+let PLAYABLE_WIDTH : number;
+let PLAYABLE_HEIGHT : number;
+let LEFT_PADDLE_X : number;
+let RIGHT_PADDLE_X : number;
 
 function handle_parameters()
 {
@@ -59,10 +59,10 @@ function handle_parameters()
     PADDLE_WIDTH = 12;
     PADDLE_DIST = 16;
 	}
-	PLAYABLE_WIDTH = Number(GAME_WIDTH) - (2 * Number(WALL_WIDTH));
-	PLAYABLE_HEIGHT = Number(GAME_HEIGHT) - (2 * Number(WALL_WIDTH));
+	PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
+	PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 	LEFT_PADDLE_X = PADDLE_DIST;
-	RIGHT_PADDLE_X = Number(PLAYABLE_WIDTH) - Number(PADDLE_DIST) - Number(PADDLE_WIDTH);
+	RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
 }
 
 window.addEventListener("resize", () => {
@@ -100,14 +100,14 @@ export function pongLogic(
 
 
 	// Initial ball position (centered in playable area)
-	let x = Number(PLAYABLE_WIDTH) / 2 - Number(BALL_SIZE) / 2;
-	let y = Number(PLAYABLE_HEIGHT) / 2 - Number(BALL_SIZE) / 2;
+	let x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
+	let y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
 
     let dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
     let dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 
-    let paddleY_Left = (Number(GAME_HEIGHT) / 2) - (Number(PADDLE_HEIGHT) / 2);
-    let paddleY_Right = (Number(GAME_HEIGHT) / 2) - (Number(PADDLE_HEIGHT) / 2);
+    let paddleY_Left = (GAME_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
+    let paddleY_Right = (GAME_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
 
     let upPressed = false;
     let downPressed = false;
@@ -236,24 +236,24 @@ export function pongLogic(
 
 		/// Left Paddle
         if (
-            x <= Number(LEFT_PADDLE_X) + Number(PADDLE_WIDTH) &&
-            x >= Number(LEFT_PADDLE_X) + Number(PADDLE_WIDTH) - 8 &&
-            y + Number(BALL_SIZE) >= paddleY_Left && // Ball's bottom edge >= Paddle's top edge
-            y <= paddleY_Left + Number(PADDLE_HEIGHT) // Ball's top edge <= Paddle's bottom edge
+            x <= LEFT_PADDLE_X + PADDLE_WIDTH &&
+            x >= LEFT_PADDLE_X + PADDLE_WIDTH - 8 &&
+            y + BALL_SIZE >= paddleY_Left && // Ball's bottom edge >= Paddle's top edge
+            y <= paddleY_Left + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
         ) {
             dx = -dx;
-            x = Number(LEFT_PADDLE_X) + Number(PADDLE_WIDTH);
+            x = LEFT_PADDLE_X + PADDLE_WIDTH;
         }
 
 		/// Right Paddle
         if (
-            x + Number(BALL_SIZE) >= Number(RIGHT_PADDLE_X) &&
-            x + Number(BALL_SIZE) <= Number(RIGHT_PADDLE_X) + 8 &&
-            y + Number(BALL_SIZE) >= paddleY_Right && // Ball's bottom edge >= Paddle's top edge
-            y <= paddleY_Right + Number(PADDLE_HEIGHT) // Ball's top edge <= Paddle's bottom edge
+            x + BALL_SIZE >= RIGHT_PADDLE_X &&
+            x + BALL_SIZE <= RIGHT_PADDLE_X + 8 &&
+            y + BALL_SIZE >= paddleY_Right && // Ball's bottom edge >= Paddle's top edge
+            y <= paddleY_Right + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
         ) {
             dx = -dx;
-            x = Number(RIGHT_PADDLE_X) - Number(BALL_SIZE);
+            x = RIGHT_PADDLE_X - BALL_SIZE;
         }
 
 		/// Top Wall
@@ -264,9 +264,9 @@ export function pongLogic(
         }
 
 		/// Bottom Wall
-		else if (y + Number(BALL_SIZE) >= Number(PLAYABLE_HEIGHT)) {
+		else if (y + BALL_SIZE >= PLAYABLE_HEIGHT) {
 			dy = -dy;
-			y = Number(PLAYABLE_HEIGHT) - Number(BALL_SIZE);
+			y = PLAYABLE_HEIGHT - BALL_SIZE;
 		}
 
         ball.style.left = x + 'px';
@@ -283,7 +283,7 @@ export function pongLogic(
             resetBall();
         }
 
-        if (x + Number(BALL_SIZE) > Number(PLAYABLE_WIDTH)) {
+        if (x + BALL_SIZE > PLAYABLE_WIDTH) {
             scoreLeft++;
             scoreLeftDisplay.textContent = `${p1}: ${scoreLeft}`;
             checkWinner();
@@ -303,16 +303,16 @@ export function pongLogic(
 	function movePaddle() {
 		// Left paddle (W / S)
 		if (wPressed)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, Number(PLAYABLE_HEIGHT), Number(PADDLE_HEIGHT), false);
+			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
 		if (sPressed)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, Number(PLAYABLE_HEIGHT), Number(PADDLE_HEIGHT), true);
+			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
 		left_p.style.top = `${paddleY_Left}px`;
 
 		// Right paddle (Arrow Up / Down or AI)
 		if (upPressed)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, Number(PLAYABLE_HEIGHT), Number(PADDLE_HEIGHT), false);
+			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
 		if (downPressed)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, Number(PLAYABLE_HEIGHT), Number(PADDLE_HEIGHT), true);
+			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
 
 		right_p.style.top = `${paddleY_Right}px`;
 	}
@@ -320,8 +320,8 @@ export function pongLogic(
 	let resetTimeout: number | null = null;
 
 	function resetBall() {
-		x = Number(PLAYABLE_WIDTH) / 2 - Number(BALL_SIZE) / 2;
-		y = Number(PLAYABLE_HEIGHT) / 2 - Number(BALL_SIZE) / 2;
+		x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
+		y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
 		dx = 0;
 		dy = 0;
 	

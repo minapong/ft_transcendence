@@ -1,18 +1,18 @@
-let GAME_WIDTH : Number;
-let GAME_HEIGHT : Number;
-let WALL_WIDTH : Number;
+let GAME_WIDTH : number;
+let GAME_HEIGHT : number;
+let WALL_WIDTH : number;
 
-let BALL_SIZE : Number;
+let BALL_SIZE : number;
 
-let PADDLE_HEIGHT : Number;
-let PADDLE_WIDTH : Number;
-let PADDLE_DIST : Number;
+let PADDLE_HEIGHT : number;
+let PADDLE_WIDTH : number;
+let PADDLE_DIST : number;
 
 
-let PLAYABLE_WIDTH : Number;
-let PLAYABLE_HEIGHT : Number;
-let LEFT_PADDLE_X : Number;
-let RIGHT_PADDLE_X : Number;
+let PLAYABLE_WIDTH : number;
+let PLAYABLE_HEIGHT : number;
+let LEFT_PADDLE_X : number;
+let RIGHT_PADDLE_X : number;
 
 function handle_parameters()
 {
@@ -56,10 +56,10 @@ function handle_parameters()
     PADDLE_WIDTH = 12;
     PADDLE_DIST = 16;
 	}
-	PLAYABLE_WIDTH = Number(GAME_WIDTH) - (2 * Number(WALL_WIDTH));
-	PLAYABLE_HEIGHT = Number(GAME_HEIGHT) - (2 * Number(WALL_WIDTH));
+	PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
+	PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 	LEFT_PADDLE_X = PADDLE_DIST;
-	RIGHT_PADDLE_X = Number(PLAYABLE_WIDTH) - Number(PADDLE_DIST) - Number(PADDLE_WIDTH);
+	RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
 }
 
 window.addEventListener("resize", () => {
