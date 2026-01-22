@@ -1,4 +1,6 @@
 import { useRef, navigate } from "Reactor";
+import { setAuth } from "@/lib/auth";
+import { connectPresenceWS } from "@/lib/presence";
 
 export default function LoginPage() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -26,7 +28,8 @@ export default function LoginPage() {
       return;
     }
 
-    localStorage.setItem("auth", JSON.stringify(data));
+    setAuth(data);
+    connectPresenceWS();  
     navigate("/me");
   };
 

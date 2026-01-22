@@ -2,6 +2,11 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 
+import websocket from "@fastify/websocket";
+import { registerPresenceWs} from "./routes/presence.ws.js";
+import { registerPresenceRoutes } from "./routes/presence.js";
+
+
 import { prisma } from "./db/prisma.js";    
 
 import { registerTournamentRoutes } from "./routes/tournament.js";
@@ -22,26 +27,31 @@ async function start() {
 	  allowedHeaders: ["Content-Type", "Authorization"],
 	});
 
-server.get("/", async () => {
-  return { message: "Hello from Backend!" };
-});
+    server.get("/", async () => {
+      return { message: "Hello from Backend!" };
+    });
 
-await server.register(jwt, {
-  secret: process.env.JWT_SECRET!,
-});
+    await server.register(jwt, {
+      secret: process.env.JWT_SECRET!,
+    });
 
-registerTournamentRoutes(server);
-registerMatchmakingRoutes(server);
-registerLoginRoutes(server);
-registerAuthRoutes(server);
-registerProfileRoutes(server);
-registerMeRoutes(server);
+    await server.register(websocket); // must be before websocket routes
 
+    registerPresenceWs(server);
+    // registerPresenceHttpRoutes(server);
+    registerPresenceRoutes(server);
 
-server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
-	if (err){ process.exit(1); throw err; }
-  console.log(`Server listening at ${address}, hot reload is working!`);
-});
+    registerTournamentRoutes(server);
+    registerMatchmakingRoutes(server);
+    registerLoginRoutes(server);
+    registerAuthRoutes(server);
+    registerProfileRoutes(server);
+    registerMeRoutes(server);
+
+    server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
+      if (err){ process.exit(1); throw err; }
+      console.log(`Server listening at ${address}, hot reload is working!`);
+    });
 }
 
 
