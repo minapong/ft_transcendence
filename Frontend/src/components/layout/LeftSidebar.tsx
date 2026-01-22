@@ -10,6 +10,8 @@ const links = [
   { label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
   { label: "Timer", href: "/timer", icon: "icon-[solar--clock-circle-bold-duotone]", iconActive: "icon-[solar--clock-circle-linear]" },
   { label: "Counter Page", href: "/counterPage", icon: "icon-[solar--chart-square-bold-duotone]", iconActive: "icon-[solar--chart-square-linear]" },
+  { label: "Dashboard", href: "/dashboard", icon: "icon-[solar--chart-square-bold-duotone]", iconActive: "icon-[solar--chart-square-linear]" },
+
 ];
 
 export default function Sidebar() {
