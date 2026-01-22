@@ -137,7 +137,7 @@ export default function Sidebar() {
           <div className="flex flex-col h-full bg-inherit">
             {/* Links */}
             <nav
-              className={`flex flex-col ${open ? "mt-6 gap-3.5" : "lg:mt-10 lg:gap-5 lg:items-center"
+              className={`flex flex-col ${open ? "mt-6 gap-3.5 px-4" : "lg:mt-10 lg:gap-5 lg:items-center w-full"
                 }`}
             >
               {links.map((link, index) => (
