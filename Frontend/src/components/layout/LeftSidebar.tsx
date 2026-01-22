@@ -65,7 +65,7 @@ export default function Sidebar() {
             z-[70] flex items-center justify-center
             h-8 w-8 rounded-md
             border sidebar-toggle
-            transition-all duration-300
+            transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
             active:scale-95
             
             ${/* Mobile & Tablet (< 1024px): Fixed at top-left, independent of sidebar transform */ ""}
@@ -87,7 +87,7 @@ export default function Sidebar() {
         {/* Backdrop for Mobile & Tablet (< 1024px) when open */}
         <div
           className={`
-            fixed inset-0 bg-black/60 z-40 lg:hidden transition-opacity duration-300
+            fixed inset-0 bg-black/60 z-40 lg:hidden transition-opacity duration-500
             ${open ? "opacity-100" : "opacity-0 pointer-events-none"}
           `}
           onClick={() => setOpen(false)}
@@ -101,7 +101,7 @@ export default function Sidebar() {
             sidebar-shell
             overflow-visible
             pt-16 sm:pt-14
-            transition-[transform,width,padding] duration-300 ease-out
+            transition-[transform,width,padding] duration-500 cubic-bezier(0.4, 0, 0.2, 1)
             
             ${/* 1. Mobile (< 640px): Fixed Full Overlay */ ""}
             fixed inset-y-0 left-0 z-50
@@ -122,7 +122,7 @@ export default function Sidebar() {
           <div className="flex flex-col h-full bg-inherit">
             {/* Links */}
             <nav
-              className={`mt-6 flex flex-col gap-3.5 ${open ? "" : "lg:items-center"
+              className={`flex flex-col ${open ? "mt-6 gap-3.5" : "lg:mt-10 lg:gap-5 lg:items-center"
                 }`}
             >
               {links.map((link, index) => (

@@ -15,7 +15,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 relative min-h-[var(--header-height)] px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4 overflow-hidden header-surface">
+    <header className="sticky top-0 z-50 relative min-h-[var(--header-height)] pl-14 pr-4 sm:pl-16 sm:pr-6 lg:px-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4 overflow-hidden header-surface">
 
       <div className="flex items-center gap-4 z-10">
         <div className="flex items-center gap-3">
