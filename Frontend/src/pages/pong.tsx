@@ -97,7 +97,6 @@ export default function PongGame() {
 		};
 	  }, []);
 
-<<<<<<< HEAD
 	  return (
 			<div className="bg-gray-900 flex flex-col items-center justify-center min-h-screen px-2">
 				
@@ -169,56 +168,11 @@ export default function PongGame() {
 				<button
 					id="right-up"
 					className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-=======
-	return(
-        <div className="bg-gray-900 flex flex-col items-center justify-center h-screen">
-            <div className="flex justify-between w-[800px] text-white text-2xl font-bold mb-2">
-                <span id="scoreLeft">{p1Name}: 0</span>
-                <span id="scoreRight">{p2Name}: 0</span>
-            </div>
-
-
-			{/* LEFT TOUCH CONTROLS */}
-			<div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 ml-2">
-				<button
-					id="left-up"
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
-				>
-					▲
-				</button>
-				<button
-					id="left-down"
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
-				>
-					▼
-				</button>
-			</div>
-            
-            {/* Game board */}
-            <div id="game_board" className="bg-gray-800 border-8 border-white rounded-lg w-[800px] h-[500px] relative">
-            
-                {/* Left paddle */}
-                <div id="left_p" className="absolute left-4 top-1/2 w-3 h-24 bg-white"></div>
-
-                {/* Right paddle */}
-                <div id="right_p" className="absolute right-4 top-1/2 w-3 h-24 bg-white"></div>
-
-                {/* Ball */}
-                <div id="ball" className="absolute w-4 h-4 bg-white rounded-full top-1/2 left-1/2"></div>
-            
-            </div>
-			{/* RIGHT TOUCH CONTROLS */}
-			<div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-4 mr-2">
-				<button
-					id="right-up"
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
->>>>>>> origin/Dev
 				>
 					▲
 				</button>
 				<button
 					id="right-down"
-<<<<<<< HEAD
 					className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
 				>
 					▼
@@ -249,22 +203,3 @@ export default function PongGame() {
 			</div>
 		);
 }
-=======
-					className="w-14 h-14 bg-white/80 text-black text-2xl font-bold rounded-lg active:bg-white"
-				>
-					▼
-				</button>
-			</div>
-            <button id="pauseBtn" className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400">
-                ⏸️ Pause
-            </button>
-			<div
-				id="winnerOverlay"
-				className="hidden absolute inset-0 flex bg-black/70 items-center justify-center text-white text-4xl font-bold z-50"
-			>
-				<div id="winnerText"></div>
-			</div>
-        </div>
-	);
-}
->>>>>>> origin/Dev
