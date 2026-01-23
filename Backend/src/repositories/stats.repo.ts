@@ -204,7 +204,7 @@ export async function getRecentMatchesForUser(
     },
   });
 
-  return playerEntries.map(entry => formatMatchForFrontend(entry.match));
+  return playerEntries.map((entry: any) => formatMatchForFrontend(entry.match));
 }
 
 // ─────────────────────────────────────────────
