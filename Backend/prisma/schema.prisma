@@ -18,6 +18,7 @@ model User {
   password_hash String
   avatarId      Int?            @unique
   avatar        Avatar?         @relation("UserSelectedAvatar", fields: [avatarId], references: [id], onDelete: SetNull)
+  isAdmin       Boolean         @default(false)
 
   // all avatars user owns
   avatars       Avatar[]        @relation("UserAvatars")
