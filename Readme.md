@@ -55,6 +55,7 @@ All modules below match their **real implementation status**.
 | Multiplayer Pong (2P / 4P) | Abdul Rehman  | Major (2 pts) | Multiple paddle modes                |
 | Second Game (Connect4)     | Abdul Rehman  | Major (2 pts) | Board logic & win detection          |
 | AI Opponent                | Santiago      | Major (2 pts) | Pong AI decision engine              |
+| Fastify Backend            | Hashir        | Minor (1 pt)  | Core server, CORS, tournament routes |
 | Tournament System          | Santiago      | Minor (1 pt)  | Tournament manager & routes          |
 | Statistics                 | Santiago      | Minor (1 pt)  | stats_user aggregation table         |
 
@@ -62,7 +63,6 @@ All modules below match their **real implementation status**.
 
 | Module            | Owner    | Type          | Notes                                |
 | ----------------- | -------- | ------------- | ------------------------------------ |
-| Fastify Backend   | Hashir   | Major (2 pts) | Core server, CORS, tournament routes |
 | User Management   | Natalia  | Major (2 pts) | SQLite schema for users              |
 | ORM / Database    | Natalia  | Minor (1 pt)  | better-sqlite3 + migrations          |
 
@@ -82,14 +82,14 @@ All modules below match their **real implementation status**.
 
 | Member           | Major (✅) | Minor (✅) | Points        |
 | ---------------- | --------- | --------- | ------------- |
-| **Hashir**       | 1         | 0         | **2**         |
+| **Hashir**       | 1         | 1         | **3**         |
 | **Abdul Rehman** | 3         | 0         | **6**         |
 | **Natalia**      | 0         | 0         | **0**         |
 | **Santiago**     | 1         | 2         | **4**         |
-| **TOTAL**        | **5**     | **2**     | **12 / 14** ❌ |
+| **TOTAL**        | **5**     | **3**     | **13 / 14** ❌ |
 
 **Status:** ❌ Not evaluation-ready  
-**Missing:** 2 points (1 Major or 2 Minor)
+**Missing:** 1 point (1 Minor)
 
 ---
 
