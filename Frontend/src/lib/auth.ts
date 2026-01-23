@@ -1,22 +1,23 @@
 import { disconnectPresenceWS } from "@/lib/presence";
-import { useRef, navigate } from "Reactor";
+import { navigate } from "Reactor";
 
 const AUTH_KEY = "auth";
+const AUTH_EVENT = "auth:changed";
 
 export function logout() {
   // close WS first (so backend marks you offline immediately)
   disconnectPresenceWS();
 
   // remove auth token/user
-  sessionStorage.removeItem(AUTH_KEY);
-
+  localStorage.removeItem(AUTH_KEY);
+  window.dispatchEvent(new Event(AUTH_EVENT))
   // go to login
   navigate("/login");
 }
 
 export function getAuth() {
   try {
-    const raw = sessionStorage.getItem(AUTH_KEY);
+    const raw = localStorage.getItem(AUTH_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -25,9 +26,11 @@ export function getAuth() {
 }
 
 export function setAuth(data: any){
-  sessionStorage.setItem(AUTH_KEY, JSON.stringify(data));
+  localStorage.setItem(AUTH_KEY, JSON.stringify(data));
+  window.dispatchEvent(new Event(AUTH_EVENT));
 }
 
 export function clearAuth() {
-  sessionStorage.removeItem(AUTH_KEY);
+  localStorage.removeItem(AUTH_KEY);
+  window.dispatchEvent(new Event(AUTH_EVENT));
 }

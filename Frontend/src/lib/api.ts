@@ -12,7 +12,7 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
 
   const res = await fetch(url, { ...options, headers });
 
-  if (res.status === 401) {
+  if (res.status === 401 && token) {
     console.warn("401 → auto logout");
     logout(); // closes WS + clears auth + redirects
     return res;
