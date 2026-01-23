@@ -1,6 +1,13 @@
-import { useRef, navigate } from "Reactor";
+import { useRef, navigate, useEffect } from "Reactor";
+import { setAuth } from "@/lib/auth";
+import { connectPresenceWS } from "@/lib/presence";
+import { useAuth } from "@/lib/useAuth";
 
 export default function LoginPage() {
+  const auth = useAuth();
+  useEffect(() => {
+    if (auth?.token) navigate("/me");
+  }, [auth?.token]);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -26,7 +33,8 @@ export default function LoginPage() {
       return;
     }
 
-    localStorage.setItem("auth", JSON.stringify(data));
+    setAuth(data);
+    connectPresenceWS();  
     navigate("/me");
   };
 
