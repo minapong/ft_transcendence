@@ -33,9 +33,14 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
     <header className={`sticky top-0 z-50 relative min-h-[var(--header-height)] ${headerPadding} flex flex-wrap items-center justify-between gap-3 sm:gap-4 overflow-hidden header-surface`}>
 
       <div className="flex items-center gap-4 z-10">
-        <div className="flex items-center gap-3">
+        <div
+          className="flex items-center gap-3 cursor-pointer group"
+          onClick={() => navigate("/")}
+          role="button"
+          tabIndex={0}
+        >
           <div
-            className="logo-mark logo-mark--ominous relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center overflow-hidden"
+            className="logo-mark logo-mark--ominous relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-300"
             aria-hidden="true"
           >
             <span className="logo-orb" />
@@ -43,12 +48,12 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
           </div>
           <div className="flex flex-col leading-tight">
             <div className="flex items-center gap-2">
-              <span className="text-xl sm:text-2xl font-bold tracking-[0.06em] text-primary">
-                MINA&nbsp;PONG
+              <span className="text-xl sm:text-2xl font-bold tracking-[0.06em] text-primary transition-colors group-hover:text-accent">
+                MINA&nbsp;PONG    
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm sm:text-base font-semibold text-accent-soft">
+            <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+              <span className="text-sm sm:text-base font-medium text-accent-soft">
                 Arena Command Hub
               </span>
               <span

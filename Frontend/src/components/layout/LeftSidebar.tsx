@@ -50,33 +50,20 @@ export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
 
   // Determine sidebar classes based on explicit state
   // Determine sidebar classes based on explicit state
-  const sidebarClass = (() => {
-    if (screen === "mobile") {
-      return `
-        fixed inset-y-0 left-0 z-50
-        w-full
-        ${open ? "translate-x-0" : "-translate-x-full"}
-      `;
-    }
+  // Responsive sidebar classes handled via CSS instead of JS state to prevent resize synchronization issues
+  const sidebarClass = `
+    fixed inset-y-0 left-0 z-50
+    w-full md:w-64
+    transition-[transform,width,padding] duration-500 cubic-bezier(0.4, 0, 0.2, 1)
+    
+    ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+    
+    lg:relative lg:h-full lg:inset-auto lg:z-auto
+    lg:block
+    ${open ? "lg:w-72 lg:px-6" : "lg:w-16 lg:px-2"}
+  `;
 
-    if (screen === "tablet") {
-      return `
-        fixed inset-y-0 left-0 z-50
-        w-64
-        ${open ? "translate-x-0" : "-translate-x-full"}
-      `;
-    }
 
-    // desktop
-    return `
-      relative h-full translate-x-0
-      ${open ? "w-72 px-6" : "w-16 px-2"}
-    `;
-  })();
-
-  const toggleClass = screen === "desktop"
-    ? "absolute top-3 right-3 left-auto"
-    : "fixed top-3 left-4";
 
   return (
     <>
@@ -90,7 +77,7 @@ export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
             h-8 w-8 rounded-md
             border sidebar-toggle
             active:scale-95
-            ${toggleClass}
+            fixed top-3 left-4 lg:absolute lg:top-3 lg:right-3 lg:left-auto
           `}
         >
           <span
