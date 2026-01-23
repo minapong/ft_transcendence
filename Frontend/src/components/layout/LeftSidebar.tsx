@@ -48,11 +48,13 @@ export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
   useEffect(() => {
     if (!sidebarRef.current) return;
 
+    // On mobile/tablet: slide in/out based on open state
+    // On desktop: always visible (no x transform needed)
+    const targetX = screen === "desktop" ? 0 : (open ? 0 : "-100%");
+
     animate(
       sidebarRef.current,
-      open
-        ? { x: 0 }
-        : { x: screen === "desktop" ? 0 : "-100%" },
+      { x: targetX },
       { duration: 0.45, ease: [0.4, 0, 0.2, 1] }
     );
   }, [open, screen]);
@@ -106,7 +108,8 @@ export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
         {/* Backdrop */}
         <div
           ref={backdropRef}
-          className={`fixed inset-0 bg-black/60 z-40 ${screen === "desktop" ? "hidden" : ""}`}
+          className={`fixed inset-0 bg-black/60 z-40 ${screen === "desktop" || !open ? "pointer-events-none" : ""} ${screen === "desktop" ? "hidden" : ""}`}
+          style={{ opacity: open && screen !== "desktop" ? 1 : 0 }}
           onClick={() => setOpen(false)}
         />
 
@@ -115,12 +118,16 @@ export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
           ref={sidebarRef}
           role="navigation"
           aria-label="Main navigation"
+          style={{
+            transform: screen !== "desktop" && !open ? "translateX(-100%)" : "translateX(0)"
+          }}
           className={`
             sidebar-shell fixed inset-y-0 left-0 z-50
             w-full md:w-64
             lg:relative lg:h-full lg:inset-auto lg:z-auto
             ${open ? "lg:w-72 lg:px-6" : "lg:w-16 lg:px-2"}
             pt-16 overflow-visible
+            ${screen !== "desktop" && !open ? "pointer-events-none" : ""}
           `}
         >
           <nav className={`flex flex-col ${open ? "mt-6 gap-3.5 px-4" : "lg:mt-10 lg:gap-5 lg:items-center w-full"}`}>
