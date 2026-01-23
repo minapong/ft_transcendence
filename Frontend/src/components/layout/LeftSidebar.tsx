@@ -1,44 +1,39 @@
-import { useEffect, useState, useRef } from "Reactor";
-import { animate, hover } from "motion";
+import { useRef, useEffect, useState } from "@/Reactor";
+import { animate } from "motion";
 
 const links = [
   { label: "Home", href: "/", icon: "icon-[solar--home-smile-bold-duotone]", iconActive: "icon-[solar--home-smile-linear]" },
-  { label: "Login", href: "/login", icon: "icon-[solar--login-3-bold-duotone]", iconActive: "icon-[solar--login-3-linear]" },
   { label: "Tournament", href: "/tournament/start", icon: "icon-[solar--cup-star-bold-duotone]", iconActive: "icon-[solar--cup-star-linear]" },
   { label: "Pong", href: "/single_game", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
   { label: "Connect4", href: "/connect4_single", icon: "icon-[solar--widget-5-bold-duotone]", iconActive: "icon-[solar--widget-5-linear]" },
   { label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
 ];
 
-export default function Sidebar() {
-  const [open, setOpen] = useState(true);
+interface SidebarProps {
+  screen: "mobile" | "tablet" | "desktop";
+  open: boolean;
+  setOpen: (v: boolean | ((p: boolean) => boolean)) => void;
+}
+
+export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
   const [activePath, setActivePath] = useState(normalizePath(window.location.pathname));
-  const [screen, setScreen] = useState<"mobile" | "tablet" | "desktop">("desktop");
-  const sidebarRef = useRef<HTMLElement | null>(null);
+
+  const sidebarRef = useRef<HTMLElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const toggleIconRef = useRef<HTMLSpanElement>(null);
+
+  /* ---------------- routing ---------------- */
 
   useEffect(() => {
-    const onPop = () =>
-      setActivePath(() => normalizePath(window.location.pathname));
+    const onPop = () => setActivePath(normalizePath(window.location.pathname));
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Screen size tracking
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w < 640) setScreen("mobile");
-      else if (w < 1024) setScreen("tablet");
-      else setScreen("desktop");
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+  /* ---------------- scroll lock ---------------- */
 
-  // Lock body scroll on mobile/tablet when open
   useEffect(() => {
-    if (open && (screen === "mobile" || screen === "tablet")) {
+    if (open && screen !== "desktop") {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -48,152 +43,147 @@ export default function Sidebar() {
     };
   }, [open, screen]);
 
-  // Auto-close on link click for non-desktop
+  /* ---------------- sidebar motion ---------------- */
+
+  useEffect(() => {
+    if (!sidebarRef.current) return;
+
+    // On mobile/tablet: slide in/out based on open state
+    // On desktop: always visible (no x transform needed)
+    const targetX = screen === "desktop" ? 0 : (open ? 0 : "-100%");
+
+    animate(
+      sidebarRef.current,
+      { x: targetX },
+      { duration: 0.45, ease: [0.4, 0, 0.2, 1] }
+    );
+  }, [open, screen]);
+
+  /* ---------------- backdrop motion ---------------- */
+
+  useEffect(() => {
+    if (!backdropRef.current) return;
+
+    animate(
+      backdropRef.current,
+      { opacity: open && screen !== "desktop" ? 1 : 0 },
+      { duration: 0.25, ease: "easeOut" }
+    );
+  }, [open, screen]);
+
+  /* ---------------- toggle icon motion ---------------- */
+
+  useEffect(() => {
+    if (!toggleIconRef.current) return;
+
+    animate(
+      toggleIconRef.current,
+      { rotate: open ? 180 : 0 },
+      { duration: 0.25, ease: "easeInOut" }
+    );
+  }, [open]);
+
   const handleLinkClick = (path: string) => {
     setActivePath(normalizePath(path));
-    if (screen !== "desktop") {
-      setOpen(false);
-    }
+    if (screen !== "desktop") setOpen(false);
   };
-
-  // Determine sidebar classes based on explicit state
-  // Determine sidebar classes based on explicit state
-  const sidebarClass = (() => {
-    if (screen === "mobile") {
-      return `
-        fixed inset-y-0 left-0 z-50
-        w-full
-        ${open ? "translate-x-0" : "-translate-x-full"}
-      `;
-    }
-
-    if (screen === "tablet") {
-      return `
-        fixed inset-y-0 left-0 z-50
-        w-64
-        ${open ? "translate-x-0" : "-translate-x-full"}
-      `;
-    }
-
-    // desktop
-    return `
-      relative h-full translate-x-0
-      ${open ? "w-72 px-6" : "w-16 px-2"}
-    `;
-  })();
-
-  const toggleClass = screen === "desktop"
-    ? "absolute top-3 right-3 left-auto"
-    : "fixed top-3 left-4";
 
   return (
     <>
       <div className="lg:sticky lg:top-[var(--header-height)] lg:h-[calc(100vh-var(--header-height))] z-50">
+
+        {/* Toggle button */}
         <button
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setOpen(v => !v)}
           aria-expanded={open}
           aria-label="Toggle sidebar"
-          className={`
-            z-[70] flex items-center justify-center
-            h-8 w-8 rounded-md
-            border sidebar-toggle
-            active:scale-95
-            ${toggleClass}
-          `}
+          className="z-[70] flex items-center justify-center h-8 w-8 rounded-md border sidebar-toggle fixed top-3 left-4 lg:absolute lg:top-3 lg:right-3 lg:left-auto"
         >
           <span
-            className={`
-              icon-[solar--sidebar-minimalistic-bold-duotone]
-              text-xl transition-transform duration-300
-              ${open ? "rotate-180" : "rotate-0"}
-            `}
+            ref={toggleIconRef}
+            className="icon-[solar--sidebar-minimalistic-bold-duotone] text-xl"
           />
         </button>
 
-        {/* Backdrop for Mobile & Tablet when open */}
+        {/* Backdrop */}
         <div
-          className={`
-            fixed inset-0 bg-black/60 z-40 transition-opacity duration-500
-            ${screen !== "desktop" && open ? "opacity-100" : "opacity-0 pointer-events-none"}
-            ${screen === "desktop" ? "hidden" : ""}
-          `}
+          ref={backdropRef}
+          className={`fixed inset-0 bg-black/60 z-40 ${screen === "desktop" || !open ? "pointer-events-none" : ""} ${screen === "desktop" ? "hidden" : ""}`}
+          style={{ opacity: open && screen !== "desktop" ? 1 : 0 }}
           onClick={() => setOpen(false)}
-          aria-hidden="true"
         />
 
+        {/* Sidebar */}
         <aside
+          ref={sidebarRef}
           role="navigation"
           aria-label="Main navigation"
+          style={{
+            transform: screen !== "desktop" && !open ? "translateX(-100%)" : "translateX(0)"
+          }}
           className={`
-            sidebar-shell
-            overflow-visible
-            pt-16
-            transition-[transform,width,padding] duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-            ${sidebarClass}
+            sidebar-shell fixed inset-y-0 left-0 z-50
+            w-full md:w-64
+            lg:relative lg:h-full lg:inset-auto lg:z-auto
+            ${open ? "lg:w-72 lg:px-6" : "lg:w-16 lg:px-2"}
+            pt-16 overflow-visible
+            ${screen !== "desktop" && !open ? "pointer-events-none" : ""}
           `}
-          ref={sidebarRef}
         >
-          {/* Wrapper to handle content layout */}
-          <div className="flex flex-col h-full bg-inherit">
-            {/* Links */}
-            <nav
-              className={`flex flex-col ${open ? "mt-6 gap-3.5 px-4" : "lg:mt-10 lg:gap-5 lg:items-center w-full"
-                }`}
-            >
-              {links.map((link, index) => (
-                <SidebarLink
-                  link={link}
-                  activePath={activePath}
-                  open={open}
-                  onLinkClick={handleLinkClick}
-                  index={index}
-                />
-              ))}
-            </nav>
-          </div>
+          <nav className={`flex flex-col ${open ? "mt-6 gap-3.5 px-4" : "lg:mt-10 lg:gap-5 lg:items-center w-full"}`}>
+            {links.map(link => (
+              <SidebarLink
+                link={link}
+                activePath={activePath}
+                open={open}
+                onLinkClick={handleLinkClick}
+              />
+            ))}
+          </nav>
         </aside>
       </div>
     </>
   );
 }
 
+/* ---------------- SidebarLink ---------------- */
+
 interface SidebarLinkProps {
   link: (typeof links)[0];
   activePath: string;
   open: boolean;
   onLinkClick: (path: string) => void;
-  index: number;
 }
 
-function SidebarLink({
-  link,
-  activePath,
-  open,
-  onLinkClick,
-  index,
-}: SidebarLinkProps) {
+function SidebarLink({ link, activePath, open, onLinkClick }: SidebarLinkProps) {
   const ref = useRef<HTMLAnchorElement>(null);
   const isActive = activePath === link.href;
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  // Direct event handlers - re-attached on every render (Reactor-compatible)
+  const handlePointerEnter = () => {
+    if (!ref.current) return;
+    animate(ref.current, { scale: 1.05 }, { duration: 0.15, ease: "easeOut" });
+  };
 
-    // Hover animation
-    const unsubscribe = hover(el, () => {
-      animate(el, { scale: 1.1 }, { duration: 0.1, ease: "easeOut" });
-      return () => {
-        animate(el, { scale: 1 }, { duration: 0.6, ease: "easeInOut" });
-      };
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+  const handlePointerLeave = () => {
+    if (!ref.current) return;
+    animate(ref.current, { scale: 1 }, { duration: 0.2, ease: "easeInOut" });
+  };
 
   const handlePointerDown = () => {
-    if (ref.current) animate(ref.current, { scale: 0.96 }, { duration: 0.06 });
+    if (!ref.current) return;
+    animate(ref.current, { scale: 0.96 }, { duration: 0.08 });
+  };
+
+  const handlePointerUp = () => {
+    if (!ref.current) return;
+    // Check if still hovering to decide which scale to return to
+    const isHovering = ref.current.matches(":hover");
+    animate(
+      ref.current,
+      { scale: isHovering ? 1.05 : 1 },
+      { duration: 0.2, ease: "easeInOut" }
+    );
   };
 
   return (
@@ -201,45 +191,27 @@ function SidebarLink({
       ref={ref}
       href={link.href}
       onClick={() => onLinkClick(link.href)}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerLeave}
       title={!open ? link.label : undefined}
-      style={{
-        transitionDelay: open ? `${index * 40}ms` : "0ms",
-      }}
-      className={`
-        sidebar-link group rounded-lg flex items-center transition-all
-        duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-        ${open ? "px-3 py-2.5 justify-between w-full opacity-100 translate-x-0" : "p-1.5 justify-center"}
-        ${!open && "lg:opacity-100 lg:translate-x-0"}
-        ${!open && "opacity-0 -translate-x-4"}
-        ${isActive ? "sidebar-link--active" : ""}
-      `}
+      className={`sidebar-link group rounded-lg flex items-center ${open ? "px-3 py-2.5 justify-between w-full" : "p-1.5 justify-center"} ${isActive ? "sidebar-link--active" : ""}`}
     >
-      <span
-        className={`sidebar-link__content flex items-center ${open ? "gap-4" : ""
-          }`}
-      >
-        <span
-          className={`sidebar-icon-shell ${isActive ? "sidebar-icon-shell--active" : ""
-            }`}
-        >
-          <span
-            className={`
-              ${isActive ? link.iconActive : link.icon}
-              ${isActive ? "sidebar-icon--active" : ""}
-              text-xl transition-transform duration-200
-              group-hover:scale-110
-            `}
-          />
+      <span className={`flex items-center ${open ? "gap-4" : ""}`}>
+        <span className={`sidebar-icon-shell ${isActive ? "sidebar-icon-shell--active" : ""}`}>
+          <span className={`${isActive ? link.iconActive : link.icon} ${isActive ? "sidebar-icon--active" : ""} text-xl`} />
         </span>
         <span className={open ? "font-medium" : "sr-only"}>{link.label}</span>
       </span>
-      {open && (
-        <span className="sidebar-link__icon icon-[solar--arrow-right-bold] text-xl opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
-      )}
+
+      {open && <span className="icon-[solar--arrow-right-bold] text-xl opacity-50" />}
     </a>
   );
 }
+
+/* ---------------- utils ---------------- */
 
 function normalizePath(raw: string) {
   return raw.toLowerCase().replace(/\/+$/, "") || "/";
