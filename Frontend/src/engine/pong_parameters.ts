@@ -51,6 +51,7 @@ window.addEventListener("resize", () => {
 });
 
 
+<<<<<<< HEAD
 const PADDLE_SPEED = 6;
 
 const PLAYABLE_WIDTH = Number(GAME_WIDTH) - (2 * Number(WALL_WIDTH));
@@ -63,6 +64,11 @@ const GAME_SPEED = 2;
 
 const WIN_SCORE = 3;
 
+=======
+export const GAME_SPEED = 2;
+
+export const WIN_SCORE = 3;
+>>>>>>> origin/Dev
 
 // =====================
 // 4 PLAYER (P4) MODE

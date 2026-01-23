@@ -1,15 +1,25 @@
 import Fastify from "fastify";
-import cors from "@fastify/cors"; // ✅ import the CORS plugin
+import cors from "@fastify/cors";
+import jwt from "@fastify/jwt";
 
-import { prisma } from "./db/prisma.js";               // ✅ Prisma client
-import apiRoutes from "./routes/api.routes.js";        // ✅ New unified API routes
+import websocket from "@fastify/websocket";
+import { registerPresenceWs} from "./routes/presence.ws.js";
+import { registerPresenceRoutes } from "./routes/presence.js";
+
+
+import { prisma } from "./db/prisma.js";    
 
 import { registerTournamentRoutes } from "./routes/tournament.js";
 import { registerMatchmakingRoutes } from "./routes/matchmaking.js";
+import { registerLoginRoutes } from "./routes/login.js";
+import { registerAuthRoutes } from "./routes/auth.routes.js";
+import { registerProfileRoutes } from "./routes/profile.js";
+import { registerMeRoutes } from "./routes/me.js";
+
 
 const server = Fastify({ logger: true });
 
-// ✅ Enable CORS
+//  Enable CORS
 async function start() {
 	await server.register(cors, {
 	  origin: ["http://localhost:5173"], // frontend address
@@ -17,23 +27,35 @@ async function start() {
 	  allowedHeaders: ["Content-Type", "Authorization"],
 	});
 
-server.get("/", async () => {
-  return { message: "Hello from Backend!" };
-});
+    server.get("/", async () => {
+      return { message: "Hello from Backend!" };
+    });
 
-registerTournamentRoutes(server);
-registerMatchmakingRoutes(server);
+    await server.register(jwt, {
+      secret: process.env.JWT_SECRET!,
+    });
 
-//Register Prisma-based API routes
-server.register(apiRoutes, { prefix: "/api" });
+    await server.register(websocket); // must be before websocket routes
 
-server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
-	if (err){ process.exit(1); throw err; }
-  console.log(`Server listening at ${address}, hot reload is working!`);
-});
+    registerPresenceWs(server);
+    // registerPresenceHttpRoutes(server);
+    registerPresenceRoutes(server);
+
+    registerTournamentRoutes(server);
+    registerMatchmakingRoutes(server);
+    registerLoginRoutes(server);
+    registerAuthRoutes(server);
+    registerProfileRoutes(server);
+    registerMeRoutes(server);
+
+    server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
+      if (err){ process.exit(1); throw err; }
+      console.log(`Server listening at ${address}, hot reload is working!`);
+    });
 }
 
-// Gracefully shutdown Prisma on exit
+
+// shutdown Prisma on exit
 process.on("SIGINT", async () => {
   await prisma.$disconnect();
   process.exit(0);

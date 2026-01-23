@@ -2,27 +2,33 @@
   --color-primary: #ffffff;
   --color-accent: #22d3ee;
   --color-accent-soft: #0093d7;
-  --color-border-soft: rgba(255, 255, 255, 0.05);
-  --color-border-strong: rgba(34, 211, 238, 0.4);
+  
+  /* Surface tier — cards and components */
+  --color-surface: rgba(255, 255, 255, 0.04);
+  --color-surface-strong: rgba(255, 255, 255, 0.08);
+  
+  /* Neutral borders (accents removed, disappeared by default) */
+  --color-border-soft: rgba(255, 255, 255, 0.04);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
   --header-height: clamp(68px, 8vh, 82px);
   
-  --color-navpanel: #00143c;
+  --color-navpanel: #020c1f; /* desaturated, silhouette framing */
   --sidebar-bg: var(--color-navpanel);
   --sidebar-border: var(--color-border-soft);
   --sidebar-toggle-bg: rgba(255, 255, 255, 0.05);
   --sidebar-toggle-border: var(--color-border-strong);
-  --sidebar-toggle-text: var(--color-accent-soft);
-  --sidebar-toggle-hover-bg: var(--color-accent-soft);
+  --sidebar-toggle-text: var(--color-accent);
+  --sidebar-toggle-hover-bg: rgba(255, 255, 255, 0.08); /* surface hover, not accent */
   --sidebar-toggle-hover-text: #000000;
-  --sidebar-link-bg: rgba(255, 255, 255, 0.05);
+  --sidebar-link-bg: var(--color-surface);
   --sidebar-link-border: var(--color-border-soft);
-  --sidebar-link-text: var(--color-accent);
-  --sidebar-link-hover-bg: var(--color-accent-soft);
---sidebar-link-hover-text: #ffffff;
+  --sidebar-link-text: var(--color-primary);
+  --sidebar-link-hover-bg: var(--color-surface-strong);
+  --sidebar-link-hover-text: #ffffff;
   --sidebar-active-text: var(--color-primary);
   --sidebar-active-glow: var(--color-accent);
   --sidebar-active-sheen: var(--color-accent-soft);
-  --sidebar-active-hot: #ff1f4b;
+  --sidebar-active-hot: #ff1f4b; /* danger/urgency only — never decorative */
 
   /* relative heights */
   --spacing-height-offset: 10vh;
@@ -30,8 +36,8 @@
   --spacing-width-offset:15vw;
   --spacing-width-screen:85vw;
 
-  /* gradeint */
+  /* gradient — increased contrast, darker bottom for visual lift */
   --color-start:#0f172a;
-  --color-mid: #0b1224;
-  --color-end:#0c1428;
+  --color-mid: #0a1022;
+  --color-end:#050b1a;
 } 

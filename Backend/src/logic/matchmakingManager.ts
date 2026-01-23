@@ -14,7 +14,10 @@ import {
   Player,
   cleanupQueue,
   getExpiredActiveMatches,
-} from "./matchmakingRepo.js";
+} from "../repositories/match.repo.js";
+import {
+  updateUserGameStats
+} from "../repositories/stats.repo.js"
 
 // ─────────────────────────────────────────────
 // Time constants (in seconds)
@@ -26,47 +29,47 @@ const MAX_STARTED_TIME_SECONDS = 5 * 60;       // 5 minutes max game duration
 // ─────────────────────────────────────────────
 // Helper: Clean up expired matches and queue
 // ─────────────────────────────────────────────
-function cleanupExpiredMatchesAndQueue() {
+async function cleanupExpiredMatchesAndQueue() {
   // Clean expired entries from queue
-  cleanupQueue("connect4", MAX_QUEUE_TIME_SECONDS);
+  await cleanupQueue("connect4", MAX_QUEUE_TIME_SECONDS);
 
   // Clean expired active matches
-  const expiredMatchIds = getExpiredActiveMatches(
+  const expiredMatchIds = await getExpiredActiveMatches(
     MAX_MATCHED_TIME_SECONDS,
     MAX_STARTED_TIME_SECONDS
   );
 
   for (const matchId of expiredMatchIds) {
-    deleteActiveMatch(matchId);
+    await deleteActiveMatch(matchId);
   }
 }
 
 // ─────────────────────────────────────────────
 // Join Queue
 // ─────────────────────────────────────────────
-export function joinQueue(player: Player) {
+export async function joinQueue(player: Player) {
   if (!player?.id) {
     throw new Error("joinQueue called without valid player.id");
   }
-  if (!isUserValid(player.id)) {
+  if (!(await isUserValid(player.id))) {
     throw new Error(`User ${player.id} does not exist`);
   }
 
-  const existing = getActiveMatchDTO(player.id);
+  const existing = await getActiveMatchDTO(player.id);
   if (existing) return { status: "already_active" as const, match: existing };
 
-  if (isUserQueued(player.id, "connect4")) return { status: "waiting" as const };
+  if (await isUserQueued(player.id, "connect4")) return { status: "waiting" as const };
 
-  enqueuePlayer(player.id, "connect4");
-  if (!isUserQueued(player.id, "connect4")) return { status: "idle" as const };
+  await enqueuePlayer(player.id, "connect4");
+  if (!( await isUserQueued(player.id, "connect4"))) return { status: "idle" as const };
 
-  const pair = dequeueTwoPlayers("connect4", MAX_QUEUE_TIME_SECONDS);
+  const pair = await dequeueTwoPlayers("connect4", MAX_QUEUE_TIME_SECONDS);
   if (!pair) return { status: "waiting" as const };
 
   const [p1Id, p2Id] = pair;
 
   if (player.id !== p1Id && player.id !== p2Id) {
-    enqueuePlayer(player.id, "connect4");
+    await enqueuePlayer(player.id, "connect4");
     return { status: "waiting" as const };
   }
 
@@ -82,7 +85,7 @@ export function joinQueue(player: Player) {
     status: "matched",
   };
 
-  insertActiveMatch(match);
+  await insertActiveMatch(match);
 
   return { status: "matched" as const, match };
 }
@@ -90,34 +93,34 @@ export function joinQueue(player: Player) {
 // ─────────────────────────────────────────────
 // Get Active Match for a User
 // ─────────────────────────────────────────────
-export function getActiveMatchForUser(userId: number): ActiveMatchDTO | null {
-  cleanupExpiredMatchesAndQueue();
+export async function getActiveMatchForUser(userId: number): Promise<ActiveMatchDTO | null> {
+  await cleanupExpiredMatchesAndQueue();
 
-  const match = getActiveMatchDTO(userId);
+  const match = await getActiveMatchDTO(userId);
   return match ?? null;
 }
 
 // ─────────────────────────────────────────────
 // Check if user is Queued
 // ─────────────────────────────────────────────
-export function isQueued(user_id: number): boolean {
-  cleanupExpiredMatchesAndQueue();
+export async function isQueued(user_id: number): Promise<boolean> {
+  await cleanupExpiredMatchesAndQueue();
 
-  return isUserQueued(user_id, "connect4");
+  return await isUserQueued(user_id, "connect4");
 }
 
 // ─────────────────────────────────────────────
 // Start Match
 // ─────────────────────────────────────────────
-export function startMatch(matchId: string) {
-  const match = getActiveMatchFull({ matchId });
+export async function startMatch(matchId: string) {
+  const match = await getActiveMatchFull({ matchId });
   if (!match) throw new Error("Match not found");
   if (match.status !== "matched") return match;
 
   match.status = "started";
   match.startedAt = Date.now();
 
-  updateActiveMatchStatus(matchId, "started");
+  await updateActiveMatchStatus(matchId, "started");
 
   return match;
 }
@@ -125,16 +128,30 @@ export function startMatch(matchId: string) {
 // ─────────────────────────────────────────────
 // Finish Match (normal completion with winner)
 // ─────────────────────────────────────────────
-export function finishMatch(matchId: string, winnerId: number) {
-  const match = getActiveMatchFull({ matchId });
-// If match no longer exists (e.g. timed out and cleaned up), we ignore
+export async function finishMatch(matchId: string, winnerId: number) {
+  const match = await getActiveMatchFull({ matchId });
+
+  // If match no longer exists (e.g. timed out and cleaned up), we ignore
   if (!match) {
     return { success: true, alreadyCleaned: true };
   }
 
-  recordConnect4Game(match.p1.id, match.p2.id, winnerId);
+  // Record permanent game history
+  await recordConnect4Game(match.p1.id, match.p2.id, winnerId);
 
-  deleteActiveMatch(matchId);
+  // UPDATE USER STATS (both winner and loser)
+  const loserId = winnerId === match.p1.id ? match.p2.id : match.p1.id;
+
+  // Winner always gets +1 win
+  await updateUserGameStats(winnerId, true);
+
+  // Loser gets +1 loss (only if valid player ID)
+  if (loserId && loserId !== 0) {
+    await updateUserGameStats(loserId, false);
+  }
+
+  // Clean up active match
+  await deleteActiveMatch(matchId);
 
   return { success: true };
 }

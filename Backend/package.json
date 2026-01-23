@@ -4,25 +4,33 @@
     "main": "dist/index.js",
     "type": "module",
     "scripts": {
-        "dev": "tsc && node dist/index.js",
+        "dev": "tsc && node dist/src/index.js",
         "build": "tsc",
-        "start": "node dist/index.js",
+        "start": "node dist/src/index.js",
         "migrate": "npx prisma migrate deploy",
         "prisma:generate": "npx prisma generate",
         "prisma:studio": "npx prisma studio"
     },
     "dependencies": {
         "@fastify/cors": "^8.5.0",
+        "@fastify/jwt": "^7.0.0",
+        "@fastify/websocket": "^8.3.1",
         "@prisma/adapter-better-sqlite3": "^7.2.0",
         "@prisma/client": "^7.2.0",
+        "bcrypt": "^6.0.0",
         "better-sqlite3": "^12.4.6",
-        "fastify": "^4.29.0"
+        "fastify": "^4.29.0",
+        "sqlite": "^5.1.1",
+        "sqlite3": "^5.1.7"
     },
     "devDependencies": {
         "@prisma/config": "^7.2.0",
+        "@types/bcrypt": "^6.0.0",
+        "@types/sqlite3": "^3.1.11",
         "prisma": "^7.0.1",
         "ts-node": "^10.9.1",
         "ts-node-dev": "^2.0.0",
+        "tsx": "^4.21.0",
         "typescript": "^5.1.3"
     }
 }

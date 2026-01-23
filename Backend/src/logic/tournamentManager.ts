@@ -1,153 +1,168 @@
+// src/logic/tournamentManager.ts
 import {
-    insertTournament,
-    getTournamentById,
-    insertTournamentPlayer,
-    insertMatch,
-    insertMatchPlayer,
-    getMatchesForTournament,
-    recordMatchWinner,
-    getRegisteredPlayers,
-    getMatchPlayers,
-    getMatchDTO,
-	get_ActiveTournament,
-    getTournamentWithMatches,
-    updateTournamentState
-} from "./tournamentRepo.js";
+  insertTournament,
+  getTournamentById,
+  insertTournamentPlayer,
+  insertMatch,
+  // insertMatchPlayer, // available in repo, but not used here
+  getRegisteredPlayers,
+  getMatchPlayers,
+  getMatchDTO,
+  get_ActiveTournament,
+  getTournamentWithMatches,
+  updateTournamentState,
+  recordMatchWinner,
+} from "../repositories/tournament.repo.js";
 
 import {
-    PlayerDTO,
-    MatchDTO,
-    TournamentDTO
-} from "../types/tournament.js";
+  updateUserGameStats,
+  updateUserTournamentStats
+} from "../repositories/stats.repo.js"
+
+import type { MatchDTO } from "../types/tournament.js";
 
 // Create a tournament
-export function createTournament(name: string, maxPlayers: number = 4) {
-    // Check for existing active/waiting tournament
-    const activeTournament = get_ActiveTournament();
-    if (activeTournament) {
-        return activeTournament; // Return existing tournament instead of creating a new one
-    }
+export async function createTournament(name: string, maxPlayers: number = 4) {
+  // If an active/waiting tournament exists, reuse it
+  const activeTournament = await get_ActiveTournament();
+  if (activeTournament) return activeTournament;
 
-    const idOrError = insertTournament(name, maxPlayers);
-    if (typeof idOrError !== "number") throw new Error(idOrError.error);
-    return getTournamentById(idOrError);
+  const idOrError = await insertTournament(name, maxPlayers);
+
+  //  your repo returns { error: string } on failure
+  if (typeof idOrError !== "number") {
+    throw new Error(idOrError.error);
+  }
+
+  return await getTournamentById(idOrError);
 }
 
 // Register a user to a tournament
-export function registerUserToTournament(tournamentId: number, userId: number) {
-    const tournament = getTournamentById(tournamentId);
-    if (!tournament) throw new Error("Tournament not found");
-    if (tournament.state !== "waiting") throw new Error("Tournament already started");
-    
-    // Check if tournament is full
-    const players = getRegisteredPlayers(tournamentId);
-    if (players.length >= tournament.max_players) {
-        throw new Error("Tournament is full");
-    }
-    
-    return insertTournamentPlayer(tournamentId, userId);
+export async function registerUserToTournament(tournamentId: number, userId: number) {
+  const tournament = await getTournamentById(tournamentId);
+  if (!tournament) throw new Error("Tournament not found");
+  if (tournament.state !== "waiting") throw new Error("Tournament already started");
+
+  const players = await getRegisteredPlayers(tournamentId);
+  if (players.length >= tournament.max_players) {
+    throw new Error("Tournament is full");
+  }
+
+  return await insertTournamentPlayer(tournamentId, userId);
 }
 
 // Start tournament: only allowed if full quantity is registered
-export function startTournament(tournamentId: number) {
-    const tournament = getTournamentById(tournamentId);
-    if (!tournament) throw new Error("Tournament not found");
-    if (tournament.state !== "waiting") throw new Error("Tournament already started");
-    
-    const maxPlayers = tournament.max_players || 4; // Fallback to 4 if not set
-    const players = getRegisteredPlayers(tournamentId);
-    
-    if (players.length !== maxPlayers) {
-        throw new Error(`Cannot start tournament. Required ${maxPlayers}, but ${players.length} registered.`);
-    }
+export async function startTournament(tournamentId: number) {
+  const tournament = await getTournamentById(tournamentId);
+  if (!tournament) throw new Error("Tournament not found");
+  if (tournament.state !== "waiting") throw new Error("Tournament already started");
 
-    // Shuffle first round
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
-    let matchNumber = 1;
-    const round = 1;
-    
-    for (let i = 0; i < shuffled.length; i += 2) {
-        const p1 = shuffled[i];
-        const p2 = shuffled[i + 1];
-        insertMatch(
-            tournamentId,
-            p1.id,
-            p2.id,
-            round,
-            matchNumber++
-        );
-    }
-    
-    return updateTournamentState(tournamentId, "active", round);
+  const maxPlayers = tournament.max_players || 4;
+  const players = await getRegisteredPlayers(tournamentId);
+
+  if (players.length !== maxPlayers) {
+    throw new Error(`Cannot start tournament. Required ${maxPlayers}, but ${players.length} registered.`);
+  }
+
+  // Shuffle first round
+  const shuffled = [...players].sort(() => Math.random() - 0.5);
+
+  const round = 1;
+  let matchNumber = 1;
+
+  for (let i = 0; i < shuffled.length; i += 2) {
+    const p1 = shuffled[i];
+    const p2 = shuffled[i + 1];
+    await insertMatch(tournamentId, p1.id, p2.id, round, matchNumber++);
+  }
+
+  return await updateTournamentState(tournamentId, "active", round);
 }
 
 // Advance round
-export function advanceRound(tournamentId: number) {
-    const tournament = getTournamentWithMatches(tournamentId);
-    if (!tournament) throw new Error("Tournament not found");
+export async function advanceRound(tournamentId: number) {
+  const tournament = await getTournamentWithMatches(tournamentId);
+  if (!tournament) throw new Error("Tournament not found");
 
-    // Get matches for the current round
-    const currentRoundMatches = tournament.matches.filter(
-        (m: MatchDTO) => m.round === tournament.currentRound
+  // Get matches for the current round
+  const currentRoundMatches = tournament.matches.filter((m: MatchDTO) => m.round === tournament.currentRound);
+
+  // Ensure all matches in current round are finished
+  const unfinished = currentRoundMatches.filter((m: MatchDTO) => m.status === "pending");
+  if (unfinished.length) throw new Error("Not all matches are finished");
+
+  // Winners from current round
+  const winners = currentRoundMatches
+    .map((m: MatchDTO) => m.winnerId)
+    .filter((id): id is number => id != null);
+
+  if (winners.length === 1) {
+    // Tournament finished – award the championship
+    await updateUserTournamentStats(winners[0]);
+
+    return await updateTournamentState(
+      tournamentId,
+      "finished",
+      tournament.currentRound,
+      winners[0]
     );
+  }
 
-    // Check all current-round matches are finished
-    const unfinished = currentRoundMatches.filter((m: MatchDTO) => m.status === "pending");
-    if (unfinished.length) throw new Error("Not all matches are finished");
+  const nextRound = tournament.currentRound + 1;
+  let matchNumber = 1;
 
-    // Collect winners only from current round
-    const winners = currentRoundMatches
-        .map((m: MatchDTO) => m.winnerId)
-        .filter(Boolean) as number[];
+  // Preserve bracket order: sort by previous match number
+  const winnersByIndex = currentRoundMatches
+    .filter(m => m.winnerId != null)
+    .sort((a, b) => (a.matchNumber ?? 0) - (b.matchNumber ?? 0));
 
-    if (winners.length === 1) {
-        // Tournament finished
-        return updateTournamentState(
-            tournamentId,
-            "finished",
-            tournament.currentRound,
-            winners[0]
-        );
+  for (let i = 0; i < winnersByIndex.length; i += 2) {
+    const p1 = winnersByIndex[i].winnerId!;
+    const p2 = winnersByIndex[i + 1]?.winnerId ?? null;
+
+    if (!p2) {
+      // odd player out → auto-advance placeholder
+      await insertMatch(tournamentId, p1, 0, nextRound, matchNumber++);
+    } else {
+      await insertMatch(tournamentId, p1, p2, nextRound, matchNumber++);
     }
+  }
 
-    const nextRound = tournament.currentRound + 1;
-    let matchNumber = 1;
-
-    // Sort winners by their previous match number to preserve order
-    const winnersByIndex = currentRoundMatches
-        .filter(m => m.winnerId)
-        .sort((a, b) => (a.matchNumber ?? 0) - (b.matchNumber ?? 0));
-
-	for (let i = 0; i < winnersByIndex.length; i += 2) {
-		const p1 = winnersByIndex[i].winnerId!;
-		const p2 = winnersByIndex[i + 1]?.winnerId;
-	
-		if (!p2) {
-			// Odd player out → automatically advances to next round
-			insertMatch(tournamentId, p1, 0, nextRound, matchNumber++); // 0 or null as placeholder
-		} else {
-			insertMatch(tournamentId, p1, p2, nextRound, matchNumber++);
-		}
-	}
-
-    return updateTournamentState(tournamentId, "active", nextRound);
+  return await updateTournamentState(tournamentId, "active", nextRound);
 }
 
 // Record match result
-export function recordMatchResult(matchId: number, winnerId: number) {
-    const matchPlayers = getMatchPlayers(matchId);
-    const validIds = matchPlayers.map((p: { id: number }) => p.id);
-    
-    if (!validIds.includes(winnerId)) throw new Error("Invalid winner for this match");
-    
-    recordMatchWinner(matchId, winnerId);
-    return getMatchDTO(matchId);
+export async function recordMatchResult(matchId: number, winnerId: number) {
+  const matchPlayers = await getMatchPlayers(matchId);
+  const validIds = matchPlayers.map(p => p.id);
+
+  if (!validIds.includes(winnerId)) throw new Error("Invalid winner for this match");
+
+  await recordMatchWinner(matchId, winnerId);
+  
+  // UPDATE USER STATS (both winner and loser)
+  const winnerPlayer = matchPlayers.find(p => p.id === winnerId);
+  const loserPlayer = matchPlayers.find(p => p.id !== winnerId);
+
+  if (!winnerPlayer) {
+    throw new Error("Winner not found in match players");
+  }
+
+  // Winner: +1 win
+  await updateUserGameStats(winnerId, true);
+
+  // Loser: +1 loss (only if valid player exists)
+  if (loserPlayer && loserPlayer.id !== 0) {
+    await updateUserGameStats(loserPlayer.id, false);
+  }
+
+  return await getMatchDTO(matchId);
 }
 
-export function getTournament(tournamentId: number) {
-	return getTournamentWithMatches(tournamentId);
+export async function getTournament(tournamentId: number) {
+  return await getTournamentWithMatches(tournamentId);
 }
 
-export function getActiveTournament() {
-	return(get_ActiveTournament());
+export async function getActiveTournament() {
+  return await get_ActiveTournament();
 }

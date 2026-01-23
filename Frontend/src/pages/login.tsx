@@ -1,77 +1,74 @@
-// import { useEffect, useRef } from "@/Reactor";
-// import * as BABYLON from "babylonjs";
+import { useRef, navigate, useEffect } from "Reactor";
+import { setAuth } from "@/lib/auth";
+import { connectPresenceWS } from "@/lib/presence";
+import { useAuth } from "@/lib/useAuth";
 
-// export default function Scene() {
-//   const canvasRef = useRef(null);
-//   console.log("bugging")
-//   useEffect(() => {
-//     console.log("EFFECT CALLBACK QUEUED");
-//     queueMicrotask(() => {
-//     const canvas = canvasRef.current;
-//   	console.log("canvasRef", canvasRef.current);
+export default function LoginPage() {
+  const auth = useAuth();
+  useEffect(() => {
+    if (auth?.token) navigate("/me");
+  }, [auth?.token]);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-//     const engine = new BABYLON.Engine(canvas, true);
+  const handleLogin = async () => {
+    const email = emailRef.current?.value || "";
+    const password = passwordRef.current?.value || "";
 
-//     const createScene = () => {
-//       const scene = new BABYLON.Scene(engine);
+    if (!email || !password) {
+      alert("Missing email or password");
+      return;
+    }
 
-//       const camera = new BABYLON.ArcRotateCamera(
-//         "camera",
-//         Math.PI / 2,
-//         Math.PI / 3,
-//         5,
-//         BABYLON.Vector3.Zero(),
-//         scene
-//       );
-//       camera.attachControl(canvas, true);
+    const res = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-//       const light = new BABYLON.HemisphericLight(
-//         "light",
-//         new BABYLON.Vector3(0, 1, 0),
-//         scene
-//       );
+    const data = await res.json();
 
-//       BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+    if (!res.ok) {
+      alert(data.error || "Login failed");
+      return;
+    }
 
-//       return scene;
-
-//     };
-
-//     const scene = createScene();
-
-//     engine.runRenderLoop(() => scene.render());
-//     window.addEventListener("resize", engine.resize);
-//     return () => {
-//       engine.dispose();
-//     };
-  
-//   })});
-
-//   return (
-//     <div>
-//       <h1>hashir</h1>
-//       <canvas
-//       ref={canvasRef}
-//       className="h-body-screenHeight w-width-screen"
-//       ></canvas>
-//       </div>
-//   );
-// }
-
-
-import { useEffect, useRef } from "Reactor";
-import * as BABYLON from "babylonjs";
-
-export default function Scene() {
-  const canvasRef = useRef(null);
+    setAuth(data);
+    connectPresenceWS();  
+    navigate("/me");
+  };
 
   return (
-    <div>
-      <h1>hashir</h1>
-      <canvas
-      ref={canvasRef}
-      className="h-body-screenHeight w-width-screen"
-      ></canvas>
-      </div>
+    <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-900 text-white">
+      <h1 className="text-3xl font-bold">Welcome back to Mina</h1>
+
+      <input
+        ref={emailRef}
+        className="px-4 py-2 rounded text-gray"
+        placeholder="Email" 
+      />
+
+      <input
+        ref={passwordRef}
+        type="password"
+        className="px-4 py-2 rounded text-gray"
+        placeholder="Password"
+      />
+
+      <button
+        onClick={handleLogin}
+        className="bg-blue-600 px-4 py-2 rounded font-bold hover:bg-blue-500"
+      >
+        Login
+      </button>
+      <p className="text-sm text-gray-400"></p>
+        Don`t have an account?{" "}
+        <span
+         className="text-blue-400 cursor-pointer hover:underline"
+         onClick={() => (navigate("/signup"))}
+        >
+        Register
+        </span>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "Reactor";
 import { navigate } from "Reactor";
-
-const mockUser = { id: 3, name: "Player2" };
+import { getAuth } from "@/lib/auth";
 
 type Player = { 
   id: number; 
@@ -16,6 +15,25 @@ type Match = {
 };
 
 export default function Connect4Single() {
+
+    const auth = getAuth();
+    const user = auth?.user;
+    const token = auth?.token;
+
+    if (!user) {
+    return (
+      <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl mb-4">Please login to play matchmaking.</p>
+          <button onClick={() => (navigate("/login"))} className="bg-blue-500 px-6 py-3 rounded text-xl">
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
   const [status, setStatus] = useState<"loading" | "idle" | "waiting" | "matched">("loading");
   const [match, setMatch] = useState<Match | null>(null);
 
@@ -24,9 +42,9 @@ export default function Connect4Single() {
   // ──────────────── Polling effect ────────────────
   useEffect(() => {
     const pollMatch = async () => {
-      console.log("[poll] fetching match state for user", mockUser.id);
+      console.log("[poll] fetching match state for user", user.id);
       try {
-        const res = await fetch(`http://localhost:3000/api/matchmaking/state/${mockUser.id}`);
+        const res = await fetch(`http://localhost:3000/api/matchmaking/state/${user.id}`);
         if (!res.ok) return;
 
         const data = await res.json();
@@ -74,12 +92,12 @@ export default function Connect4Single() {
 
   // ──────────────── Join Queue ────────────────
   async function join() {
-    console.log("[join] user joining queue", mockUser.id);
+    console.log("[join] user joining queue", user.id);
     try {
       const res = await fetch("http://localhost:3000/api/matchmaking/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: mockUser.id, username: mockUser.name }),
+        body: JSON.stringify({ userId: user.id, username: user.username }),
       });
       const data = await res.json();
       console.log("[join] server response:", data);
@@ -99,7 +117,7 @@ export default function Connect4Single() {
 
   // ──────────────── Start Game ────────────────
   async function startGame() {
-    if (!match || match.p1.id !== mockUser.id) return;
+    if (!match || match.p1.id !==user.id) return;
 
     // Stop polling before navigating
     if (intervalRef.current) {
@@ -134,8 +152,8 @@ export default function Connect4Single() {
     }
   }
 
-  const opponent_name = match && (match.p1.id === mockUser.id ? match.p2.name : match.p1.name);
-  const opponent_id = match && (match.p1.id === mockUser.id ? match.p2.id : match.p1.id);
+  const opponent_name = match && (match.p1.id === user.id ? match.p2.name : match.p1.name);
+  const opponent_id = match && (match.p1.id === user.id ? match.p2.id : match.p1.id);
 
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
@@ -155,20 +173,20 @@ export default function Connect4Single() {
         <div className="text-center">
           <p className="mb-4">
             Matched with <strong>{opponent_name}</strong>
-            {match.p1.id !== mockUser.id && " — Only host can start the game"}
+            {match.p1.id !== user.id && " — Only host can start the game"}
           </p>
-          {match.status === "matched" && match.p1.id === mockUser.id && (
+          {match.status === "matched" && match.p1.id === user.id && (
             <button onClick={startGame} className="bg-green-500 px-6 py-3 rounded text-xl">
               Start Game
             </button>
           )}
-          {match.status === "started" && match.p1.id === mockUser.id && 
+          {match.status === "started" && match.p1.id === user.id && 
             <p className="text-xl">Game started! You can play now.</p> && (
             <button onClick={startGame} className="bg-green-500 px-6 py-3 rounded text-xl">
               Re-Start Game
             </button>
           )}
-          {match.status === "started" && match.p1.id !== mockUser.id && 
+          {match.status === "started" && match.p1.id !== user.id && 
             <p className="text-xl">Game started! You can play now on Host Session.</p>
           }
         </div>
