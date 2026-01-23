@@ -1,13 +1,15 @@
 import { navigate, useState, useEffect, useRef } from "@/Reactor";
 import { getAuth, logout } from "../../lib/auth";
+import { animate } from "motion";
 
 export default function Header({ screen }: { screen: "mobile" | "tablet" | "desktop" }) {
   // Mobile & Tablet: Button is fixed top-left, so we need left padding
   // Desktop: Button is in the sidebar (below header), so standard padding
   const headerPadding = screen !== "desktop" ? "pl-14 pr-4 sm:pl-16 sm:pr-6" : "px-6";
   const [user, setUser] = useState<any>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -16,23 +18,35 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
     }
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close panel when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setPanelOpen(false);
       }
     };
-    if (dropdownOpen) {
+    if (panelOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [dropdownOpen]);
+  }, [panelOpen]);
+
+  // Panel entrance animation
+  useEffect(() => {
+    if (!panelContentRef.current) return;
+    if (panelOpen) {
+      animate(
+        panelContentRef.current,
+        { opacity: [0, 1], y: [-4, 0] },
+        { duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }
+      );
+    }
+  }, [panelOpen]);
 
   const handleLogout = () => {
     logout();
     setUser(null);
-    setDropdownOpen(false);
+    setPanelOpen(false);
     navigate("/login");
   };
 
@@ -115,51 +129,67 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
             <span>Login / Signup</span>
           </button>
         ) : (
-          <div ref={dropdownRef} className="relative">
+          <div ref={panelRef} className="relative">
+            {/* Operator Pill Trigger */}
             <div
-              onClick={() => setDropdownOpen(v => !v)}
-              className="avatar-shell relative flex items-center gap-3 cursor-pointer group bg-black/20 hover:bg-black/40 pl-2 pr-4 py-1.5 rounded-full transition border border-white/5"
+              onClick={() => setPanelOpen(v => !v)}
+              className="avatar-shell relative flex items-center gap-3 cursor-pointer group bg-black/20 hover:bg-black/40 pl-2 pr-3 py-1.5 rounded-full transition border border-white/5"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-accent/20">
-                <span className="icon-[mdi--account] text-accent text-lg" aria-hidden="true" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[var(--color-surface-strong)] flex items-center justify-center overflow-hidden border border-[var(--color-border-strong)]">
+                <span className="icon-[mdi--account] text-[var(--color-accent-soft)] text-lg" aria-hidden="true" />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="text-xs text-accent-soft font-medium uppercase tracking-wider">Operator</span>
-                <span className="text-sm font-bold text-slate-100 group-hover:text-white transition">{user.username}</span>
+                <span className="text-[10px] text-[var(--color-primary)] opacity-50 font-medium uppercase tracking-[0.2em]">Operator</span>
+                <span className="text-sm font-semibold text-[var(--color-primary)] group-hover:text-white transition">{user.username}</span>
               </div>
-              <span className={`icon-[mdi--chevron-down] text-lg text-slate-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+              <span className={`icon-[mdi--chevron-down] text-base text-[var(--color-primary)] opacity-40 transition-transform duration-150 ${panelOpen ? "rotate-180" : ""}`} />
             </div>
 
-            {/* Dropdown Menu */}
-            {dropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden z-[100]">
-                <div className="px-4 py-3 border-b border-white/5">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider">Signed in as</p>
-                  <p className="text-sm font-semibold text-white truncate">{user.username}</p>
+            {/* Operator Panel */}
+            {panelOpen && (
+              <div
+                ref={panelContentRef}
+                className="absolute right-0 top-full mt-2 w-52 rounded-lg bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-md shadow-black/30 overflow-hidden z-[100]"
+              >
+                {/* Identity Section */}
+                <div className="px-4 py-3 border-b border-[var(--color-border-soft)]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
+                      <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-40 text-lg" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--color-primary)]">{user.username}</p>
+                      <p className="text-[9px] text-[var(--color-primary)] opacity-25 uppercase tracking-[0.12em]">Operator</p>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Actions */}
                 <div className="py-1">
                   <button
-                    onClick={() => { setDropdownOpen(false); navigate("/me"); }}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-slate-200 hover:bg-white/5 hover:text-white transition"
+                    onClick={() => { setPanelOpen(false); navigate("/me"); }}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-[var(--color-primary)] opacity-80 hover:opacity-100 hover:bg-[var(--color-surface)] transition"
                   >
-                    <span className="icon-[mdi--account-circle-outline] text-lg text-accent" />
-                    Profile
+                    <span className="icon-[mdi--badge-account-outline] text-base opacity-50" />
+                    Operator File
                   </button>
                   <button
-                    onClick={() => { setDropdownOpen(false); navigate("/settings"); }}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-slate-200 hover:bg-white/5 hover:text-white transition"
+                    onClick={() => { setPanelOpen(false); navigate("/settings"); }}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-[var(--color-primary)] opacity-80 hover:opacity-100 hover:bg-[var(--color-surface)] transition"
                   >
-                    <span className="icon-[mdi--cog-outline] text-lg text-slate-400" />
-                    Settings
+                    <span className="icon-[mdi--tune-variant] text-base opacity-50" />
+                    System Prefs
                   </button>
                 </div>
-                <div className="border-t border-white/5 py-1">
+
+                {/* Terminate Session */}
+                <div className="mt-1 pt-1 border-t border-[var(--color-border-soft)]">
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition"
+                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-[var(--color-primary)] opacity-40 hover:opacity-100 hover:text-[var(--sidebar-active-hot)] transition"
                   >
-                    <span className="icon-[mdi--logout] text-lg" />
-                    Log out
+                    <span className="icon-[mdi--power-standby] text-base" />
+                    Terminate Session
                   </button>
                 </div>
               </div>

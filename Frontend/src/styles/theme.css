@@ -7,6 +7,10 @@
   --color-surface: rgba(255, 255, 255, 0.04);
   --color-surface-strong: rgba(255, 255, 255, 0.08);
   
+  /* Panel tier — command surfaces above cards */
+  --color-panel: rgba(6, 12, 30, 0.94);
+  --color-panel-border: rgba(255, 255, 255, 0.08);
+  
   /* Neutral borders (accents removed, disappeared by default) */
   --color-border-soft: rgba(255, 255, 255, 0.04);
   --color-border-strong: rgba(255, 255, 255, 0.12);
