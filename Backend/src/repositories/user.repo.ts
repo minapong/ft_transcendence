@@ -20,6 +20,7 @@ export const UserRepo = {
       email: user.email,
       username: user.username,
       passwordHash: user.password_hash,
+      isAdmin: user.isAdmin,
     };
   },
 
@@ -35,6 +36,7 @@ export const UserRepo = {
       email: user.email,
       username: user.username,
       passwordHash: user.password_hash,
+      isAdmin: user.isAdmin,
     };
   },
 
@@ -50,6 +52,7 @@ export const UserRepo = {
       email: user.email,
       username: user.username,
       passwordHash: user.password_hash,
+      isAdmin: user.isAdmin,
     };
   },
 
@@ -65,6 +68,7 @@ export const UserRepo = {
       email: user.email,
       username: user.username,
       passwordHash: user.password_hash,
+      isAdmin: user.isAdmin,
     };
   },
 
@@ -86,6 +90,7 @@ export const UserRepo = {
       email: user.email,
       username: user.username,
       passwordHash: user.password_hash,
+      isAdmin: user.isAdmin,
     };
   },
 
@@ -101,6 +106,7 @@ export const UserRepo = {
       email: u.email,
       username: u.username,
       passwordHash: u.password_hash,
+      isAdmin: u.isAdmin,
     }));
   },
 };

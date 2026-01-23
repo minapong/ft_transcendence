@@ -1,4 +1,5 @@
 import { UserRepo } from "../repositories/user.repo.js"
+import { toPublicUser } from "../domain/user.public.js"
 import crypto from "crypto"
 
 function hashPassword(password: string): string {
@@ -22,7 +23,7 @@ export const AuthService = {
       password_hash, // IMPORTANT: match your DB/repo field name
     });
 
-    return { id: user.id, email: user.email, username: user.username };
+    return toPublicUser(user);
   },
 
     async login(email: string, password: string) {
@@ -31,17 +32,12 @@ export const AuthService = {
       console.error("INVALID_Email:", email);
       throw new Error("INVALID_CREDENTIALS")
     }
- const incoming_hash = hashPassword(password);
 
-  
+    const incoming_hash = hashPassword(password);
     if (user.passwordHash !== incoming_hash) {
       throw new Error("INVALID_CREDENTIALS");
     }
 
-    return {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-    }
+    return toPublicUser(user);
   }
 }
