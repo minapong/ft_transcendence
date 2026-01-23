@@ -7,3 +7,7 @@ export function getAuth() {
     return null;
   }
 }
+
+export function logout() {
+  localStorage.removeItem("auth");
+}

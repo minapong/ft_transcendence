@@ -1,11 +1,13 @@
-import { navigate, useState, useEffect } from "@/Reactor";
-import { getAuth } from "../../lib/auth";
+import { navigate, useState, useEffect, useRef } from "@/Reactor";
+import { getAuth, logout } from "../../lib/auth";
 
 export default function Header({ screen }: { screen: "mobile" | "tablet" | "desktop" }) {
   // Mobile & Tablet: Button is fixed top-left, so we need left padding
   // Desktop: Button is in the sidebar (below header), so standard padding
   const headerPadding = screen !== "desktop" ? "pl-14 pr-4 sm:pl-16 sm:pr-6" : "px-6";
   const [user, setUser] = useState<any>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -13,6 +15,26 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
       setUser(auth.user);
     }
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    setDropdownOpen(false);
+    navigate("/login");
+  };
 
   const statusCards = [
     {
@@ -30,7 +52,7 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
   ];
 
   return (
-    <header className={`sticky top-0 z-50 relative min-h-[var(--header-height)] ${headerPadding} flex flex-wrap items-center justify-between gap-3 sm:gap-4 overflow-hidden header-surface`}>
+    <header className={`sticky top-0 z-50 relative min-h-[var(--header-height)] ${headerPadding} flex flex-wrap items-center justify-between gap-3 sm:gap-4 header-surface`}>
 
       <div className="flex items-center gap-4 z-10">
         <div
@@ -93,18 +115,55 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
             <span>Login / Signup</span>
           </button>
         ) : (
-          <div
-            onClick={() => navigate("/me")}
-            className="avatar-shell relative flex items-center gap-3 cursor-pointer group bg-black/20 hover:bg-black/40 pl-2 pr-4 py-1.5 rounded-full transition border border-white/5"
-          >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-accent/20">
-              {/* Placeholder for avatar, or actual image if available */}
-              <span className="icon-[mdi--account] text-accent text-lg" aria-hidden="true" />
+          <div ref={dropdownRef} className="relative">
+            <div
+              onClick={() => setDropdownOpen(v => !v)}
+              className="avatar-shell relative flex items-center gap-3 cursor-pointer group bg-black/20 hover:bg-black/40 pl-2 pr-4 py-1.5 rounded-full transition border border-white/5"
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-accent/20">
+                <span className="icon-[mdi--account] text-accent text-lg" aria-hidden="true" />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="text-xs text-accent-soft font-medium uppercase tracking-wider">Operator</span>
+                <span className="text-sm font-bold text-slate-100 group-hover:text-white transition">{user.username}</span>
+              </div>
+              <span className={`icon-[mdi--chevron-down] text-lg text-slate-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
             </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-xs text-accent-soft font-medium uppercase tracking-wider">Operator</span>
-              <span className="text-sm font-bold text-slate-100 group-hover:text-white transition">{user.username}</span>
-            </div>
+
+            {/* Dropdown Menu */}
+            {dropdownOpen && (
+              <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden z-[100]">
+                <div className="px-4 py-3 border-b border-white/5">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">Signed in as</p>
+                  <p className="text-sm font-semibold text-white truncate">{user.username}</p>
+                </div>
+                <div className="py-1">
+                  <button
+                    onClick={() => { setDropdownOpen(false); navigate("/me"); }}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-slate-200 hover:bg-white/5 hover:text-white transition"
+                  >
+                    <span className="icon-[mdi--account-circle-outline] text-lg text-accent" />
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => { setDropdownOpen(false); navigate("/settings"); }}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-slate-200 hover:bg-white/5 hover:text-white transition"
+                  >
+                    <span className="icon-[mdi--cog-outline] text-lg text-slate-400" />
+                    Settings
+                  </button>
+                </div>
+                <div className="border-t border-white/5 py-1">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition"
+                  >
+                    <span className="icon-[mdi--logout] text-lg" />
+                    Log out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
