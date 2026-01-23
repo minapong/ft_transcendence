@@ -41,11 +41,14 @@ export default function MePage() {
     <div className="p-10 text-white">
        <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">{me.username}</h1>
+          <button onClick={() => navigate("/friends")} className="bg-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-600">
+            Friends
+          </button>
 
         <button
           type="button"
           onClick={logout}
-          className="bg-red-600 px-4 py-2 rounded font-bold hover:bg-red-500"
+          className="bg-orange-600 px-4 py-2 rounded font-bold hover:bg-red-500"
         >
           Logout
         </button>
