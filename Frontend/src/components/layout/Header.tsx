@@ -85,7 +85,7 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
           <div className="flex flex-col leading-tight">
             <div className="flex items-center gap-2">
               <span className="text-xl sm:text-2xl font-bold tracking-[0.06em] text-primary transition-colors group-hover:text-accent">
-                MINA&nbsp;PONG    
+                MINA&nbsp;PONG
               </span>
             </div>
             <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
@@ -130,20 +130,17 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
           </button>
         ) : (
           <div ref={panelRef} className="relative">
-            {/* Operator Pill Trigger */}
-            <div
+            {/* Operator Trigger */}
+            <button
               onClick={() => setPanelOpen(v => !v)}
-              className="avatar-shell relative flex items-center gap-3 cursor-pointer group bg-black/20 hover:bg-black/40 pl-2 pr-3 py-1.5 rounded-full transition border border-white/5"
+              className="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)]"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[var(--color-surface-strong)] flex items-center justify-center overflow-hidden border border-[var(--color-border-strong)]">
-                <span className="icon-[mdi--account] text-[var(--color-accent-soft)] text-lg" aria-hidden="true" />
+              <div className="w-7 h-7 rounded-md bg-[var(--color-surface)] flex items-center justify-center">
+                <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-base" aria-hidden="true" />
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-[10px] text-[var(--color-primary)] opacity-50 font-medium uppercase tracking-[0.2em]">Operator</span>
-                <span className="text-sm font-semibold text-[var(--color-primary)] group-hover:text-white transition">{user.username}</span>
-              </div>
-              <span className={`icon-[mdi--chevron-down] text-base text-[var(--color-primary)] opacity-40 transition-transform duration-150 ${panelOpen ? "rotate-180" : ""}`} />
-            </div>
+              <span className="text-sm text-[var(--color-primary)] opacity-85">{user.username}</span>
+              <span className={`icon-[mdi--chevron-down] text-sm text-[var(--color-primary)] opacity-30 transition-transform duration-150 ${panelOpen ? "rotate-180" : ""}`} />
+            </button>
 
             {/* Operator Panel */}
             {panelOpen && (
