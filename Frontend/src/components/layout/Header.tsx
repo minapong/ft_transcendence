@@ -1,9 +1,18 @@
-import { useLayoutState } from "../../hooks/useLayoutState";
+import { navigate, useState, useEffect } from "@/Reactor";
+import { getAuth } from "../../lib/auth";
 
 export default function Header({ screen }: { screen: "mobile" | "tablet" | "desktop" }) {
   // Mobile & Tablet: Button is fixed top-left, so we need left padding
   // Desktop: Button is in the sidebar (below header), so standard padding
   const headerPadding = screen !== "desktop" ? "pl-14 pr-4 sm:pl-16 sm:pr-6" : "px-6";
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    if (auth && auth.user) {
+      setUser(auth.user);
+    }
+  }, []);
 
   const statusCards = [
     {
@@ -69,19 +78,30 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
             </div>
           </div>
         ))}
-        <button className="bleed-btn rounded-lg bg-accent text-primary text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-3.5 sm:py-2 transition hover:bg-accent-soft flex items-center gap-2">
-          <span
-            className="icon-[mdi--sword-cross] text-base sm:text-lg"
-            aria-hidden="true"
-          />
-          <span>Enter Arena</span>
-        </button>
-        <div className="avatar-shell relative w-9 h-9 sm:w-10 sm:h-10 rounded-full cursor-pointer transition flex items-center justify-center">
-          <span
-            className="icon-[mdi--moon-waning-crescent] text-accent text-base sm:text-lg"
-            aria-hidden="true"
-          />
-        </div>
+
+        {!user ? (
+          <button
+            onClick={() => navigate("/login")}
+            className="bleed-btn rounded-lg bg-accent text-primary text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-3.5 sm:py-2 transition hover:bg-accent-soft flex items-center gap-2"
+          >
+            <span className="icon-[mdi--login] text-base sm:text-lg" aria-hidden="true" />
+            <span>Login / Signup</span>
+          </button>
+        ) : (
+          <div
+            onClick={() => navigate("/me")}
+            className="avatar-shell relative flex items-center gap-3 cursor-pointer group bg-black/20 hover:bg-black/40 pl-2 pr-4 py-1.5 rounded-full transition border border-white/5"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-accent/20">
+              {/* Placeholder for avatar, or actual image if available */}
+              <span className="icon-[mdi--account] text-accent text-lg" aria-hidden="true" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-xs text-accent-soft font-medium uppercase tracking-wider">Operator</span>
+              <span className="text-sm font-bold text-slate-100 group-hover:text-white transition">{user.username}</span>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
