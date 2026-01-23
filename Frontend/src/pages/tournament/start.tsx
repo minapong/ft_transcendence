@@ -22,9 +22,8 @@ export default function TournamentPage() {
     );
   }
 
-  const isAdmin = (user?.username || "").toLowerCase() === "santiago";
-
-
+  const isAdmin = user.isAdmin;
+  if (!isAdmin) console.log("user is not admin");
   const [tournament, setTournament] = useState(null);
   const [max_players, setMax_players] = useState(4);
   const [tournamentName, setTournamentName] = useState("");
