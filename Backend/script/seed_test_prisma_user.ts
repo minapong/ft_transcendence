@@ -1,9 +1,13 @@
 import { prisma } from "../src/db/prisma.js";
-import * as bcrypt from "bcrypt";
+import crypto from "crypto";
+
+function hashPassword(password: string): string {
+  return crypto.createHash("sha256").update(password).digest("hex");
+}
 
 async function main() {
   const password = "password123";
-  const hashed = await bcrypt.hash(password, 10);
+  const password_hash = hashPassword(password);
 
   for (let i = 1; i <= 10; i++) {
     const email = `test${i}@example.com`;
@@ -13,7 +17,7 @@ async function main() {
       data: {
         email,
         username,
-        password_hash: hashed,
+        password_hash,
       },
     });
 
@@ -21,7 +25,6 @@ async function main() {
       id: user.id,
       email,
       username,
-      password,
     });
   }
 }
