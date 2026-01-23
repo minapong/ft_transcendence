@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "Reactor";
+import { useRef, useEffect, useState } from "@/Reactor";
 import { animate, hover } from "motion";
 
 const links = [
@@ -10,10 +10,14 @@ const links = [
   { label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
 ];
 
-export default function Sidebar() {
-  const [open, setOpen] = useState(true);
+interface SidebarProps {
+  screen: "mobile" | "tablet" | "desktop";
+  open: boolean;
+  setOpen: (v: boolean | ((p: boolean) => boolean)) => void;
+}
+
+export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
   const [activePath, setActivePath] = useState(normalizePath(window.location.pathname));
-  const [screen, setScreen] = useState<"mobile" | "tablet" | "desktop">("desktop");
   const sidebarRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -23,18 +27,7 @@ export default function Sidebar() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Screen size tracking
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w < 640) setScreen("mobile");
-      else if (w < 1024) setScreen("tablet");
-      else setScreen("desktop");
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+
 
   // Lock body scroll on mobile/tablet when open
   useEffect(() => {

@@ -1,4 +1,10 @@
-export default function Header() {
+import { useLayoutState } from "../../hooks/useLayoutState";
+
+export default function Header({ screen }: { screen: "mobile" | "tablet" | "desktop" }) {
+  // Mobile & Tablet: Button is fixed top-left, so we need left padding
+  // Desktop: Button is in the sidebar (below header), so standard padding
+  const headerPadding = screen !== "desktop" ? "pl-14 pr-4 sm:pl-16 sm:pr-6" : "px-6";
+
   const statusCards = [
     {
       icon: "mdi--ghost",
@@ -15,7 +21,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 relative min-h-[var(--header-height)] pl-14 pr-4 sm:pl-16 sm:pr-6 lg:px-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4 overflow-hidden header-surface">
+    <header className={`sticky top-0 z-50 relative min-h-[var(--header-height)] ${headerPadding} flex flex-wrap items-center justify-between gap-3 sm:gap-4 overflow-hidden header-surface`}>
 
       <div className="flex items-center gap-4 z-10">
         <div className="flex items-center gap-3">
