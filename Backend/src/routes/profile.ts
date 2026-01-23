@@ -2,7 +2,6 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { prisma } from "../db/prisma.js";
 
 export async function registerProfileRoutes(server: FastifyInstance) {
-  console.log("🔥 PROFILE ROUTES LOADED");
 
   server.get(
     "/api/users/:id",
