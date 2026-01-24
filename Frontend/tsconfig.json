@@ -10,18 +10,41 @@
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "preserve",
-    "jsxImportSource": "reactor",
-
-    "baseUrl": ".",                      
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "Reactor": ["src/Reactor/index.tsx"],
-      "Reactor/*": ["src/Reactor/*"],
-      "components": ["src/components"],
-      "layouts": ["src/layouts"],
-      "pages": ["src/pages"]
+      "@/*": [
+        "src/*"
+      ],
+      "@/app/*": [
+        "src/app/*"
+      ],
+      "@/core/*": [
+        "src/core/*"
+      ],
+      "Reactor": [
+        "src/core/Reactor/index.tsx"
+      ],
+      "Reactor/*": [
+        "src/core/Reactor/*"
+      ],
+      "reactor": [
+        "src/core/Reactor/index.tsx"
+      ],
+      "reactor/*": [
+        "src/core/Reactor/*"
+      ],
+      "components": [
+        "src/app/components"
+      ],
+      "layouts": [
+        "src/app/components/layout"
+      ],
+      "pages": [
+        "src/app/pages"
+      ]
     }
   },
-
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
