@@ -10,10 +10,12 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			Reactor: "/src/Reactor",
-			components: "/src/components",
-			pages: "/src/pages",
-			layouts: "/src/layouts",
+			Reactor: "/src/core/Reactor",
+			components: "/src/app/components",
+			pages: "/src/app/pages",
+			layouts: "/src/app/components/layout",
+			"@/app": "/src/app",
+			"@/core": "/src/core",
 			"@":"/src",
 		},
 	},

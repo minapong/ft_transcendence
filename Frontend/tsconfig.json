@@ -15,11 +15,13 @@
     "baseUrl": ".",                      
     "paths": {
       "@/*": ["src/*"],
-      "Reactor": ["src/Reactor/index.tsx"],
-      "Reactor/*": ["src/Reactor/*"],
-      "components": ["src/components"],
-      "layouts": ["src/layouts"],
-      "pages": ["src/pages"]
+      "@/app/*": ["src/app/*"],
+      "@/core/*": ["src/core/*"],
+      "Reactor": ["src/core/Reactor/index.tsx"],
+      "Reactor/*": ["src/core/Reactor/*"],
+      "components": ["src/app/components"],
+      "layouts": ["src/app/components/layout"],
+      "pages": ["src/app/pages"]
     }
   },
 
