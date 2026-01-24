@@ -56,7 +56,7 @@ export default function Home() {
 
                 <div className="flex flex-wrap items-center gap-3">
                   <a
-                    href="/single_game"
+                    href="/game/single_game"
                     className="bleed-btn bleed-btn--hero rounded-lg bg-accent text-primary text-base font-semibold px-6 py-3 transition hover:bg-accent-soft flex items-center gap-2"
                   >
                     <span
