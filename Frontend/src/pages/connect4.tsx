@@ -1,5 +1,7 @@
 import { navigate, useEffect } from "Reactor";
 import { connect4Logic } from "../engine/connect4_logic";
+import { apiFetch } from "@/lib/api";
+
 
 type Player = { id: number; name: string };
 type NavState = {
@@ -26,7 +28,7 @@ export default function Connect4Game() {
 
     // Fire-and-forget finish match
     const finishMatch = (winnerId: number) => {
-      fetch("/api/matchmaking/finish", {
+      apiFetch("/api/matchmaking/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ matchId, winnerId }),
