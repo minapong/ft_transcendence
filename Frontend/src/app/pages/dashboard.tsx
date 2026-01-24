@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'Reactor';
-import { apiFetch } from "@/lib/api";
+import { apiFetch } from "@/core/lib/api";
 
 
 // const API_BASE = "http://localhost:3000";
