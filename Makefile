@@ -2,6 +2,7 @@
 COMPOSE_BASE = Docker/docker-compose.yml
 COMPOSE_DEV = Docker/docker-compose.dev.yml
 COMPOSE_PROD = ./docker-compose.prod.yml
+COMPOSE_PROD_LOCAL = Docker/docker-compose.prod.yml
 
 # Container names (optional; for clarity)
 PROJECT_NAME = game_app
@@ -21,6 +22,10 @@ build-prod:
 	@echo "🏗️  Building production images..."
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) build
 
+build-prod-local:
+	@echo "🏗️  Building production images..."
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD_LOCAL) build
+
 # ==============================================================================
 # 🚀 Run Targets
 # ==============================================================================
@@ -33,6 +38,10 @@ prod: build-prod
 	@echo "🌐 Starting production environment..."
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) up -d
 
+prod-local: build-prod-local
+	@echo "🌐 Starting local production environment..."
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD_LOCAL) up -d
+
 # ==============================================================================
 # 🧹 Cleanup Targets
 # ==============================================================================
@@ -41,6 +50,8 @@ clean:
 	@echo "🧼 Stopping and removing containers..."
 	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) down
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) down
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD_LOCAL) down
+
 
 fclean: clean
 	@echo "🧹 Removing dist/..."
@@ -79,8 +90,10 @@ help:
 	@echo "Available targets:"
 	@echo "  make dev        → Run development environment (with hot reload)"
 	@echo "  make prod       → Run production environment (detached mode)"
+	@echo "  make prod-local → Run production environment locally (detached mode)"
 	@echo "  make build-dev  → Build dev Docker images"
-	@echo "  make build-prod → Build prod Docker images"
+	@echo "  make build-prod → Build prod Docker images" 
+	@echo "  make build-prod-local → Build prod Docker images locally"
 	@echo "  make clean      → Stop and remove containers"
 	@echo "  make fclean     → Full cleanup (containers, images, volumes)"
 	@echo "  make re         → Rebuild everything from scratch"

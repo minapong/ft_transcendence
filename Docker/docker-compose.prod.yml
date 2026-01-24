@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=file:./transcendence.db
+      - DATABASE_URL=file:./database/transcendence.db
       - JWT_SECRET=commercial-deep-water-port
     restart: always
     networks:

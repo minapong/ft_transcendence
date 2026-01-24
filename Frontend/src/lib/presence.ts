@@ -2,13 +2,17 @@ import { getAuth, logout } from "@/lib/auth";
 
 let ws: WebSocket | null = null;
 
+const WS_BASE =
+  import.meta.env.VITE_WS_BASE ??
+  (location.protocol === "https:" ? "wss://" : "ws://") + location.host;
+
 export function connectPresenceWS() {
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return ws;
 
   const token = getAuth()?.token;
   if (!token) return null;
 
-  ws = new WebSocket(`ws://localhost:3000/ws/presence?token=${token}`);
+  ws = new WebSocket(`${WS_BASE}/ws/presence?token=${encodeURIComponent(token)}`);
 
   ws.onopen = () => console.log("✅ presence ws open");
   ws.onclose = () => {
