@@ -81,7 +81,7 @@ const WIN_SCORE = 3;
 export function pongLogic(
     p1: string, 
     p2: string, 
-    onWin: (winner: string) => void,
+    onWin: (winner: string, scoreP1: number, scoreP2: number) => void,  //scores added
     useAI: boolean = false,
     aiDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
 )
@@ -339,25 +339,25 @@ export function pongLogic(
 
 	function checkWinner() {
 		if (scoreLeft >= WIN_SCORE) {
-			showWinner(p1);
+		showWinner(p1, scoreLeft, scoreRight);
 		}
 		else if (scoreRight >= WIN_SCORE) {
-			showWinner(p2);
+		showWinner(p2, scoreLeft, scoreRight);
 		}
 	}
 
-	function showWinner(winner: string) {
+	function showWinner(winner: string, scoreP1: number, scoreP2: number) {
 		gameEnded = true;
 		isPaused = true;
 		dx = 0;
 		dy = 0;
-	
+
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
-	
+
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
-	
-		onWin(winner);
+
+		onWin(winner, scoreP1, scoreP2);
 	}
 
     moveBall();

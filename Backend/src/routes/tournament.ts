@@ -17,7 +17,7 @@ import {
 // Request body types
 type StartTournamentBody = { name: string; max_players: number; tournamentId?: number };
 type RegisterUserBody = { tournamentId: number};
-type ReportResultBody = { matchId: number; winnerId: number };
+type ReportResultBody = { matchId: number; winnerId: number, scoreP1: number, scoreP2: number };
 type AdvanceRoundBody = { tournamentId: number };
 type GetTournamentBody = { tournamentId: number };
 
@@ -41,7 +41,7 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
          { preHandler: requireAuth }, 
          async (req,reply) => {
         const { tournamentId } = req.body;
-        const { userId } = req.user as any; 
+        const { userId } = req.user as any;
         try {
             const playerId = await registerUserToTournament(tournamentId, userId);
             return reply.send({ success: true, playerId });
@@ -71,9 +71,9 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
         "/api/tournament/result", 
          { preHandler: requireAuth },
           async (req, reply ) => {
-        const { matchId, winnerId } = req.body;
+        const { matchId, winnerId, scoreP1, scoreP2 } = req.body;
         try {
-            const matchRaw = await recordMatchResult(matchId, winnerId);
+            const matchRaw = await recordMatchResult(matchId, winnerId, scoreP1, scoreP2);
 
             // Ensure status is properly typed
             const match: MatchDTO = {
