@@ -24,8 +24,8 @@ export default function MePage() {
       setFetchError(null);
 
       try {
-        // Profile
-        const profileRes = await apiFetch("http://localhost:3000/api/me");
+        // 1. Profile (/api/me)
+        const profileRes = await apiFetch("/api/me");
         if (!profileRes.ok) throw new Error("Failed to load profile");
         const profileData = await profileRes.json();
         setProfile(profileData);
@@ -33,14 +33,14 @@ export default function MePage() {
         const userId = profileData.id;
 
         // Stats
-        const statsRes = await apiFetch(`http://localhost:3000/api/stats/user/${userId}`);
+        const statsRes = await apiFetch(`/api/stats/user/${userId}`);
         if (statsRes.ok) {
           const statsData = await statsRes.json();
           if (statsData.success) setStats(statsData.data);
         }
 
         // Achievements
-        const achRes = await apiFetch(`http://localhost:3000/api/stats/achievements/${userId}`);
+        const achRes = await apiFetch(`/api/stats/achievements/${userId}`);
         if (achRes.ok) {
           const achData = await achRes.json();
           if (achData.success) setAchievements(achData.data || []);

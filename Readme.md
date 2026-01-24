@@ -166,12 +166,13 @@ NODE_ENV=development
 PORT=3000
 DATABASE_URL="file:./database/transcendence.db"
 JWT_SECRET=commercial-deep-water-port
-```
-
-Frontend `.env`:
 
 ```
-VITE_API_URL=http://localhost:3000
+
+Frontend `.env` !!! while running PROD, comment VITE_API_URL:
+
+```
+VITE_API_URL=http://localhost:3000 
 ```
 
 ---

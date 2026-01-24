@@ -1,6 +1,8 @@
 import { useRef, navigate } from "Reactor";
 import { setAuth } from "@/core/lib/auth";
 import { connectPresenceWS } from "@/core/lib/presence";
+import { apiFetch } from "@/core/lib/api";
+
 
 export default function SignupPage() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -18,7 +20,7 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/signup", {
+      const res = await apiFetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, username, password })

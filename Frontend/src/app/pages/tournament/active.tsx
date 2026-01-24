@@ -14,7 +14,7 @@ export default function ActiveTournamentPage() {
   async function loadActiveTournament() {
     setLoading(true);
     try {
-      const res = await apiFetch("http://localhost:3000/api/tournament/active");
+      const res = await apiFetch("/api/tournament/active");
       const data = await res.json();
 
       if (!data?.tournament) {
@@ -65,7 +65,7 @@ export default function ActiveTournamentPage() {
 
     setLoading(true);
     try {
-      const res = await apiFetch("http://localhost:3000/api/tournament/next", {
+      const res = await apiFetch("/api/tournament/next", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: tournament.id }),

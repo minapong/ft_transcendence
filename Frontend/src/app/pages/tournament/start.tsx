@@ -38,7 +38,7 @@ export default function TournamentPage() {
     const loadTournament = async () => {
       setLoading(true);
       try {
-        const res = await apiFetch("http://localhost:3000/api/tournament/active");
+        const res = await apiFetch("/api/tournament/active");
         if (!mounted) return;
 
         if (res.ok) {
@@ -66,7 +66,7 @@ export default function TournamentPage() {
 
   const refreshTournament = async () => {
     try {
-      const res = await apiFetch("http://localhost:3000/api/tournament/active");
+      const res = await apiFetch("/api/tournament/active");
       if (res.ok) {
         const data = await res.json();
         setTournament(data.tournament);
@@ -80,7 +80,7 @@ export default function TournamentPage() {
 			setError("Please select number of players");
 			return;
 		}
-		const res = await apiFetch("http://localhost:3000/api/tournament/create", {
+		const res = await apiFetch("/api/tournament/create", {
         method: "POST",
         // headers: { "Content-Type": "application/json" }, //apiFetch sets same header
         body: JSON.stringify({ name: tournamentName, max_players  }),
@@ -100,7 +100,7 @@ export default function TournamentPage() {
   const handleRegister = async () => {
     if (!tournament) return;
     try {
-      const res = await apiFetch("http://localhost:3000/api/tournament/register", {
+      const res = await apiFetch("/api/tournament/register", {
         method: "POST",
         // headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: tournament.id}),
@@ -120,7 +120,7 @@ export default function TournamentPage() {
   const handleStartTournament = async () => {
     if (!tournament) return;
     try {
-      const res = await apiFetch("http://localhost:3000/api/tournament/start", {
+      const res = await apiFetch("/api/tournament/start", {
         method: "POST",
         // headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: tournament.id }),
