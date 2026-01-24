@@ -159,7 +159,11 @@ make dev
 
 ## 🧪 Environment
 
-Backend `.env`  while running PROD add DATABASE and JWT to compose environment:
+For PROD add  this to backend service (docker.compose.prod.yml)
+    env_file:
+      - ./Backend/.env
+
+Backend `.env`  while running PROD / DEV is the same:
 
 ```
 NODE_ENV=development
