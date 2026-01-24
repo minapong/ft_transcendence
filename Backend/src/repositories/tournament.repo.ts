@@ -183,10 +183,16 @@ export async function insertMatchPlayer(matchId: number, userId: number): Promis
 // ─────────────────────────────────────────────
 // Record winner 
 // ─────────────────────────────────────────────
-export async function recordMatchWinner(matchId: number, winnerId: number): Promise<void> {
+export async function recordMatchWinner(
+  matchId: number, 
+  winnerId: number,
+  scoreP1: number,
+  scoreP2: number
+): Promise<void> {
   if (!matchId || !winnerId) throw new Error("Invalid input");
 
   await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    //update Match
     await tx.match.update({
       where: { id: matchId },
       data: {
@@ -195,14 +201,42 @@ export async function recordMatchWinner(matchId: number, winnerId: number): Prom
       },
     });
 
+    //reset winners
     await tx.matchPlayer.updateMany({
       where: { match_id: matchId },
       data: { is_winner: false },
     });
 
+    //Set Winner
     await tx.matchPlayer.updateMany({
       where: { match_id: matchId, user_id: winnerId },
       data: { is_winner: true },
+    });
+
+    // Fetch current match players to assign scores correctly
+    const matchPlayers = await tx.matchPlayer.findMany({
+      where: { match_id: matchId },
+      orderBy: { id: 'asc' }, // assuming order of creation = p1, p2
+      select: { id: true, user_id: true },
+    });
+
+    if (matchPlayers.length !== 2) {
+      throw new Error("Match must have exactly 2 players to assign scores");
+    }
+
+    // first = p1, second = p2 (based on creation order)
+    const p1PlayerId = matchPlayers[0].id;
+    const p2PlayerId = matchPlayers[1].id;
+
+    // Assign scores
+    await tx.matchPlayer.update({
+      where: { id: p1PlayerId },
+      data: { score: scoreP1 },
+    });
+
+    await tx.matchPlayer.update({
+      where: { id: p2PlayerId },
+      data: { score: scoreP2 },
     });
   });
 }
@@ -348,7 +382,7 @@ export async function getTournamentWithMatches(tournamentId: number): Promise<To
   }));
 
   //derive from the match where winnerId appears
-  const winnerMatch = matches.find(m => m.winnerId === (t.winner_id ?? null));
+  const winnerMatch = matches.find((m: any) => m.winnerId === (t.winner_id ?? null));
   const winnerName = winnerMatch
     ? winnerMatch.p1.id === t.winner_id
       ? winnerMatch.p1.name

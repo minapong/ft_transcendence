@@ -106,26 +106,37 @@ export async function recordConnect4Game(
   if (!p1Id || !p2Id || !winnerId) throw new Error("Invalid input");
   if (winnerId !== p1Id && winnerId !== p2Id) throw new Error("Winner must be one of the players");
 
-  const matchId = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    // Create the match record
     const match = await tx.match.create({
       data: {
         game_name: "connect4",
         winner_id: winnerId,
         finished_at: new Date(),
-        players: {
-          create: [
-            { user_id: p1Id, is_winner: p1Id === winnerId },
-            { user_id: p2Id, is_winner: p2Id === winnerId },
-          ],
-        },
       },
       select: { id: true },
     });
 
-    return match.id;
-  });
+    // Create match players with score & is_winner
+    await tx.matchPlayer.createMany({
+      data: [
+        {
+          match_id: match.id,
+          user_id: p1Id,
+          score: p1Id === winnerId ? 1 : 0,
+          is_winner: p1Id === winnerId,
+        },
+        {
+          match_id: match.id,
+          user_id: p2Id,
+          score: p2Id === winnerId ? 1 : 0,
+          is_winner: p2Id === winnerId,
+        },
+      ],
+    });
 
-  return matchId;
+  return match.id;
+  });
 }
 
 // ------------------------------
@@ -187,7 +198,7 @@ export async function getExpiredActiveMatches(
     }),
   ]);
 
-  return [...matched.map(x => x.match_id), ...started.map(x => x.match_id)];
+  return [...matched.map((x: any) => x.match_id), ...started.map((x:any) => x.match_id)];
 }
 
 export async function getActiveMatchFull(params: {

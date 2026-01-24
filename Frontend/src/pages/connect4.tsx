@@ -115,7 +115,10 @@ export default function Connect4Game() {
 
       <button
         id="resetBtn"
-        className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        className="mt-1 px-2 py-1 sm:px-3 sm:py-2 sm:mt-4
+                  bg-red-500 text-white rounded
+                  text-sm sm:text-base 
+                  hover:bg-red-600"
       >
         Reset Game
       </button>
