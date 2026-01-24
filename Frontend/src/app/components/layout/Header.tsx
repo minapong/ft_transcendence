@@ -1,22 +1,17 @@
 import { navigate, useState, useEffect, useRef } from "Reactor";
-import { getAuth, logout } from "@/core/lib/auth";
+import { logout } from "@/core/lib/auth";
+import { useAuth } from "@/core/lib/useAuth";
 import { animate } from "motion";
 
 export default function Header({ screen }: { screen: "mobile" | "tablet" | "desktop" }) {
   // Mobile & Tablet: Button is fixed top-left, so we need left padding
   // Desktop: Button is in the sidebar (below header), so standard padding
   const headerPadding = screen !== "desktop" ? "pl-14 pr-4 sm:pl-16 sm:pr-6" : "px-6";
-  const [user, setUser] = useState<any>(null);
+  const auth = useAuth();
+  const user = auth?.user || null;
   const [panelOpen, setPanelOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const panelContentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const auth = getAuth();
-    if (auth && auth.user) {
-      setUser(auth.user);
-    }
-  }, []);
 
   // Close panel when clicking outside
   useEffect(() => {
@@ -45,7 +40,6 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
 
   const handleLogout = () => {
     logout();
-    setUser(null);
     setPanelOpen(false);
     navigate("/auth/login");
   };
