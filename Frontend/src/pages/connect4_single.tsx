@@ -44,7 +44,7 @@ export default function Connect4Single() {
     const pollMatch = async () => {
       console.log("[poll] fetching match state for user", user.id);
       try {
-        const res = await fetch(`http://localhost:3000/api/matchmaking/state/${user.id}`);
+        const res = await fetch(`/api/matchmaking/state/${user.id}`);
         if (!res.ok) return;
 
         const data = await res.json();
@@ -94,7 +94,7 @@ export default function Connect4Single() {
   async function join() {
     console.log("[join] user joining queue", user.id);
     try {
-      const res = await fetch("http://localhost:3000/api/matchmaking/join", {
+      const res = await fetch("/api/matchmaking/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, username: user.username }),
@@ -128,7 +128,7 @@ export default function Connect4Single() {
 
     try {
       console.log("[startGame] sending request to start match", match.id);
-      const res = await fetch("http://localhost:3000/api/matchmaking/start", {
+      const res = await fetch("/api/matchmaking/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ matchId: match.id }),

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'Reactor';
 
-const API_BASE = "http://localhost:3000";
+// const API_BASE = "http://localhost:3000";
 
 export default function Dashboard() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -21,7 +21,7 @@ export default function Dashboard() {
   const fetchLeaderboard = async () => {
     try {
       setError(null);
-      const res = await fetch(`${API_BASE}/api/stats/leaderboard?limit=50`);
+      const res = await fetch(`/api/stats/leaderboard?limit=50`);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`HTTP ${res.status}: ${text.slice(0, 100)}`);
@@ -44,7 +44,7 @@ export default function Dashboard() {
     setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/stats/history/global?page=${p}&limit=10`);
+      const res = await fetch(`/api/stats/history/global?page=${p}&limit=10`);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`HTTP ${res.status}: ${text.slice(0, 100)}`);
