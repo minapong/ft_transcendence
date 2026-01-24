@@ -159,7 +159,7 @@ make dev
 
 ## 🧪 Environment
 
-Backend `.env`:
+Backend `.env`  while running PROD add DATABASE and JWT to compose environment:
 
 ```
 NODE_ENV=development
