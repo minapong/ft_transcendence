@@ -18,7 +18,20 @@ declare module "Reactor" {
 	export function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean; state?: any }): void;
 	export function initRouter(): void;
 	export function renderRoute(triggerKey?: string): void;
-	export function openModal<T>(modal: { type: string; payload?: T; render?: (p: T) => HTMLElement; label?: string }): void;
+	export function resetHooks(key: string, opts?: { track?: boolean }): void;
+	
+	// Modal functions
+	export type ModalRenderer<T = unknown> = (payload: T) => HTMLElement;
+	export type ModalDescriptor<T = unknown> = {
+		type: string;
+		payload?: T;
+		render?: ModalRenderer<T>;
+		label?: string;
+	};
+	export function openModal<T>(modal: ModalDescriptor<T>): void;
 	export function closeModal(): void;
+	export function registerModal<T>(type: string, renderer: ModalRenderer<T>): void;
+	export function getCurrentModal(): ModalDescriptor | null;
+	export function resolveModalRenderer(modal: ModalDescriptor | null): ModalRenderer<any> | null;
 }
 

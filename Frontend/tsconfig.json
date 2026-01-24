@@ -10,7 +10,6 @@
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "preserve",
-    "jsxImportSource": "reactor",
     "baseUrl": ".",
     "paths": {
       "@/*": [
