@@ -11,7 +11,7 @@ export default function ProfilePage(props?: { id?: string }) {
   useEffect(() => {
     if (!id) return;
     
-    apiFetch(`http://localhost:3000/api/users/${id}`)
+    apiFetch(`/api/users/${id}`)
     .then(res => {
       if (!res.ok) throw new Error("User not found");
       return res.json();
@@ -30,7 +30,7 @@ export default function ProfilePage(props?: { id?: string }) {
       const fetchStatus = async () => {
         const mySeq = ++seq;
         try {
-          const res = await apiFetch(`http://localhost:3000/api/presence/status/${id}`);
+          const res = await apiFetch(`/api/presence/status/${id}`);
           if (!res.ok) return;
           const data = await res.json();
           if (alive && mySeq === seq) setOnline(!!data.online);

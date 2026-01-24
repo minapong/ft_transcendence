@@ -169,7 +169,7 @@ JWT_SECRET=commercial-deep-water-port
 
 ```
 
-Frontend `.env` ! while running PROD, comment VITE_API_URL:
+Frontend `.env` !!! while running PROD, comment VITE_API_URL:
 
 ```
 VITE_API_URL=http://localhost:3000 

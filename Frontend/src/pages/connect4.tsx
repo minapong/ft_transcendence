@@ -26,7 +26,7 @@ export default function Connect4Game() {
 
     // Fire-and-forget finish match
     const finishMatch = (winnerId: number) => {
-      fetch("http://localhost:3000/api/matchmaking/finish", {
+      fetch("/api/matchmaking/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ matchId, winnerId }),
