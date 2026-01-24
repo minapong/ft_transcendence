@@ -1,5 +1,7 @@
 import { useRef, navigate, useEffect } from "Reactor";
 import { setAuth } from "@/core/lib/auth";
+import { apiFetch } from "@/core/lib/api";
+
 import { connectPresenceWS } from "@/core/lib/presence";
 import { useAuth } from "@/core/lib/useAuth";
 
@@ -20,7 +22,7 @@ export default function LoginPage() {
       return;
     }
 
-    const res = await fetch("http://localhost:3000/api/auth/login", {
+    const res = await apiFetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
