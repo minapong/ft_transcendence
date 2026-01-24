@@ -1,19 +1,88 @@
-import {
-	P4_GAME_WIDTH,
-	P4_GAME_HEIGHT,
-	P4_BALL_SIZE,
-	P4_PADDLE_LENGTH,
-	P4_PADDLE_THICKNESS,
-	P4_PADDLE_SPEED,
-	P4_LEFT_PADDLE_X,
-	P4_RIGHT_PADDLE_X,
-	P4_TOP_PADDLE_Y,
-	P4_BOTTOM_PADDLE_Y,
-	P4_BALL_SPEED,
-	P4_WIN_SCORE,
-	P4_PLAYABLE_HEIGHT,
-	P4_PLAYABLE_WIDTH
-} from './pong_parameters';
+
+
+let P4_GAME_WIDTH : number;
+let P4_GAME_HEIGHT : number;
+let P4_WALL_WIDTH : number;
+
+let P4_BALL_SIZE : number;
+
+let P4_PADDLE_LENGTH : number;
+let P4_PADDLE_THICKNESS : number;
+let P4_PADDLE_DIST : number;
+
+
+let P4_PLAYABLE_WIDTH : number;
+let P4_PLAYABLE_HEIGHT : number;
+let P4_LEFT_PADDLE_X : number;
+let P4_RIGHT_PADDLE_X : number;
+let P4_TOP_PADDLE_Y : number;
+let P4_BOTTOM_PADDLE_Y : number;
+
+function handle_parameters()
+{
+    let width = window.innerWidth;
+
+    if (width < 640) {
+    P4_GAME_WIDTH = 200;
+    P4_GAME_HEIGHT = 200;
+    P4_WALL_WIDTH = 4;
+    P4_BALL_SIZE = 12;
+    P4_PADDLE_LENGTH = 64;
+    P4_PADDLE_THICKNESS = 8;
+    P4_PADDLE_DIST = 8;
+    }
+  else if (width < 1024) {
+    P4_GAME_WIDTH = 280;
+    P4_GAME_HEIGHT = 280;
+    P4_WALL_WIDTH = 6;
+    P4_BALL_SIZE = 16;
+    P4_PADDLE_LENGTH = 80;
+    P4_PADDLE_THICKNESS = 12;
+    P4_PADDLE_DIST = 12;
+    }
+
+  else if (width < 1280){
+    P4_GAME_WIDTH = 380;
+    P4_GAME_HEIGHT = 380;
+    P4_WALL_WIDTH = 8;
+    P4_BALL_SIZE = 16;
+    P4_PADDLE_LENGTH = 80;
+    P4_PADDLE_THICKNESS = 12;
+    P4_PADDLE_DIST = 16;
+    }
+	else 
+	{
+	P4_GAME_WIDTH = 500;
+    P4_GAME_HEIGHT = 500;
+    P4_WALL_WIDTH = 8;
+    P4_BALL_SIZE = 16;
+    P4_PADDLE_LENGTH = 96;
+    P4_PADDLE_THICKNESS = 12;
+    P4_PADDLE_DIST = 16;
+	}
+	P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - ( 2 * P4_WALL_WIDTH);
+	P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - ( 2 * P4_WALL_WIDTH);
+	P4_LEFT_PADDLE_X = P4_PADDLE_DIST;
+	P4_RIGHT_PADDLE_X = P4_PLAYABLE_WIDTH - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
+	
+	P4_TOP_PADDLE_Y = P4_PADDLE_DIST;
+	P4_BOTTOM_PADDLE_Y = P4_PLAYABLE_HEIGHT - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
+}
+
+window.addEventListener("resize", () => {
+  handle_parameters();
+});
+
+handle_parameters();
+
+const P4_PADDLE_SPEED = 6;
+
+const P4_BALL_SPEED = 2;
+
+const P4_WIN_SCORE = 3;
+
+
+
 
 export function pong4PLogic(
 	onWin: (winner: "red" | "blue") => void

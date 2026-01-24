@@ -1,23 +1,87 @@
 import { PongAI } from './pong_ai'
-import { 
-	GAME_WIDTH, 
-	GAME_HEIGHT, 
-	BALL_SIZE, 
-	PADDLE_SPEED, 
-	PADDLE_HEIGHT,
-	PADDLE_WIDTH,
-	LEFT_PADDLE_X,
-	RIGHT_PADDLE_X,
-	PLAYABLE_HEIGHT,
-	PLAYABLE_WIDTH,
-	GAME_SPEED,
-	WIN_SCORE,
-  } from './pong_parameters';
+
+
+let GAME_WIDTH : number;
+let GAME_HEIGHT : number;
+let WALL_WIDTH : number;
+
+let BALL_SIZE : number;
+
+let PADDLE_HEIGHT : number;
+let PADDLE_WIDTH : number;
+let PADDLE_DIST : number;
+
+
+let PLAYABLE_WIDTH : number;
+let PLAYABLE_HEIGHT : number;
+let LEFT_PADDLE_X : number;
+let RIGHT_PADDLE_X : number;
+
+function handle_parameters()
+{
+    let width = window.innerWidth;
+
+    if (width < 640) {
+    GAME_WIDTH = 320;
+    GAME_HEIGHT = 200;
+    WALL_WIDTH = 4;
+    BALL_SIZE = 12;
+    PADDLE_HEIGHT = 64;
+    PADDLE_WIDTH = 8;
+    PADDLE_DIST = 8;
+    }
+  else if (width < 1024) {
+    GAME_WIDTH = 400;
+    GAME_HEIGHT = 280;
+    WALL_WIDTH = 6;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 80;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 12;
+    }
+
+  else if (width < 1280){
+    GAME_WIDTH = 600;
+    GAME_HEIGHT = 380;
+    WALL_WIDTH = 8;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 80;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 16;
+    }
+	else 
+	{
+	GAME_WIDTH = 800;
+    GAME_HEIGHT = 500;
+    WALL_WIDTH = 8;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 96;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 16;
+	}
+	PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
+	PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
+	LEFT_PADDLE_X = PADDLE_DIST;
+	RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
+}
+
+window.addEventListener("resize", () => {
+  handle_parameters();
+});
+
+handle_parameters();
+
+const PADDLE_SPEED = 6;
+
+const GAME_SPEED = 2;
+
+const WIN_SCORE = 3;
+
 
 export function pongLogic(
     p1: string, 
     p2: string, 
-    onWin: (winner: string) => void,
+    onWin: (winner: string, scoreP1: number, scoreP2: number) => void,  //scores added
     useAI: boolean = false,
     aiDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
 )
@@ -275,25 +339,25 @@ export function pongLogic(
 
 	function checkWinner() {
 		if (scoreLeft >= WIN_SCORE) {
-			showWinner(p1);
+		showWinner(p1, scoreLeft, scoreRight);
 		}
 		else if (scoreRight >= WIN_SCORE) {
-			showWinner(p2);
+		showWinner(p2, scoreLeft, scoreRight);
 		}
 	}
 
-	function showWinner(winner: string) {
+	function showWinner(winner: string, scoreP1: number, scoreP2: number) {
 		gameEnded = true;
 		isPaused = true;
 		dx = 0;
 		dy = 0;
-	
+
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
-	
+
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
-	
-		onWin(winner);
+
+		onWin(winner, scoreP1, scoreP2);
 	}
 
     moveBall();

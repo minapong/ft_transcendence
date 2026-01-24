@@ -67,40 +67,43 @@ export default function Pong4PGame() {
 			<div className="relative flex items-center justify-center overflow-visible">
 
 			{/* LEFT CONTROLS */}
-			<div className="absolute -left-20 top-1/2 -translate-y-1/2 flex flex-col gap-4">
-				<button id="left-up" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬆</button>
-				<button id="left-down" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬇</button>
+			<div className="absolute -left-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4">
+				<button id="left-up" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬆</button>
+				<button id="left-down" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬇</button>
 			</div>
 
 			{/* RIGHT CONTROLS */}
-			<div className="absolute -right-20 top-1/2 -translate-y-1/2 flex flex-col gap-4">
-				<button id="right-up" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬆</button>
-				<button id="right-down" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬇</button>
+			<div className="absolute -right-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4">
+				<button id="right-up" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬆</button>
+				<button id="right-down" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬇</button>
 			</div>
 
 			{/* TOP CONTROLS */}
-			<div className="absolute -top-20 left-1/2 -translate-x-1/2 flex gap-4">
-				<button id="top-left" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬅</button>
-				<button id="top-right" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">➡</button>
+			<div className="absolute -top-20 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 lg:gap-4">
+				<button id="top-left" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬅</button>
+				<button id="top-right" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">➡</button>
 			</div>
 
 			{/* BOTTOM CONTROLS */}
-			<div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex gap-4">
-				<button id="bottom-left" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬅</button>
-				<button id="bottom-right" className="w-14 h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">➡</button>
+			<div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 lg:gap-4">
+				<button id="bottom-left" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬅</button>
+				<button id="bottom-right" className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">➡</button>
 			</div>
 			<div
 				id="game_board"
-				className="bg-gray-800 border-8 
+				className="bg-gray-800 border-4 sm:border-6 lg:border-8
 					border-l-red-500 border-b-red-500 
 					border-t-blue-500 border-r-blue-500 
-					rounded-lg w-[500px] h-[500px] relative"
+					rounded-lg w-[200px] h-[200px]
+					sm:w-[280px] sm:h-[280px]
+					lg:w-[380px] lg:h-[380px]
+					xl:w-[500px] xl:h-[500px] relative"
 			>
-				<div id="left_p" className="absolute left-4 top-1/2 w-3 h-24 bg-white"></div>
-				<div id="right_p" className="absolute right-4 top-1/2 w-3 h-24 bg-white"></div>
-				<div id="upper_p" className="absolute top-4 left-1/2 w-24 h-3 bg-white"></div>
-				<div id="lower_p" className="absolute bottom-4 left-1/2 w-24 h-3 bg-white"></div>
-				<div id="ball" className="absolute w-4 h-4 bg-white rounded-full top-1/2 left-1/2"></div>
+				<div id="left_p" className="absolute left-2 sm:left-3 lg:left-4 top-1/2 w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"></div>
+				<div id="right_p" className="absolute right-2 sm:right-3 lg:right-4 top-1/2 w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"></div>
+				<div id="upper_p" className="absolute top-2 sm:top-3 lg:top-4 left-1/2 h-2 sm:h-3 w-16 sm:w-20 xl:w-24 bg-white"></div>
+				<div id="lower_p" className="absolute bottom-2 sm:bottom-3 lg:bottom-4 left-1/2 h-2 sm:h-3 w-16 sm:w-20 xl:w-24 bg-white"></div>
+				<div id="ball" className="absolute w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full top-1/2 left-1/2"></div>
 
 			</div>
 			</div>
@@ -109,7 +112,7 @@ export default function Pong4PGame() {
 			<br></br>
 			<button
 				id="pauseBtn"
-				className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400"
+				className="mt-3 sm:mt-4 px-3 sm:px-4 py-1.5 sm:py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400"
 			>
 				⏸️ Pause
 			</button>
