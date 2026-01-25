@@ -84,12 +84,16 @@ export default function ProfilePage(props?: { id?: string }) {
   }, [id, meId]);
 
   async function addFriend() {
-    if (!id) return;
+    if (!user?.username) return;
+
     setFriendBusy(true);
     setFriendMsg(null);
 
     try {
-      const res = await apiFetch(`http://localhost:3000/api/friends/request/${id}`, { method: "POST" });
+      const res = await apiFetch(`http://localhost:3000/api/friends/request`, { 
+        method: "POST",
+         body: JSON.stringify({ username:user.username }),
+    });
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {

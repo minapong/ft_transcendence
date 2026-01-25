@@ -42,6 +42,12 @@ export const FriendRepo = {
     });
   },
 
+  async find(userId: number, friendId: number) {
+    return prisma.friend.findUnique({
+      where: { user_id_friend_id: { user_id: userId, friend_id: friendId } },
+    });
+  },
+
   async listOutgoing(userId: number) {
     return prisma.friend.findMany({
       where: { user_id: userId },

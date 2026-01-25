@@ -32,10 +32,25 @@ export async function registerFriendRoutes(app: FastifyInstance) {
         return reply.code(400).send({ error: "Cannot friend yourself" });
 
       // block duplicates both directions (A->B or B->A)
-      const a = await FriendRepo.exists(me, other);
-      const b = await FriendRepo.exists(other, me);
-      if (a || b) return reply.code(409).send({ error: "Friend relation already exists" });
+      const ab = await FriendRepo.find(me, other);
+      const ba = await FriendRepo.find(other, me);
+      if (ab) {
+        if (ab.status === "pending")
+          return reply.code(409).send({ error: "Friend request already sent" });
 
+        if (ab.status === "accepted")
+          return reply.code(409).send({ error: "You are already friends" });
+      }
+
+      if (ba) {
+        if (ba.status === "pending")
+         return reply.code(409).send({ error: "This user already sent you a friend request",});
+
+        if (ba.status === "accepted")
+         return reply.code(409).send({ error: "You are already friends" });
+
+      }
+      
       const row = await FriendRepo.request(me, other);
       
       //  notify target user in realtime
