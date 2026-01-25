@@ -123,13 +123,15 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
          { preHandler: requireAuth }, 
          async (_req, reply) => {
 		try {
-		  const activeTournament = await getActiveTournament();
-		  if (!activeTournament) {
-			return reply.status(404).send({ error: "No active tournament" });
-		  }
-		  return reply.send({ success: true, tournament: activeTournament });
+            const activeTournament = await getActiveTournament();
+
+            // Always 200, even if null
+            return reply.send({ 
+                success: true, 
+                tournament: activeTournament || null 
+            });
 		} catch (err: any) {
-		  return reply.code(400).send({ error: err.message });
+		  return reply.code(500).send({ error: err.message });
 		}
 	  });
 }
