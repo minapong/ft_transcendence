@@ -353,3 +353,8 @@
   opacity: 0.35;
   filter: blur(24px);
 }
+
+
+.sidebar-visual {
+  transform-origin: left center;
+}
