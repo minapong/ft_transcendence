@@ -50,7 +50,13 @@ export default function Pong4PGame() {
 
 	return (
 		<div className="bg-gray-900 flex flex-col items-center justify-center h-full">
-			<div className="flex justify-between w-[800px] text-white text-xl font-bold mb-2">
+			<div className="
+				flex justify-between 
+				w-full max-w-[320px] sm:max-w-[500px] lg:max-w-[800px] 
+				text-white 
+				text-lg sm:text-xl lg:text-2xl 
+				font-bold mb-2
+				">
 				<div className="text-left">
 					<div>Red Team</div>
 					<div id="redNames">{navState.p1} & {navState.p2}</div>
