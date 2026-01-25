@@ -17,16 +17,14 @@ export default function ActiveTournamentPage() {
       const res = await apiFetch("/api/tournament/active");
       const data = await res.json();
 
-      if (!data?.tournament) {
-        setTournament(null);
-      } else {
-        setTournament(data.tournament);
-      }
+      // Success = 200, even with null
+      setTournament(data?.tournament ?? null);
     } catch (err) {
       console.error(err);
       setTournament(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {
@@ -114,7 +112,9 @@ export default function ActiveTournamentPage() {
       {/* User placeholder */}
       <div className="text-lg font-bold">
         Logged in as:{" "}
-        <span className="text-cyan-400">{currentUser.username} - ID: {currentUser.id}</span>
+        <span className="text-cyan-400">
+         {currentUser?.username ?? "Guest"} - ID: {currentUser?.id ?? "—"}
+        </span>
       </div>
 
       <h1 className="text-3xl font-bold">

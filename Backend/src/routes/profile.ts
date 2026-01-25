@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { prisma } from "../db/prisma.js";
 
 export async function registerProfileRoutes(server: FastifyInstance) {
-  console.log("🔥 PROFILE ROUTES LOADED");
+  // console.log("🔥 PROFILE ROUTES LOADED");
 
   server.get(
     "/api/users/:id",
@@ -14,7 +14,7 @@ export async function registerProfileRoutes(server: FastifyInstance) {
       if (Number.isNaN(userId)) {
         return reply.code(400).send({ error: "Invalid user id" });
       }
-      console.log(`searching for user id ${userId}`);
+      // console.log(`searching for user id ${userId}`);
 
       const user = await prisma.user.findUnique({
         where: { id: userId },

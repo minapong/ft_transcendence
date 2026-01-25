@@ -4,8 +4,6 @@ import {useState, useEffect, navigate} from "Reactor"
 
 
 export default function TournamentPage() {
-	// Simulate logged-in user
-	//   const user = { id: 5, name: "santiago", isAdmin: true };
 	const auth = getAuth();
 	const user = auth?.user;
 
@@ -23,7 +21,7 @@ export default function TournamentPage() {
   }
 
   const isAdmin = user.isAdmin;
-  if (!isAdmin) console.log("user is not admin");
+//   if (!isAdmin) console.log("user is not admin");
   const [tournament, setTournament] = useState(null);
   const [max_players, setMax_players] = useState(4);
   const [tournamentName, setTournamentName] = useState("");
@@ -32,30 +30,27 @@ export default function TournamentPage() {
 
   // Fetch active tournament on load
   useEffect(() => {
-	console.log("Tournament fetch triggered");
+	// console.log("Tournament fetch triggered");
 	let mounted = true;
 
     const loadTournament = async () => {
-      setLoading(true);
-      try {
-        const res = await apiFetch("/api/tournament/active");
-        if (!mounted) return;
-
-        if (res.ok) {
-          const data = await res.json();
-          setTournament(data.tournament);
-        } else if (res.status === 404) {
-          setTournament(null); // No active tournament
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          setError(errData.error || "Failed to load tournament");
-        }
-      } catch (err) {
-        setError("Network error fetching tournament");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
+		setLoading(true);
+		try {
+			const res = await apiFetch("/api/tournament/active");
+			if (res.ok) {
+			const data = await res.json();
+			setTournament(data.tournament); // null = no tournament
+			} else {
+			setTournament(null);
+			setError("Failed to load tournament");
+			}
+		} catch (err) {
+			setTournament(null);
+			setError("Network error");
+		} finally {
+			if (mounted) setLoading(false);
+		}
+	};
 
     loadTournament();
 
@@ -64,15 +59,17 @@ export default function TournamentPage() {
     };
   },[]);
 
-  const refreshTournament = async () => {
-    try {
-      const res = await apiFetch("/api/tournament/active");
-      if (res.ok) {
-        const data = await res.json();
-        setTournament(data.tournament);
-      }
-    } catch {}
-  };
+	const refreshTournament = async () => {
+	try {
+		const res = await apiFetch("/api/tournament/active");
+		const data = await res.json();
+		if (data.success) {
+		setTournament(data.tournament);
+		}
+	} catch {
+		// Silent fail on refresh — don't show error banner for refresh
+	}
+	};
 
   const handleCreateTournament = async () => {
     try {
