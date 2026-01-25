@@ -1,25 +1,35 @@
 import { FastifyInstance } from "fastify";
 import { requireAuth } from "../plugins/auth.guard.js";
 import { FriendRepo } from "../repositories/friend.repo.js";
+import { UserRepo } from "../repositories/user.repo.js";
 import { sendToUsers } from "../presence/presence.store.js";
 
 function getUserId(req: any): number {
-  // Adjust this ONE LINE if your guard stores it differently
-  // Common shapes: req.user.userId, req.user.id, req.user.sub
   return Number(req.user.userId);
 }
 
 export async function registerFriendRoutes(app: FastifyInstance) {
   // Send friend request to :id
-  app.post<{ Params: { id: string } }>(
-    "/api/friends/request/:id",
+  app.post<{ Body: { username: string } }>(
+    "/api/friends/request",
     { preHandler: requireAuth },
     async (req: any, reply) => {
       const me = getUserId(req);
-      const other = Number(req.params.id);
+      const { username } = req.body ?? {}
 
-      if (!Number.isFinite(other)) return reply.code(400).send({ error: "Invalid id" });
-      if (other === me) return reply.code(400).send({ error: "Cannot friend yourself" });
+      if (!username || typeof username !== "string") {
+          return reply.code(400).send({error: "Username is required"})
+      }
+
+      const target = await UserRepo.findByUsername(username);
+      if (!target) {
+        return reply.code(404).send({ error: "User not found" });
+      }
+
+      const other = target.id;
+
+      if (other === me)
+        return reply.code(400).send({ error: "Cannot friend yourself" });
 
       // block duplicates both directions (A->B or B->A)
       const a = await FriendRepo.exists(me, other);
@@ -27,11 +37,21 @@ export async function registerFriendRoutes(app: FastifyInstance) {
       if (a || b) return reply.code(409).send({ error: "Friend relation already exists" });
 
       const row = await FriendRepo.request(me, other);
-
+      
       //  notify target user in realtime
-      sendToUsers(other, { type: "friend_request", fromUserId: me });
+      sendToUsers(other, { 
+        type: "friend_request",
+        fromUserId: me,
+        fromUsername: req.user.username,
+       });
 
-      return reply.code(201).send({ ok: true, request: row });
+      return reply.code(201).send({ 
+        ok: true, 
+        request: {
+          to: { id: target.id, username:target.username },
+          status: row.status,
+        } 
+      });
     }
   );
 

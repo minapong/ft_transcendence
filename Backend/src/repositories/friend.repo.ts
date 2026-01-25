@@ -52,7 +52,7 @@ export const FriendRepo = {
 
   async listIncoming(userId: number) {
     return prisma.friend.findMany({
-      where: { friend_id: userId },
+      where: { friend_id: userId, status: "pending" },
       include: { user: true },
       orderBy: { created_at: "desc" },
     });

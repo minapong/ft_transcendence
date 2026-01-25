@@ -23,7 +23,7 @@ export default function FriendsPage() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<string | null>(null);
 
-  const [newId, setNewId] = useState("");
+  const [newUsername, setNewUsername] = useState("");
 
   useEffect(() => {
     if (!token) navigate("/login");
@@ -57,20 +57,25 @@ export default function FriendsPage() {
   }, [token]);
 
   async function sendRequest() {
-    const id = Number(newId);
-    if (!Number.isFinite(id)) {
-      setMsg("Enter a valid user id");
+    const username = newUsername.trim();
+    if (!username) {
+      setMsg("Enter a valid username");
       return;
     }
 
     setMsg(null);
-    const res = await apiFetch(`http://localhost:3000/api/friends/request/${id}`, { method: "POST" });
+
+    const res = await apiFetch(`http://localhost:3000/api/friends/request`, { 
+      method: "POST",
+      body: JSON.stringify({username}),
+    });
+    
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setMsg(data.error || "Failed to send request");
       return;
     }
-    setNewId("");
+    setNewUsername("");
     setMsg("Request sent ✅");
     reload();
   }
@@ -122,9 +127,9 @@ export default function FriendsPage() {
         <div className="flex gap-2">
           <input
             className="bg-gray-800 border border-gray-700 rounded px-3 py-2 w-48"
-            placeholder="User id (e.g. 12)"
-            value={newId}
-            onChange={(e: any) => setNewId(e.target.value)}
+            placeholder="User name (e.g. fox)"
+            value={newUsername}
+            onChange={(e: any) => setNewUsername(e.target.value)}
           />
           <button
             type="button"
