@@ -1,6 +1,6 @@
 import { apiFetch } from "@/core/lib/api";
 import { useEffect, useState } from "Reactor";
-import { useAuth } from "@/lib/useAuth";
+import { useAuth } from "@/core/lib/useAuth";
 
 export default function ProfilePage(props?: { id?: string }) {
   const id = props?.id;
