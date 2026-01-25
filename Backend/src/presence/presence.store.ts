@@ -28,3 +28,18 @@ export function isOnline(userId: number) {
 export function onlineUserIds() {
   return Array.from(online.keys());
 }
+
+export function sendToUsers(userId: number, payload: any) {
+  const conns = online.get(userId);
+  if (!conns) return;
+
+  const msg = JSON.stringify(payload);
+
+  for (const conn of conns) {
+    try {
+      conn.socket.send(msg);
+    } catch {
+      //ignore broken sockets
+    }
+  }
+}
