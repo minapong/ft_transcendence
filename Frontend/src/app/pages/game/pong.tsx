@@ -53,7 +53,7 @@ export default function PongGame() {
 		if (matchId !== null && p1Id !== null && p2Id !== null) {
 		const winnerId = winner === p1Name ? p1Id : p2Id;
 
-		apiFetch("http://localhost:3000/api/tournament/result", {
+		apiFetch("/api/tournament/result", {
 			method: "POST",
 			body: JSON.stringify({ matchId, winnerId, scoreP1, scoreP2 }),
 			keepalive: true, // Survives page unload
