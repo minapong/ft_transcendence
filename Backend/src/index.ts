@@ -16,6 +16,7 @@ import { registerAuthRoutes } from "./routes/auth.routes.js";
 import { registerProfileRoutes } from "./routes/profile.js";
 import { registerMeRoutes } from "./routes/me.js";
 import { registerStatsRoutes } from "./routes/stats.js";
+import { registerFriendRoutes } from "./routes/friends.js";
 
 
 const server = Fastify({ logger: true });
@@ -36,10 +37,9 @@ async function start() {
       secret: process.env.JWT_SECRET!,
     });
 
-    await server.register(websocket); // must be before websocket routes
+    await server.register(websocket); 
 
     registerPresenceWs(server);
-    // registerPresenceHttpRoutes(server);
     registerPresenceRoutes(server);
 
     registerTournamentRoutes(server);
@@ -49,6 +49,7 @@ async function start() {
     registerProfileRoutes(server);
     registerMeRoutes(server);
     registerStatsRoutes(server);
+    registerFriendRoutes(server);
 
     server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
       if (err){ process.exit(1); throw err; }

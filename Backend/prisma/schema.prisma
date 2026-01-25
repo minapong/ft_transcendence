@@ -95,7 +95,7 @@ model Friend {
 
   @@unique([user_id, friend_id])
 
-  @@map("friend")
+  @@map("friends")
 }
 
 /* =====================

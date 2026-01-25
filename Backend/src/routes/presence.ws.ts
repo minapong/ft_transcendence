@@ -15,7 +15,7 @@ export async function registerPresenceWs(server: FastifyInstance) {
       const userId = Number(payload.userId);
       if (!Number.isFinite(userId)) return connection.socket.close();
 
-      // ✅ track this exact connection
+      // track this exact connection
       addOnline(userId, connection);
 
       connection.socket.send(
@@ -27,7 +27,7 @@ export async function registerPresenceWs(server: FastifyInstance) {
       );
 
       connection.socket.on("close", () => {
-        // ✅ only goes offline when the LAST connection is removed
+        //  only goes offline when the LAST connection is removed
         removeOnline(userId, connection);
       });
     } catch {

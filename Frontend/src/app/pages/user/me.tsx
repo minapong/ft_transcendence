@@ -102,6 +102,10 @@ export default function MePage() {
             </p>
           </div>
         </div>
+         
+        <button onClick={() => navigate("/user/friends")} className="bg-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-600">
+          Friends
+        </button>
 
         <button
           onClick={logout}
