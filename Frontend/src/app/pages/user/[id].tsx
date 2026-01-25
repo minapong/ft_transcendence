@@ -63,7 +63,7 @@ export default function ProfilePage(props?: { id?: string }) {
     setFriendMsg(null);
 
     // We don't have "status endpoint", so we infer from /api/friends list
-    apiFetch("http://localhost:3000/api/friends")
+    apiFetch("/api/friends")
       .then(async (res) => {
         if (!res.ok) return null;
         const data = await res.json();
@@ -89,7 +89,7 @@ export default function ProfilePage(props?: { id?: string }) {
     setFriendMsg(null);
 
     try {
-      const res = await apiFetch(`http://localhost:3000/api/friends/request`, { 
+      const res = await apiFetch(`/api/friends/request`, { 
         method: "POST",
          body: JSON.stringify({ username:user.username }),
     });
@@ -115,7 +115,7 @@ export default function ProfilePage(props?: { id?: string }) {
     setFriendMsg(null);
 
     try {
-      const res = await apiFetch(`http://localhost:3000/api/friends/${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/friends/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
