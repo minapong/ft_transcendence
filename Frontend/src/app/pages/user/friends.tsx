@@ -26,7 +26,7 @@ export default function FriendsPage() {
   const [newUsername, setNewUsername] = useState("");
 
   useEffect(() => {
-    if (!token) navigate("/login");
+    if (!token) navigate("/auth/login");
   }, [token]);
 
   async function reload() {
@@ -169,7 +169,7 @@ export default function FriendsPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => navigate(`/profile/${r.from.id}`)}
+                        onClick={() => navigate(`user/${r.from.id}`)}
                         className="bg-gray-700 px-3 py-2 rounded font-bold hover:bg-gray-600"
                       >
                         View
@@ -216,7 +216,7 @@ export default function FriendsPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => navigate(`/profile/${r.to.id}`)}
+                        onClick={() => navigate(`user/${r.to.id}`)}
                         className="bg-gray-700 px-3 py-2 rounded font-bold hover:bg-gray-600"
                       >
                         View
