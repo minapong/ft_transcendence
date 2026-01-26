@@ -157,6 +157,17 @@ export default function PongGame() {
 							w-3 h-3 sm:w-4 sm:h-4 
 							bg-white rounded-full 
 							top-1/2 left-1/2"
+					style={{
+						boxShadow: `
+							0 0 10px 2px rgba(0, 255, 255, 0.8),
+							0 0 20px 4px rgba(0, 255, 255, 0.5),
+							0 0 30px 6px rgba(0, 255, 255, 0.3),
+							0 0 40px 8px rgba(0, 255, 255, 0.15),
+							inset 0 0 5px rgba(0, 255, 255, 0.6)
+						`,
+						filter: 'brightness(1.2) blur(0.3px)',
+						transition: 'transform 0.05s linear'
+					}}
 				/>
 				</div>
 

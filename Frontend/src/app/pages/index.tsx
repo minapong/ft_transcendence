@@ -6,20 +6,30 @@ function PongAnimation() {
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
-		if (!canvas) return;
+        const frameId = { current: 0 }; // Mutable ref-like object for cleanup within this closure
 
+		if (!canvas) {
+			console.log('Pong: Canvas ref missing on mount');
+			return;
+		}
+        
 		const ctx = canvas.getContext('2d');
-		if (!ctx) return;
+		if (!ctx) {
+			console.error('Pong: Canvas context missing');
+			return;
+		}
 
-		// Set canvas size
+		console.log('Pong: Mounted & Context acquired');
+
 		const resizeCanvas = () => {
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Force clear on resize
 		};
 		resizeCanvas();
 		window.addEventListener('resize', resizeCanvas);
 
-		// Game state
+		// Game state (re-initialized on every mount)
 		const ball = {
 			x: canvas.width / 2,
 			y: canvas.height / 2,
@@ -29,166 +39,94 @@ function PongAnimation() {
 			maxSpeed: 8
 		};
 
-		const paddleWidth = 12;
+		// ... (paddles and other state omitted for brevity, they are local consts) ...
+        const paddleWidth = 12;
 		const paddleHeight = 120;
 		const paddleOffset = 60;
-
-		const leftPaddle = {
-			x: paddleOffset,
-			y: canvas.height / 2 - paddleHeight / 2,
-			width: paddleWidth,
-			height: paddleHeight,
-			speed: 3.5
-		};
-
-		const rightPaddle = {
-			x: canvas.width - paddleOffset - paddleWidth,
-			y: canvas.height / 2 - paddleHeight / 2,
-			width: paddleWidth,
-			height: paddleHeight,
-			speed: 3.5
-		};
-
-		// Trail effect
+		const leftPaddle = { x: paddleOffset, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, speed: 3.5 };
+		const rightPaddle = { x: canvas.width - paddleOffset - paddleWidth, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, speed: 3.5 };
 		const trail: { x: number; y: number; opacity: number }[] = [];
 		const maxTrailLength = 15;
 
-		// AI for paddles
-		const updatePaddleAI = (paddle: typeof leftPaddle, targetY: number) => {
+        // Helper AI (embedded to access local constants)
+        const updatePaddleAI = (paddle: typeof leftPaddle, targetY: number) => {
 			const paddleCenter = paddle.y + paddle.height / 2;
 			const diff = targetY - paddleCenter;
-
-			if (Math.abs(diff) > paddle.speed) {
-				paddle.y += diff > 0 ? paddle.speed : -paddle.speed;
-			}
-
-			// Keep paddle in bounds
+			if (Math.abs(diff) > paddle.speed) paddle.y += diff > 0 ? paddle.speed : -paddle.speed;
 			paddle.y = Math.max(0, Math.min(canvas.height - paddle.height, paddle.y));
 		};
 
-		// Game loop
 		const animate = () => {
-			// Clear with fade effect for trails
-			ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			// Safety check: if canvas is gone or size is 0
+			if (!canvas || canvas.width === 0) return;
 
-			// Update ball position
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Update ball
 			ball.x += ball.speedX;
 			ball.y += ball.speedY;
 
-			// Add to trail
+			// Trail
 			trail.push({ x: ball.x, y: ball.y, opacity: 1 });
-			if (trail.length > maxTrailLength) {
-				trail.shift();
-			}
+			if (trail.length > maxTrailLength) trail.shift();
 
-			// Ball collision with top/bottom
+			// Wall Collisions
 			if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
 				ball.speedY = -ball.speedY;
 				ball.y = ball.y - ball.radius < 0 ? ball.radius : canvas.height - ball.radius;
 			}
 
-			// Ball collision with paddles
-			const hitLeftPaddle =
-				ball.x - ball.radius < leftPaddle.x + leftPaddle.width &&
-				ball.x + ball.radius > leftPaddle.x &&
-				ball.y > leftPaddle.y &&
-				ball.y < leftPaddle.y + leftPaddle.height;
+            // Paddle Collisions (Simplified logic)
+			const hitLeft = ball.x - ball.radius < leftPaddle.x + leftPaddle.width && ball.x + ball.radius > leftPaddle.x && ball.y > leftPaddle.y && ball.y < leftPaddle.y + leftPaddle.height;
+			const hitRight = ball.x + ball.radius > rightPaddle.x && ball.x - ball.radius < rightPaddle.x + rightPaddle.width && ball.y > rightPaddle.y && ball.y < rightPaddle.y + rightPaddle.height;
 
-			const hitRightPaddle =
-				ball.x + ball.radius > rightPaddle.x &&
-				ball.x - ball.radius < rightPaddle.x + rightPaddle.width &&
-				ball.y > rightPaddle.y &&
-				ball.y < rightPaddle.y + rightPaddle.height;
-
-			if (hitLeftPaddle || hitRightPaddle) {
+			if (hitLeft || hitRight) {
 				ball.speedX = -ball.speedX;
-
-				// Add spin based on where ball hits paddle
-				const paddle = hitLeftPaddle ? leftPaddle : rightPaddle;
+                const paddle = hitLeft ? leftPaddle : rightPaddle;
 				const hitPos = (ball.y - paddle.y) / paddle.height - 0.5;
 				ball.speedY += hitPos * 2;
-
-				// Increase speed slightly
-				ball.speedX *= 1.05;
-				ball.speedY *= 1.05;
-
-				// Cap speed
-				const speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2);
-				if (speed > ball.maxSpeed) {
-					ball.speedX = (ball.speedX / speed) * ball.maxSpeed;
-					ball.speedY = (ball.speedY / speed) * ball.maxSpeed;
-				}
-
-				// Reposition ball
-				ball.x = hitLeftPaddle
-					? leftPaddle.x + leftPaddle.width + ball.radius
-					: rightPaddle.x - ball.radius;
+                ball.speedX *= 1.05; ball.speedY *= 1.05;
+                const speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2);
+				if (speed > ball.maxSpeed) { ball.speedX = (ball.speedX / speed) * ball.maxSpeed; ball.speedY = (ball.speedY / speed) * ball.maxSpeed; }
+                ball.x = hitLeft ? leftPaddle.x + leftPaddle.width + ball.radius : rightPaddle.x - ball.radius;
 			}
 
-			// Reset if ball goes out
+            // Reset
 			if (ball.x < -50 || ball.x > canvas.width + 50) {
-				ball.x = canvas.width / 2;
-				ball.y = canvas.height / 2;
-				ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4;
-				ball.speedY = (Math.random() - 0.5) * 4;
+				ball.x = canvas.width / 2; ball.y = canvas.height / 2;
+				ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4; ball.speedY = (Math.random() - 0.5) * 4;
 				trail.length = 0;
 			}
 
-			// Update AI
 			updatePaddleAI(leftPaddle, ball.y);
 			updatePaddleAI(rightPaddle, ball.y);
-
-			// Update paddle positions on resize
+            
+            // Resize updates
 			leftPaddle.x = paddleOffset;
 			rightPaddle.x = canvas.width - paddleOffset - paddleWidth;
 
-			// Draw trail
+            // Draw Trail
 			trail.forEach((point, index) => {
-				const opacity = (index / trail.length) * 0.3;
-				const size = ball.radius * (index / trail.length);
-				ctx.fillStyle = `rgba(139, 92, 246, ${opacity})`;
-				ctx.beginPath();
-				ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
-				ctx.fill();
+				const opacity = (index / trail.length) * 0.8;
+				ctx.fillStyle = `rgba(0, 255, 255, ${opacity})`;
+				ctx.beginPath(); ctx.arc(point.x, point.y, ball.radius * (index / trail.length), 0, Math.PI * 2); ctx.fill();
 			});
 
-			// Draw ball with glow
-			const gradient = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ball.radius * 2);
-			gradient.addColorStop(0, 'rgba(139, 92, 246, 1)');
-			gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.6)');
-			gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
-			ctx.fillStyle = gradient;
-			ctx.beginPath();
-			ctx.arc(ball.x, ball.y, ball.radius * 2, 0, Math.PI * 2);
-			ctx.fill();
+            // Draw Ball (Simplified glows for perf/rendering safety)
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+            // Glows
+             const outerGlow = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ball.radius * 3);
+            outerGlow.addColorStop(0, 'rgba(0, 255, 255, 0.4)'); outerGlow.addColorStop(1, 'rgba(0, 255, 255, 0)');
+            ctx.fillStyle = outerGlow; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius * 3, 0, Math.PI * 2); ctx.fill();
 
-			// Draw ball core
-			ctx.fillStyle = '#a78bfa';
-			ctx.beginPath();
-			ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-			ctx.fill();
+            // Draw Paddles
+            ctx.fillStyle = '#00ffff';
+            ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
+            ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
 
-			// Draw paddles with glow
-			const drawPaddle = (paddle: typeof leftPaddle) => {
-				// Paddle glow
-				ctx.shadowBlur = 20;
-				ctx.shadowColor = 'rgba(139, 92, 246, 0.5)';
-				ctx.fillStyle = '#8b5cf6';
-				ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-
-				// Paddle highlight
-				ctx.shadowBlur = 0;
-				ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-				ctx.fillRect(paddle.x, paddle.y, paddle.width * 0.3, paddle.height);
-			};
-
-			drawPaddle(leftPaddle);
-			drawPaddle(rightPaddle);
-
-			// Draw center line
+			// Draw center line - bright cyan
 			ctx.setLineDash([10, 15]);
-			ctx.strokeStyle = 'rgba(139, 92, 246, 0.15)';
+			ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)'; // Bright cyan
 			ctx.lineWidth = 3;
 			ctx.beginPath();
 			ctx.moveTo(canvas.width / 2, 0);
@@ -196,28 +134,39 @@ function PongAnimation() {
 			ctx.stroke();
 			ctx.setLineDash([]);
 
-			requestAnimationFrame(animate);
+            // Loop
+			frameId.current = requestAnimationFrame(animate);
 		};
 
-		animate();
+		frameId.current = requestAnimationFrame(animate);
 
 		return () => {
+			console.log('Pong: Unmounting, canceling frame', frameId.current);
 			window.removeEventListener('resize', resizeCanvas);
+            if (frameId.current) cancelAnimationFrame(frameId.current);
 		};
 	}, []);
 
 	return (
 		<canvas
 			ref={canvasRef}
-			className="absolute inset-0 -z-5 opacity-50"
-			style={{ imageRendering: 'crisp-edges' }}
+			style={{
+				position: 'fixed',
+				top: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+				zIndex: 5,
+				opacity: 0.4,
+				pointerEvents: 'none'
+			}}
 		/>
 	);
 }
 
 export default function App() {
 	return (
-		<div className="min-h-screen w-full relative overflow-hidden">
+		<div className="min-h-screen w-full relative overflow-hidden isolation-isolate">
 			{/* Crispy Pong Animation */}
 			<PongAnimation />
 
@@ -262,7 +211,7 @@ export default function App() {
 			</div>
 
 			{/* Main content - vertically centered */}
-			<div className="flex items-center justify-center min-h-screen px-6 py-12">
+			<div className="flex items-center justify-center min-h-screen px-6 py-12 relative z-20">
 				<div className="flex flex-col items-center gap-8 max-w-5xl w-full">
 
 					{/* Intent Split: 3 Cards */}

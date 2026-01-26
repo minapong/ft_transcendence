@@ -3,11 +3,11 @@ import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
 import { animate } from "motion";
 
-export default function Header({ screen }: { screen: "mobile" | "tablet" | "desktop" }) {
-  // Mobile & Tablet: Button is fixed top-left, so we need left padding
-  // Desktop: Button is in the sidebar (below header), so standard padding
-  const headerPadding = screen !== "desktop" ? "pl-14 pr-4 sm:pl-16 sm:pr-6" : "px-6";
+export default function Header() {
+  // Mobile & Tablet: Fixed top-left button needs padding
+  // Desktop: Sidebar handles it
   const auth = useAuth();
+
   const user = auth?.user || null;
   const [panelOpen, setPanelOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -60,7 +60,7 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
   ];
 
   return (
-    <header className={`sticky top-0 z-50 relative min-h-[var(--header-height)] ${headerPadding} flex flex-wrap items-center justify-between gap-3 sm:gap-4 header-surface`}>
+    <header className={`sticky top-0 z-50 relative min-h-[var(--header-height)] pl-14 pr-4 sm:pl-16 sm:pr-6 lg:px-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4 header-surface`}>
 
       <div className="flex items-center gap-4 z-10">
         <div
@@ -116,7 +116,7 @@ export default function Header({ screen }: { screen: "mobile" | "tablet" | "desk
 
         {!user ? (
           <button
-            onClick={() => navigate("/auth/login")}
+            onClick={() => navigate("/auth/login", { triggerLayout: true })}
             className="bleed-btn rounded-lg bg-accent text-primary text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-3.5 sm:py-2 transition hover:bg-accent-soft flex items-center gap-2"
           >
             <span className="icon-[mdi--login] text-base sm:text-lg" aria-hidden="true" />

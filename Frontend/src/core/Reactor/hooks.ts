@@ -24,6 +24,7 @@ type HookContext = {
 	hooks: HookEntry[];
 	effects: EffectEntry[];
 	pendingEffects: Array<() => void>;
+	hookCount: number | null;
 };
 
 const contextMap = new Map<string, HookContext>();
@@ -33,7 +34,7 @@ let activeHookKey = DEFAULT_KEY;
 function getContext(key: string): HookContext {
 	let ctx = contextMap.get(key);
 	if (!ctx) {
-		ctx = { hooks: [], effects: [], pendingEffects: [] };
+		ctx = { hooks: [], effects: [], pendingEffects: [], hookCount: null };
 		contextMap.set(key, ctx);
 	}
 	return ctx;
@@ -44,6 +45,7 @@ let effects = getContext(DEFAULT_KEY).effects;
 let pendingEffects = getContext(DEFAULT_KEY).pendingEffects;
 let hookIndex = 0;
 let trackedKey: string | null = null;
+let isCleaningUp = false;
 
 export let pendingRefSetters: Array<() => void> = [];
 
@@ -67,6 +69,18 @@ export function resetHooks(pageKey?: string, opts?: { track?: boolean }) {
 	}
 
 	const ctx = getContext(nextKey);
+	// Hook Order Guard
+	if (ctx.hookCount !== null && hookIndex !== ctx.hookCount) {
+		console.warn(`Reactor: Hook count mismatch for key "${activeHookKey}". Expected ${ctx.hookCount}, got ${hookIndex}. This indicates hooks were called conditionally.`);
+	}
+	// Update tracking for the *previous* render (which just finished)
+	// IMPORTANT: The check above validates the *previous* render against its *previous* expectation.
+	// Now we must save the count for the *next* time this key renders.
+	// However, since 'resetHooks' is called BEFORE render, 'hookIndex' here represents the result of the LAST render loop.
+	if (activeHookKey !== DEFAULT_KEY) {
+		getContext(activeHookKey).hookCount = hookIndex;
+	}
+
 	hooks = ctx.hooks;
 	effects = ctx.effects;
 	pendingEffects = ctx.pendingEffects;
@@ -88,6 +102,10 @@ export function useState<T>(initial: T): [T, (v: T | ((prev: T) => T)) => void] 
 
 	const stateKey = activeHookKey;
 	const setState = (newValue: T | ((v: T) => T)) => {
+		if (isCleaningUp) {
+			console.warn("Reactor: setState ignored during cleanup to prevent re-entry loops.");
+			return;
+		}
 		const next = typeof newValue === "function"
 			? (newValue as (v: T) => T)(entry!.value)
 			: newValue;
@@ -120,9 +138,7 @@ export function useEffect(cb: () => void | (() => void), deps?: any[]) {
 	};
 
 	if (deps === undefined) {
-		if (!prev) {
-			pendingEffects.push(queue);
-		}
+		pendingEffects.push(queue);
 		return;
 	}
 
@@ -190,7 +206,12 @@ function depsChanged(prev: any[] | undefined, next: any[]) {
 }
 
 function cleanupEffects(ctx: HookContext) {
-	for (const entry of ctx.effects) {
-		if (entry?.cleanup) entry.cleanup();
+	isCleaningUp = true;
+	try {
+		for (const entry of ctx.effects) {
+			if (entry?.cleanup) entry.cleanup();
+		}
+	} finally {
+		isCleaningUp = false;
 	}
 }

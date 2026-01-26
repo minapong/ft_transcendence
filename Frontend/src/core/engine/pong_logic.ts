@@ -456,5 +456,6 @@ export function pongLogic(
 		document.removeEventListener('keydown', keydownHandler);
 		document.removeEventListener('keyup', keyupHandler);
 		pause.removeEventListener('click', pauseHandler);
+		window.removeEventListener('resize', resizeHandler);
 	};
 }

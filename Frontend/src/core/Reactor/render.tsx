@@ -72,25 +72,24 @@ function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key:
 export function navigate(
   path: string,
   opts?: {
-    replace?: boolean;
-    triggerLayout?: boolean;
-    state?: any;
+    replace?: boolean; // you can ask forcefull replacement of current url
+    triggerLayout?: boolean; // you can ask forcefull replacement of layout
+    state?: any; // you can pass state to the route
   }
 ) {
-  const target = normalizePath(path.startsWith("/") ? path : `/${path}`);
-  const current = normalizePath(window.location.pathname);
+  const target = normalizePath(path.startsWith("/") ? path : `/${path}`); //appends if there is no slash at start
+  const current = normalizePath(window.location.pathname); //get current url
 
-  const shouldUpdateHistory = opts?.replace || target !== current;
+  const shouldUpdateHistory = opts?.replace || target !== current; // check if user asked replacement 
 
   if (shouldUpdateHistory) {
     const method = opts?.replace ? "replaceState" : "pushState";
     history[method](opts?.state ?? {}, "", target);
+    window.dispatchEvent(new Event("routechange"));
   }
 
   renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
 }
-
-
 
 
 
