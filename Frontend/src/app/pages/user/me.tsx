@@ -28,9 +28,17 @@ export default function MePage() {
         const profileRes = await apiFetch("/api/me");
         if (!profileRes.ok) throw new Error("Failed to load profile");
         const profileData = await profileRes.json();
-        setProfile(profileData);
+        console.log("[ME] /api/me JSON =", profileData);
+        const me = profileData?.me ?? null;
+        const flatProfile = me ? { ...me, avatarUrl: profileData.avatarUrl } : profileData;
 
-        const userId = profileData.id;
+        setProfile(flatProfile);
+        console.log("[ME] profileData.username =", profileData?.username);
+        console.log("[ME] profileData.email =", profileData?.email);
+        console.log("[ME] profileData.created_at =", profileData?.created_at);
+
+
+        const userId = flatProfile.id;
 
         // Stats
         const statsRes = await apiFetch(`/api/stats/user/${userId}`);
@@ -72,6 +80,8 @@ export default function MePage() {
     );
   }
 
+  console.log("avatarUrl:", profile?.avatarUrl);
+  
   if (fetchError) {
     return (
       <div className="p-10 text-center">
@@ -91,9 +101,22 @@ export default function MePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-6">
-          <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl font-bold">
-            {profile?.username?.[0]?.toUpperCase() || "?"}
-          </div>
+       <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-4xl font-bold">
+        {profile?.avatarUrl ? (
+          <img
+            src={profile.avatarUrl}
+            className="w-full h-full object-cover"
+            alt="avatar"
+            onError={(e) => {
+              console.warn("avatar failed to load:", profile?.avatarUrl);
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <span>{profile?.username?.[0]?.toUpperCase() || "?"}</span>
+        )}
+      </div>
+
           <div>
             <h1 className="text-4xl font-bold">{profile?.username || "Player"}</h1>
             <p className="text-gray-400">{profile?.email || "No email"}</p>

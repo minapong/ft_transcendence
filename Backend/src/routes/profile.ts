@@ -23,13 +23,17 @@ export async function registerProfileRoutes(server: FastifyInstance) {
           username: true,
           created_at: true,
           avatarId: true,
+          avatar: { select: { file_path: true } },
         },
       });
       if (!user) {
         return reply.code(404).send({ error: "User not found" });
       }
 
-      return user;
+      return reply.send({
+        ...user,
+        avatarUrl: user.avatar?.file_path ? `${process.env.PUBLIC_BASE_URL ?? ""}/static/${user.avatar.file_path}` : null,
+      });
     }
   );
 }
