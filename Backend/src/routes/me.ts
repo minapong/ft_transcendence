@@ -8,7 +8,6 @@ export async function registerMeRoutes(server: FastifyInstance) {
         {preHandler: requireAuth},
         async (req: any, reply) => {
             const userId = Number((req.user as any).userId);
-            const base = process.env.PUBLIC_BASE_URL ?? "";
             const me = await prisma.user.findUnique({
                 where: { id: userId },
                 select: { 
@@ -23,8 +22,9 @@ export async function registerMeRoutes(server: FastifyInstance) {
             
             if (!me)
                 return reply.code(404).send({error: "User not found"});
-            return reply.send({me,
-                avatarUrl: me.avatar?.file_path ? `${process.env.PUBLIC_BASE_URL ?? ""}/static/${me.avatar.file_path}` : null,
+            return reply.send({
+                ...me,
+                avatarUrl: me.avatar?.file_path ? `/static/${me.avatar.file_path}` : null,
             });
         }
     );

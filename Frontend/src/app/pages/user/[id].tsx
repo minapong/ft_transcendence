@@ -145,11 +145,7 @@ export default function ProfilePage(props?: { id?: string }) {
           <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-3xl font-bold">
             {user?.avatarUrl ? (
               <img
-                src={
-                  user.avatarUrl.startsWith("http")
-                    ? user.avatarUrl
-                    : `${import.meta.env.VITE_API_BASE}${user.avatarUrl}`
-                }
+                src={user.avatarUrl}
                 className="w-full h-full object-cover"
                 alt="avatar"
                 onError={(e) => {

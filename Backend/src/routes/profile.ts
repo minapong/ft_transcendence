@@ -32,7 +32,7 @@ export async function registerProfileRoutes(server: FastifyInstance) {
 
       return reply.send({
         ...user,
-        avatarUrl: user.avatar?.file_path ? `${process.env.PUBLIC_BASE_URL ?? ""}/static/${user.avatar.file_path}` : null,
+        avatarUrl: user.avatar?.file_path ? `/static/${user.avatar.file_path}` : null,
       });
     }
   );
