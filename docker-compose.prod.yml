@@ -7,7 +7,9 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=file:./transcendence.db
-      - JWT_SECRET=${JWT_SECRET}
+      # - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - ./Backend/.env
     restart: always
     networks:
       - app_net
@@ -19,12 +21,12 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/ssl:/etc/letsencrypt
+      # - ./nginx/ssl:/etc/letsencrypt
     depends_on:
       - backend
     ports:
-      - "80:80"
-      - "443:443"
+      - "8443:443"
+      # - "443:443"
     networks:
       - app_net
     restart: always
