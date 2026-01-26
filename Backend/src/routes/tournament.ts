@@ -1,4 +1,4 @@
-import { requireAuth } from "../plugins/auth.guard.js";
+import { requireAuth, requireAdmin } from "../plugins/auth.guard.js";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import {
     createTournament,
@@ -22,11 +22,11 @@ type AdvanceRoundBody = { tournamentId: number };
 type GetTournamentBody = { tournamentId: number };
 
 export async function registerTournamentRoutes(server: FastifyInstance) {
-
+  
     server.post<{ Body: StartTournamentBody }>(
         "/api/tournament/create", 
-         { preHandler: requireAuth }, 
-         async (req, reply) => {
+         { preHandler: [requireAuth, requireAdmin] }, 
+        async (req: any, reply) => {        
         const { name, max_players } = req.body;
         try {
             const tournament = await createTournament(name, max_players);
@@ -34,12 +34,12 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
         } catch (err: any) {
             return reply.code(400).send({ error: err.message });
         }
-    });
+        });
 
     server.post<{ Body: RegisterUserBody }>(
         "/api/tournament/register", 
          { preHandler: requireAuth }, 
-         async (req,reply) => {
+         async (req: any,reply) => {
         const { tournamentId } = req.body;
         const { userId } = req.user as any;
         try {
@@ -52,8 +52,8 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
 
     server.post<{ Body: StartTournamentBody }>(
         "/api/tournament/start",
-         { preHandler: requireAuth },
-          async (req,reply) => {
+         { preHandler: [requireAuth, requireAdmin] },
+          async (req: any,reply) => {
         const { tournamentId} = req.body;
         if (!tournamentId) return reply.status(400).send({ error: "tournamentId is required" });
 
