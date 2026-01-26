@@ -1,5 +1,6 @@
 import { UserRepo } from "../repositories/user.repo.js"
 import { toPublicUser } from "../domain/user.public.js"
+import { prisma } from "../db/prisma.js";
 import crypto from "crypto"
 
 function hashPassword(password: string): string {
@@ -23,6 +24,15 @@ export const AuthService = {
       password_hash, // IMPORTANT: match your DB/repo field name
     });
 
+    const defaults = await prisma.avatar.findMany({
+      where: { is_default: true },
+      select: { id: true },
+    });
+
+    if (defaults.length > 0) {
+      const pick = defaults[Math.floor(Math.random() * defaults.length)];
+      await UserRepo.update(user.id, { avatarId: pick.id });
+    }
     return toPublicUser(user);
   },
 
@@ -37,7 +47,7 @@ export const AuthService = {
     if (user.passwordHash !== incoming_hash) {
       throw new Error("INVALID_CREDENTIALS");
     }
-
+    //  return toPublicUser(await UserRepo.findById(user.id)!);
     return toPublicUser(user);
   }
 }

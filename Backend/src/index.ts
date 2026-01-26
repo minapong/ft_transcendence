@@ -3,6 +3,9 @@ import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 
 import websocket from "@fastify/websocket";
+import fastifyStatic from "@fastify/static";
+import path from "path";
+
 import { registerPresenceWs} from "./routes/presence.ws.js";
 import { registerPresenceRoutes } from "./routes/presence.js";
 
@@ -38,6 +41,11 @@ async function start() {
     });
 
     await server.register(websocket); 
+
+    server.register(fastifyStatic, {
+      root: path.join(process.cwd(), "assets"),
+      prefix: "/static/",
+    });
 
     registerPresenceWs(server);
     registerPresenceRoutes(server);
