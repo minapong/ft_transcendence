@@ -142,6 +142,26 @@ export default function ProfilePage(props?: { id?: string }) {
     <div className="p-10 text-white">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-3xl font-bold">
+            {user?.avatarUrl ? (
+              <img
+                src={
+                  user.avatarUrl.startsWith("http")
+                    ? user.avatarUrl
+                    : `${import.meta.env.VITE_API_BASE}${user.avatarUrl}`
+                }
+                className="w-full h-full object-cover"
+                alt="avatar"
+                onError={(e) => {
+                  console.warn("profile avatar failed:", user?.avatarUrl);
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <span>{user?.username?.[0]?.toUpperCase() || "?"}</span>
+            )}
+          </div>
+
           <h1 className="text-3xl font-bold">{user.username}</h1>
           {online === null ? (
             <span className="text-gray-400 text-sm">…</span>
