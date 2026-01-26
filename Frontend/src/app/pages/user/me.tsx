@@ -29,16 +29,15 @@ export default function MePage() {
         if (!profileRes.ok) throw new Error("Failed to load profile");
         const profileData = await profileRes.json();
         console.log("[ME] /api/me JSON =", profileData);
-        const me = profileData?.me ?? null;
-        const flatProfile = me ? { ...me, avatarUrl: profileData.avatarUrl } : profileData;
+       
 
-        setProfile(flatProfile);
+        setProfile(profileData);
         console.log("[ME] profileData.username =", profileData?.username);
         console.log("[ME] profileData.email =", profileData?.email);
         console.log("[ME] profileData.created_at =", profileData?.created_at);
 
 
-        const userId = flatProfile.id;
+        const userId = profileData.id;
 
         // Stats
         const statsRes = await apiFetch(`/api/stats/user/${userId}`);

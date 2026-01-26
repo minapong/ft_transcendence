@@ -22,6 +22,12 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		open: false,
+		proxy: {
+		   "/static": {
+			target: "http://backend:3000",
+			changeOrigin: true,
+		   },
+		},
 	},
 	build: {
 		outDir: "dist",
