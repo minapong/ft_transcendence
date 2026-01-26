@@ -23,7 +23,7 @@ export async function registerLoginRoutes(server: FastifyInstance) {
         const user = await AuthService.login(email, password);
 
         const token = server.jwt.sign(
-          { userId: user.id, email: user.email },
+          { userId: user.id, email: user.email, isAdmin: user.isAdmin },
           { expiresIn: "1h"}
         );
 
