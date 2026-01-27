@@ -11,9 +11,6 @@
         "prisma:generate": "npx prisma generate",
         "prisma:studio": "npx prisma studio"
     },
-    "prisma": {
-        "seed": "node prisma/seedAvatars.js"
-    },
     "dependencies": {
         "@fastify/cors": "^8.5.0",
         "@fastify/jwt": "^7.0.0",
