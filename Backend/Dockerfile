@@ -11,6 +11,7 @@ COPY prisma.config.js ./
 RUN  npx prisma generate
 COPY src ./src
 COPY assets ./assets
+COPY script ./script
 RUN npm run build
 
 #production stage

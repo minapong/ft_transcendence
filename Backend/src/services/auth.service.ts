@@ -3,7 +3,7 @@ import { toPublicUser } from "../domain/user.public.js"
 import { prisma } from "../db/prisma.js";
 import crypto from "crypto"
 
-function hashPassword(password: string): string {
+export function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex")
 }
 
