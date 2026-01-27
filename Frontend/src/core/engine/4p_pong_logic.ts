@@ -1,92 +1,207 @@
 
 
-let P4_GAME_WIDTH : number;
-let P4_GAME_HEIGHT : number;
-let P4_WALL_WIDTH : number;
-
-let P4_BALL_SIZE : number;
-
-let P4_PADDLE_LENGTH : number;
-let P4_PADDLE_THICKNESS : number;
-let P4_PADDLE_DIST : number;
-
-
-let P4_PLAYABLE_WIDTH : number;
-let P4_PLAYABLE_HEIGHT : number;
-let P4_LEFT_PADDLE_X : number;
-let P4_RIGHT_PADDLE_X : number;
-let P4_TOP_PADDLE_Y : number;
-let P4_BOTTOM_PADDLE_Y : number;
-
-function handle_parameters()
-{
-    let width = window.innerWidth;
-
-    if (width < 640) {
-    P4_GAME_WIDTH = 200;
-    P4_GAME_HEIGHT = 200;
-    P4_WALL_WIDTH = 4;
-    P4_BALL_SIZE = 12;
-    P4_PADDLE_LENGTH = 64;
-    P4_PADDLE_THICKNESS = 8;
-    P4_PADDLE_DIST = 8;
-    }
-  else if (width < 1024) {
-    P4_GAME_WIDTH = 280;
-    P4_GAME_HEIGHT = 280;
-    P4_WALL_WIDTH = 6;
-    P4_BALL_SIZE = 16;
-    P4_PADDLE_LENGTH = 80;
-    P4_PADDLE_THICKNESS = 12;
-    P4_PADDLE_DIST = 12;
-    }
-
-  else if (width < 1280){
-    P4_GAME_WIDTH = 380;
-    P4_GAME_HEIGHT = 380;
-    P4_WALL_WIDTH = 8;
-    P4_BALL_SIZE = 16;
-    P4_PADDLE_LENGTH = 80;
-    P4_PADDLE_THICKNESS = 12;
-    P4_PADDLE_DIST = 16;
-    }
-	else 
-	{
-	P4_GAME_WIDTH = 500;
-    P4_GAME_HEIGHT = 500;
-    P4_WALL_WIDTH = 8;
-    P4_BALL_SIZE = 16;
-    P4_PADDLE_LENGTH = 96;
-    P4_PADDLE_THICKNESS = 12;
-    P4_PADDLE_DIST = 16;
-	}
-	P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - ( 2 * P4_WALL_WIDTH);
-	P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - ( 2 * P4_WALL_WIDTH);
-	P4_LEFT_PADDLE_X = P4_PADDLE_DIST;
-	P4_RIGHT_PADDLE_X = P4_PLAYABLE_WIDTH - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
-	
-	P4_TOP_PADDLE_Y = P4_PADDLE_DIST;
-	P4_BOTTOM_PADDLE_Y = P4_PLAYABLE_HEIGHT - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
-}
-
-window.addEventListener("resize", () => {
-  handle_parameters();
-});
-
-handle_parameters();
-
-const P4_PADDLE_SPEED = 6;
-
-const P4_BALL_SPEED = 2;
-
-const P4_WIN_SCORE = 3;
-
-
-
-
 export function pong4PLogic(
 	onWin: (winner: "red" | "blue") => void
 ): () => void {
+	let P4_GAME_WIDTH : number;
+	let P4_GAME_HEIGHT : number;
+	let P4_WALL_WIDTH : number;
+
+	let P4_BALL_SIZE : number;
+
+	let P4_PADDLE_LENGTH : number;
+	let P4_PADDLE_THICKNESS : number;
+	let P4_PADDLE_DIST : number;
+
+
+	let P4_PLAYABLE_WIDTH : number;
+	let P4_PLAYABLE_HEIGHT : number;
+	let P4_LEFT_PADDLE_X : number;
+	let P4_RIGHT_PADDLE_X : number;
+	let P4_TOP_PADDLE_Y : number;
+	let P4_BOTTOM_PADDLE_Y : number;
+
+	let state : number = 0;
+	let paddleY_Left : number;
+	let paddleY_Right : number;
+	let paddleX_Upper : number;
+	let paddleX_Lower : number;
+
+	let x = P4_GAME_WIDTH / 2 - P4_BALL_SIZE / 2;
+	let y = P4_GAME_HEIGHT / 2 - P4_BALL_SIZE / 2;
+
+	function handle_parameters()
+	{
+		let width = window.innerWidth;
+		let height = window.innerHeight;
+		let size : number;
+
+		if (width <= height)
+			size = width;
+		else
+			size = height;
+
+		if (size < 640) {
+			P4_GAME_WIDTH = 200;
+			P4_GAME_HEIGHT = 200;
+			P4_WALL_WIDTH = 4;
+			P4_BALL_SIZE = 12;
+			P4_PADDLE_LENGTH = 64;
+			P4_PADDLE_THICKNESS = 8;
+			P4_PADDLE_DIST = 8;
+			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - ( 2 * P4_WALL_WIDTH);
+			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - ( 2 * P4_WALL_WIDTH);
+			if (state == 2)
+			{
+				paddleY_Left = paddleY_Left * (200/280);
+				paddleY_Right = paddleY_Right * (200/280);
+				paddleX_Upper = paddleX_Upper * (200/280);
+				paddleX_Lower = paddleX_Lower * (200/280);
+				x = x * (200/280);
+				y = y * (200/280);
+			}
+			else if (state == 0)
+			{
+				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
+				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
+			}
+			state = 1;
+		}
+		else if (size < 840) {
+			P4_GAME_WIDTH = 280;
+			P4_GAME_HEIGHT = 280;
+			P4_WALL_WIDTH = 6;
+			P4_BALL_SIZE = 16;
+			P4_PADDLE_LENGTH = 80;
+			P4_PADDLE_THICKNESS = 12;
+			P4_PADDLE_DIST = 12;
+			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - ( 2 * P4_WALL_WIDTH);
+			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - ( 2 * P4_WALL_WIDTH);
+			if (state == 1)
+			{
+				paddleY_Left = paddleY_Left * (280/200);
+				paddleY_Right = paddleY_Right * (280/200);
+				paddleX_Upper = paddleX_Upper * (280/200);
+				paddleX_Lower = paddleX_Lower * (280/200);
+				x = x * (280/200);
+				y = y * (280/200);
+			}
+			else if (state == 3)
+			{
+				paddleY_Left = paddleY_Left * (280/380);
+				paddleY_Right = paddleY_Right * (280/380);
+				paddleX_Upper = paddleX_Upper * (280/380);
+				paddleX_Lower = paddleX_Lower * (280/380);
+				x = x * (280/380);
+				y = y * (280/380);
+			}
+			else if (state == 0)
+			{
+				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
+				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
+			}
+			state = 2;
+		}
+
+		else if (size < 1024){
+			P4_GAME_WIDTH = 380;
+			P4_GAME_HEIGHT = 380;
+			P4_WALL_WIDTH = 8;
+			P4_BALL_SIZE = 16;
+			P4_PADDLE_LENGTH = 80;
+			P4_PADDLE_THICKNESS = 12;
+			P4_PADDLE_DIST = 16;
+			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - ( 2 * P4_WALL_WIDTH);
+			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - ( 2 * P4_WALL_WIDTH);
+			if (state == 2)
+			{
+				paddleY_Left = paddleY_Left * (380/280);
+				paddleY_Right = paddleY_Right * (380/280);
+				paddleX_Upper = paddleX_Upper * (380/280);
+				paddleX_Lower = paddleX_Lower * (380/280);
+				x = x * (380/280);
+				y = y * (380/280);
+			}
+			else if (state == 4)
+			{
+				paddleY_Left = paddleY_Left * (380/500);
+				paddleY_Right = paddleY_Right * (380/500);
+				paddleX_Upper = paddleX_Upper * (380/500);
+				paddleX_Lower = paddleX_Lower * (380/500);
+				x = x * (380/500);
+				y = y * (380/500);
+			}
+			else if (state == 0)
+			{
+				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
+				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
+			}
+			state = 3;
+		}
+		else 
+		{
+			P4_GAME_WIDTH = 500;
+			P4_GAME_HEIGHT = 500;
+			P4_WALL_WIDTH = 8;
+			P4_BALL_SIZE = 16;
+			P4_PADDLE_LENGTH = 96;
+			P4_PADDLE_THICKNESS = 12;
+			P4_PADDLE_DIST = 16;
+			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - ( 2 * P4_WALL_WIDTH);
+			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - ( 2 * P4_WALL_WIDTH);
+			if (state == 3)
+			{
+				paddleY_Left = paddleY_Left * (500/380);
+				paddleY_Right = paddleY_Right * (500/380);
+				paddleX_Upper = paddleX_Upper * (500/380);
+				paddleX_Lower = paddleX_Lower * (500/380);
+				x = x * (500/380);
+				y = y * (500/380);
+			}
+			else if (state == 0)
+			{
+				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
+				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
+			}
+			state = 4;
+		}
+		P4_LEFT_PADDLE_X = P4_PADDLE_DIST;
+		P4_RIGHT_PADDLE_X = P4_PLAYABLE_WIDTH - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
+		
+		P4_TOP_PADDLE_Y = P4_PADDLE_DIST;
+		P4_BOTTOM_PADDLE_Y = P4_PLAYABLE_HEIGHT - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
+	}
+
+	window.addEventListener("resize", () => {
+	handle_parameters();
+	});
+
+	handle_parameters();
+
+	const P4_PADDLE_SPEED = 6;
+
+	const P4_BALL_SPEED = 2;
+
+	const P4_WIN_SCORE = 7;
+
+
+
 	const ball = document.getElementById('ball') as HTMLElement;
 	const left_p = document.getElementById('left_p') as HTMLElement;
 	const right_p = document.getElementById('right_p') as HTMLElement;
@@ -105,16 +220,9 @@ export function pong4PLogic(
 	let isPaused = false;
 	let isWin = false;
 
-	let x = P4_GAME_WIDTH / 2 - P4_BALL_SIZE / 2;
-	let y = P4_GAME_HEIGHT / 2 - P4_BALL_SIZE / 2;
 
 	let dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
 	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.75;
-
-	let paddleY_Left = P4_GAME_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-	let paddleY_Right = P4_GAME_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-	let paddleX_Upper = P4_GAME_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-	let paddleX_Lower = P4_GAME_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
 
 	let scoreRed = 0;
 	let scoreBlue = 0;
