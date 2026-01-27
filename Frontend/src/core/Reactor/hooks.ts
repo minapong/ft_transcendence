@@ -61,6 +61,15 @@ export function resetHooks(pageKey?: string, opts?: { track?: boolean }) {
 	const shouldTrack = opts?.track !== false;
 	const prevKey = shouldTrack ? (trackedKey ?? DEFAULT_KEY) : null;
 
+	// Save the hook count for the PREVIOUS render BEFORE switching contexts
+	if (activeHookKey !== DEFAULT_KEY) {
+		const prevCtx = getContext(activeHookKey);
+		if (prevCtx.hookCount !== null && hookIndex !== prevCtx.hookCount) {
+			console.warn(`Reactor: Hook count mismatch for key "${activeHookKey}". Expected ${prevCtx.hookCount}, got ${hookIndex}. This indicates hooks were called conditionally.`);
+		}
+		prevCtx.hookCount = hookIndex;
+	}
+
 	if (shouldTrack && prevKey && nextKey !== prevKey) {
 		const prevCtx = getContext(prevKey);
 		cleanupEffects(prevCtx);
@@ -69,18 +78,6 @@ export function resetHooks(pageKey?: string, opts?: { track?: boolean }) {
 	}
 
 	const ctx = getContext(nextKey);
-	// Hook Order Guard
-	if (ctx.hookCount !== null && hookIndex !== ctx.hookCount) {
-		console.warn(`Reactor: Hook count mismatch for key "${activeHookKey}". Expected ${ctx.hookCount}, got ${hookIndex}. This indicates hooks were called conditionally.`);
-	}
-	// Update tracking for the *previous* render (which just finished)
-	// IMPORTANT: The check above validates the *previous* render against its *previous* expectation.
-	// Now we must save the count for the *next* time this key renders.
-	// However, since 'resetHooks' is called BEFORE render, 'hookIndex' here represents the result of the LAST render loop.
-	if (activeHookKey !== DEFAULT_KEY) {
-		getContext(activeHookKey).hookCount = hookIndex;
-	}
-
 	hooks = ctx.hooks;
 	effects = ctx.effects;
 	pendingEffects = ctx.pendingEffects;

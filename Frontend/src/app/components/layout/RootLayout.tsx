@@ -4,24 +4,40 @@ import LeftSidebar from "@/app/components/layout/LeftSidebar";
 import ModalRoot from "Reactor/ModalRoot";
 
 export default function RootLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const mq = window.matchMedia("(min-width: 1024px)");
+  const [isDesktop, setIsDesktop] = useState(mq.matches);
+  const [sidebarOpen, setSidebarOpen] = useState(mq.matches);
+
+  useEffect(() => {
+	const mq = window.matchMedia("(min-width: 1024px)");
+	const handler = (e) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const handleNavigate = () => {
+    if (!isDesktop) setSidebarOpen(false);
+  };
+
+  const pathname = window.location.pathname;
+  const isGameRoute = pathname.startsWith("/game");
+  const hideSidebar = isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
+
 
   return (
-    <div className="min-h-screen bg-linear-to-br text-slate-100 from-start via-mid to-end grid grid-rows-[auto_1fr]">
-      <Header />
+    <div className="min-h-screen grid grid-rows-[auto_1fr]">
+      <Header minimal={isGameRoute} />
 
       <div className="flex flex-1">
-        <LeftSidebar
-          open={sidebarOpen}
-          setOpen={setSidebarOpen}
-        />
+        {!hideSidebar && (
+          <LeftSidebar
+            open={sidebarOpen}
+            setOpen={setSidebarOpen}
+            onNavigate={handleNavigate}
+          />
+        )}
 
-        <main
-          id="spa-root"
-          className="flex-1 relative overflow-hidden"
-        >
-          {children}
-        </main>
+        <main id="spa-root" className="flex-1">{children}</main>
       </div>
 
       <ModalRoot />

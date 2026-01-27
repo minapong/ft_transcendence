@@ -32,13 +32,7 @@ export default function SidebarLink({ label, href, icon, iconActive, active, col
 
 	const handlePointerUp = () => {
 		if (!ref.current) return;
-		// Check if still hovering to decide which scale to return to
-		const isHovering = ref.current.matches(":hover");
-		animate(
-			ref.current,
-			{ scale: isHovering ? 1.05 : 1 },
-			{ duration: 0.2, ease: "easeInOut" }
-		);
+		animate(ref.current, { scale: 1 }, { duration: 0.2, ease: "easeInOut" });
 	};
 
 	return (

@@ -80,6 +80,12 @@ export function navigate(
   const target = normalizePath(path.startsWith("/") ? path : `/${path}`); //appends if there is no slash at start
   const current = normalizePath(window.location.pathname); //get current url
 
+  // Define which paths require a different layout look
+  const isSpecial = (p: string) => p.startsWith("/game") || p.startsWith("/auth") || p === "/login";
+  
+  // If we are moving from "Normal" to "Special" (or vice versa), force layout re-render
+  const layoutNeedsUpdate = isSpecial(target) !== isSpecial(current);
+  
   const shouldUpdateHistory = opts?.replace || target !== current; // check if user asked replacement 
 
   if (shouldUpdateHistory) {
@@ -88,7 +94,7 @@ export function navigate(
     window.dispatchEvent(new Event("routechange"));
   }
 
-  renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
+	renderRoute((opts?.triggerLayout || layoutNeedsUpdate) ? LAYOUT_KEY : undefined);
 }
 
 
