@@ -6,7 +6,7 @@ import ModalRoot from "Reactor/ModalRoot";
 export default function RootLayout({ children }) {
   const mq = window.matchMedia("(min-width: 1024px)");
   const [isDesktop, setIsDesktop] = useState(mq.matches);
-  const [sidebarOpen, setSidebarOpen] = useState(mq.matches);
+  const [isOverlayOpen, setIsOverlayOpen] = useState(mq.matches);
 
   useEffect(() => {
 	const mq = window.matchMedia("(min-width: 1024px)");
@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
   }, []);
 
   const handleNavigate = () => {
-    if (!isDesktop) setSidebarOpen(false);
+    if (!isDesktop) setIsOverlayOpen(false);
   };
 
   const pathname = window.location.pathname;
@@ -31,8 +31,8 @@ export default function RootLayout({ children }) {
       <div className="flex flex-1">
         {!hideSidebar && (
           <LeftSidebar
-            open={sidebarOpen}
-            setOpen={setSidebarOpen}
+            isOverlayOpen={isOverlayOpen}
+            setIsOverlayOpen={setIsOverlayOpen}
             onNavigate={handleNavigate}
           />
         )}
