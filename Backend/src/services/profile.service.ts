@@ -1,5 +1,6 @@
 import { UserRepo } from "../repositories/user.repo.js";
 
+
 export const ProfileService = {
   async updateBasics(userId: number, age: number | null, location: string | null) {
     if (!Number.isFinite(userId)) throw new Error("UNAUTHORIZED");
