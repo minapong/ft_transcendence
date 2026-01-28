@@ -5,35 +5,50 @@ import { getRoutes, resolvePage } from "./router/routes";
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
 export const LAYOUT_KEY = "__layout__";
 
+// Track the last known path for layout swap detection
+let lastKnownPath = "";
+
+// Define which paths require a different layout look
+const isSpecial = (p: string) => p.startsWith("/game") || p.startsWith("/auth") || p === "/login";
+
 // Renders the current route by resolving the page component and updating the DOM.
 export function renderRoute(triggerKey?: string) {
   const rawPath = window.location.pathname;
   const normalizedPath = normalizePath(rawPath);
   //normalize cuurent page url points to
 
+  // Check if layout needs to swap (from normal to special or vice versa)
+  const layoutNeedsUpdate = lastKnownPath && isSpecial(normalizedPath) !== isSpecial(lastKnownPath);
+  
+  // Update last known path
+  lastKnownPath = normalizedPath;
+
   const routes = getRoutes();
-  const Page = resolvePage(routes, rawPath);
+  const { component, params } = resolvePage(routes, rawPath);
 
   const root = document.getElementById("app");
   if (!root) return;
   try {
     // get current page
     const pageKey = `page:${normalizedPath}`;
+    // Use different layout keys for normal vs special layouts
+    const layoutKey = isSpecial(normalizedPath) ? "__layout__:special" : "__layout__:normal";
     let inner = document.getElementById("spa-root");
 
     // if page is not loaded or someone ordered layout re render through passing triggerKey props
-    if (!inner || triggerKey === LAYOUT_KEY) {
+  if (!inner || triggerKey?.startsWith(LAYOUT_KEY) || layoutNeedsUpdate)
+  {
       renderSubtree(
         () => rootLayout({ children: null }), //build the outer shell first
         root, // mount at root
-        LAYOUT_KEY, // track layout's its state independently
+        layoutKey, // track layout's its state independently with separate keys per type
         { track: false } // dont check layouts children at all
       );
       inner = document.getElementById("spa-root");
       if (!inner) throw new Error("spa-root not found after rendering RootLayout");
     }
 
-    renderSubtree(Page, inner, pageKey); //after grabing actual page now render that
+    renderSubtree(() => component(params), inner, pageKey); //after grabing actual page now render that
   } catch (err) {
     console.error("⚠️ renderRoute error:", err);
   }
@@ -43,15 +58,20 @@ export function renderRoute(triggerKey?: string) {
 export function initRouter() {
   document.addEventListener("click", (e) => {
     const link = (e.target as HTMLElement).closest("a");
-    if (link && link.getAttribute("href")?.startsWith("/")) {
+    // Ensure it's a left click and not opening in new tab
+    if (link && link.getAttribute("href")?.startsWith("/") && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
       history.pushState({}, "", link.getAttribute("href")!);
+      window.dispatchEvent(new Event("routechange")); // Notify hooks
       renderRoute();
     }
   });
 
-  // Handle browser back/forward
-  window.addEventListener("popstate", () => renderRoute());
+  window.addEventListener("popstate", () => {
+    window.dispatchEvent(new Event("routechange")); // 👈 Crucial for useLocation()!
+    renderRoute();
+  });
+  
   renderRoute();
 }
 
@@ -79,12 +99,6 @@ export function navigate(
 ) {
   const target = normalizePath(path.startsWith("/") ? path : `/${path}`); //appends if there is no slash at start
   const current = normalizePath(window.location.pathname); //get current url
-
-  // Define which paths require a different layout look
-  const isSpecial = (p: string) => p.startsWith("/game") || p.startsWith("/auth") || p === "/login";
-  
-  // If we are moving from "Normal" to "Special" (or vice versa), force layout re-render
-  const layoutNeedsUpdate = isSpecial(target) !== isSpecial(current);
   
   const shouldUpdateHistory = opts?.replace || target !== current; // check if user asked replacement 
 
@@ -94,7 +108,7 @@ export function navigate(
     window.dispatchEvent(new Event("routechange"));
   }
 
-	renderRoute((opts?.triggerLayout || layoutNeedsUpdate) ? LAYOUT_KEY : undefined);
+	renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
 }
 
 

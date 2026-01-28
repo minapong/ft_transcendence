@@ -12,6 +12,7 @@ Reactor is a lightweight, React-like library for building web applications with 
   - `useEffect`: Run side effects based on dependencies.
   - `useMemo`: Memoize values to optimize performance.
   - `useRef`: Create mutable references that persist across renders.
+  - `useLocation` (Router): React to URL changes - see [Router Documentation](./router/useLocation.md)
 - **Routing**:
   - File-based routing from `/src/app/pages` directory.
   - **Static routes**: `pages/dashboard.tsx` → `/dashboard`
@@ -50,9 +51,32 @@ Reactor is a lightweight, React-like library for building web applications with 
 
 ## Router
 
-### File-Based Routing
+**[→ Full Router Documentation](./router/Readme.md)**
 
-Routes are automatically generated from the filesystem:
+The router module provides:
+- `useLocation` hook for reactive URL subscriptions
+- `navigate()` function for programmatic navigation
+- Automatic layout swaps for route-specific layouts
+
+### Quick Example
+
+```tsx
+import { useLocation } from "@/core/router/useLocation";
+import { navigate } from "Reactor";
+
+function MyComponent() {
+  const pathname = useLocation(); // Reactive to URL changes
+  
+  return (
+    <div>
+      <p>Current: {pathname}</p>
+      <button onClick={() => navigate("/dashboard")}>Go to Dashboard</button>
+    </div>
+  );
+}
+```
+
+### File-Based Routing
 
 ```
 src/app/pages/

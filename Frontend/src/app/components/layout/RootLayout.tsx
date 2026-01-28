@@ -1,40 +1,48 @@
-import { useState, useEffect } from "Reactor";
+import { useState } from "Reactor";
+import { useLocation } from "Reactor/router/useLocation";
 import Header from "@/app/components/layout/Header";
 import LeftSidebar from "@/app/components/layout/LeftSidebar";
 import ModalRoot from "Reactor/ModalRoot";
+import { useScreen } from "@/app/hooks/useScreen";
 
 export default function RootLayout({ children }) {
-  const mq = window.matchMedia("(min-width: 1024px)");
-  const [isDesktop, setIsDesktop] = useState(mq.matches);
-  const [isOverlayOpen, setIsOverlayOpen] = useState(mq.matches);
-
-  useEffect(() => {
-	const mq = window.matchMedia("(min-width: 1024px)");
-	const handler = (e) => setIsDesktop(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const screen = useScreen();
+  const isDesktop = screen === "desktop";
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const pathname = useLocation();
 
   const handleNavigate = () => {
     if (!isDesktop) setIsOverlayOpen(false);
   };
 
-  const pathname = window.location.pathname;
   const isGameRoute = pathname.startsWith("/game");
-  const hideSidebar = isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
-
-
+  const hideSidebar = false
+//    isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
+  console.log("[RootLayout] screen:", screen, "isOverlayOpen:", isOverlayOpen);
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr]">
-      <Header minimal={isGameRoute} />
+      <Header
+        onMenuToggle={() => setIsOverlayOpen(true)}
+        showMenuButton={!hideSidebar}
+      />
 
       <div className="flex flex-1">
         {!hideSidebar && (
-          <LeftSidebar
-            isOverlayOpen={isOverlayOpen}
-            setIsOverlayOpen={setIsOverlayOpen}
-            onNavigate={handleNavigate}
-          />
+          isDesktop ? (
+            <LeftSidebar
+              mode="static"
+              isOverlayOpen={false}
+              setIsOverlayOpen={() => {}}
+              onNavigate={handleNavigate}
+            />
+          ) : (
+            <LeftSidebar
+              mode="overlay"
+              isOverlayOpen={isOverlayOpen}
+              setIsOverlayOpen={setIsOverlayOpen}
+              onNavigate={handleNavigate}
+            />
+          )
         )}
 
         <main id="spa-root" className="flex-1">{children}</main>

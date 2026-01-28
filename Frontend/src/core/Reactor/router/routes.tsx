@@ -82,13 +82,13 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
   if (original !== path) history.replaceState({}, "", path);
   path = path.split(/[?#]/)[0];
 
-  // 1. Try static route (case-insensitive lookup)
+  // try static route (case-insensitive lookup)
   const staticComponent = routes.static[path.toLowerCase()];
   if (staticComponent) {
-    return staticComponent;
+    return { component: staticComponent, params: {} };
   }
 
-  // 2. Try dynamic routes
+  // try dynamic routes
   for (const route of routes.dynamic) {
     const match = path.match(route.pattern);
     if (match) {
@@ -98,11 +98,11 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
         params[name] = match[i + 1];
       });
       
-      // Return component with params injected
-      return () => route.component(params);
+      // Return component with params
+      return { component: route.component, params: params };
     }
   }
 
   // 3. Not found
-  return routes.static["/notfound"];
+  return { component: routes.static["/notfound"], params: {} };
 }

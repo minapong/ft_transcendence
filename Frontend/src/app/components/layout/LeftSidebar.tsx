@@ -71,7 +71,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 			{/* Overlay background for closing sidebar */}
 			{mode === "overlay" && isOverlayOpen && (
 				<div
-					className="fixed inset-0 bg-black/60 z-40"
+					className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
 					onClick={() => {
 						console.log("[Sidebar] Overlay close: false");
 						setIsOverlayOpen(false);
@@ -83,21 +83,31 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 				role="navigation"
 				aria-label="Main navigation"
 				aria-hidden={!isOverlayOpen}
-				className={`sidebar-shell fixed inset-y-0 left-0 z-50 w-[80vw] max-w-88 pt-16 transition-transform duration-300 bg-red-200 border-4 border-red-500 ${isOverlayOpen ? 'translate-x-0' : '-translate-x-full'
+				className={`sidebar-shell fixed inset-y-0 left-0 z-50 w-[80vw] max-w-88 pt-6 transition-transform duration-300 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl ${isOverlayOpen ? 'translate-x-0' : '-translate-x-full'
 					}`}
 			>
-				{/* Close (X) button for mobile overlay */}
-				<button
-					className="absolute top-4 right-4 p-2 rounded-md bg-white text-xl z-50 lg:hidden"
-					aria-label="Close sidebar menu"
-					onClick={() => {
-						console.log("[Sidebar] Overlay close: false (X button)");
-						setIsOverlayOpen(false);
-					}}
-				>
-					<span className="icon-[mdi--close]">×</span>
-				</button>
-				<nav className="flex flex-col gap-3.5 px-4">
+				{/* Sidebar Header with Close Button */}
+				<div className="flex items-center justify-between px-6 mb-8 mt-2">
+					<div className="flex items-center gap-2.5 text-accent">
+						<div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center">
+							<span className="icon-[solar--layers-bold-duotone] text-lg" />
+						</div>
+						<div className="flex flex-col gap-0.5">
+							<span className="text-[10px] font-black tracking-[0.25em] text-accent/50 uppercase leading-none">System</span>
+							<span className="text-xs font-bold tracking-[0.1em] text-primary/80 uppercase">Navigation</span>
+						</div>
+					</div>
+
+					<button
+						onClick={() => setIsOverlayOpen(false)}
+						className="w-10 h-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-accent flex items-center justify-center hover:bg-[var(--color-surface-strong)] transition-all active:scale-95 group shadow-lg shadow-black/20"
+						aria-label="Close sidebar"
+					>
+						<span className="icon-[solar--close-circle-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-300" />
+					</button>
+				</div>
+
+				<nav className="flex flex-col gap-3 px-4">
 					{links.map(link => (
 						<SidebarLink
 							label={link.label}
@@ -113,6 +123,14 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 						/>
 					))}
 				</nav>
+
+				{/* Version footer */}
+				<div className="absolute bottom-8 left-0 right-0 px-8 opacity-20 pointer-events-none">
+					<div className="h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent mb-4" />
+					<div className="flex items-center justify-center gap-2 text-[9px] uppercase tracking-widest font-black">
+						Mina Hub v2.0.4
+					</div>
+				</div>
 			</aside>
 		</div>
 	);
