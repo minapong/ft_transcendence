@@ -7,6 +7,7 @@ export type ProfileView = {
   created_at: string;
   avatarId: number | null;
   avatarUrl: string | null;
+  canSeePrivate: boolean;
   age: number | null;
   location: string | null;
 };
@@ -25,6 +26,7 @@ export const ProfileIdService = {
       created_at: user.created_at.toISOString(),
       avatarId: user.avatarId ?? null,
       avatarUrl: user.avatar?.file_path ? `/static/${user.avatar.file_path}` : null,
+      canSeePrivate,
       age: canSeePrivate ? (user.age ?? null) : null,
       location: canSeePrivate ? (user.location ?? null) : null,
     };

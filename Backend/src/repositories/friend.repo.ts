@@ -65,12 +65,15 @@ export const FriendRepo = {
   },
 
    async areFriends(a: number, b: number): Promise<boolean> {
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+    if (a === b) return true;
+
     const row = await prisma.friend.findFirst({
       where: {
         status: "accepted",
         OR: [
           { user_id: a, friend_id: b },
-          { friend_id: b, user_id: a },
+          { user_id: b, friend_id: a },
         ],
       },
       select: { id: true },
@@ -78,4 +81,5 @@ export const FriendRepo = {
 
     return !!row;
   },
+
 };
