@@ -15,10 +15,11 @@ const links = [
 
 interface SidebarProps {
 	isOverlayOpen: boolean;
-	setIsOverlayOpen: (v: boolean | ((p: boolean) => boolean)) => void;
+	setIsOverlayOpen?: (v: boolean | ((p: boolean) => boolean)) => void;
 	onNavigate: () => void;
+	isCollapsed?: boolean;
 }
-export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, mode }: SidebarProps & { mode: "overlay" | "static" }) {
+export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, mode, isCollapsed = false }: SidebarProps & { mode: "overlay" | "static" }) {
 
 	if (mode === "overlay") {
 		console.log("[LeftSidebar] overlay render, isOverlayOpen:", isOverlayOpen);
@@ -43,7 +44,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 				duration: 0.3,
 				ease: [0.22, 1, 0.36, 1],
 				onComplete: () => {
-					setIsOverlayOpen(false);
+					if (setIsOverlayOpen) setIsOverlayOpen(false);
 					if (href) navigate(href);
 					console.log("[LeftSidebar] Closing complete - dispatching sidebar:resume");
 					window.dispatchEvent(new Event("sidebar:resume"));
@@ -120,17 +121,18 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 			<aside
 				role="navigation"
 				aria-label="Main navigation"
-				className="sidebar-shell static left-0 z-30 w-72 max-w-88 pt-16 border-r border-(--color-border-soft) bg-(--color-surface)"
+				className={`sidebar-shell border-r border-(--color-border-soft) bg-(--color-surface) h-full overflow-y-auto flex-shrink-0 z-30 ${isCollapsed ? "w-20" : "w-72"} flex flex-col transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]`}
 			>
-				<nav className="flex flex-col gap-3.5 px-4">
+				<nav className="flex flex-col gap-3.5 px-3 pt-6">
 					{links.map(link => (
 						<SidebarLink
+							key={link.label}
 							label={link.label}
 							href={link.href}
 							icon={link.icon}
 							iconActive={link.iconActive}
 							active={isActive(activePath, link.href)}
-							collapsed={false}
+							collapsed={isCollapsed}
 							onClick={onNavigate}
 						/>
 					))}

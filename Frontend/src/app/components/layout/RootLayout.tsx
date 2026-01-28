@@ -1,4 +1,4 @@
-import { useState } from "Reactor";
+import { useState, useEffect } from "Reactor";
 import { useLocation } from "Reactor/router/useLocation";
 import Header from "@/app/components/layout/Header";
 import LeftSidebar from "@/app/components/layout/LeftSidebar";
@@ -9,34 +9,52 @@ export default function RootLayout({ children }) {
   const screen = useScreen();
   const sidebarMode = screen === "desktop" ? "static" : "overlay";
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = useLocation();
+
+  // Reset collapsed state when leaving desktop
+  useEffect(() => {
+    if (sidebarMode !== "static") {
+      setIsCollapsed(false);
+    }
+  }, [sidebarMode]);
 
   const handleNavigate = () => {
     if (sidebarMode === "overlay") setIsOverlayOpen(false);
   };
 
+  const handleToggle = () => {
+    if (sidebarMode === "overlay") {
+      setIsOverlayOpen(v => !v);
+    } else {
+      setIsCollapsed(v => !v);
+    }
+  };
+
   const isGameRoute = pathname.startsWith("/game");
   const hideSidebar = false
   //    isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
-  console.log("[RootLayout] screen:", screen, "sidebarMode:", sidebarMode, "isOverlayOpen:", isOverlayOpen);
   return (
-    <div className="min-h-screen grid grid-rows-[auto_1fr]">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header
-        onMenuToggle={() => setIsOverlayOpen(v => !v)}
+        onMenuToggle={handleToggle}
         showMenuButton={!hideSidebar}
       />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         {!hideSidebar && (
           <LeftSidebar
             mode={sidebarMode}
-            isOverlayOpen={sidebarMode === "overlay" ? isOverlayOpen : false}
-            setIsOverlayOpen={sidebarMode === "overlay" ? setIsOverlayOpen : () => {}}
+            isCollapsed={isCollapsed}
+            isOverlayOpen={isOverlayOpen}
+            setIsOverlayOpen={setIsOverlayOpen}
             onNavigate={handleNavigate}
           />
         )}
 
-        <main id="spa-root" className="flex-1">{children}</main>
+        <main id="spa-root" className="flex-1 overflow-y-auto">
+          {children}
+        </main>
       </div>
 
       <ModalRoot />

@@ -61,12 +61,21 @@ export default function Header({ onMenuToggle, showMenuButton }) {
   ];
 
   return (
-    <header className={`sticky top-0 z-50 relative min-h-[var(--header-height)] pl-14 pr-4 sm:pl-16 sm:pr-6 lg:px-6 flex flex-wrap items-center justify-between gap-3 sm:gap-4 header-surface`}>
+    <header
+      className={`
+    flex-shrink-0
+    min-h-[var(--header-height)]
+    px-4 sm:px-6 lg:px-6
+    flex flex-wrap items-center justify-between
+    gap-3 sm:gap-4
+    header-surface
+  `}
+    >
 
       <div className="flex items-center gap-4 z-10">
         {showMenuButton && (
           <button
-            className="lg:hidden flex items-center justify-center w-10 h-10 rounded-md bg-[var(--color-surface)] text-xl mr-2"
+            className="flex items-center justify-center w-10 h-10 rounded-md bg-[var(--color-surface)] text-xl mr-2"
             aria-label="Open sidebar menu"
             onClick={() => {
               console.log("[Header] Menu toggle: overlay open");
