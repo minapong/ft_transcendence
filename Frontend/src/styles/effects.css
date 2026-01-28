@@ -358,3 +358,12 @@
 .sidebar-visual {
   transform-origin: left center;
 }
+
+.sidebar-shell--overlay {
+  transform: translateX(-100%);
+}
+
+.backdrop-overlay-init {
+  opacity: 0;
+  pointer-events: none;
+}

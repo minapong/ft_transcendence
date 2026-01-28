@@ -55,7 +55,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 			// Exit (Fast: 0.25s)
 			animate(aside, { x: "-100%" }, { duration: 0.25, ease: [0.22, 1, 0.36, 1] });
 			if (backdrop) {
-				animate(backdrop, { opacity: 0 }, { duration: 0.25 });
+				animate(backdrop, { opacity: 0 }, { duration: 0.4 });
 				backdrop.style.pointerEvents = "none";
 			}
 		}
@@ -94,7 +94,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 			const t = setTimeout(() => {
 				console.log("[LeftSidebar] Closing complete - dispatching sidebar:resume");
 				window.dispatchEvent(new Event("sidebar:resume"));
-			}, 250);
+			}, 420);
 			return () => clearTimeout(t);
 		}
 	}, [mode, isOverlayOpen]);
@@ -143,23 +143,20 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 	return (
 		<div className="z-50">
 			{/* Overlay background for closing sidebar */}
-			{mode === "overlay" && (
+			{mode === "overlay" && isOverlayOpen && (
 				<div
 					ref={backdropRef}
-					className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 pointer-events-none opacity-0"
-					onClick={() => {
-						console.log("[Sidebar] Overlay backdrop clicked");
-						setIsOverlayOpen(false);
-					}}
+					className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+					onClick={() => setIsOverlayOpen(false)}
 				/>
 			)}
+
 			<aside
 				ref={asideRef}
 				role="navigation"
 				aria-label="Main navigation"
 				aria-hidden={!isOverlayOpen}
-				style={{ transform: 'translateX(-100%)' }}
-				className="sidebar-shell fixed inset-y-0 left-0 z-50 w-[80vw] max-w-88 pt-6 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl"
+				className="sidebar-shell sidebar-shell--overlay fixed inset-y-0 left-0 z-50 w-[80vw] max-w-88 pt-6 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl"
 			>
 				{/* Sidebar Header with Close Button */}
 				<div className="flex items-center justify-between px-6 mb-8 mt-2">
