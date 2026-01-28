@@ -3,6 +3,15 @@ import { useEffect, useRef, useState, navigate } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 import { useAuth } from "@/core/lib/useAuth";
 
+const WAREHOUSES = [
+  "Mina Port W-001",
+  "Mina Port W-014",
+  "Mina Port W-023",
+  "Mina Port W-107",
+  "Mina Port W-204",
+  "Mina Port W-404",
+];
+
 const MAX_BYTES = 2 * 1024 * 1024; // must match backend (2MB)
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -12,14 +21,27 @@ export default function UserSettingsPage() {
 
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // ----------------------------
+  // Profile base
+  // ----------------------------
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // ----------------------------
+  // Avatar state
+  // ----------------------------
   const [selected, setSelected] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [busyAvatar, setBusyAvatar] = useState(false);
+  const [msgAvatar, setMsgAvatar] = useState<string | null>(null);
 
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  // ----------------------------
+  // Basics state (age/location)
+  // ----------------------------
+  const [age, setAge] = useState<number | "">("");
+  const [location, setLocation] = useState<string>("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [msgBasics, setMsgBasics] = useState<string | null>(null);
 
   // --- auth guard
   useEffect(() => {
@@ -34,14 +56,24 @@ export default function UserSettingsPage() {
 
     (async () => {
       setLoading(true);
-      setMsg(null);
+      setMsgAvatar(null);
+      setMsgBasics(null);
+
       try {
         const res = await apiFetch("/api/me");
         if (!res.ok) throw new Error("Failed to load profile");
         const data = await res.json();
-        if (!cancelled) setProfile(data);
+
+        if (cancelled) return;
+
+        setProfile(data);
+
+        // fields to read from /api/me:
+        // data.age, data.location
+        setAge(typeof data?.age === "number" ? data.age : "");
+        setLocation(typeof data?.location === "string" ? data.location : "");
       } catch (e: any) {
-        if (!cancelled) setMsg(e?.message || "Failed to load profile");
+        if (!cancelled) setMsgBasics(e?.message || "Failed to load profile");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -68,7 +100,7 @@ export default function UserSettingsPage() {
   }
 
   function onFileChange(e: any) {
-    setMsg(null);
+    setMsgAvatar(null);
 
     const f: File | undefined = e?.target?.files?.[0];
     if (!f) {
@@ -79,33 +111,35 @@ export default function UserSettingsPage() {
     // client-side checks (backend still enforces!)
     if (!ALLOWED.has(f.type)) {
       setSelected(null);
-      setMsg("Only JPG / PNG / WEBP are allowed");
+      setMsgAvatar("Only JPG / PNG / WEBP are allowed");
       return;
     }
     if (f.size > MAX_BYTES) {
       setSelected(null);
-      setMsg("File is too large (max 2MB)");
+      setMsgAvatar("File is too large (max 2MB)");
       return;
     }
 
     setSelected(f);
   }
 
+  // ----------------------------
+  // Avatar upload
+  // ----------------------------
   async function uploadAvatar() {
     if (!selected) {
-      setMsg("Pick an image first");
+      setMsgAvatar("Pick an image first");
       return;
     }
 
-    setBusy(true);
-    setMsg(null);
+    setBusyAvatar(true);
+    setMsgAvatar(null);
 
     try {
       const fd = new FormData();
-      console.log("[SETTINGS] selected:", selected?.name, selected?.type, selected?.size);
-      fd.append("avatar", selected); // MUST match backend field name
-      console.log("[SETTINGS] formdata avatar =", fd.get("avatar"));
-
+      // IMPORTANT field name:
+      // backend expects file.fieldname === "avatar"
+      fd.append("avatar", selected);
 
       const res = await apiFetch("/api/me/avatar", {
         method: "POST",
@@ -114,30 +148,80 @@ export default function UserSettingsPage() {
 
       const data = await res.json().catch(() => ({}));
 
-      console.log("[SETTINGS] upload status =", res.status);
-      console.log("[SETTINGS] upload response =", data);
-
       if (!res.ok) {
-        setMsg(data.error || "Upload failed");
+        setMsgAvatar(data.error || "Upload failed");
         return;
       }
 
-      // update local profile state immediately
+      // fields to read from response:
+      // data.avatarUrl, data.avatarId
       setProfile((prev: any) => ({
         ...(prev ?? {}),
         avatarUrl: data.avatarUrl ?? prev?.avatarUrl ?? null,
         avatarId: data.avatarId ?? prev?.avatarId ?? null,
       }));
 
-      // clear selected file
+      // clear selected
       setSelected(null);
       if (fileRef.current) fileRef.current.value = "";
 
-      setMsg("Avatar updated ✅");
+      setMsgAvatar("Avatar updated ✅");
     } catch {
-      setMsg("Network error");
+      setMsgAvatar("Network error");
     } finally {
-      setBusy(false);
+      setBusyAvatar(false);
+    }
+  }
+
+  // ----------------------------
+  // Save basics (age + location)
+  // Endpoint: PATCH /api/me/profile
+  // Body: { age: number|null, location: string|null }
+  // Expects: { user: { age, location, ... } }
+  // ----------------------------
+  async function saveBasics() {
+    setSavingProfile(true);
+    setMsgBasics(null);
+
+    try {
+      // client-side validation (backend must validate too)
+      const ageValue = age === "" ? null : Number(age);
+      if (ageValue != null && (!Number.isFinite(ageValue) || ageValue < 0 || ageValue > 130)) {
+        setMsgBasics("Age must be between 0 and 130");
+        return;
+      }
+
+      const body = {
+        age: ageValue,
+        location: location ? location : null,
+      };
+
+      const res = await apiFetch("/api/me/profile", {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setMsgBasics(data.error || "Failed to save");
+        return;
+      }
+
+      // expects data.user from backend
+      const updatedUser = data.user ?? null;
+
+      if (updatedUser) {
+        setProfile((prev: any) => ({ ...(prev ?? {}), ...updatedUser }));
+        setAge(typeof updatedUser?.age === "number" ? updatedUser.age : age);
+        setLocation(typeof updatedUser?.location === "string" ? updatedUser.location : location);
+      }
+
+      setMsgBasics("Saved ✅");
+    } catch {
+      setMsgBasics("Network error");
+    } finally {
+      setSavingProfile(false);
     }
   }
 
@@ -171,8 +255,10 @@ export default function UserSettingsPage() {
         </button>
       </div>
 
-      {/* Avatar card */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+      {/* ----------------------------
+          Avatar card
+      ---------------------------- */}
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 mb-8">
         <h2 className="text-xl font-bold mb-4">Avatar</h2>
 
         <div className="flex items-center gap-6">
@@ -200,11 +286,7 @@ export default function UserSettingsPage() {
           <div className="flex flex-col items-center gap-2">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-3xl font-bold">
               {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  className="w-full h-full object-cover"
-                  alt="preview"
-                />
+                <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
               ) : (
                 <span className="text-gray-400">—</span>
               )}
@@ -226,7 +308,7 @@ export default function UserSettingsPage() {
               <button
                 type="button"
                 onClick={pickFile}
-                disabled={busy}
+                disabled={busyAvatar}
                 className="bg-blue-600 px-4 py-2 rounded font-bold hover:bg-blue-500 disabled:opacity-50"
               >
                 Choose image
@@ -235,41 +317,84 @@ export default function UserSettingsPage() {
               <button
                 type="button"
                 onClick={uploadAvatar}
-                disabled={busy || !selected}
+                disabled={busyAvatar || !selected}
                 className="bg-green-600 px-4 py-2 rounded font-bold hover:bg-green-500 disabled:opacity-50"
               >
-                {busy ? "Uploading..." : "Upload"}
+                {busyAvatar ? "Uploading..." : "Upload"}
               </button>
 
               <button
                 type="button"
                 onClick={() => {
                   setSelected(null);
-                  setMsg(null);
+                  setMsgAvatar(null);
                   if (fileRef.current) fileRef.current.value = "";
                 }}
-                disabled={busy}
+                disabled={busyAvatar}
                 className="bg-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-600 disabled:opacity-50"
               >
                 Clear
               </button>
             </div>
 
-            <p className="text-xs text-gray-400 mt-3">
-              Allowed: JPG / PNG / WEBP. Max size: 2MB.
-            </p>
+            <p className="text-xs text-gray-400 mt-3">Allowed: JPG / PNG / WEBP. Max size: 2MB.</p>
 
-            {msg && <p className="text-sm text-gray-300 mt-3">{msg}</p>}
+            {msgAvatar && <p className="text-sm text-gray-300 mt-3">{msgAvatar}</p>}
           </div>
         </div>
       </div>
 
-      {/* Later settings placeholder */}
-      <div className="mt-8 bg-gray-900 border border-gray-800 rounded-lg p-6 opacity-80">
-        <h2 className="text-xl font-bold mb-2">More settings (later)</h2>
-        <p className="text-sm text-gray-400">
-          Username, email, location, etc. will go here.
-        </p>
+      {/* ----------------------------
+          Basics (age/location)
+      ---------------------------- */}
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <h2 className="text-xl font-bold mb-4">Basics</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Age</label>
+            <input
+              type="number"
+              min={0}
+              max={130}
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
+              value={age}
+              onChange={(e: any) => setAge(e.target.value === "" ? "" : Number(e.target.value))}
+              placeholder="e.g. 21"
+            />
+            <p className="text-xs text-gray-400 mt-1">Optional</p>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Location</label>
+            <select
+              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
+              value={location}
+              onChange={(e: any) => setLocation(e.target.value)}
+            >
+              <option value="">— select warehouse —</option>
+              {WAREHOUSES.map((w) => (
+                <option key={w} value={w}>
+                  {w}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-400 mt-1">Optional</p>
+          </div>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={saveBasics}
+            disabled={savingProfile}
+            className="bg-green-600 px-4 py-2 rounded font-bold hover:bg-green-500 disabled:opacity-50"
+          >
+            {savingProfile ? "Saving..." : "Save"}
+          </button>
+        </div>
+
+        {msgBasics && <p className="text-sm text-gray-300 mt-3">{msgBasics}</p>}
       </div>
     </div>
   );
