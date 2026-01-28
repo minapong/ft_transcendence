@@ -1,16 +1,12 @@
 import { PongAI } from './pong_ai'
 
-
 let GAME_WIDTH: number;
 let GAME_HEIGHT: number;
 let WALL_WIDTH: number;
-
 let BALL_SIZE: number;
-
 let PADDLE_HEIGHT: number;
 let PADDLE_WIDTH: number;
 let PADDLE_DIST: number;
-
 
 let PLAYABLE_WIDTH: number;
 let PLAYABLE_HEIGHT: number;
@@ -38,7 +34,6 @@ function handle_parameters() {
 		PADDLE_WIDTH = 12;
 		PADDLE_DIST = 12;
 	}
-
 	else if (width < 1280) {
 		GAME_WIDTH = 600;
 		GAME_HEIGHT = 380;
@@ -63,49 +58,47 @@ function handle_parameters() {
 	RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
 }
 
-window.addEventListener("resize", () => {
-	handle_parameters();
-});
-
+// Initial call to set global params
 handle_parameters();
 
 const PADDLE_SPEED = 6;
-
 const GAME_SPEED = 2;
-
 const WIN_SCORE = 3;
-
 
 export function pongLogic(
 	p1: string,
 	p2: string,
-	onWin: (winner: string, scoreP1: number, scoreP2: number) => void,  //scores added
+	onWin: (winner: string, scoreP1: number, scoreP2: number) => void,
 	useAI: boolean = false,
 	aiDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
 ) {
 	const ball = document.getElementById('ball');
 	const left_p = document.getElementById('left_p');
 	const right_p = document.getElementById('right_p');
-	const pause = document.getElementById("pauseBtn");
+	const pause = document.getElementById("pauseBtn") as HTMLButtonElement;
 	const left_up_But = document.getElementById("left-up");
 	const left_down_But = document.getElementById("left-down");
 	const right_up_But = document.getElementById("right-up");
 	const right_down_But = document.getElementById("right-down");
 
+	if (!ball || !left_p || !right_p || !pause) {
+		console.error("[PongLogic] Missing critical DOM elements:", { ball, left_p, right_p, pause });
+		return () => {};
+	}
+
 	let isPaused = false;
+	let gameEnded = false;
+	let animationId: number | null = null;
+	let resetTimeout: number | null = null;
 
+	// Update params for the current window size
+	handle_parameters();
 
-
-
+	let x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
+	let y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
 	let dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 	let dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 
-<<<<<<< HEAD
-    let upPressed = false;
-    let downPressed = false;
-    let wPressed = false;
-    let sPressed = false;
-=======
 	let paddleY_Left = (GAME_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
 	let paddleY_Right = (GAME_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
 
@@ -113,7 +106,6 @@ export function pongLogic(
 	let downPressed = false;
 	let wPressed = false;
 	let sPressed = false;
->>>>>>> 48f39fa (wip)
 
 	let scoreLeft = 0;
 	let scoreRight = 0;
@@ -121,14 +113,10 @@ export function pongLogic(
 	const scoreLeftDisplay = document.getElementById('scoreLeft');
 	const scoreRightDisplay = document.getElementById('scoreRight');
 
-	// Show player names
 	if (scoreLeftDisplay) scoreLeftDisplay.textContent = `${p1}: 0`;
 	if (scoreRightDisplay) scoreRightDisplay.textContent = `${p2}: 0`;
 
-	// AI Setup
 	let aiPlayer: PongAI | null = null;
-	let gameEnded = false;
-
 	const getGameState = () => ({
 		ballX: x,
 		ballY: y,
@@ -140,7 +128,6 @@ export function pongLogic(
 
 	const simulateKeyPress = (key: string, action: 'down' | 'up') => {
 		if (gameEnded) return;
-
 		const event = new KeyboardEvent(`key${action}`, {
 			key: key,
 			bubbles: true,
@@ -149,20 +136,16 @@ export function pongLogic(
 		document.dispatchEvent(event);
 	};
 
-	// Initialize AI if needed
 	if (useAI) {
 		aiPlayer = new PongAI(aiDifficulty);
 		aiPlayer.start(getGameState, simulateKeyPress);
 	}
 
-	// Define handlers
 	const keydownHandler = (e: KeyboardEvent) => {
-		if ((e.key === "ArrowUp" || e.key === "ArrowDown")) {
+		if (e.key === "ArrowUp" || e.key === "ArrowDown") {
 			e.preventDefault();
-			if (useAI && e.isTrusted)
-				return;
+			if (useAI && e.isTrusted) return;
 		}
-
 		if (e.key === 'ArrowUp') upPressed = true;
 		if (e.key === 'ArrowDown') downPressed = true;
 		if (e.key === 'w') wPressed = true;
@@ -170,126 +153,97 @@ export function pongLogic(
 	};
 
 	const keyupHandler = (e: KeyboardEvent) => {
-		if ((e.key === "ArrowUp" || e.key === "ArrowDown")) {
+		if (e.key === "ArrowUp" || e.key === "ArrowDown") {
 			e.preventDefault();
-			if (useAI && e.isTrusted)
-				return;
+			if (useAI && e.isTrusted) return;
 		}
-
 		if (e.key === 'ArrowUp') upPressed = false;
 		if (e.key === 'ArrowDown') downPressed = false;
 		if (e.key === 'w') wPressed = false;
 		if (e.key === 's') sPressed = false;
 	};
 
-	left_up_But.addEventListener("pointerdown", e => {
-		wPressed = true;
-	});
-	left_up_But.addEventListener("pointerup", e => {
-		wPressed = false;
-	});
-	left_down_But.addEventListener("pointerdown", e => {
-		sPressed = true;
-	});
-	left_down_But.addEventListener("pointerup", e => {
-		sPressed = false;
-	});
-	right_up_But.addEventListener("pointerdown", e => {
-		upPressed = true;
-	});
-	right_up_But.addEventListener("pointerup", e => {
-		upPressed = false;
-	});
-	right_down_But.addEventListener("pointerdown", e => {
-		downPressed = true;
-	});
-	right_down_But.addEventListener("pointerup", e => {
-		downPressed = false;
-	});
-
 	const pauseHandler = () => {
 		isPaused = !isPaused;
-
 		if (isPaused) {
 			pause.textContent = "▶️ Resume";
-			if (aiPlayer) {
-				aiPlayer.stop(simulateKeyPress);
-			}
+			if (aiPlayer) aiPlayer.stop(simulateKeyPress);
+			if (animationId !== null) cancelAnimationFrame(animationId);
 		} else {
 			pause.textContent = "⏸️ Pause";
-			if (aiPlayer) {
-				aiPlayer.start(getGameState, simulateKeyPress);
-			}
+			if (aiPlayer) aiPlayer.start(getGameState, simulateKeyPress);
 			moveBall();
 		}
 	};
-	// Attach
+
+	const resizeHandler = () => {
+		handle_parameters();
+	};
+
+	// Event Listeners
 	document.addEventListener('keydown', keydownHandler);
 	document.addEventListener('keyup', keyupHandler);
 	pause.addEventListener("click", pauseHandler);
+	window.addEventListener('resize', resizeHandler);
 
-	let animationId: number | null = null;
+	if (left_up_But) {
+		left_up_But.addEventListener("pointerdown", () => { wPressed = true; });
+		left_up_But.addEventListener("pointerup", () => { wPressed = false; });
+	}
+	if (left_down_But) {
+		left_down_But.addEventListener("pointerdown", () => { sPressed = true; });
+		left_down_But.addEventListener("pointerup", () => { sPressed = false; });
+	}
+	if (right_up_But) {
+		right_up_But.addEventListener("pointerdown", () => { upPressed = true; });
+		right_up_But.addEventListener("pointerup", () => { upPressed = false; });
+	}
+	if (right_down_But) {
+		right_down_But.addEventListener("pointerdown", () => { downPressed = true; });
+		right_down_But.addEventListener("pointerup", () => { downPressed = false; });
+	}
 
 	function moveBall() {
 		if (isPaused || gameEnded) return;
 		x += dx;
 		y += dy;
 
-		/// Left Paddle
-		if (
-			x <= LEFT_PADDLE_X + PADDLE_WIDTH &&
-			x >= LEFT_PADDLE_X + PADDLE_WIDTH - 8 &&
-			y + BALL_SIZE >= paddleY_Left && // Ball's bottom edge >= Paddle's top edge
-			y <= paddleY_Left + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
-		) {
+		// Collisions
+		if (x <= LEFT_PADDLE_X + PADDLE_WIDTH && x >= LEFT_PADDLE_X + PADDLE_WIDTH - 8 &&
+			y + BALL_SIZE >= paddleY_Left && y <= paddleY_Left + PADDLE_HEIGHT) {
 			dx = -dx;
 			x = LEFT_PADDLE_X + PADDLE_WIDTH;
 		}
-
-		/// Right Paddle
-		if (
-			x + BALL_SIZE >= RIGHT_PADDLE_X &&
-			x + BALL_SIZE <= RIGHT_PADDLE_X + 8 &&
-			y + BALL_SIZE >= paddleY_Right && // Ball's bottom edge >= Paddle's top edge
-			y <= paddleY_Right + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
-		) {
+		if (x + BALL_SIZE >= RIGHT_PADDLE_X && x + BALL_SIZE <= RIGHT_PADDLE_X + 8 &&
+			y + BALL_SIZE >= paddleY_Right && y <= paddleY_Right + PADDLE_HEIGHT) {
 			dx = -dx;
 			x = RIGHT_PADDLE_X - BALL_SIZE;
 		}
+		if (y <= 0) { dy = -dy; y = 0; }
+		else if (y + BALL_SIZE >= PLAYABLE_HEIGHT) { dy = -dy; y = PLAYABLE_HEIGHT - BALL_SIZE; }
 
-		/// Top Wall
-		if (y <= 0) {
-			dy = -dy;
-			y = 0;
+		if (ball) {
+			ball.style.left = x + 'px';
+			ball.style.top = y + 'px';
 		}
-
-		/// Bottom Wall
-		else if (y + BALL_SIZE >= PLAYABLE_HEIGHT) {
-			dy = -dy;
-			y = PLAYABLE_HEIGHT - BALL_SIZE;
-		}
-
-		ball.style.left = x + 'px';
-		ball.style.top = y + 'px';
 
 		movePaddle();
 
-		animationId = requestAnimationFrame(moveBall);
-
 		if (x < 0) {
 			scoreRight++;
-			scoreRightDisplay.textContent = `${p2}: ${scoreRight}`;
+			if (scoreRightDisplay) scoreRightDisplay.textContent = `${p2}: ${scoreRight}`;
 			checkWinner();
 			resetBall();
-		}
-
-		if (x + BALL_SIZE > PLAYABLE_WIDTH) {
+		} else if (x + BALL_SIZE > PLAYABLE_WIDTH) {
 			scoreLeft++;
-			scoreLeftDisplay.textContent = `${p1}: ${scoreLeft}`;
+			if (scoreLeftDisplay) scoreLeftDisplay.textContent = `${p1}: ${scoreLeft}`;
 			checkWinner();
 			resetBall();
+		} else {
+			animationId = requestAnimationFrame(moveBall);
 		}
 	}
+
 	function clampPaddle(pos: number, speed: number, min: number, max: number, length: number, movingPositive: boolean): number {
 		if (movingPositive) {
 			if (pos + speed + length >= max) return max - length;
@@ -301,74 +255,56 @@ export function pongLogic(
 	}
 
 	function movePaddle() {
-		// Left paddle (W / S)
-		if (wPressed)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
-		if (sPressed)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
-		left_p.style.top = `${paddleY_Left}px`;
+		if (wPressed) paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
+		if (sPressed) paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
+		if (left_p) left_p.style.top = `${paddleY_Left}px`;
 
-		// Right paddle (Arrow Up / Down or AI)
-		if (upPressed)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
-		if (downPressed)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
-
-		right_p.style.top = `${paddleY_Right}px`;
+		if (upPressed) paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
+		if (downPressed) paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
+		if (right_p) right_p.style.top = `${paddleY_Right}px`;
 	}
-
-	let resetTimeout: number | null = null;
 
 	function resetBall() {
 		x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
 		y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
 		dx = 0;
 		dy = 0;
-
-		ball.style.left = x + 'px';
-		ball.style.top = y + 'px';
-
+		if (ball) {
+			ball.style.left = x + 'px';
+			ball.style.top = y + 'px';
+		}
 		if (scoreLeft !== WIN_SCORE && scoreRight !== WIN_SCORE) {
 			resetTimeout = window.setTimeout(() => {
 				dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 				dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 				resetTimeout = null;
+				moveBall();
 			}, 1000);
 		}
 	}
 
 	function checkWinner() {
-		if (scoreLeft >= WIN_SCORE) {
-			showWinner(p1, scoreLeft, scoreRight);
-		}
-		else if (scoreRight >= WIN_SCORE) {
-			showWinner(p2, scoreLeft, scoreRight);
-		}
+		if (scoreLeft >= WIN_SCORE) showWinner(p1, scoreLeft, scoreRight);
+		else if (scoreRight >= WIN_SCORE) showWinner(p2, scoreLeft, scoreRight);
 	}
 
-	function showWinner(winner: string, scoreP1: number, scoreP2: number) {
+	function showWinner(winner: string, s1: number, s2: number) {
 		gameEnded = true;
 		isPaused = true;
-		dx = 0;
-		dy = 0;
-
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
-
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
-
-		onWin(winner, scoreP1, scoreP2);
+		onWin(winner, s1, s2);
 	}
 
+	// Start Game
 	moveBall();
 
 	return () => {
 		gameEnded = true;
 		isPaused = true;
-
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
-
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
 
 		document.removeEventListener('keydown', keydownHandler);
