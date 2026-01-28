@@ -29,101 +29,88 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 	const backdropRef = useRef<HTMLDivElement | null>(null);
 	const navRef = useRef<HTMLElement | null>(null);
 
-	// --- Animation visibility state ---
-	const [isVisible, setIsVisible] = useState(isOverlayOpen);
+	// Centralized closing logic
+	function closeAndNavigate(href?: string) {
+		const aside = asideRef.current;
+		const backdrop = backdropRef.current;
+		if (!aside) return;
 
-	// Show sidebar when opening
-	useEffect(() => {
-		if (mode !== "overlay") return;
-		if (isOverlayOpen) {
-			setIsVisible(true);
+		// Play exit animation
+		animate(
+			aside,
+			{ x: "-100%" },
+			{
+				duration: 0.3,
+				ease: [0.22, 1, 0.36, 1],
+				onComplete: () => {
+					setIsOverlayOpen(false);
+					if (href) onNavigate();
+					console.log("[LeftSidebar] Closing complete - dispatching sidebar:resume");
+					window.dispatchEvent(new Event("sidebar:resume"));
+				}
+			}
+		);
+
+		if (backdrop) {
+			animate(backdrop, { opacity: 0 }, { duration: 0.2 });
+			backdrop.style.pointerEvents = "none";
 		}
-	}, [isOverlayOpen, mode]);
+	}
 
-	// Animate open/close
+	// Handle Opening / Entrance
 	useEffect(() => {
-		if (mode !== "overlay") return;
+		if (mode !== "overlay" || !isOverlayOpen) return;
 		const aside = asideRef.current;
 		const backdrop = backdropRef.current;
 		const nav = navRef.current;
 		if (!aside) return;
 
-		if (isOverlayOpen) {
-			// Entrance (Decisive: 0.3s)
-			animate(aside, { x: 0 }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
-			if (backdrop) {
-				animate(backdrop, { opacity: 1 }, { duration: 0.25 });
-				backdrop.style.pointerEvents = "auto";
-			}
-			// Stagger links using children refs
-			if (nav) {
-				animate(
-					Array.from(nav.children),
-					{ opacity: [0, 1], x: [-24, 0] },
-					{ delay: stagger(0.04), duration: 0.35, ease: [0.22, 1, 0.36, 1] }
-				);
-			}
+		// Entrance (Decisive: 0.3s)
+		animate(aside, { x: 0 }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
+		if (backdrop) {
+			animate(backdrop, { opacity: 1 }, { duration: 0.25 });
+			backdrop.style.pointerEvents = "auto";
 		}
+		// Stagger links
+		if (nav) {
+			animate(
+				Array.from(nav.children),
+				{ opacity: [0, 1], x: [-24, 0] },
+				{ delay: stagger(0.04), duration: 0.35, ease: [0.22, 1, 0.36, 1] }
+			);
+		}
+
+		console.log("[LeftSidebar] Opening - dispatching sidebar:pause");
+		window.dispatchEvent(new Event("sidebar:pause"));
 	}, [mode, isOverlayOpen]);
+
+	// Initial Position Authority
 	useEffect(() => {
 		if (mode !== "overlay") return;
 		const aside = asideRef.current;
-		if (!aside) return;
-
-		animate(aside, { x: "-100%" }, { duration: 0 });
+		if (aside) animate(aside, { x: "-100%" }, { duration: 0 });
 	}, [mode]);
 
 	function isActive(current: string, target: string) {
 		return current === target || current.startsWith(target + "/");
 	}
 
-	// Only lock scroll for overlay mode (mobile/tablet)
-	useEffect(() => {
-		if (mode === "overlay" && isVisible) {
-			document.body.style.overflow = "hidden";
-			return () => {
-				document.body.style.overflow = "";
-			};
-		}
-		document.body.style.overflow = "";
-	}, [mode, isVisible]);
-
-	// Dispatch pause BEFORE animation starts
+	// Body lock & Inert
 	useEffect(() => {
 		if (mode !== "overlay") return;
-
-		if (isOverlayOpen) {
-			console.log("[LeftSidebar] Opening - dispatching sidebar:pause");
-			window.dispatchEvent(new Event("sidebar:pause"));
-		}
-	}, [mode, isOverlayOpen]);
-
-	// Dispatch resume AFTER close animation (duration-300)
-	useEffect(() => {
-		if (mode !== "overlay") return;
-
-		if (!isOverlayOpen) {
-			const t = setTimeout(() => {
-				console.log("[LeftSidebar] Closing complete - dispatching sidebar:resume");
-				window.dispatchEvent(new Event("sidebar:resume"));
-			}, 420);
-			return () => clearTimeout(t);
-		}
-	}, [mode, isOverlayOpen]);
-
-	useEffect(() => {
-		if (mode !== "overlay") return;
-
 		const root = document.getElementById("spa-root");
-
-		if (isVisible && isOverlayOpen) {
+		if (isOverlayOpen) {
+			document.body.style.overflow = "hidden";
 			root?.setAttribute("inert", "");
 		} else {
+			document.body.style.overflow = "";
 			root?.removeAttribute("inert");
 		}
-
-		return () => root?.removeAttribute("inert");
-	}, [mode, isVisible, isOverlayOpen]);
+		return () => {
+			document.body.style.overflow = "";
+			root?.removeAttribute("inert");
+		}
+	}, [mode, isOverlayOpen]);
 
 	// (No document click-outside listener; backdrop handles close)
 
@@ -138,6 +125,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 				<nav className="flex flex-col gap-3.5 px-4">
 					{links.map(link => (
 						<SidebarLink
+							key={link.label}
 							label={link.label}
 							href={link.href}
 							icon={link.icon}
@@ -151,27 +139,27 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 			</aside>
 		);
 	}
-	// Overlay mode (mobile/tablet)
-	// Only render overlay/sidebar if visible (keeps mounted for exit animation)
-	if (mode === "overlay" && isVisible) {
+
+
+
+	// Overlay mode: Only render when open
+	if (mode === "overlay" && isOverlayOpen) {
 		return (
 			<div className="z-50">
-				{/* Overlay background for closing sidebar */}
 				<div
 					ref={backdropRef}
 					className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-					style={{ opacity: isOverlayOpen ? 1 : 0, pointerEvents: isOverlayOpen ? "auto" : "none" }}
-					onClick={() => setIsOverlayOpen(false)}
+					style={{ opacity: 0, pointerEvents: "none" }}
+					onClick={() => closeAndNavigate()}
 				/>
 
 				<aside
 					ref={asideRef}
 					role="navigation"
-					// aria-label="Main navigation"
-					// aria-hidden={!isOverlayOpen}
-					className="sidebar-shell sidebar-shell--overlay fixed inset-y-0 left-0 z-50 w-[80vw] max-w-88 pt-6 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl"
+					aria-label="Main navigation"
+					className="sidebar-shell fixed inset-y-0 left-0 z-50 w-[80vw] max-w-88 pt-6 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl"
+					style={{ transform: "translateX(-100%)" }}
 				>
-					{/* Sidebar Header with Close Button */}
 					<div className="flex items-center justify-between px-6 mb-8 mt-2">
 						<div className="flex items-center gap-2.5 text-accent">
 							<div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center">
@@ -184,10 +172,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 						</div>
 
 						<button
-							onClick={() => {
-								console.log("[Sidebar] Close button clicked");
-								setIsOverlayOpen(false);
-							}}
+							onClick={() => closeAndNavigate()}
 							className="w-10 h-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-accent flex items-center justify-center hover:bg-[var(--color-surface-strong)] transition-all active:scale-95 group shadow-lg shadow-black/20"
 							aria-label="Close sidebar"
 						>
@@ -198,18 +183,14 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 					<nav ref={navRef} className="flex flex-col gap-3 px-4">
 						{links.map(link => (
 							<SidebarLink
+								key={link.label}
 								label={link.label}
 								href={link.href}
 								icon={link.icon}
 								iconActive={link.iconActive}
 								active={isActive(activePath, link.href)}
-								collapsed={!isOverlayOpen}
-								onClick={() => {
-									if (mode === "overlay") setIsOverlayOpen(false);
-									setTimeout(() => {
-										onNavigate();
-									}, 300); // must match exit animation duration
-								}}
+								collapsed={false}
+								onClick={() => closeAndNavigate(link.href)}
 							/>
 						))}
 					</nav>
@@ -217,7 +198,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 			</div>
 		);
 	}
-	// If not visible, render nothing
+
 	return null;
 }
 
