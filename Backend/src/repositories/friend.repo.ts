@@ -63,4 +63,23 @@ export const FriendRepo = {
       orderBy: { created_at: "desc" },
     });
   },
+
+   async areFriends(a: number, b: number): Promise<boolean> {
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+    if (a === b) return true;
+
+    const row = await prisma.friend.findFirst({
+      where: {
+        status: "accepted",
+        OR: [
+          { user_id: a, friend_id: b },
+          { user_id: b, friend_id: a },
+        ],
+      },
+      select: { id: true },
+    });
+
+    return !!row;
+  },
+
 };
