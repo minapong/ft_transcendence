@@ -9,15 +9,25 @@ export async function registerAvatarRoutes(server: FastifyInstance) {
       { preHandler: requireAuth },
       async (req: any, reply) => {
       const userId = Number((req.user as any).userId);
-
+      server.log.info({ type: req.headers["content-type"] }, "avatar upload content-type");
       const file = await req.file({
         limit: {fileSize: MAX_BYTES},
       });
+      server.log.info({ gotFile: !!file }, "avatar upload got file");
+
+      if (file) {
+        server.log.info(
+          { fieldname: file.fieldname, filename: file.filename, mimetype: file.mimetype },
+          "avatar upload file meta"
+        );
+      } 
+      server.log.info({ fieldname: file.fieldname }, "[AVATAR] BEFORE FIELDNAME CHECK");
 
       if (!file) return reply.code(400).send({ error: "Missing file (fiels name avatar)" });
-      if (file.filename !== "avatar") {
+      if (file.fieldname !== "avatar") {
         file.file.resume();
-        return reply.code(400).send({error: "Invalid field name (expected: avatar"});
+        return reply.code(400).send({error: `Invalid field name "${file.fieldname}" (expected: "avatar")`,});
+          // server.log.warn({ fieldname: file.fieldname }, "Unexpected field name; accepting anyway");
       }
       
       const chunks: Buffer[] = [];
@@ -30,12 +40,15 @@ export async function registerAvatarRoutes(server: FastifyInstance) {
         }
         chunks.push(chunk);
       }
-      
+      const bytes = Buffer.concat(chunks);
+      server.log.info({ size: bytes.length }, "avatar upload buffer size");
+
+
       try {
         const out = await AvatarService.uploadMyAvatar({
           userId,
           mimetype: file.mimetype,
-          bytes: Buffer.concat(chunks);
+          bytes: Buffer.concat(chunks),
           maxBytes: MAX_BYTES,
         });
 
