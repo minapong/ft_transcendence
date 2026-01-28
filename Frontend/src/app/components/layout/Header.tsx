@@ -7,8 +7,6 @@ import { animate } from "motion";
 export default function Header({ onMenuToggle, showMenuButton }) {
   const screen = useScreen();
   const isMobile = screen === "mobile";
-  // Mobile & Tablet: Fixed top-left button needs padding
-  // Desktop: Sidebar handles it
   const auth = useAuth();
 
   const user = auth?.user || null;
@@ -110,17 +108,13 @@ export default function Header({ onMenuToggle, showMenuButton }) {
         </div>
       </div>
 
-
-      <div className="flex items-center gap-3 sm:gap-4 z-10 flex-wrap justify-end">
-        {!isMobile && statusCards.map((card) => (
+      <div className="hidden md:flex items-center gap-3 sm:gap-4">
+        {statusCards.map((card) => (
           <div
             key={card.title}
             className="glass-pill flex items-center gap-2 sm:gap-3 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg"
           >
-            <span
-              className={`icon-[${card.icon}] ${card.tone} text-xl`}
-              aria-hidden="true"
-            />
+            <span className={`icon-[${card.icon}] ${card.tone} text-xl`} />
             <div className="leading-none">
               <span className="text-xs uppercase tracking-[0.25em] text-slate-300">
                 {card.title}
@@ -129,7 +123,9 @@ export default function Header({ onMenuToggle, showMenuButton }) {
             </div>
           </div>
         ))}
+      </div>
 
+      <div className="flex items-center gap-2">
         {!user ? (
           <button
             onClick={() => navigate("/auth/login", { triggerLayout: true })}
@@ -140,7 +136,6 @@ export default function Header({ onMenuToggle, showMenuButton }) {
           </button>
         ) : (
           <div ref={panelRef} className="relative">
-            {/* Operator Trigger */}
             <button
               onClick={() => setPanelOpen(v => !v)}
               className="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)]"
@@ -152,13 +147,11 @@ export default function Header({ onMenuToggle, showMenuButton }) {
               <span className={`icon-[mdi--chevron-down] text-sm text-[var(--color-primary)] opacity-30 transition-transform duration-150 ${panelOpen ? "rotate-180" : ""}`} />
             </button>
 
-            {/* Operator Panel */}
             {panelOpen && (
               <div
                 ref={panelContentRef}
                 className="absolute right-0 top-full mt-2 w-52 rounded-lg bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-md shadow-black/30 overflow-hidden z-[100]"
               >
-                {/* Identity Section */}
                 <div className="px-4 py-3 border-b border-[var(--color-border-soft)]">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
@@ -171,7 +164,6 @@ export default function Header({ onMenuToggle, showMenuButton }) {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="py-1">
                   <button
                     onClick={() => { setPanelOpen(false); navigate("/user/me"); }}
@@ -189,7 +181,6 @@ export default function Header({ onMenuToggle, showMenuButton }) {
                   </button>
                 </div>
 
-                {/* Terminate Session */}
                 <div className="mt-1 pt-1 border-t border-[var(--color-border-soft)]">
                   <button
                     onClick={handleLogout}
