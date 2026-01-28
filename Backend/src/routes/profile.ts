@@ -13,7 +13,7 @@ export async function registerProfileRoutes(server: FastifyInstance) {
       }
 
       const viewerId = Number((req.user as any).userId);
-
+console.log("[GET /api/users/:id]", { viewerId, targetId });
       const user = await ProfileIdService.getProfileForViewer(viewerId, targetId);
       if (!user) return reply.code(404).send({ error: "User not found" });
 
