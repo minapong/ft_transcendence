@@ -11,7 +11,11 @@ export async function registerAvatarRoutes(server: FastifyInstance) {
       const userId = Number((req.user as any).userId);
       server.log.info({ type: req.headers["content-type"] }, "avatar upload content-type");
       const file = await req.file({
-        limit: {fileSize: MAX_BYTES},
+        limit: {
+          fileSize: MAX_BYTES,
+          files: 1,
+          parts: 5,
+        },
       });
       server.log.info({ gotFile: !!file }, "avatar upload got file");
 
