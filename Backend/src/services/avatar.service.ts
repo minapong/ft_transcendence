@@ -23,15 +23,17 @@ function extFromMime(mime: string) {
 export const AvatarService = {
   async uploadMyAvatar(input: UploadAvatarInput) {
     const maxBytes = input.maxBytes ?? 2 * 1024 * 1024; // 2MB default
-
+    
     // --- validate
     if (!Number.isFinite(input.userId)) throw new Error("UNAUTHORIZED");
     if (!input.bytes || input.bytes.length === 0) throw new Error("EMPTY_FILE");
     if (input.bytes.length > maxBytes) throw new Error("FILE_TOO_LARGE");
-
+    
     if (!ALLOWED_MIME.has(input.mimetype)) throw new Error("UNSUPPORTED_TYPE");
     const ext = extFromMime(input.mimetype);
     if (!ext) throw new Error("UNSUPPORTED_TYPE");
+
+    const prev = await AvatarRepo.getSelectedForUser(input.userId);
 
     // --- generate safe path
     const name = crypto.randomBytes(16).toString("hex") + ext;
@@ -46,22 +48,39 @@ export const AvatarService = {
     await fs.writeFile(absPath, input.bytes);
 
     // --- DB: create avatar + set as selected
-    const avatar = await AvatarRepo.createForUser({
-      userId: input.userId,
-      filePath: relPath,
-      isDefault: false,
-    });
+    let avatarId: number;
+    try {
+      const avatar = await AvatarRepo.createForUser({
+        userId: input.userId,
+        filePath: relPath,
+        isDefault: false,
+      });
 
     await prisma.user.update({
-      where: { id: input.userId },
-      data: { avatarId: avatar.id },
-      select: { id: true }, 
-    });
+        where: { id: input.userId },
+        data: { avatarId: avatar.id },
+        select: { id: true },
+      });
 
+      avatarId = avatar.id;
+    } catch (e) {
+      // rollback new file if DB failed
+      await fs.unlink(absPath).catch(() => {});
+      throw e;
+    }
+   
+    if (prev && !prev.is_default && prev.user_id === input.userId) {
+      // prev.file_path is like "uploads/u19/xxxx.png" OR "default_avatars/a1.jpg"
+      // we only delete non-default ones; also ensure it's in uploads/
+      if (prev.file_path.startsWith("uploads/")) {
+        const oldAbs = path.join(process.cwd(), "assets", prev.file_path);
+        await fs.unlink(oldAbs).catch(() => {});
+      }
+    }
     return {
-      avatarId: avatar.id,
-      avatarUrl: `/static/${avatar.file_path}`,
-      filePath: avatar.file_path, // optional internal info
+      avatarId,
+      avatarUrl: `/static/${relPath}`,
+      filePath: relPath,
     };
   },
 };

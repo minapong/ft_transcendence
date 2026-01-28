@@ -21,7 +21,7 @@ export const AuthService = {
     const user = await UserRepo.create({
       email,
       username,
-      password_hash, // IMPORTANT: match your DB/repo field name
+      password_hash,
     });
 
     const defaults = await prisma.avatar.findMany({
