@@ -28,21 +28,12 @@ export default function RootLayout({ children }) {
 
       <div className="flex flex-1">
         {!hideSidebar && (
-          isDesktop ? (
-            <LeftSidebar
-              mode="static"
-              isOverlayOpen={false}
-              setIsOverlayOpen={() => { }}
-              onNavigate={handleNavigate}
-            />
-          ) : (
-            <LeftSidebar
-              mode="overlay"
-              isOverlayOpen={isOverlayOpen}
-              setIsOverlayOpen={setIsOverlayOpen}
-              onNavigate={handleNavigate}
-            />
-          )
+          <LeftSidebar
+            mode={isDesktop ? "static" : "overlay"}
+            isOverlayOpen={isDesktop ? false : isOverlayOpen}
+            setIsOverlayOpen={isDesktop ? () => {} : setIsOverlayOpen}
+            onNavigate={handleNavigate}
+          />
         )}
 
         <main id="spa-root" className="flex-1">{children}</main>

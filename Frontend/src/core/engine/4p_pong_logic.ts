@@ -1,195 +1,92 @@
 
 
+let P4_GAME_WIDTH : number;
+let P4_GAME_HEIGHT : number;
+let P4_WALL_WIDTH : number;
+
+let P4_BALL_SIZE : number;
+
+let P4_PADDLE_LENGTH : number;
+let P4_PADDLE_THICKNESS : number;
+let P4_PADDLE_DIST : number;
+
+
+let P4_PLAYABLE_WIDTH : number;
+let P4_PLAYABLE_HEIGHT : number;
+let P4_LEFT_PADDLE_X : number;
+let P4_RIGHT_PADDLE_X : number;
+let P4_TOP_PADDLE_Y : number;
+let P4_BOTTOM_PADDLE_Y : number;
+
+function handle_parameters()
+{
+    let width = window.innerWidth;
+
+    if (width < 640) {
+    P4_GAME_WIDTH = 200;
+    P4_GAME_HEIGHT = 200;
+    P4_WALL_WIDTH = 4;
+    P4_BALL_SIZE = 12;
+    P4_PADDLE_LENGTH = 64;
+    P4_PADDLE_THICKNESS = 8;
+    P4_PADDLE_DIST = 8;
+    }
+  else if (width < 1024) {
+    P4_GAME_WIDTH = 280;
+    P4_GAME_HEIGHT = 280;
+    P4_WALL_WIDTH = 6;
+    P4_BALL_SIZE = 16;
+    P4_PADDLE_LENGTH = 80;
+    P4_PADDLE_THICKNESS = 12;
+    P4_PADDLE_DIST = 12;
+    }
+
+  else if (width < 1280){
+    P4_GAME_WIDTH = 380;
+    P4_GAME_HEIGHT = 380;
+    P4_WALL_WIDTH = 8;
+    P4_BALL_SIZE = 16;
+    P4_PADDLE_LENGTH = 80;
+    P4_PADDLE_THICKNESS = 12;
+    P4_PADDLE_DIST = 16;
+    }
+	else 
+	{
+	P4_GAME_WIDTH = 500;
+    P4_GAME_HEIGHT = 500;
+    P4_WALL_WIDTH = 8;
+    P4_BALL_SIZE = 16;
+    P4_PADDLE_LENGTH = 96;
+    P4_PADDLE_THICKNESS = 12;
+    P4_PADDLE_DIST = 16;
+	}
+	P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - ( 2 * P4_WALL_WIDTH);
+	P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - ( 2 * P4_WALL_WIDTH);
+	P4_LEFT_PADDLE_X = P4_PADDLE_DIST;
+	P4_RIGHT_PADDLE_X = P4_PLAYABLE_WIDTH - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
+	
+	P4_TOP_PADDLE_Y = P4_PADDLE_DIST;
+	P4_BOTTOM_PADDLE_Y = P4_PLAYABLE_HEIGHT - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
+}
+
+window.addEventListener("resize", () => {
+  handle_parameters();
+});
+
+handle_parameters();
+
+const P4_PADDLE_SPEED = 6;
+
+const P4_BALL_SPEED = 2;
+
+const P4_WIN_SCORE = 3;
+
+
+
+
 export function pong4PLogic(
 	onWin: (winner: "red" | "blue") => void
 ): () => void {
-	let P4_GAME_WIDTH: number;
-	let P4_GAME_HEIGHT: number;
-	let P4_WALL_WIDTH: number;
-
-	let P4_BALL_SIZE: number;
-
-	let P4_PADDLE_LENGTH: number;
-	let P4_PADDLE_THICKNESS: number;
-	let P4_PADDLE_DIST: number;
-
-
-	let P4_PLAYABLE_WIDTH: number;
-	let P4_PLAYABLE_HEIGHT: number;
-	let P4_LEFT_PADDLE_X: number;
-	let P4_RIGHT_PADDLE_X: number;
-	let P4_TOP_PADDLE_Y: number;
-	let P4_BOTTOM_PADDLE_Y: number;
-
-	let state: number = 0;
-	let paddleY_Left: number;
-	let paddleY_Right: number;
-	let paddleX_Upper: number;
-	let paddleX_Lower: number;
-
-	let x = P4_GAME_WIDTH / 2 - P4_BALL_SIZE / 2;
-	let y = P4_GAME_HEIGHT / 2 - P4_BALL_SIZE / 2;
-
-	function handle_parameters() {
-		let width = window.innerWidth;
-		let height = window.innerHeight;
-		let size: number;
-
-		if (width <= height)
-			size = width;
-		else
-			size = height;
-
-		if (size < 640) {
-			P4_GAME_WIDTH = 200;
-			P4_GAME_HEIGHT = 200;
-			P4_WALL_WIDTH = 4;
-			P4_BALL_SIZE = 12;
-			P4_PADDLE_LENGTH = 64;
-			P4_PADDLE_THICKNESS = 8;
-			P4_PADDLE_DIST = 8;
-			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - (2 * P4_WALL_WIDTH);
-			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - (2 * P4_WALL_WIDTH);
-			if (state == 2) {
-				paddleY_Left = paddleY_Left * (200 / 280);
-				paddleY_Right = paddleY_Right * (200 / 280);
-				paddleX_Upper = paddleX_Upper * (200 / 280);
-				paddleX_Lower = paddleX_Lower * (200 / 280);
-				x = x * (200 / 280);
-				y = y * (200 / 280);
-			}
-			else if (state == 0) {
-				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
-				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
-			}
-			state = 1;
-		}
-		else if (size < 840) {
-			P4_GAME_WIDTH = 280;
-			P4_GAME_HEIGHT = 280;
-			P4_WALL_WIDTH = 6;
-			P4_BALL_SIZE = 16;
-			P4_PADDLE_LENGTH = 80;
-			P4_PADDLE_THICKNESS = 12;
-			P4_PADDLE_DIST = 12;
-			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - (2 * P4_WALL_WIDTH);
-			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - (2 * P4_WALL_WIDTH);
-			if (state == 1) {
-				paddleY_Left = paddleY_Left * (280 / 200);
-				paddleY_Right = paddleY_Right * (280 / 200);
-				paddleX_Upper = paddleX_Upper * (280 / 200);
-				paddleX_Lower = paddleX_Lower * (280 / 200);
-				x = x * (280 / 200);
-				y = y * (280 / 200);
-			}
-			else if (state == 3) {
-				paddleY_Left = paddleY_Left * (280 / 380);
-				paddleY_Right = paddleY_Right * (280 / 380);
-				paddleX_Upper = paddleX_Upper * (280 / 380);
-				paddleX_Lower = paddleX_Lower * (280 / 380);
-				x = x * (280 / 380);
-				y = y * (280 / 380);
-			}
-			else if (state == 0) {
-				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
-				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
-			}
-			state = 2;
-		}
-
-		else if (size < 1024) {
-			P4_GAME_WIDTH = 380;
-			P4_GAME_HEIGHT = 380;
-			P4_WALL_WIDTH = 8;
-			P4_BALL_SIZE = 16;
-			P4_PADDLE_LENGTH = 80;
-			P4_PADDLE_THICKNESS = 12;
-			P4_PADDLE_DIST = 16;
-			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - (2 * P4_WALL_WIDTH);
-			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - (2 * P4_WALL_WIDTH);
-			if (state == 2) {
-				paddleY_Left = paddleY_Left * (380 / 280);
-				paddleY_Right = paddleY_Right * (380 / 280);
-				paddleX_Upper = paddleX_Upper * (380 / 280);
-				paddleX_Lower = paddleX_Lower * (380 / 280);
-				x = x * (380 / 280);
-				y = y * (380 / 280);
-			}
-			else if (state == 4) {
-				paddleY_Left = paddleY_Left * (380 / 500);
-				paddleY_Right = paddleY_Right * (380 / 500);
-				paddleX_Upper = paddleX_Upper * (380 / 500);
-				paddleX_Lower = paddleX_Lower * (380 / 500);
-				x = x * (380 / 500);
-				y = y * (380 / 500);
-			}
-			else if (state == 0) {
-				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
-				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
-			}
-			state = 3;
-		}
-		else {
-			P4_GAME_WIDTH = 500;
-			P4_GAME_HEIGHT = 500;
-			P4_WALL_WIDTH = 8;
-			P4_BALL_SIZE = 16;
-			P4_PADDLE_LENGTH = 96;
-			P4_PADDLE_THICKNESS = 12;
-			P4_PADDLE_DIST = 16;
-			P4_PLAYABLE_WIDTH = P4_GAME_WIDTH - (2 * P4_WALL_WIDTH);
-			P4_PLAYABLE_HEIGHT = P4_GAME_HEIGHT - (2 * P4_WALL_WIDTH);
-			if (state == 3) {
-				paddleY_Left = paddleY_Left * (500 / 380);
-				paddleY_Right = paddleY_Right * (500 / 380);
-				paddleX_Upper = paddleX_Upper * (500 / 380);
-				paddleX_Lower = paddleX_Lower * (500 / 380);
-				x = x * (500 / 380);
-				y = y * (500 / 380);
-			}
-			else if (state == 0) {
-				paddleY_Left = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleY_Right = P4_PLAYABLE_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Upper = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				paddleX_Lower = P4_PLAYABLE_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
-				x = P4_PLAYABLE_WIDTH / 2 - P4_BALL_SIZE / 2;
-				y = P4_PLAYABLE_HEIGHT / 2 - P4_BALL_SIZE / 2;
-			}
-			state = 4;
-		}
-		P4_LEFT_PADDLE_X = P4_PADDLE_DIST;
-		P4_RIGHT_PADDLE_X = P4_PLAYABLE_WIDTH - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
-
-		P4_TOP_PADDLE_Y = P4_PADDLE_DIST;
-		P4_BOTTOM_PADDLE_Y = P4_PLAYABLE_HEIGHT - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
-	}
-
-	window.addEventListener("resize", () => {
-		handle_parameters();
-	});
-
-	handle_parameters();
-
-	const P4_PADDLE_SPEED = 6;
-
-	const P4_BALL_SPEED = 2;
-
-	const P4_WIN_SCORE = 7;
-
-
-
 	const ball = document.getElementById('ball') as HTMLElement;
 	const left_p = document.getElementById('left_p') as HTMLElement;
 	const right_p = document.getElementById('right_p') as HTMLElement;
@@ -207,11 +104,17 @@ export function pong4PLogic(
 
 	let isPaused = false;
 	let isWin = false;
-	let inputEnabled = true;
 
+	let x = P4_GAME_WIDTH / 2 - P4_BALL_SIZE / 2;
+	let y = P4_GAME_HEIGHT / 2 - P4_BALL_SIZE / 2;
 
 	let dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
 	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.75;
+
+	let paddleY_Left = P4_GAME_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+	let paddleY_Right = P4_GAME_HEIGHT / 2 - P4_PADDLE_LENGTH / 2;
+	let paddleX_Upper = P4_GAME_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
+	let paddleX_Lower = P4_GAME_WIDTH / 2 - P4_PADDLE_LENGTH / 2;
 
 	let scoreRed = 0;
 	let scoreBlue = 0;
@@ -227,10 +130,6 @@ export function pong4PLogic(
 	/* ---------------- event handlers ---------------- */
 
 	const keydownHandler = (e: KeyboardEvent) => {
-		if (!inputEnabled) return;
-		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-			e.preventDefault();
-		}
 		if (e.key === 'w') wPressed = true;
 		if (e.key === 's') sPressed = true;
 		if (e.key === '6') num6Pressed = true;
@@ -242,10 +141,6 @@ export function pong4PLogic(
 	};
 
 	const keyupHandler = (e: KeyboardEvent) => {
-		if (!inputEnabled) return;
-		if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-			e.preventDefault();
-		}
 		if (e.key === 'w') wPressed = false;
 		if (e.key === 's') sPressed = false;
 		if (e.key === '6') num6Pressed = false;
@@ -309,24 +204,15 @@ export function pong4PLogic(
 	});
 
 
-	const setPause = (paused: boolean) => {
-		if (isWin || isPaused === paused) return;
-		isPaused = paused;
-		inputEnabled = !isPaused && !isWin;
+	const pauseHandler = () => {
+		isPaused = !isPaused;
 		pause.textContent = isPaused ? "▶️ Resume" : "⏸️ Pause";
 		if (!isPaused) moveBall();
 	};
 
-	const pauseHandler = () => setPause(!isPaused);
-
-	const sidebarPauseHandler = () => setPause(true);
-	const sidebarResumeHandler = () => setPause(false);
-
 	document.addEventListener('keydown', keydownHandler);
 	document.addEventListener('keyup', keyupHandler);
 	pause.addEventListener('click', pauseHandler);
-	window.addEventListener('sidebar:pause', sidebarPauseHandler);
-	window.addEventListener('sidebar:resume', sidebarResumeHandler);
 
 	/* ---------------- game loop ---------------- */
 
@@ -412,23 +298,23 @@ export function pong4PLogic(
 			return pos - speed;
 		}
 	}
-
+	
 	function movePaddles() {
 		// Left paddle (vertical)
 		if (wPressed) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
 		if (sPressed) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
 		left_p.style.top = `${paddleY_Left}px`;
-
+	
 		// Right paddle (vertical)
 		if (num6Pressed) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
 		if (num3Pressed) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
 		right_p.style.top = `${paddleY_Right}px`;
-
+	
 		// Bottom paddle (horizontal)
 		if (leftPressed) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
 		if (rightPressed) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
 		lower_p.style.left = `${paddleX_Lower}px`;
-
+	
 		// Top paddle (horizontal)
 		if (vPressed) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
 		if (bPressed) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
@@ -442,7 +328,7 @@ export function pong4PLogic(
 		y = P4_GAME_HEIGHT / 2 - P4_BALL_SIZE / 2;
 		dx = 0;
 		dy = 0;
-
+	
 		resetTimeout = window.setTimeout(() => {
 			dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
 			dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
@@ -458,21 +344,20 @@ export function pong4PLogic(
 			endGame("blue");
 		}
 	}
-
+	
 	function endGame(winner: "red" | "blue") {
 		isWin = true;
 		isPaused = true;
-		inputEnabled = false;
 		dx = 0;
 		dy = 0;
-
+	
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
-
+	
 		document.removeEventListener('keydown', keydownHandler);
 		document.removeEventListener('keyup', keyupHandler);
 		pause.removeEventListener('click', pauseHandler);
-
+	
 		onWin(winner);
 	}
 
@@ -483,15 +368,12 @@ export function pong4PLogic(
 	return () => {
 		isWin = true;
 		isPaused = true;
-		inputEnabled = false;
-
+	
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
-
+	
 		document.removeEventListener('keydown', keydownHandler);
 		document.removeEventListener('keyup', keyupHandler);
 		pause.removeEventListener('click', pauseHandler);
-		window.removeEventListener('sidebar:pause', sidebarPauseHandler);
-		window.removeEventListener('sidebar:resume', sidebarResumeHandler);
 	};
 }

@@ -1,6 +1,6 @@
 
 import SidebarLink from "@/app/components/ui/SidebarLink"
-import { useEffect, useRef, useState } from "Reactor"
+import { navigate, useEffect, useRef, useState } from "Reactor"
 import { useLocation } from "Reactor/router/useLocation"
 import { animate, stagger } from "motion"
 
@@ -44,7 +44,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 				ease: [0.22, 1, 0.36, 1],
 				onComplete: () => {
 					setIsOverlayOpen(false);
-					if (href) onNavigate();
+					if (href) navigate(href);
 					console.log("[LeftSidebar] Closing complete - dispatching sidebar:resume");
 					window.dispatchEvent(new Event("sidebar:resume"));
 				}
@@ -183,9 +183,9 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 					<nav ref={navRef} className="flex flex-col gap-3 px-4">
 						{links.map(link => (
 							<SidebarLink
-								key={link.label}
+
 								label={link.label}
-								href={link.href}
+								href={mode === "overlay" ? undefined : link.href}
 								icon={link.icon}
 								iconActive={link.iconActive}
 								active={isActive(activePath, link.href)}

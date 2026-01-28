@@ -14,7 +14,6 @@ let PLAYABLE_HEIGHT : number;
 let LEFT_PADDLE_X : number;
 let RIGHT_PADDLE_X : number;
 
-
 function handle_parameters()
 {
     let width = window.innerWidth;
