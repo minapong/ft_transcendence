@@ -1,39 +1,23 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { prisma } from "../db/prisma.js";
+import { FastifyInstance } from "fastify";
+import { requireAuth } from "../plugins/auth.guard.js";
+import { ProfileIdService } from "../services/profile_id.service.js";
 
 export async function registerProfileRoutes(server: FastifyInstance) {
-  // console.log("🔥 PROFILE ROUTES LOADED");
-
-  server.get(
+  server.get<{ Params: { id: string } }>(
     "/api/users/:id",
-    async (
-      req: FastifyRequest<{ Params: { id: string } }>,
-      reply: FastifyReply
-    ) => {
-      const userId = Number(req.params.id);
-      if (Number.isNaN(userId)) {
+    { preHandler: requireAuth },
+    async (req, reply) => {
+      const targetId = Number(req.params.id);
+      if (!Number.isFinite(targetId)) {
         return reply.code(400).send({ error: "Invalid user id" });
       }
-      // console.log(`searching for user id ${userId}`);
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          username: true,
-          created_at: true,
-          avatarId: true,
-          avatar: { select: { file_path: true } },
-        },
-      });
-      if (!user) {
-        return reply.code(404).send({ error: "User not found" });
-      }
+      const viewerId = Number((req.user as any).userId);
 
-      return reply.send({
-        ...user,
-        avatarUrl: user.avatar?.file_path ? `/static/${user.avatar.file_path}` : null,
-      });
+      const user = await ProfileIdService.getProfileForViewer(viewerId, targetId);
+      if (!user) return reply.code(404).send({ error: "User not found" });
+
+      return reply.send(user);
     }
   );
 }
