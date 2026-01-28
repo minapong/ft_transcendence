@@ -1,9 +1,12 @@
 import { navigate, useState, useEffect, useRef } from "Reactor";
+import { useScreen } from "@/app/hooks/useScreen";
 import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
 import { animate } from "motion";
 
 export default function Header({ onMenuToggle, showMenuButton }) {
+  const screen = useScreen();
+  const isMobile = screen === "mobile";
   // Mobile & Tablet: Fixed top-left button needs padding
   // Desktop: Sidebar handles it
   const auth = useAuth();
@@ -107,8 +110,9 @@ export default function Header({ onMenuToggle, showMenuButton }) {
         </div>
       </div>
 
+
       <div className="flex items-center gap-3 sm:gap-4 z-10 flex-wrap justify-end">
-        {statusCards.map((card) => (
+        {!isMobile && statusCards.map((card) => (
           <div
             key={card.title}
             className="glass-pill flex items-center gap-2 sm:gap-3 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg"

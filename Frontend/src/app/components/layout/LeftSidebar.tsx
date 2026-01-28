@@ -125,7 +125,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 				<nav className="flex flex-col gap-3.5 px-4">
 					{links.map(link => (
 						<SidebarLink
-							key={link.label}
 							label={link.label}
 							href={link.href}
 							icon={link.icon}

@@ -7,18 +7,18 @@ import { useScreen } from "@/app/hooks/useScreen";
 
 export default function RootLayout({ children }) {
   const screen = useScreen();
-  const isDesktop = screen === "desktop";
+  const sidebarMode = screen === "desktop" ? "static" : "overlay";
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const pathname = useLocation();
 
   const handleNavigate = () => {
-    if (!isDesktop) setIsOverlayOpen(false);
+    if (sidebarMode === "overlay") setIsOverlayOpen(false);
   };
 
   const isGameRoute = pathname.startsWith("/game");
   const hideSidebar = false
   //    isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
-  console.log("[RootLayout] screen:", screen, "isOverlayOpen:", isOverlayOpen);
+  console.log("[RootLayout] screen:", screen, "sidebarMode:", sidebarMode, "isOverlayOpen:", isOverlayOpen);
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr]">
       <Header
@@ -29,9 +29,9 @@ export default function RootLayout({ children }) {
       <div className="flex flex-1">
         {!hideSidebar && (
           <LeftSidebar
-            mode={isDesktop ? "static" : "overlay"}
-            isOverlayOpen={isDesktop ? false : isOverlayOpen}
-            setIsOverlayOpen={isDesktop ? () => {} : setIsOverlayOpen}
+            mode={sidebarMode}
+            isOverlayOpen={sidebarMode === "overlay" ? isOverlayOpen : false}
+            setIsOverlayOpen={sidebarMode === "overlay" ? setIsOverlayOpen : () => {}}
             onNavigate={handleNavigate}
           />
         )}
