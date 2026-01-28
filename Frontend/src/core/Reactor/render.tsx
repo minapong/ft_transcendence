@@ -19,7 +19,7 @@ export function renderRoute(triggerKey?: string) {
 
   // Check if layout needs to swap (from normal to special or vice versa)
   const layoutNeedsUpdate = lastKnownPath && isSpecial(normalizedPath) !== isSpecial(lastKnownPath);
-  
+
   // Update last known path
   lastKnownPath = normalizedPath;
 
@@ -36,8 +36,7 @@ export function renderRoute(triggerKey?: string) {
     let inner = document.getElementById("spa-root");
 
     // if page is not loaded or someone ordered layout re render through passing triggerKey props
-  if (!inner || triggerKey?.startsWith(LAYOUT_KEY) || layoutNeedsUpdate)
-  {
+    if (!inner || triggerKey?.startsWith(LAYOUT_KEY) || layoutNeedsUpdate) {
       renderSubtree(
         () => rootLayout({ children: null }), //build the outer shell first
         root, // mount at root
@@ -71,7 +70,7 @@ export function initRouter() {
     window.dispatchEvent(new Event("routechange")); // 👈 Crucial for useLocation()!
     renderRoute();
   });
-  
+
   renderRoute();
 }
 
@@ -99,7 +98,7 @@ export function navigate(
 ) {
   const target = normalizePath(path.startsWith("/") ? path : `/${path}`); //appends if there is no slash at start
   const current = normalizePath(window.location.pathname); //get current url
-  
+
   const shouldUpdateHistory = opts?.replace || target !== current; // check if user asked replacement 
 
   if (shouldUpdateHistory) {
@@ -108,7 +107,7 @@ export function navigate(
     window.dispatchEvent(new Event("routechange"));
   }
 
-	renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
+  renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
 }
 
 

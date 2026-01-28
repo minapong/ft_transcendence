@@ -17,12 +17,12 @@ export default function RootLayout({ children }) {
 
   const isGameRoute = pathname.startsWith("/game");
   const hideSidebar = false
-//    isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
+  //    isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
   console.log("[RootLayout] screen:", screen, "isOverlayOpen:", isOverlayOpen);
   return (
     <div className="min-h-screen grid grid-rows-[auto_1fr]">
       <Header
-        onMenuToggle={() => setIsOverlayOpen(true)}
+        onMenuToggle={() => setIsOverlayOpen(v => !v)}
         showMenuButton={!hideSidebar}
       />
 
@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
             <LeftSidebar
               mode="static"
               isOverlayOpen={false}
-              setIsOverlayOpen={() => {}}
+              setIsOverlayOpen={() => { }}
               onNavigate={handleNavigate}
             />
           ) : (

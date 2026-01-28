@@ -83,11 +83,12 @@ export function pongLogic(
 
 	if (!ball || !left_p || !right_p || !pause) {
 		console.error("[PongLogic] Missing critical DOM elements:", { ball, left_p, right_p, pause });
-		return () => {};
+		return () => { };
 	}
 
 	let isPaused = false;
 	let gameEnded = false;
+	let inputEnabled = true;
 	let animationId: number | null = null;
 	let resetTimeout: number | null = null;
 
@@ -142,6 +143,7 @@ export function pongLogic(
 	}
 
 	const keydownHandler = (e: KeyboardEvent) => {
+		if (!inputEnabled) return;
 		if (e.key === "ArrowUp" || e.key === "ArrowDown") {
 			e.preventDefault();
 			if (useAI && e.isTrusted) return;
@@ -153,6 +155,7 @@ export function pongLogic(
 	};
 
 	const keyupHandler = (e: KeyboardEvent) => {
+		if (!inputEnabled) return;
 		if (e.key === "ArrowUp" || e.key === "ArrowDown") {
 			e.preventDefault();
 			if (useAI && e.isTrusted) return;
@@ -163,8 +166,10 @@ export function pongLogic(
 		if (e.key === 's') sPressed = false;
 	};
 
-	const pauseHandler = () => {
-		isPaused = !isPaused;
+	const setPause = (paused: boolean) => {
+		if (gameEnded || isPaused === paused) return;
+		isPaused = paused;
+		inputEnabled = !isPaused && !gameEnded;
 		if (isPaused) {
 			pause.textContent = "▶️ Resume";
 			if (aiPlayer) aiPlayer.stop(simulateKeyPress);
@@ -176,7 +181,20 @@ export function pongLogic(
 		}
 	};
 
+	const pauseHandler = () => setPause(!isPaused);
+
+	const sidebarPauseHandler = () => setPause(true);
+	const sidebarResumeHandler = () => setPause(false);
+
 	const resizeHandler = () => {
+		// Auto-pause game on resize to prevent issues during re-rendering
+		if (!isPaused && !gameEnded) {
+			isPaused = true;
+			inputEnabled = false;
+			pause.textContent = "▶️ Resume (Paused: Resize)";
+			if (aiPlayer) aiPlayer.stop(simulateKeyPress);
+			if (animationId !== null) cancelAnimationFrame(animationId);
+		}
 		handle_parameters();
 	};
 
@@ -185,6 +203,8 @@ export function pongLogic(
 	document.addEventListener('keyup', keyupHandler);
 	pause.addEventListener("click", pauseHandler);
 	window.addEventListener('resize', resizeHandler);
+	window.addEventListener('sidebar:pause', sidebarPauseHandler);
+	window.addEventListener('sidebar:resume', sidebarResumeHandler);
 
 	if (left_up_But) {
 		left_up_But.addEventListener("pointerdown", () => { wPressed = true; });
@@ -291,6 +311,7 @@ export function pongLogic(
 	function showWinner(winner: string, s1: number, s2: number) {
 		gameEnded = true;
 		isPaused = true;
+		inputEnabled = false;
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
@@ -303,6 +324,7 @@ export function pongLogic(
 	return () => {
 		gameEnded = true;
 		isPaused = true;
+		inputEnabled = false;
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
@@ -311,5 +333,7 @@ export function pongLogic(
 		document.removeEventListener('keyup', keyupHandler);
 		pause.removeEventListener('click', pauseHandler);
 		window.removeEventListener('resize', resizeHandler);
+		window.removeEventListener('sidebar:pause', sidebarPauseHandler);
+		window.removeEventListener('sidebar:resume', sidebarResumeHandler);
 	};
 }

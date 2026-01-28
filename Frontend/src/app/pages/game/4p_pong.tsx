@@ -47,7 +47,7 @@ export default function Pong4PGame() {
 			}
 			cleanup();
 		};
-	}, []); // Run only once on mount/unmount
+	}); 
 
 	return (
 		<div id="p4_game" className="bg-gray-900 flex flex-col items-center justify-center h-full">
