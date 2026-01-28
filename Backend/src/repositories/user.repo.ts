@@ -109,4 +109,39 @@ export const UserRepo = {
       isAdmin: u.isAdmin,
     }));
   },
+
+  async findByEmailRaw(email: string) {
+    return prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, username: true, password_hash: true, isAdmin: true },
+    });
+  },
+
+  async updateEmail(userId: number, email: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { email },
+      select: { id: true, email: true, username: true, isAdmin: true },
+    });
+  },
+
+  async updatePasswordHash(userId: number, password_hash: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { password_hash },
+      select: { id: true },
+    });
+  },
+
+  async updateBasics(id: number, patch: { age?: number | null; location?: string | null }) {
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        age: patch.age ?? undefined,
+        location: patch.location ?? undefined,
+      },
+      select: { id: true, email: true, username: true, isAdmin: true, age: true, location: true },
+    });
+    return user;
+  },
 };
