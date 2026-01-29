@@ -56,18 +56,18 @@ export function renderRoute(triggerKey?: string) {
 // Initializes the router by setting up event listeners for navigation and rendering the initial route.
 export function initRouter() {
   document.addEventListener("click", (e) => {
+    if (e.defaultPrevented) return;
+
     const link = (e.target as HTMLElement).closest("a");
     // Ensure it's a left click and not opening in new tab
     if (link && link.getAttribute("href")?.startsWith("/") && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      history.pushState({}, "", link.getAttribute("href")!);
-      window.dispatchEvent(new Event("routechange")); // Notify hooks
-      renderRoute();
+      navigate(link.getAttribute("href")!);
     }
   });
 
   window.addEventListener("popstate", () => {
-    window.dispatchEvent(new Event("routechange")); // 👈 Crucial for useLocation()!
+    window.dispatchEvent(new Event("routechange"));
     renderRoute();
   });
 

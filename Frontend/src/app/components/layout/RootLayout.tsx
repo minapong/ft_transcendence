@@ -37,8 +37,8 @@ export default function RootLayout({ children }) {
   };
 
   const isGameRoute = pathname.startsWith("/game");
-  const hideSidebar = false
-  //    isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
+  const hideSidebar = isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header

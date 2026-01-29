@@ -3,8 +3,29 @@ import { setAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
 import { connectPresenceWS } from "@/core/lib/presence";
 import { useAuth } from "@/core/lib/useAuth";
+import Input from "@/app/components/ui/Input";
 
 type AuthMode = "login" | "signup";
+
+type AuthForm = {
+    email: string;
+    password: string;
+    username?: string;
+};
+
+/**
+ * Pure validation logic.
+ * Returns error string if invalid, null if valid.
+ */
+function validateAuth(mode: AuthMode, data: AuthForm): string | null {
+    if (!data.email || !data.password) {
+        return "Missing email or password";
+    }
+    if (mode === "signup" && !data.username) {
+        return "Username is required for signup";
+    }
+    return null;
+}
 
 export default function AuthPage() {
     const auth = useAuth();
@@ -14,7 +35,7 @@ export default function AuthPage() {
     const mode: AuthMode = location.includes("signup") ? "signup" : "login";
 
     useEffect(() => {
-        if (auth?.token) navigate("/user/me");
+        if (auth?.token) navigate("/user/me", { replace: true });
     }, [auth?.token]);
 
     // Step 3: Superset refs
@@ -26,24 +47,23 @@ export default function AuthPage() {
     const handleSubmit = async (e: any) => {
         e?.preventDefault?.();
 
-        const email = emailRef.current?.value || "";
-        const password = passwordRef.current?.value || "";
-        const username = usernameRef.current?.value || "";
+        const data: AuthForm = {
+            email: emailRef.current?.value || "",
+            password: passwordRef.current?.value || "",
+            username: usernameRef.current?.value || ""
+        };
 
-        // Validation
-        if (!email || !password) {
-            alert("Missing email or password");
-            return;
-        }
-        if (mode === "signup" && !username) {
-            alert("Username is required for signup");
+        // Step 8: Use pure validation
+        const validationError = validateAuth(mode, data);
+        if (validationError) {
+            alert(validationError); // Still using alert for now, but logic is decoupled
             return;
         }
 
         const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
         const body = mode === "login"
-            ? { email, password }
-            : { email, password, username };
+            ? { email: data.email, password: data.password }
+            : { email: data.email, password: data.password, username: data.username };
 
         try {
             const res = await apiFetch(endpoint, {
@@ -52,16 +72,16 @@ export default function AuthPage() {
                 body: JSON.stringify(body)
             });
 
-            const data = await res.json();
+            const resData = await res.json();
 
             if (!res.ok) {
-                alert(data.error || `${mode} failed`);
+                alert(resData.error || `${mode} failed`);
                 return;
             }
 
-            setAuth(data);
+            setAuth(resData);
             connectPresenceWS();
-            navigate("/user/me");
+            navigate("/user/me", { replace: true });
         } catch (err) {
             console.error("Auth failed:", err);
             alert("Connection error. Is the backend running?");
@@ -69,73 +89,78 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="h-screen flex flex-col items-center justify-center gap-4 bg-gray-900 text-white">
-            <h1 className="text-3xl font-bold">
-                {mode === "login" ? "Welcome back" : "Create an account"}
-            </h1>
+        <div className="min-h-screen flex items-center justify-center p-4">
+            {/* Background Orbs for 'Energy' Feel */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full hero-orb hero-orb--accent opacity-20" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full hero-orb hero-orb--accent-soft opacity-10" />
+            </div>
 
-            {/* Step 5: One form, conditional fields inside */}
-            <form
-                onSubmit={handleSubmit}
-                className="flex flex-col gap-4 w-80"
-            >
-                <input
-                    ref={emailRef}
-                    className="px-4 py-2 rounded text-gray-900"
-                    placeholder="Email"
-                    type="email"
-                    required
-                />
+            <div className="relative w-full max-w-sm">
+                {/* Decorative Elements */}
+                <div className="absolute -top-12 -left-12 w-24 h-24 border-t-2 border-l-2 border-accent/20 rounded-tl-3xl pointer-events-none" />
+                <div className="absolute -bottom-12 -right-12 w-24 h-24 border-b-2 border-r-2 border-accent/20 rounded-br-3xl pointer-events-none" />
 
-                {mode === "signup" && (
-                    <input
-                        ref={usernameRef}
-                        className="px-4 py-2 rounded text-gray-900"
-                        placeholder="Username"
-                        required
-                    />
-                )}
+                <div className="panel-surface--heavy rounded-3xl p-8 flex flex-col gap-8 fx-energy energy-low">
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                            {mode === "login" ? "Welcome back" : "Create account"}
+                        </h1>
+                        <p className="text-sm text-white/40 font-medium uppercase tracking-[0.2em]">
+                            {mode === "login" ? "Identity Verification Required" : "Initialize New User Identity"}
+                        </p>
+                    </div>
 
-                <input
-                    ref={passwordRef}
-                    type="password"
-                    className="px-4 py-2 rounded text-gray-900"
-                    placeholder="Password"
-                    required
-                />
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex flex-col gap-6"
+                        noValidate
+                    >
+                        <div className="flex flex-col gap-4">
+                            <Input
+                                ref={emailRef}
+                                label="Endpoint Address"
+                                placeholder="name@example.com"
+                                type="email"
+                            />
 
-                <button
-                    type="submit"
-                    className="bg-blue-600 px-4 py-2 rounded font-bold hover:bg-blue-500"
-                >
-                    {mode === "login" ? "Login" : "Sign up"}
-                </button>
-            </form>
+                            {mode === "signup" && (
+                                <Input
+                                    ref={usernameRef}
+                                    label="Network handle"
+                                    placeholder="Choose a username"
+                                />
+                            )}
 
-            <p className="text-sm text-gray-400">
-                {/* Step 6: Navigation switches mode, not local state */}
-                {mode === "login" ? (
-                    <>
-                        Don't have an account?{" "}
-                        <span
-                            className="text-blue-400 cursor-pointer hover:underline"
-                            onClick={() => navigate("/auth/signup")}
+                            <Input
+                                ref={passwordRef}
+                                label="Security Key"
+                                type="password"
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full py-3 px-6 rounded-xl bg-accent text-gray-950 font-bold tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] cursor-pointer"
                         >
-                            Register
+                            {mode === "login" ? "AUTHENTICATE" : "REGISTER"}
+                        </button>
+                    </form>
+
+                    <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/5">
+                        <span className="text-sm text-white/30">
+                            {mode === "login" ? "New operative?" : "Already verified?"}
                         </span>
-                    </>
-                ) : (
-                    <>
-                        Already have an account?{" "}
-                        <span
-                            className="text-blue-400 cursor-pointer hover:underline"
-                            onClick={() => navigate("/auth/login")}
+                        <button
+                            onClick={() => navigate(mode === "login" ? "/auth/signup" : "/auth/login")}
+                            className="text-sm font-bold text-accent hover:underline decoration-accent/30 underline-offset-4 cursor-pointer"
                         >
-                            Login
-                        </span>
-                    </>
-                )}
-            </p>
+                            {mode === "login" ? "Create Account" : "Login"}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
