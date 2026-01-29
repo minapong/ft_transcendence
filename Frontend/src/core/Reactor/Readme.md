@@ -7,6 +7,7 @@ Reactor is a lightweight, React-like library for building web applications with 
 ### Core Features
 - **JSX Runtime**: Allows the use of JSX syntax to create DOM elements and components.
 - **Fragment Support**: Group multiple elements without adding extra DOM nodes using `<Fragment>` or the shorthand `<>...</>` syntax.
+- **forwardRef**: Pass refs to child components using `forwardRef((props, ref) => ...)` for advanced DOM access.
 - **Custom Hooks**:
   - `useState`: Manage state within components.
   - `useEffect`: Run side effects based on dependencies.
@@ -188,6 +189,24 @@ function Header() {
       <p>Subtitle</p>
     </>
   );
+}
+
+```
+
+### Using forwardRef
+
+```tsx
+import { forwardRef } from "Reactor";
+
+// Example: Forwarding a ref to a DOM node
+const Input = forwardRef((props, ref) => (
+  <input {...props} ref={ref} />
+));
+
+// Usage in a parent component
+function Parent() {
+  const inputRef = useRef();
+  return <Input ref={inputRef} placeholder="Type here..." />;
 }
 ```
 

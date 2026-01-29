@@ -35,33 +35,33 @@ export default function AuthPage() {
     const location = useLocation();
     const [uiError, setUiError] = useState<ValidationError | null>(null);
 
-    // Step 1: Derive mode from routing (URL segments are the source of truth)
+    // Derive mode from routing (URL segments are the source of truth)
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
 
     useEffect(() => {
         if (auth?.token) navigate("/user/me", { replace: true });
     }, [auth?.token]);
 
-    // Step 3: Superset refs
+    // Superset refs
     const emailRef = useRef<HTMLInputElement>(null);
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
-    // Step 4: Single submit pipeline
+    // Single submit pipeline
     const handleSubmit = async (e: any) => {
         e?.preventDefault?.();
 
-        // 1. Capture data immediately BEFORE any state-triggered re-renders
+        //Capture data immediately BEFORE any state-triggered re-renders
         const data: AuthForm = {
             email: emailRef.current?.value || "",
             password: passwordRef.current?.value || "",
             username: usernameRef.current?.value || ""
         };
 
-        // 2. Now clear errors and proceed
+        // Now clear errors and proceed
         setUiError(null);
 
-        // Step 8: Use classified validation
+        // Use classified validation
         const validationError = validateAuth(mode, data);
         if (validationError) {
             setUiError(validationError);
@@ -110,6 +110,36 @@ export default function AuthPage() {
                 <div className="absolute -bottom-12 -right-12 w-24 h-24 border-b-2 border-r-2 border-accent/20 rounded-br-3xl pointer-events-none" />
 
                 <div className="panel-surface--heavy rounded-3xl p-8 flex flex-col gap-8 fx-energy energy-low">
+                    {/* State Switch */}
+                    <div className="relative p-1 bg-white/5 rounded-2xl flex items-center self-center w-full max-w-[280px]">
+                        {/* Selector/Pill */}
+                        <div
+                            className={`absolute inset-y-1 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] bg-accent/10 rounded-xl pointer-events-none shadow-sm border border-accent/20 ${mode === "login" ? "left-1 right-1/2" : "left-1/2 right-1"
+                                }`}
+                        />
+
+                        <button
+                            onClick={() => {
+                                setUiError(null);
+                                navigate("/auth/login");
+                            }}
+                            className={`relative flex-1 py-1.5 text-xs font-bold tracking-widest transition-all duration-300 cursor-pointer ${mode === "login" ? "text-white" : "text-white/40 hover:text-white/60"
+                                }`}
+                        >
+                            LOGIN
+                        </button>
+                        <button
+                            onClick={() => {
+                                setUiError(null);
+                                navigate("/auth/signup");
+                            }}
+                            className={`relative flex-1 py-1.5 text-xs font-bold tracking-widest transition-all duration-300 cursor-pointer ${mode === "signup" ? "text-white" : "text-white/40 hover:text-white/60"
+                                }`}
+                        >
+                            SIGNUP
+                        </button>
+                    </div>
+
                     <div className="flex flex-col gap-2">
                         <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
                             {mode === "login" ? "Welcome back" : "Create account"}
@@ -165,20 +195,6 @@ export default function AuthPage() {
                         </button>
                     </form>
 
-                    <div className="flex items-center justify-center gap-2 pt-4 border-t border-white/5">
-                        <span className="text-sm text-white/30">
-                            {mode === "login" ? "New operative?" : "Already verified?"}
-                        </span>
-                        <button
-                            onClick={() => {
-                                setUiError(null);
-                                navigate(mode === "login" ? "/auth/signup" : "/auth/login");
-                            }}
-                            className="text-sm font-bold text-accent hover:underline decoration-accent/30 underline-offset-4 cursor-pointer"
-                        >
-                            {mode === "login" ? "Create Account" : "Login"}
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>

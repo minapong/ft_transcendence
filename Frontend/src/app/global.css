@@ -75,4 +75,79 @@
         text-transform: uppercase;
         letter-spacing: -0.025em;
     }
+
+    .auth-pane-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        /* Matches the height to prevent reflow jank */
+        min-height: 400px;
+    }
+
+    .auth-pane {
+        width: 100%;
+        position: absolute;
+        inset: 0;
+        transition:
+            transform 420ms cubic-bezier(.2, .8, .2, 1),
+            opacity 300ms ease,
+            filter 300ms ease;
+        filter: blur(0);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .auth-pane.active {
+        transform: translateX(0);
+        opacity: 1;
+        filter: blur(0);
+        pointer-events: auto;
+        position: relative;
+        /* the active one defines the container height */
+    }
+
+    .auth-pane.inactive-left {
+        transform: translateX(-8%);
+        opacity: 0;
+        filter: blur(6px);
+    }
+
+    .auth-pane.inactive-right {
+        transform: translateX(8%);
+        opacity: 0;
+        filter: blur(6px);
+    }
+
+    .auth-title-container {
+        position: relative;
+        height: 60px;
+        /* Adjust to fit the title + subhead height */
+    }
+
+    .auth-title-group {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        opacity: 0;
+    }
+
+    .auth-title-group.active {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .auth-title-group.inactive-up {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    .auth-title-group.inactive-down {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 }

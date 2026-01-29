@@ -21,7 +21,6 @@ function PanelButton({ icon, label, onClick }) {
 
 export default function Header({ onMenuToggle, showMenuButton }) {
   const screen = useScreen();
-  // const isMobile = screen === "mobile"; // Removed unused variable
   const auth = useAuth();
 
   const user = auth?.user || null;

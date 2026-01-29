@@ -35,7 +35,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		if (!isOverlayOpen) setPendingPath(null);
 	}, [activePath, isOverlayOpen, mode]);
 
-	// 1. IMPROVED CLOSING: Trigger animation BEFORE unmounting in overlay mode
+	// IMPROVED CLOSING: Trigger animation BEFORE unmounting in overlay mode
 	const closeAndNavigate = useCallback((href?: string) => {
 		if (isClosingRef.current) return;
 		if (href && mode === "overlay") setPendingPath(normalizePath(href));
@@ -64,7 +64,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		});
 	}, [mode, setIsOverlayOpen, setPendingPath]); // navigate is stable via Reactor/render
 
-	// 1.5 INITIAL POSITION (No-Clobber)
+	// INITIAL POSITION (No-Clobber)
 	// We set the initial state manually to prevent React's 'style' prop from overriding animations on re-render
 	useEffect(() => {
 		if (mode !== "overlay" || !asideRef.current) return;
@@ -74,7 +74,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 	}, [mode]); // Only runs when switching TO overlay mode
 
 
-	// 2. OVERLAY ANIMATION CONTROLLER
+	// OVERLAY ANIMATION CONTROLLER
 	useEffect(() => {
 		if (mode !== "overlay") return;
 		const aside = asideRef.current;
@@ -125,7 +125,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		}
 	}, [mode, isOverlayOpen]);
 
-	// 3. DESKTOP (STATIC) FOLDING: The Cinematic Illusion
+	// DESKTOP (STATIC) FOLDING: The Cinematic Illusion
 	useEffect(() => {
 		if (mode !== "static" || !asideRef.current) return;
 
@@ -150,14 +150,14 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 					x: isCollapsed ? -12 : 0
 				},
 				{
-					delay: stagger(0.03, { from: isCollapsed ? "end" : "start" }),
+					delay: stagger(0.03, { from: isCollapsed ? "last" : "first" }),
 					duration: 0.2
 				}
 			);
 		}
 	}, [mode, isCollapsed]);
 
-	// 4. EXTERNAL CLOSE TRIGGER
+	// EXTERNAL CLOSE TRIGGER
 	useEffect(() => {
 		const handleClose = () => closeAndNavigate();
 		window.addEventListener("sidebar:close", handleClose);
@@ -195,7 +195,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		);
 	}
 
-	// 4. OVERLAY RENDER: Permanent DOM with visibility/pointer control
+	// OVERLAY RENDER: Permanent DOM with visibility/pointer control
 	if (mode === "overlay") {
 		return (
 			<div
