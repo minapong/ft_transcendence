@@ -147,6 +147,8 @@ export function useEffect(cb: () => void | (() => void), deps?: any[]) {
 	effects[idx] = prev;
 }
 
+export { useEffect as useLayoutEffect };
+
 
 export function flushEffects() {
 	const list = [...pendingEffects];

@@ -12,20 +12,25 @@ export default function RootLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = useLocation();
 
-  // Reset collapsed state when leaving desktop
+  // Reset states when switching between static and overlay
   useEffect(() => {
-    if (sidebarMode !== "static") {
+    if (sidebarMode === "static") {
+      setIsOverlayOpen(false);
+    } else {
       setIsCollapsed(false);
     }
   }, [sidebarMode]);
 
-  const handleNavigate = () => {
-    if (sidebarMode === "overlay") setIsOverlayOpen(false);
-  };
+  // LeftSidebar handles its own navigation and closing in overlay mode
 
   const handleToggle = () => {
     if (sidebarMode === "overlay") {
-      setIsOverlayOpen(v => !v);
+      if (isOverlayOpen) {
+        // Dispatch close and wait for animation via isOverlayOpen flipping to false
+        window.dispatchEvent(new Event("sidebar:close"));
+      } else {
+        setIsOverlayOpen(true);
+      }
     } else {
       setIsCollapsed(v => !v);
     }
@@ -48,7 +53,6 @@ export default function RootLayout({ children }) {
             isCollapsed={isCollapsed}
             isOverlayOpen={isOverlayOpen}
             setIsOverlayOpen={setIsOverlayOpen}
-            onNavigate={handleNavigate}
           />
         )}
 

@@ -108,7 +108,7 @@ export default function Header({ onMenuToggle, showMenuButton }) {
           tabIndex={0}
         >
           <div
-            className="logo-mark logo-mark--ominous relative h-10 w-10 sm:h-12 sm:w-12 rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-300 flex-shrink-0"
+            className="logo-mark logo-mark--ominous relative h-10 w-10 sm:h-12 sm:w-12 rounded-lg flex items-center justify-center overflow-hidden transition-transform duration-300 flex-shrink-0 group-hover:fx-energy group-hover:energy-low group-focus:fx-energy group-focus:energy-low"
             aria-hidden="true"
           >
             <span className="logo-orb" />
@@ -134,20 +134,24 @@ export default function Header({ onMenuToggle, showMenuButton }) {
       </div>
 
       <div className="hidden lg:flex items-center gap-3 sm:gap-4 flex-shrink-0">
-        {statusCards.map((card) => (
-          <div
-            key={card.title}
-            className="glass-pill flex items-center gap-2 sm:gap-3 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg whitespace-nowrap"
-          >
-            <span className={`icon-[${card.icon}] ${card.tone} text-xl`} />
-            <div className="leading-none">
-              <span className="text-xs uppercase tracking-[0.25em] text-slate-300">
-                {card.title}
-              </span>
-              <span className="text-sm text-primary block">{card.detail}</span>
+        {statusCards.map((card) => {
+          // Example: treat "active / healthy" as energy-medium, else energy-low
+          const isActive = card.detail?.toLowerCase().includes("online") || card.detail?.toLowerCase().includes("steady");
+          const energyClass = isActive ? "energy-medium" : "energy-low";
+          return (
+            <div key={card.title} className={`fx-energy ${energyClass} rounded-lg`}>
+              <div className="glass-pill flex items-center gap-2 sm:gap-3 px-2.5 py-1.5 sm:px-3 sm:py-2 whitespace-nowrap">
+                <span className={`icon-[${card.icon}] ${card.tone} text-xl`} />
+                <div className="leading-none">
+                  <span className="text-xs uppercase tracking-[0.25em] text-slate-300">
+                    {card.title}
+                  </span>
+                  <span className="text-sm text-primary block">{card.detail}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-[clamp(0.5rem,2vw,1rem)] flex-shrink-0 flex-nowrap">
@@ -155,16 +159,21 @@ export default function Header({ onMenuToggle, showMenuButton }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("/auth/login")}
-              className="text-[clamp(0.7rem,1.8vw,0.85rem)] font-medium text-primary/40 hover:text-primary transition-colors px-2 py-1.5 whitespace-nowrap"
+              className="glass-pill border border-white/10 bg-white/5 text-[clamp(0.7rem,1.8vw,0.85rem)] font-medium text-primary/80 hover:text-primary transition-colors px-2 py-1.5 whitespace-nowrap"
             >
               Log In
             </button>
             <button
               onClick={() => navigate("/auth/signup")}
-              className="bleed-btn fx-energy energy-high rounded-lg bg-accent text-black text-[clamp(0.7rem,2vw,0.875rem)] font-bold px-[clamp(0.8rem,2.5vw,1.1rem)] py-1.5 sm:py-2 transition-all hover:scale-[1.03] active:scale-95 flex items-center gap-2 whitespace-nowrap"
+              className="bleed-btn bleed-btn--hero fx-energy energy-high hover:energy-critical rounded-lg bg-accent text-black text-[clamp(0.7rem,2vw,0.875rem)] font-bold px-[clamp(0.8rem,2.5vw,1.1rem)] py-[0.625rem] sm:py-[0.875rem] transition-all hover:scale-[1.03] active:scale-95 flex items-center gap-2 whitespace-nowrap relative overflow-hidden"
             >
-              <span className="icon-[solar--bolt-circle-bold-duotone] text-lg flex-shrink-0" />
-              <span>Signup</span>
+              <span className="absolute inset-0 pointer-events-none" style={{
+                background: "linear-gradient(180deg,rgba(255,255,255,0.13) 0%,rgba(255,255,255,0.04) 60%,rgba(255,255,255,0) 100%)",
+                borderRadius: "inherit",
+                zIndex: 1
+              }} />
+              <span className="icon-[solar--bolt-circle-bold-duotone] text-lg flex-shrink-0 relative z-10" />
+              <span className="relative z-10">Signup</span>
             </button>
           </div>
         ) : (

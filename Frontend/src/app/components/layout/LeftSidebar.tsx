@@ -1,6 +1,5 @@
-
 import SidebarLink from "@/app/components/ui/SidebarLink"
-import { navigate, useEffect, useRef, useState } from "Reactor"
+import { navigate, useEffect, useRef, useState, useCallback } from "Reactor"
 import { useLocation } from "Reactor/router/useLocation"
 import { animate, stagger } from "motion"
 
@@ -16,18 +15,27 @@ const links = [
 interface SidebarProps {
 	isOverlayOpen: boolean;
 	setIsOverlayOpen?: (v: boolean | ((p: boolean) => boolean)) => void;
-	onNavigate: () => void;
 	isCollapsed?: boolean;
 }
-export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, mode, isCollapsed = false }: SidebarProps & { mode: "overlay" | "static" }) {
+export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false }: SidebarProps & { mode: "overlay" | "static" }) {
 
 	const activePath = normalizePath(useLocation());
+	const [pendingPath, setPendingPath] = useState<string | null>(null);
+	const resolvedPath = mode === "overlay" ? (pendingPath ?? activePath) : activePath;
+
 	const asideRef = useRef<HTMLDivElement | null>(null);
 	const backdropRef = useRef<HTMLDivElement | null>(null);
 	const navRef = useRef<HTMLElement | null>(null);
 
+	// Sync pendingPath with actual activePath
+	useEffect(() => {
+		setPendingPath(null);
+	}, [activePath]);
+
 	// 1. IMPROVED CLOSING: Trigger animation BEFORE unmounting in overlay mode
-	function closeAndNavigate(href?: string) {
+	const closeAndNavigate = useCallback((href?: string) => {
+		if (href && mode === "overlay") setPendingPath(normalizePath(href));
+
 		if (mode === "static") {
 			if (href) navigate(href);
 			return;
@@ -47,39 +55,51 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 			if (href) navigate(href);
 			window.dispatchEvent(new Event("sidebar:resume"));
 		});
-	}
+	}, [mode, setIsOverlayOpen, setPendingPath]); // navigate is stable via Reactor/render
 
-	// 2. OVERLAY ENTRANCE: Handle animations when mounted
+	// 1.5 INITIAL POSITION (No-Clobber)
+	// We set the initial state manually to prevent React's 'style' prop from overriding animations on re-render
 	useEffect(() => {
-		if (mode !== "overlay" || !isOverlayOpen) return;
+		if (mode !== "overlay" || !asideRef.current) return;
+		if (!isOverlayOpen) {
+			asideRef.current.style.transform = "translateX(-100%)";
+		}
+	}, [mode]); // Only runs when switching TO overlay mode
+
+
+	// 2. OVERLAY ANIMATION CONTROLLER
+	useEffect(() => {
+		if (mode !== "overlay") return;
 		const aside = asideRef.current;
 		const backdrop = backdropRef.current;
 		const nav = navRef.current;
 		if (!aside) return;
 
-		// Entrance (Snappy 0.3s)
-		animate(aside, { x: 0 }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
-		if (backdrop) {
-			animate(backdrop, { opacity: 1 }, { duration: 0.25 });
-			backdrop.style.pointerEvents = "auto";
-		}
+		if (isOverlayOpen) {
+			// Entrance: We specify 'from' as -100 to ensure we slide even if snapped
+			animate(aside, { x: [-100, 0] }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
+			if (backdrop) {
+				animate(backdrop, { opacity: [0, 1] }, { duration: 0.25 });
+				backdrop.style.pointerEvents = "auto";
+			}
 
-		// Staggered Entrance for Links
-		if (nav) {
-			animate(
-				Array.from(nav.children),
-				{ opacity: [0, 1], x: [-16, 0] },
-				{ delay: stagger(0.04), duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }
-			);
+			// Staggered Entrance for Links
+			if (nav) {
+				animate(
+					Array.from(nav.children),
+					{ opacity: [0, 1], x: [-16, 0] },
+					{ delay: stagger(0.04), duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }
+				);
+			}
+		} else {
+			// Initial/Snapped Position
+			animate(aside, { x: "-100%" }, { duration: 0 });
+			if (backdrop) {
+				animate(backdrop, { opacity: 0 }, { duration: 0 });
+				backdrop.style.pointerEvents = "none";
+			}
 		}
 	}, [mode, isOverlayOpen]);
-
-	// Initial Position for Overlay
-	useEffect(() => {
-		if (mode !== "overlay") return;
-		const aside = asideRef.current;
-		if (aside) animate(aside, { x: "-100%" }, { duration: 0 });
-	}, [mode]);
 
 	// Body lock & Inert for Overlay
 	useEffect(() => {
@@ -98,24 +118,21 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 		}
 	}, [mode, isOverlayOpen]);
 
-	// 3. DESKTOP (STATIC) FOLDING: The "Illusion" of collapse
+	// 3. DESKTOP (STATIC) FOLDING: The Cinematic Illusion
 	useEffect(() => {
 		if (mode !== "static" || !asideRef.current) return;
 
-		// Folding the sidebar (scaleX) instead of fighting width
+		// Direct width animation for smooth layout + reclaimed space
 		animate(
 			asideRef.current,
 			{
-				scaleX: isCollapsed ? 0 : 1,
+				width: isCollapsed ? "0px" : "18rem",
 				opacity: isCollapsed ? 0 : 1,
 			},
-			{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }
-		).finished.then(() => {
-			// Reclaim layout space instantly AFTER the visual illusion completes
-			if (asideRef.current) {
-				asideRef.current.style.width = isCollapsed ? "0px" : "18rem";
-			}
-		});
+			{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }
+		);
+
+		// Staggered Link reaction for Desktop
 
 		// Staggered Link reaction for Desktop
 		if (navRef.current) {
@@ -133,6 +150,13 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 		}
 	}, [mode, isCollapsed]);
 
+	// 4. EXTERNAL CLOSE TRIGGER
+	useEffect(() => {
+		const handleClose = () => closeAndNavigate();
+		window.addEventListener("sidebar:close", handleClose);
+		return () => window.removeEventListener("sidebar:close", handleClose);
+	}, [closeAndNavigate]);
+
 	function isActive(current: string, target: string) {
 		return current === target || current.startsWith(target + "/");
 	}
@@ -143,19 +167,17 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 				ref={asideRef}
 				role="navigation"
 				aria-label="Main navigation"
-				className="sidebar-shell bg-(--color-surface) h-full overflow-hidden flex-shrink-0 z-30 border-r border-(--color-border-soft) flex flex-col origin-left"
-				style={{ width: isCollapsed ? "0px" : "18rem" }}
+				className="sidebar-shell bg-(--color-surface) h-full overflow-hidden flex-shrink-0 z-30 border-r border-(--color-border-soft) flex flex-col origin-left will-change-[width,opacity]"
 			>
 				<div className="w-72 flex-shrink-0">
 					<nav ref={navRef as any} className="flex flex-col gap-3.5 px-3 pt-6">
 						{links.map(link => (
 							<SidebarLink
-								key={link.href}
 								label={link.label}
 								href={link.href}
 								icon={link.icon}
 								iconActive={link.iconActive}
-								active={isActive(activePath, link.href)}
+								active={isActive(resolvedPath, link.href)}
 								collapsed={isCollapsed}
 								onClick={() => { if (link.href) navigate(link.href); }}
 							/>
@@ -170,16 +192,15 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 	if (mode === "overlay") {
 		return (
 			<div
-				className={`z-50 ${!isOverlayOpen ? "pointer-events-none" : ""}`}
+				className="z-[110]"
 				style={{
-					visibility: isOverlayOpen ? "visible" : "hidden",
-					// Small transition on visibility ensures it stays around long enough for animations
-					transition: 'visibility 0.3s'
+					opacity: isOverlayOpen ? 1 : 0,
+					pointerEvents: isOverlayOpen ? "auto" : "none",
 				}}
 			>
 				<div
 					ref={backdropRef}
-					className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+					className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[111]"
 					style={{ opacity: 0 }}
 					onClick={() => closeAndNavigate()}
 				/>
@@ -188,8 +209,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 					ref={asideRef}
 					role="navigation"
 					aria-label="Main navigation"
-					className="sidebar-shell fixed inset-y-0 left-0 z-50 w-[80vw] max-w-88 pt-6 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl"
-					style={{ transform: "translateX(-100%)" }}
+					className="sidebar-shell fixed inset-y-0 left-0 z-[112] w-[80vw] max-w-88 pt-6 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl"
 				>
 					<div className="flex items-center justify-between px-6 mb-8 mt-2">
 						<div className="flex items-center gap-2.5 text-accent">
@@ -214,12 +234,11 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 					<nav ref={navRef as any} className="flex flex-col gap-3 px-4">
 						{links.map(link => (
 							<SidebarLink
-								key={link.href}
 								label={link.label}
 								href={link.href}
 								icon={link.icon}
 								iconActive={link.iconActive}
-								active={isActive(activePath, link.href)}
+								active={isActive(resolvedPath, link.href)}
 								collapsed={false}
 								onClick={() => closeAndNavigate(link.href)}
 							/>
@@ -236,5 +255,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 /* ---------------- utils ---------------- */
 
 function normalizePath(raw: string) {
-	return raw.toLowerCase().replace(/\/+$/, "") || "/";
+	const p = raw.toLowerCase().replace(/\/+$/, "");
+	return p === "" ? "/" : p;
 }
