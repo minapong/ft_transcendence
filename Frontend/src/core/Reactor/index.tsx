@@ -9,6 +9,7 @@ export { resetHooks } from "./hooks";
 
 // Exports custom hooks for state management and effects.
 export { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from "./hooks"
+export { useLocation } from "./router/useLocation";
 
 // Exports global modal helpers.
 export { openModal, closeModal, getCurrentModal, registerModal, resolveModalRenderer } from "./modal";
