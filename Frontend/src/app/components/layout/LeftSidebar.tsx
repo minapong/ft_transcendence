@@ -174,7 +174,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, onNavigate, m
 
 						<button
 							onClick={() => closeAndNavigate()}
-							className="w-10 h-10 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-accent flex items-center justify-center hover:bg-[var(--color-surface-strong)] transition-all active:scale-95 group shadow-lg shadow-black/20"
+							className="w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-accent flex items-center justify-center hover:bg-[var(--color-surface-strong)] transition-all active:scale-95 group shadow-lg shadow-black/20"
 							aria-label="Close sidebar"
 						>
 							<span className="icon-[solar--close-circle-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-300" />

@@ -1,12 +1,27 @@
+
 import { navigate, useState, useEffect, useRef } from "Reactor";
 import { useScreen } from "@/app/hooks/useScreen";
 import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
 import { animate } from "motion";
 
+// PanelButton extracted for clarity and reusability
+function PanelButton({ icon, label, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full px-3 py-2 flex items-center gap-3 text-left text-sm text-[var(--color-primary)]/70 hover:text-[var(--color-primary)] hover:bg-white/5 rounded-md transition-all duration-150 group"
+    >
+      <span className={`${icon} text-lg opacity-40 group-hover:opacity-100 transition-opacity`} />
+      <span className="font-medium">{label}</span>
+    </button>
+  );
+}
+
+
 export default function Header({ onMenuToggle, showMenuButton }) {
   const screen = useScreen();
-  const isMobile = screen === "mobile";
+  // const isMobile = screen === "mobile"; // Removed unused variable
   const auth = useAuth();
 
   const user = auth?.user || null;
@@ -27,16 +42,16 @@ export default function Header({ onMenuToggle, showMenuButton }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [panelOpen]);
 
-  // Panel entrance animation
+  // Panel entrance and exit animation
   useEffect(() => {
     if (!panelContentRef.current) return;
-    if (panelOpen) {
-      animate(
-        panelContentRef.current,
-        { opacity: [0, 1], y: [-4, 0] },
-        { duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }
-      );
-    }
+    animate(
+      panelContentRef.current,
+      panelOpen
+        ? { opacity: [0, 1], y: [-4, 0] }
+        : { opacity: [1, 0], y: [0, -4] },
+      { duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }
+    );
   }, [panelOpen]);
 
   const handleLogout = () => {
@@ -65,17 +80,18 @@ export default function Header({ onMenuToggle, showMenuButton }) {
       className={`
     flex-shrink-0
     min-h-[var(--header-height)]
-    px-4 sm:px-6 lg:px-6
-    flex flex-wrap items-center justify-between
-    gap-3 sm:gap-4
+    px-[clamp(1rem,3vw,1.5rem)]
+    flex flex-nowrap items-center justify-between
+    gap-[clamp(0.5rem,2vw,1rem)]
     header-surface
+    relative z-[100]
   `}
     >
 
-      <div className="flex items-center gap-4 z-10">
+      <div className="flex items-center gap-[clamp(0.4rem,2vw,0.75rem)] z-10 flex-shrink-0 flex-nowrap">
         {showMenuButton && (
           <button
-            className="flex items-center justify-center w-10 h-10 rounded-md bg-[var(--color-surface)] text-xl mr-2"
+            className="flex items-center justify-center w-10 h-10 rounded-md bg-[var(--color-surface)] text-xl mr-2 flex-shrink-0"
             aria-label="Open sidebar menu"
             onClick={() => {
               console.log("[Header] Menu toggle: overlay open");
@@ -86,26 +102,26 @@ export default function Header({ onMenuToggle, showMenuButton }) {
           </button>
         )}
         <div
-          className="flex items-center gap-3 cursor-pointer group"
+          className="flex items-center gap-[clamp(0.4rem,1.5vw,0.75rem)] cursor-pointer group flex-shrink-0"
           onClick={() => navigate("/")}
           role="button"
           tabIndex={0}
         >
           <div
-            className="logo-mark logo-mark--ominous relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-300"
+            className="logo-mark logo-mark--ominous relative h-10 w-10 sm:h-12 sm:w-12 rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-300 flex-shrink-0"
             aria-hidden="true"
           >
             <span className="logo-orb" />
             <span className="logo-scratch" />
           </div>
-          <div className="flex flex-col leading-tight">
+          <div className="flex flex-col leading-tight whitespace-nowrap">
             <div className="flex items-center gap-2">
-              <span className="text-xl sm:text-2xl font-bold tracking-[0.06em] text-primary transition-colors group-hover:text-accent">
+              <span className="text-[clamp(1rem,4vw,1.5rem)] font-bold tracking-[0.06em] text-primary transition-colors group-hover:text-accent">
                 MINA&nbsp;PONG
               </span>
             </div>
             <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-              <span className="text-sm sm:text-base font-medium text-accent-soft">
+              <span className="text-[clamp(0.7rem,2.5vw,1rem)] font-medium text-accent-soft">
                 Arena Command Hub
               </span>
               <span
@@ -117,11 +133,11 @@ export default function Header({ onMenuToggle, showMenuButton }) {
         </div>
       </div>
 
-      <div className="hidden md:flex items-center gap-3 sm:gap-4">
+      <div className="hidden lg:flex items-center gap-3 sm:gap-4 flex-shrink-0">
         {statusCards.map((card) => (
           <div
             key={card.title}
-            className="glass-pill flex items-center gap-2 sm:gap-3 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg"
+            className="glass-pill flex items-center gap-2 sm:gap-3 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg whitespace-nowrap"
           >
             <span className={`icon-[${card.icon}] ${card.tone} text-xl`} />
             <div className="leading-none">
@@ -134,20 +150,31 @@ export default function Header({ onMenuToggle, showMenuButton }) {
         ))}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-[clamp(0.5rem,2vw,1rem)] flex-shrink-0 flex-nowrap">
         {!user ? (
-          <button
-            onClick={() => navigate("/auth/login", { triggerLayout: true })}
-            className="bleed-btn rounded-lg bg-accent text-primary text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-3.5 sm:py-2 transition hover:bg-accent-soft flex items-center gap-2"
-          >
-            <span className="icon-[mdi--login] text-base sm:text-lg" aria-hidden="true" />
-            <span>Login / Signup</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/auth/login")}
+              className="text-[clamp(0.7rem,1.8vw,0.85rem)] font-medium text-primary/40 hover:text-primary transition-colors px-2 py-1.5 whitespace-nowrap"
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => navigate("/auth/signup")}
+              className="bleed-btn fx-energy energy-high rounded-lg bg-accent text-black text-[clamp(0.7rem,2vw,0.875rem)] font-bold px-[clamp(0.8rem,2.5vw,1.1rem)] py-1.5 sm:py-2 transition-all hover:scale-[1.03] active:scale-95 flex items-center gap-2 whitespace-nowrap"
+            >
+              <span className="icon-[solar--bolt-circle-bold-duotone] text-lg flex-shrink-0" />
+              <span>Signup</span>
+            </button>
+          </div>
         ) : (
           <div ref={panelRef} className="relative">
             <button
-              onClick={() => setPanelOpen(v => !v)}
-              className="flex items-center gap-2 cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)]"
+              onClick={e => {
+                e.stopPropagation();
+                setPanelOpen(v => !v);
+              }}
+              className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)] whitespace-nowrap flex-shrink-0"
             >
               <div className="w-7 h-7 rounded-md bg-[var(--color-surface)] flex items-center justify-center">
                 <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-base" aria-hidden="true" />
@@ -159,41 +186,44 @@ export default function Header({ onMenuToggle, showMenuButton }) {
             {panelOpen && (
               <div
                 ref={panelContentRef}
-                className="absolute right-0 top-full mt-2 w-52 rounded-lg bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-md shadow-black/30 overflow-hidden z-[100]"
+                className="absolute right-0 top-[calc(100%+8px)] w-60 rounded-xl bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100"
               >
-                <div className="px-4 py-3 border-b border-[var(--color-border-soft)]">
+                {/* Header Section: More "Command Center" feel */}
+                <div className="px-4 py-4 bg-white/[0.02] border-b border-[var(--color-border-soft)]">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
-                      <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-40 text-lg" />
+                    <div className="shrink-0 w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-white/5 flex items-center justify-center shadow-inner">
+                      <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-xl" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-[var(--color-primary)]">{user.username}</p>
-                      <p className="text-[9px] text-[var(--color-primary)] opacity-25 uppercase tracking-[0.12em]">Operator</p>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-[var(--color-primary)] leading-none mb-1">
+                        {user.username}
+                      </span>
+                      <span className="text-[10px] text-[var(--color-primary)] opacity-40 uppercase tracking-widest font-bold">
+                        Operator
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="py-1">
-                  <button
+                {/* Actions Section: Better hover & active states */}
+                <div className="p-1.5 space-y-0.5">
+                  <PanelButton
+                    icon="icon-[mdi--badge-account-outline]"
+                    label="Operator File"
                     onClick={() => { setPanelOpen(false); navigate("/user/me"); }}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-[var(--color-primary)] opacity-80 hover:opacity-100 hover:bg-[var(--color-surface)] transition"
-                  >
-                    <span className="icon-[mdi--badge-account-outline] text-base opacity-50" />
-                    Operator File
-                  </button>
-                  <button
+                  />
+                  <PanelButton
+                    icon="icon-[mdi--tune-variant]"
+                    label="System Prefs"
                     onClick={() => { setPanelOpen(false); navigate("/settings"); }}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-[var(--color-primary)] opacity-80 hover:opacity-100 hover:bg-[var(--color-surface)] transition"
-                  >
-                    <span className="icon-[mdi--tune-variant] text-base opacity-50" />
-                    System Prefs
-                  </button>
+                  />
                 </div>
 
-                <div className="mt-1 pt-1 border-t border-[var(--color-border-soft)]">
+                {/* Footer: Dangerous action separation */}
+                <div className="p-1.5 border-t border-[var(--color-border-soft)] bg-black/10">
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-2.5 flex items-center gap-3 text-left text-sm text-[var(--color-primary)] opacity-40 hover:opacity-100 hover:text-[var(--sidebar-active-hot)] transition"
+                    className="w-full px-3 py-2 flex items-center gap-3 text-left text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
                   >
                     <span className="icon-[mdi--power-standby] text-base" />
                     Terminate Session

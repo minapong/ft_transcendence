@@ -46,7 +46,7 @@ export default function SidebarLink({ label, href, icon, iconActive, active, col
 			onPointerUp={handlePointerUp}
 			onPointerCancel={handlePointerLeave}
 			title={collapsed ? label : undefined}
-			className={`sidebar-link group rounded-lg flex items-center ${!collapsed ? "px-3 py-2.5 justify-between w-full" : "p-1.5 justify-center"} ${active ? "sidebar-link--active" : ""}`}
+			className={`sidebar-link fx-energy group rounded-lg flex items-center ${!collapsed ? "px-3 py-2.5 justify-between w-full" : "p-1.5 justify-center"} ${active ? "sidebar-link--active energy-focus" : "energy-none"} hover:energy-low`}
 		>
 			<span className={`flex items-center ${!collapsed ? "gap-4" : ""}`}>
 				<span className={`sidebar-icon-shell ${active ? "sidebar-icon-shell--active" : ""}`}>

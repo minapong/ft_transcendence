@@ -6,13 +6,13 @@ function PongAnimation() {
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
-        const frameId = { current: 0 }; // Mutable ref-like object for cleanup within this closure
+		const frameId = { current: 0 }; // Mutable ref-like object for cleanup within this closure
 
 		if (!canvas) {
 			console.log('Pong: Canvas ref missing on mount');
 			return;
 		}
-        
+
 		const ctx = canvas.getContext('2d');
 		if (!ctx) {
 			console.error('Pong: Canvas context missing');
@@ -24,7 +24,7 @@ function PongAnimation() {
 		const resizeCanvas = () => {
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Force clear on resize
+			ctx.clearRect(0, 0, canvas.width, canvas.height); // Force clear on resize
 		};
 		resizeCanvas();
 		window.addEventListener('resize', resizeCanvas);
@@ -40,7 +40,7 @@ function PongAnimation() {
 		};
 
 		// ... (paddles and other state omitted for brevity, they are local consts) ...
-        const paddleWidth = 12;
+		const paddleWidth = 12;
 		const paddleHeight = 120;
 		const paddleOffset = 60;
 		const leftPaddle = { x: paddleOffset, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, speed: 3.5 };
@@ -48,8 +48,8 @@ function PongAnimation() {
 		const trail: { x: number; y: number; opacity: number }[] = [];
 		const maxTrailLength = 15;
 
-        // Helper AI (embedded to access local constants)
-        const updatePaddleAI = (paddle: typeof leftPaddle, targetY: number) => {
+		// Helper AI (embedded to access local constants)
+		const updatePaddleAI = (paddle: typeof leftPaddle, targetY: number) => {
 			const paddleCenter = paddle.y + paddle.height / 2;
 			const diff = targetY - paddleCenter;
 			if (Math.abs(diff) > paddle.speed) paddle.y += diff > 0 ? paddle.speed : -paddle.speed;
@@ -76,22 +76,22 @@ function PongAnimation() {
 				ball.y = ball.y - ball.radius < 0 ? ball.radius : canvas.height - ball.radius;
 			}
 
-            // Paddle Collisions (Simplified logic)
+			// Paddle Collisions (Simplified logic)
 			const hitLeft = ball.x - ball.radius < leftPaddle.x + leftPaddle.width && ball.x + ball.radius > leftPaddle.x && ball.y > leftPaddle.y && ball.y < leftPaddle.y + leftPaddle.height;
 			const hitRight = ball.x + ball.radius > rightPaddle.x && ball.x - ball.radius < rightPaddle.x + rightPaddle.width && ball.y > rightPaddle.y && ball.y < rightPaddle.y + rightPaddle.height;
 
 			if (hitLeft || hitRight) {
 				ball.speedX = -ball.speedX;
-                const paddle = hitLeft ? leftPaddle : rightPaddle;
+				const paddle = hitLeft ? leftPaddle : rightPaddle;
 				const hitPos = (ball.y - paddle.y) / paddle.height - 0.5;
 				ball.speedY += hitPos * 2;
-                ball.speedX *= 1.05; ball.speedY *= 1.05;
-                const speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2);
+				ball.speedX *= 1.05; ball.speedY *= 1.05;
+				const speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2);
 				if (speed > ball.maxSpeed) { ball.speedX = (ball.speedX / speed) * ball.maxSpeed; ball.speedY = (ball.speedY / speed) * ball.maxSpeed; }
-                ball.x = hitLeft ? leftPaddle.x + leftPaddle.width + ball.radius : rightPaddle.x - ball.radius;
+				ball.x = hitLeft ? leftPaddle.x + leftPaddle.width + ball.radius : rightPaddle.x - ball.radius;
 			}
 
-            // Reset
+			// Reset
 			if (ball.x < -50 || ball.x > canvas.width + 50) {
 				ball.x = canvas.width / 2; ball.y = canvas.height / 2;
 				ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4; ball.speedY = (Math.random() - 0.5) * 4;
@@ -100,29 +100,29 @@ function PongAnimation() {
 
 			updatePaddleAI(leftPaddle, ball.y);
 			updatePaddleAI(rightPaddle, ball.y);
-            
-            // Resize updates
+
+			// Resize updates
 			leftPaddle.x = paddleOffset;
 			rightPaddle.x = canvas.width - paddleOffset - paddleWidth;
 
-            // Draw Trail
+			// Draw Trail
 			trail.forEach((point, index) => {
 				const opacity = (index / trail.length) * 0.8;
 				ctx.fillStyle = `rgba(0, 255, 255, ${opacity})`;
 				ctx.beginPath(); ctx.arc(point.x, point.y, ball.radius * (index / trail.length), 0, Math.PI * 2); ctx.fill();
 			});
 
-            // Draw Ball (Simplified glows for perf/rendering safety)
-            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
-            // Glows
-             const outerGlow = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ball.radius * 3);
-            outerGlow.addColorStop(0, 'rgba(0, 255, 255, 0.4)'); outerGlow.addColorStop(1, 'rgba(0, 255, 255, 0)');
-            ctx.fillStyle = outerGlow; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius * 3, 0, Math.PI * 2); ctx.fill();
+			// Draw Ball (Simplified glows for perf/rendering safety)
+			ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+			// Glows
+			const outerGlow = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ball.radius * 3);
+			outerGlow.addColorStop(0, 'rgba(0, 255, 255, 0.4)'); outerGlow.addColorStop(1, 'rgba(0, 255, 255, 0)');
+			ctx.fillStyle = outerGlow; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius * 3, 0, Math.PI * 2); ctx.fill();
 
-            // Draw Paddles
-            ctx.fillStyle = '#00ffff';
-            ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
-            ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
+			// Draw Paddles
+			ctx.fillStyle = '#00ffff';
+			ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
+			ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
 
 			// Draw center line - bright cyan
 			ctx.setLineDash([10, 15]);
@@ -134,7 +134,7 @@ function PongAnimation() {
 			ctx.stroke();
 			ctx.setLineDash([]);
 
-            // Loop
+			// Loop
 			frameId.current = requestAnimationFrame(animate);
 		};
 
@@ -143,7 +143,7 @@ function PongAnimation() {
 		return () => {
 			console.log('Pong: Unmounting, canceling frame', frameId.current);
 			window.removeEventListener('resize', resizeCanvas);
-            if (frameId.current) cancelAnimationFrame(frameId.current);
+			if (frameId.current) cancelAnimationFrame(frameId.current);
 		};
 	}, []);
 
@@ -219,7 +219,7 @@ export default function App() {
 
 						{/* PLAY Card */}
 						<button
-							className="group relative p-8 rounded-2xl text-left
+							className="group fx-energy energy-none hover:energy-low relative p-8 rounded-2xl text-left
 								transition-all duration-300 ease-out
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -243,20 +243,12 @@ export default function App() {
 								</ul>
 							</div>
 
-							{/* Hover glow */}
-							<div
-								className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
-									transition-opacity duration-300 -z-10"
-								style={{
-									background: 'var(--color-accent)',
-									filter: 'blur(40px)'
-								}}
-							/>
+							{/* Energy Layer handles the glow via pseudoelements */}
 						</button>
 
 						{/* TOURNAMENTS Card */}
 						<button
-							className="group relative p-8 rounded-2xl text-left
+							className="group fx-energy energy-none hover:energy-low relative p-8 rounded-2xl text-left
 								transition-all duration-300 ease-out
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -280,19 +272,12 @@ export default function App() {
 								</ul>
 							</div>
 
-							<div
-								className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
-									transition-opacity duration-300 -z-10"
-								style={{
-									background: 'var(--color-accent)',
-									filter: 'blur(40px)'
-								}}
-							/>
+							{/* Energy Layer handles the glow via pseudoelements */}
 						</button>
 
 						{/* WATCH Card */}
 						<button
-							className="group relative p-8 rounded-2xl text-left
+							className="group fx-energy energy-none hover:energy-low relative p-8 rounded-2xl text-left
 								transition-all duration-300 ease-out
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -315,14 +300,7 @@ export default function App() {
 								</ul>
 							</div>
 
-							<div
-								className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 
-									transition-opacity duration-300 -z-10"
-								style={{
-									background: 'var(--color-accent)',
-									filter: 'blur(40px)'
-								}}
-							/>
+							{/* Energy Layer handles the glow via pseudoelements */}
 						</button>
 					</div>
 
@@ -330,7 +308,7 @@ export default function App() {
 					<div className="flex flex-col sm:flex-row gap-4 items-center">
 						{/* Primary: Quick Play */}
 						<button
-							className="group relative px-12 py-4 rounded-xl text-xl font-bold tracking-wide
+							className="group fx-energy energy-high relative px-12 py-4 rounded-xl text-xl font-bold tracking-wide
 								transition-all duration-300 ease-out
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -339,7 +317,6 @@ export default function App() {
 								color: '#000000',
 								boxShadow: `
 									0 20px 40px rgba(0, 0, 0, 0.35),
-									0 0 28px color-mix(in srgb, var(--color-accent) 35%, transparent),
 									inset 0 1px 0 rgba(255, 255, 255, 0.3)
 								`,
 								outlineColor: 'var(--color-accent)'

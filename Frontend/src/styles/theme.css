@@ -2,27 +2,29 @@
   --color-primary: #ffffff;
   --color-accent: #22d3ee;
   --color-accent-soft: #0093d7;
-  
+
   /* Surface tier — cards and components */
   --color-surface: rgba(255, 255, 255, 0.04);
   --color-surface-strong: rgba(255, 255, 255, 0.08);
-  
+
   /* Panel tier — command surfaces above cards */
   --color-panel: rgba(6, 12, 30, 0.94);
   --color-panel-border: rgba(255, 255, 255, 0.08);
-  
+
   /* Neutral borders (accents removed, disappeared by default) */
   --color-border-soft: rgba(255, 255, 255, 0.04);
   --color-border-strong: rgba(255, 255, 255, 0.12);
   --header-height: clamp(68px, 8vh, 82px);
-  
-  --color-navpanel: #020c1f; /* desaturated, silhouette framing */
+
+  --color-navpanel: #020c1f;
+  /* desaturated, silhouette framing */
   --sidebar-bg: var(--color-navpanel);
   --sidebar-border: var(--color-border-soft);
   --sidebar-toggle-bg: rgba(255, 255, 255, 0.05);
   --sidebar-toggle-border: var(--color-border-strong);
   --sidebar-toggle-text: var(--color-accent);
-  --sidebar-toggle-hover-bg: rgba(255, 255, 255, 0.08); /* surface hover, not accent */
+  --sidebar-toggle-hover-bg: rgba(255, 255, 255, 0.08);
+  /* surface hover, not accent */
   --sidebar-toggle-hover-text: #000000;
   --sidebar-link-bg: var(--color-surface);
   --sidebar-link-border: var(--color-border-soft);
@@ -32,16 +34,31 @@
   --sidebar-active-text: var(--color-primary);
   --sidebar-active-glow: var(--color-accent);
   --sidebar-active-sheen: var(--color-accent-soft);
-  --sidebar-active-hot: #ff1f4b; /* danger/urgency only — never decorative */
+  --sidebar-active-hot: #ff1f4b;
+  /* danger/urgency only — never decorative */
 
   /* relative heights */
   --spacing-height-offset: 10vh;
   --spacing-body-screenHeight: 90vh;
-  --spacing-width-offset:15vw;
-  --spacing-width-screen:85vw;
+  --spacing-width-offset: 15vw;
+  --spacing-width-screen: 85vw;
 
   /* gradient — increased contrast, darker bottom for visual lift */
-  --color-start:#0f172a;
+  --color-start: #0f172a;
   --color-mid: #0a1022;
-  --color-end:#050b1a;
-} 
+  --color-end: #050b1a;
+  /* Energy Layer DNA */
+  --energy-color-start: color-mix(in srgb, var(--color-accent) 60%, transparent);
+  --energy-color-end: color-mix(in srgb, var(--color-accent-soft) 40%, transparent);
+
+  /* State Intensity (Opacity) */
+  --energy-opacity-low: 0.15;
+  --energy-opacity-medium: 0.45;
+  --energy-opacity-high: 0.65;
+  --energy-opacity-critical: 0.85;
+
+  /* Structural & Ambient Animation */
+  --energy-blur: 32px;
+  --energy-duration: 30s;
+  --energy-bleed: -12px;
+}
