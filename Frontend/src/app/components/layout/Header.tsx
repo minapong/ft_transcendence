@@ -54,9 +54,8 @@ export default function Header({ onMenuToggle, showMenuButton }) {
   }, [panelOpen]);
 
   const handleLogout = () => {
-    logout();
     setPanelOpen(false);
-    navigate("/auth/login");
+    logout();
   };
 
   const statusCards = [

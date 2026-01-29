@@ -1,5 +1,5 @@
 import rootLayout from "@/app/components/layout/RootLayout";
-import { resetHooks, flushEffects, runPendingRefs } from "./hooks";
+import { resetHooks, flushEffects, runPendingRefs, cleanupContext } from "./hooks";
 import { getRoutes, resolvePage } from "./router/routes";
 
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
@@ -37,6 +37,11 @@ export function renderRoute(triggerKey?: string) {
 
     // if page is not loaded or someone ordered layout re render through passing triggerKey props
     if (!inner || triggerKey?.startsWith(LAYOUT_KEY) || layoutNeedsUpdate) {
+      if (layoutNeedsUpdate) {
+        const prevLayoutKey = isSpecial(lastKnownPath) ? "__layout__:special" : "__layout__:normal";
+        cleanupContext(prevLayoutKey);
+      }
+
       renderSubtree(
         () => rootLayout({ children: null }), //build the outer shell first
         root, // mount at root
