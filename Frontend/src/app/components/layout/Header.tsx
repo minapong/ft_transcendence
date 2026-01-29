@@ -215,7 +215,7 @@ export default function Header({ onMenuToggle, showMenuButton }) {
                   <PanelButton
                     icon="icon-[mdi--tune-variant]"
                     label="System Prefs"
-                    onClick={() => { setPanelOpen(false); navigate("/settings"); }}
+                    onClick={() => { setPanelOpen(false); navigate("user/settings"); }}
                   />
                 </div>
 
