@@ -1,6 +1,83 @@
 import { PongAI } from './pong_ai'
 
 
+let GAME_WIDTH : number;
+let GAME_HEIGHT : number;
+let WALL_WIDTH : number;
+
+let BALL_SIZE : number;
+
+let PADDLE_HEIGHT : number;
+let PADDLE_WIDTH : number;
+let PADDLE_DIST : number;
+
+
+let PLAYABLE_WIDTH : number;
+let PLAYABLE_HEIGHT : number;
+let LEFT_PADDLE_X : number;
+let RIGHT_PADDLE_X : number;
+
+function handle_parameters()
+{
+    let width = window.innerWidth;
+
+    if (width < 640) {
+    GAME_WIDTH = 320;
+    GAME_HEIGHT = 200;
+    WALL_WIDTH = 4;
+    BALL_SIZE = 12;
+    PADDLE_HEIGHT = 64;
+    PADDLE_WIDTH = 8;
+    PADDLE_DIST = 8;
+    }
+  else if (width < 1024) {
+    GAME_WIDTH = 400;
+    GAME_HEIGHT = 280;
+    WALL_WIDTH = 6;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 80;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 12;
+    }
+
+  else if (width < 1280){
+    GAME_WIDTH = 600;
+    GAME_HEIGHT = 380;
+    WALL_WIDTH = 8;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 80;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 16;
+    }
+	else 
+	{
+	GAME_WIDTH = 800;
+    GAME_HEIGHT = 500;
+    WALL_WIDTH = 8;
+    BALL_SIZE = 16;
+    PADDLE_HEIGHT = 96;
+    PADDLE_WIDTH = 12;
+    PADDLE_DIST = 16;
+	}
+	PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
+	PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
+	LEFT_PADDLE_X = PADDLE_DIST;
+	RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
+}
+
+window.addEventListener("resize", () => {
+  handle_parameters();
+});
+
+handle_parameters();
+
+const PADDLE_SPEED = 6;
+
+const GAME_SPEED = 2;
+
+const WIN_SCORE = 3;
+
+
 export function pongLogic(
     p1: string, 
     p2: string, 
@@ -9,171 +86,6 @@ export function pongLogic(
     aiDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
 )
 {
-	let GAME_WIDTH : number;
-	let GAME_HEIGHT : number;
-	let WALL_WIDTH : number;
-
-	let BALL_SIZE : number;
-
-	let PADDLE_HEIGHT : number;
-	let PADDLE_WIDTH : number;
-	let PADDLE_DIST : number;
-
-
-	let PLAYABLE_WIDTH : number;
-	let PLAYABLE_HEIGHT : number;
-	let LEFT_PADDLE_X : number;
-	let RIGHT_PADDLE_X : number;
-
-
-	let paddleY_Left : number;
-	let paddleY_Right : number;
-	// Initial ball position (centered in playable area)
-	let x : number;
-	let y : number;
-	let state : number = 0;
-
-	function handle_parameters()
-	{
-		let width = window.innerWidth;
-
-		if (width < 640) {
-			GAME_WIDTH = 320;
-			GAME_HEIGHT = 200;
-			WALL_WIDTH = 4;
-			BALL_SIZE = 12;
-			PADDLE_HEIGHT = 64;
-			PADDLE_WIDTH = 8;
-			PADDLE_DIST = 8;
-			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
-			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
-			if (state == 2)
-			{
-				paddleY_Left = paddleY_Left * (200/280);
-				paddleY_Right = paddleY_Right * (200/280);
-				x = x * (200/280);
-				y = y * (200/280);
-			}
-			else if (state == 0)
-			{
-				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				paddleY_Right = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
-				y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
-			}
-			state = 1;
-		}
-		else if (width < 1024) {
-			GAME_WIDTH = 400;
-			GAME_HEIGHT = 280;
-			WALL_WIDTH = 6;
-			BALL_SIZE = 16;
-			PADDLE_HEIGHT = 80;
-			PADDLE_WIDTH = 12;
-			PADDLE_DIST = 12;
-			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
-			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
-			if (state == 1)
-			{
-				paddleY_Left = paddleY_Left * (280/200);
-				paddleY_Right = paddleY_Right * (280/200);
-				x = x * (280/200);
-				y = y * (280/200);
-			}
-			else if (state == 3)
-			{
-				paddleY_Left = paddleY_Left * (280/380);
-				paddleY_Right = paddleY_Right * (280/380);
-				x = x * (280/380);
-				y = y * (280/380);
-			}
-			else if (state == 0)
-			{
-				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				paddleY_Right = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
-				y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
-			}
-			state = 2;
-		}
-
-		else if (width < 1280){
-			GAME_WIDTH = 600;
-			GAME_HEIGHT = 380;
-			WALL_WIDTH = 8;
-			BALL_SIZE = 16;
-			PADDLE_HEIGHT = 80;
-			PADDLE_WIDTH = 12;
-			PADDLE_DIST = 16;
-			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
-			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
-			if (state == 2)
-			{
-				paddleY_Left = paddleY_Left * (380/280);
-				paddleY_Right = paddleY_Right * (380/280);
-				x = x * (380/280);
-				y = y * (380/280);
-			}
-			else if (state == 4)
-			{
-				paddleY_Left = paddleY_Left * (380/500);
-				paddleY_Right = paddleY_Right * (380/500);
-				x = x * (380/500);
-				y = y * (380/500);
-			}
-			else if (state == 0)
-			{
-				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				paddleY_Right = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
-				y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
-			}
-			state = 3;
-		}
-		else 
-		{
-			GAME_WIDTH = 800;
-			GAME_HEIGHT = 500;
-			WALL_WIDTH = 8;
-			BALL_SIZE = 16;
-			PADDLE_HEIGHT = 96;
-			PADDLE_WIDTH = 12;
-			PADDLE_DIST = 16;
-			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
-			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
-			if (state == 3)
-			{
-				paddleY_Left = paddleY_Left * (500/380);
-				paddleY_Right = paddleY_Right * (500/380);
-				x = x * (500/380);
-				y = y * (500/380);
-			}
-			else if (state == 0)
-			{
-				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				paddleY_Right = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
-				x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
-				y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
-			}
-			state = 4;
-		}
-		LEFT_PADDLE_X = PADDLE_DIST;
-		RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
-	}
-
-	window.addEventListener("resize", () => {
-	handle_parameters();
-	});
-
-	handle_parameters();
-
-	const PADDLE_SPEED = 6;
-
-	const GAME_SPEED = 2;
-
-	const WIN_SCORE = 3;
-
-
     const ball = document.getElementById('ball');
     const left_p = document.getElementById('left_p');
     const right_p = document.getElementById('right_p');
@@ -187,9 +99,15 @@ export function pongLogic(
 
 
 
+	// Initial ball position (centered in playable area)
+	let x = PLAYABLE_WIDTH / 2 - BALL_SIZE / 2;
+	let y = PLAYABLE_HEIGHT / 2 - BALL_SIZE / 2;
 
     let dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
     let dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
+
+    let paddleY_Left = (GAME_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
+    let paddleY_Right = (GAME_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
 
     let upPressed = false;
     let downPressed = false;

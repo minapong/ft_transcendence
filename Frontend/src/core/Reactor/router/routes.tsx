@@ -33,7 +33,7 @@ export function getRoutes(): RouteMap {
       .replace("/src/app/pages", "")
       .replace(/index\.tsx$/, "")
       .replace(/\.tsx$/, "");
-    
+
     // Normalize trailing slash
     if (route.endsWith("/")) route = route.slice(0, -1);
     if (route === "") route = "/";
@@ -43,7 +43,7 @@ export function getRoutes(): RouteMap {
     // Check for dynamic segments: [param]
     if (route.includes("[")) {
       const paramNames: string[] = [];
-      
+
       // Convert [param] to named capture groups
       // /user/[id] → ^/user/([^/]+)$
       const patternStr = route.replace(/\[([^\]]+)\]/g, (_, paramName) => {
@@ -63,10 +63,10 @@ export function getRoutes(): RouteMap {
   }
 
   cache = { static: staticRoutes, dynamic: dynamicRoutes };
-  
+
   console.log("🧭 static routes:", Object.keys(staticRoutes));
   console.log("🧭 dynamic routes:", dynamicRoutes.map(r => r.path));
-  
+
   return cache;
 }
 
@@ -76,19 +76,18 @@ export function getRoutes(): RouteMap {
  */
 export function resolvePage(routes: RouteMap, rawPath: string) {
   const original = rawPath;
-  
+
   // Normalize: collapse slashes, remove trailing slash, strip query/hash
   let path = rawPath.replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
-  if (original !== path) history.replaceState({}, "", path);
   path = path.split(/[?#]/)[0];
 
-  // 1. Try static route (case-insensitive lookup)
+  // try static route (case-insensitive lookup)
   const staticComponent = routes.static[path.toLowerCase()];
   if (staticComponent) {
-    return staticComponent;
+    return { component: staticComponent, params: {} };
   }
 
-  // 2. Try dynamic routes
+  // try dynamic routes
   for (const route of routes.dynamic) {
     const match = path.match(route.pattern);
     if (match) {
@@ -97,12 +96,12 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
       route.paramNames.forEach((name, i) => {
         params[name] = match[i + 1];
       });
-      
-      // Return component with params injected
-      return () => route.component(params);
+
+      // Return component with params
+      return { component: route.component, params: params };
     }
   }
 
   // 3. Not found
-  return routes.static["/notfound"];
+  return { component: routes.static["/notfound"], params: {} };
 }

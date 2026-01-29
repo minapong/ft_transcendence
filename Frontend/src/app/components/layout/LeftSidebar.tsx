@@ -1,220 +1,267 @@
-import { useRef, useEffect, useState } from "Reactor";
-import { animate } from "motion";
+import SidebarLink from "@/app/components/ui/SidebarLink"
+import { navigate, useEffect, useRef, useState, useCallback } from "Reactor"
+import { useLocation } from "Reactor/router/useLocation"
+import { animate, stagger } from "motion"
 
 const links = [
-  { label: "Home", href: "/", icon: "icon-[solar--home-smile-bold-duotone]", iconActive: "icon-[solar--home-smile-linear]" },
-  { label: "Tournament", href: "/tournament/start", icon: "icon-[solar--cup-star-bold-duotone]", iconActive: "icon-[solar--cup-star-linear]" },
-  { label: "Pong", href: "/game/single_game", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
-  { label: "Connect4", href: "/game/connect4_single", icon: "icon-[solar--widget-5-bold-duotone]", iconActive: "icon-[solar--widget-5-linear]" },
-  { label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
-  { label: "Dashboard", href: "/dashboard", icon: "icon-[solar--chart-square-bold-duotone]", iconActive: "icon-[solar--chart-square-linear]" },
-
+	{ label: "Home", href: "/", icon: "icon-[solar--home-smile-bold-duotone]", iconActive: "icon-[solar--home-smile-linear]" },
+	{ label: "Tournament", href: "/tournament/start", icon: "icon-[solar--cup-star-bold-duotone]", iconActive: "icon-[solar--cup-star-linear]" },
+	{ label: "Pong", href: "/game/single_game", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
+	{ label: "Connect4", href: "/game/connect4_single", icon: "icon-[solar--widget-5-bold-duotone]", iconActive: "icon-[solar--widget-5-linear]" },
+	{ label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
+	{ label: "Dashboard", href: "/dashboard", icon: "icon-[solar--chart-square-bold-duotone]", iconActive: "icon-[solar--chart-square-linear]" },
 ];
 
 interface SidebarProps {
-  screen: "mobile" | "tablet" | "desktop";
-  open: boolean;
-  setOpen: (v: boolean | ((p: boolean) => boolean)) => void;
+	isOverlayOpen: boolean;
+	setIsOverlayOpen?: (v: boolean | ((p: boolean) => boolean)) => void;
+	isCollapsed?: boolean;
 }
+export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false }: SidebarProps & { mode: "overlay" | "static" }) {
 
-export default function Sidebar({ screen, open, setOpen }: SidebarProps) {
-  const [activePath, setActivePath] = useState(normalizePath(window.location.pathname));
+	const activePath = normalizePath(useLocation());
+	const [pendingPath, setPendingPath] = useState<string | null>(null);
+	const resolvedPath = mode === "overlay" ? (pendingPath ?? activePath) : activePath;
 
-  const sidebarRef = useRef<HTMLElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const toggleIconRef = useRef<HTMLSpanElement>(null);
+	const asideRef = useRef<HTMLDivElement | null>(null);
+	const backdropRef = useRef<HTMLDivElement | null>(null);
+	const navRef = useRef<HTMLElement | null>(null);
+	const isClosingRef = useRef(false);
 
-  /* ---------------- routing ---------------- */
+	// Sync pendingPath only after the overlay is fully closed.
+	// This prevents the active link from snapping back mid-animation.
+	useEffect(() => {
+		if (mode !== "overlay") return;
+		if (!isOverlayOpen) setPendingPath(null);
+	}, [activePath, isOverlayOpen, mode]);
 
-  useEffect(() => {
-    const onPop = () => setActivePath(normalizePath(window.location.pathname));
-    window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
-  }, []);
+	// IMPROVED CLOSING: Trigger animation BEFORE unmounting in overlay mode
+	const closeAndNavigate = useCallback((href?: string) => {
+		if (isClosingRef.current) return;
+		if (href && mode === "overlay") setPendingPath(normalizePath(href));
 
-  /* ---------------- scroll lock ---------------- */
+		if (mode === "static") {
+			if (href) navigate(href);
+			return;
+		}
 
-  useEffect(() => {
-    if (open && screen !== "desktop") {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open, screen]);
+		const aside = asideRef.current;
+		const backdrop = backdropRef.current;
+		if (!aside) return;
 
-  /* ---------------- sidebar motion ---------------- */
+		isClosingRef.current = true;
 
-  useEffect(() => {
-    if (!sidebarRef.current) return;
+		// Play exit animations
+		const asideAnim = animate(aside, { x: "-100%" }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
+		const backdropAnim = backdrop ? animate(backdrop, { opacity: 0 }, { duration: 0.25 }) : null;
 
-    // On mobile/tablet: slide in/out based on open state
-    // On desktop: always visible (no x transform needed)
-    const targetX = screen === "desktop" ? 0 : (open ? 0 : "-100%");
+		// Wait for both to finish before cleanup
+		Promise.all([asideAnim.finished, backdropAnim?.finished || Promise.resolve()]).then(() => {
+			isClosingRef.current = false;
+			if (setIsOverlayOpen) setIsOverlayOpen(false);
+			if (href) navigate(href);
+			window.dispatchEvent(new Event("sidebar:resume"));
+		});
+	}, [mode, setIsOverlayOpen, setPendingPath]); // navigate is stable via Reactor/render
 
-    animate(
-      sidebarRef.current,
-      { x: targetX },
-      { duration: 0.45, ease: [0.4, 0, 0.2, 1] }
-    );
-  }, [open, screen]);
+	// INITIAL POSITION (No-Clobber)
+	// We set the initial state manually to prevent React's 'style' prop from overriding animations on re-render
+	useEffect(() => {
+		if (mode !== "overlay" || !asideRef.current) return;
+		if (!isOverlayOpen) {
+			asideRef.current.style.transform = "translateX(-100%)";
+		}
+	}, [mode]); // Only runs when switching TO overlay mode
 
-  /* ---------------- backdrop motion ---------------- */
 
-  useEffect(() => {
-    if (!backdropRef.current) return;
+	// OVERLAY ANIMATION CONTROLLER
+	useEffect(() => {
+		if (mode !== "overlay") return;
+		const aside = asideRef.current;
+		const backdrop = backdropRef.current;
+		const nav = navRef.current;
+		if (!aside) return;
 
-    animate(
-      backdropRef.current,
-      { opacity: open && screen !== "desktop" ? 1 : 0 },
-      { duration: 0.25, ease: "easeOut" }
-    );
-  }, [open, screen]);
+		if (isOverlayOpen) {
+			// Entrance: We specify 'from' as -100 to ensure we slide even if snapped
+			animate(aside, { x: [-100, 0] }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
+			if (backdrop) {
+				animate(backdrop, { opacity: [0, 1] }, { duration: 0.25 });
+				backdrop.style.pointerEvents = "auto";
+			}
 
-  /* ---------------- toggle icon motion ---------------- */
+			// Staggered Entrance for Links
+			if (nav) {
+				animate(
+					Array.from(nav.children),
+					{ opacity: [0, 1], x: [-16, 0] },
+					{ delay: stagger(0.04), duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }
+				);
+			}
+		} else {
+			// Initial/Snapped Position
+			animate(aside, { x: "-100%" }, { duration: 0 });
+			if (backdrop) {
+				animate(backdrop, { opacity: 0 }, { duration: 0 });
+				backdrop.style.pointerEvents = "none";
+			}
+		}
+	}, [mode, isOverlayOpen]);
 
-  useEffect(() => {
-    if (!toggleIconRef.current) return;
+	// Body lock & Inert for Overlay
+	useEffect(() => {
+		if (mode !== "overlay") return;
+		const root = document.getElementById("spa-root");
+		if (isOverlayOpen) {
+			document.body.style.overflow = "hidden";
+			root?.setAttribute("inert", "");
+		} else {
+			document.body.style.overflow = "";
+			root?.removeAttribute("inert");
+		}
+		return () => {
+			document.body.style.overflow = "";
+			root?.removeAttribute("inert");
+		}
+	}, [mode, isOverlayOpen]);
 
-    animate(
-      toggleIconRef.current,
-      { rotate: open ? 180 : 0 },
-      { duration: 0.25, ease: "easeInOut" }
-    );
-  }, [open]);
+	// DESKTOP (STATIC) FOLDING: The Cinematic Illusion
+	useEffect(() => {
+		if (mode !== "static" || !asideRef.current) return;
 
-  const handleLinkClick = (path: string) => {
-    setActivePath(normalizePath(path));
-    if (screen !== "desktop") setOpen(false);
-  };
+		// Direct width animation for smooth layout + reclaimed space
+		animate(
+			asideRef.current,
+			{
+				width: isCollapsed ? "0px" : "18rem",
+				opacity: isCollapsed ? 0 : 1,
+			},
+			{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }
+		);
 
-  return (
-    <>
-      <div className="lg:sticky lg:top-[var(--header-height)] lg:h-[calc(100vh-var(--header-height))] z-50">
+		// Staggered Link reaction for Desktop
 
-        {/* Toggle button */}
-        <button
-          onClick={() => setOpen(v => !v)}
-          aria-expanded={open}
-          aria-label="Toggle sidebar"
-          className="z-[70] flex items-center justify-center h-8 w-8 rounded-md border sidebar-toggle fixed top-3 left-4 lg:absolute lg:top-3 lg:right-3 lg:left-auto"
-        >
-          <span
-            ref={toggleIconRef}
-            className="icon-[solar--sidebar-minimalistic-bold-duotone] text-xl"
-          />
-        </button>
+		// Staggered Link reaction for Desktop
+		if (navRef.current) {
+			animate(
+				Array.from(navRef.current.children),
+				{
+					opacity: isCollapsed ? 0 : 1,
+					x: isCollapsed ? -12 : 0
+				},
+				{
+					delay: stagger(0.03, { from: isCollapsed ? "last" : "first" }),
+					duration: 0.2
+				}
+			);
+		}
+	}, [mode, isCollapsed]);
 
-        {/* Backdrop */}
-        <div
-          ref={backdropRef}
-          className={`fixed inset-0 bg-black/60 z-40 ${screen === "desktop" || !open ? "pointer-events-none" : ""} ${screen === "desktop" ? "hidden" : ""}`}
-          style={{ opacity: open && screen !== "desktop" ? 1 : 0 }}
-          onClick={() => setOpen(false)}
-        />
+	// EXTERNAL CLOSE TRIGGER
+	useEffect(() => {
+		const handleClose = () => closeAndNavigate();
+		window.addEventListener("sidebar:close", handleClose);
+		return () => window.removeEventListener("sidebar:close", handleClose);
+	}, [closeAndNavigate]);
 
-        {/* Sidebar */}
-        <aside
-          ref={sidebarRef}
-          role="navigation"
-          aria-label="Main navigation"
-          style={{
-            transform: screen !== "desktop" && !open ? "translateX(-100%)" : "translateX(0)"
-          }}
-          className={`
-            sidebar-shell fixed inset-y-0 left-0 z-50
-            w-full md:w-64
-            lg:relative lg:h-full lg:inset-auto lg:z-auto
-            ${open ? "lg:w-72 lg:px-6" : "lg:w-16 lg:px-2"}
-            pt-16 overflow-visible
-            ${screen !== "desktop" && !open ? "pointer-events-none" : ""}
-          `}
-        >
-          <nav className={`flex flex-col ${open ? "mt-6 gap-3.5 px-4" : "lg:mt-10 lg:gap-5 lg:items-center w-full"}`}>
-            {links.map(link => (
-              <SidebarLink
-                link={link}
-                activePath={activePath}
-                open={open}
-                onLinkClick={handleLinkClick}
-              />
-            ))}
-          </nav>
-        </aside>
-      </div>
-    </>
-  );
-}
+	function isActive(current: string, target: string) {
+		return current === target || current.startsWith(target + "/");
+	}
 
-/* ---------------- SidebarLink ---------------- */
+	if (mode === "static") {
+		return (
+			<aside
+				ref={asideRef}
+				role="navigation"
+				aria-label="Main navigation"
+				className="sidebar-shell bg-(--color-surface) h-full overflow-hidden flex-shrink-0 z-30 border-r border-(--color-border-soft) flex flex-col origin-left will-change-[width,opacity]"
+			>
+				<div className="w-72 flex-shrink-0">
+					<nav ref={navRef as any} className="flex flex-col gap-3.5 px-3 pt-6">
+						{links.map(link => (
+							<SidebarLink
+								label={link.label}
+								href={link.href}
+								icon={link.icon}
+								iconActive={link.iconActive}
+								active={isActive(resolvedPath, link.href)}
+								collapsed={isCollapsed}
+								onClick={() => { if (link.href) navigate(link.href); }}
+							/>
+						))}
+					</nav>
+				</div>
+			</aside>
+		);
+	}
 
-interface SidebarLinkProps {
-  link: (typeof links)[0];
-  activePath: string;
-  open: boolean;
-  onLinkClick: (path: string) => void;
-}
+	// OVERLAY RENDER: Permanent DOM with visibility/pointer control
+	if (mode === "overlay") {
+		return (
+			<div
+				className="z-[110]"
+				style={{
+					opacity: isOverlayOpen ? 1 : 0,
+					pointerEvents: isOverlayOpen ? "auto" : "none",
+				}}
+			>
+				<div
+					ref={backdropRef}
+					className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[111]"
+					style={{ opacity: 0 }}
+					onClick={() => closeAndNavigate()}
+				/>
 
-function SidebarLink({ link, activePath, open, onLinkClick }: SidebarLinkProps) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const isActive = activePath === link.href;
+				<aside
+					ref={asideRef}
+					role="navigation"
+					aria-label="Main navigation"
+					className="sidebar-shell fixed inset-y-0 left-0 z-[112] w-[80vw] max-w-88 pt-6 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] shadow-2xl"
+				>
+					<div className="flex items-center justify-between px-6 mb-8 mt-2">
+						<div className="flex items-center gap-2.5 text-accent">
+							<div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center">
+								<span className="icon-[solar--layers-bold-duotone] text-lg" />
+							</div>
+							<div className="flex flex-col gap-0.5">
+								<span className="text-[10px] font-black tracking-[0.25em] text-accent/50 uppercase leading-none">System</span>
+								<span className="text-xs font-bold tracking-[0.1em] text-primary/80 uppercase">Navigation</span>
+							</div>
+						</div>
 
-  // Direct event handlers - re-attached on every render (Reactor-compatible)
-  const handlePointerEnter = () => {
-    if (!ref.current) return;
-    animate(ref.current, { scale: 1.05 }, { duration: 0.15, ease: "easeOut" });
-  };
+						<button
+							onClick={() => closeAndNavigate()}
+							className="w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-soft)] text-accent flex items-center justify-center hover:bg-[var(--color-surface-strong)] transition-all active:scale-95 group shadow-lg shadow-black/20"
+							aria-label="Close sidebar"
+						>
+							<span className="icon-[solar--close-circle-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-300" />
+						</button>
+					</div>
 
-  const handlePointerLeave = () => {
-    if (!ref.current) return;
-    animate(ref.current, { scale: 1 }, { duration: 0.2, ease: "easeInOut" });
-  };
+					<nav ref={navRef as any} className="flex flex-col gap-3 px-4">
+						{links.map(link => (
+							<SidebarLink
+								label={link.label}
+								href={link.href}
+								icon={link.icon}
+								iconActive={link.iconActive}
+								active={isActive(resolvedPath, link.href)}
+								collapsed={false}
+								onClick={() => closeAndNavigate(link.href)}
+							/>
+						))}
+					</nav>
+				</aside>
+			</div>
+		);
+	}
 
-  const handlePointerDown = () => {
-    if (!ref.current) return;
-    animate(ref.current, { scale: 0.96 }, { duration: 0.08 });
-  };
-
-  const handlePointerUp = () => {
-    if (!ref.current) return;
-    // Check if still hovering to decide which scale to return to
-    const isHovering = ref.current.matches(":hover");
-    animate(
-      ref.current,
-      { scale: isHovering ? 1.05 : 1 },
-      { duration: 0.2, ease: "easeInOut" }
-    );
-  };
-
-  return (
-    <a
-      ref={ref}
-      href={link.href}
-      onClick={() => onLinkClick(link.href)}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerLeave}
-      title={!open ? link.label : undefined}
-      className={`sidebar-link group rounded-lg flex items-center ${open ? "px-3 py-2.5 justify-between w-full" : "p-1.5 justify-center"} ${isActive ? "sidebar-link--active" : ""}`}
-    >
-      <span className={`flex items-center ${open ? "gap-4" : ""}`}>
-        <span className={`sidebar-icon-shell ${isActive ? "sidebar-icon-shell--active" : ""}`}>
-          <span className={`${isActive ? link.iconActive : link.icon} ${isActive ? "sidebar-icon--active" : ""} text-xl`} />
-        </span>
-        <span className={open ? "font-medium" : "sr-only"}>{link.label}</span>
-      </span>
-
-      {open && <span className="icon-[solar--arrow-right-bold] text-xl opacity-50" />}
-    </a>
-  );
+	return null;
 }
 
 /* ---------------- utils ---------------- */
 
 function normalizePath(raw: string) {
-  return raw.toLowerCase().replace(/\/+$/, "") || "/";
+	const p = raw.toLowerCase().replace(/\/+$/, "");
+	return p === "" ? "/" : p;
 }

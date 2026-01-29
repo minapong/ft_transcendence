@@ -33,18 +33,27 @@ function applyProps(el: HTMLElement, props: any) {
 
 // Creates a custom element or component, applying props and attaching children.
 export function createReactor(tag: any, props: any, ...children: any[]) {
+	const p = props || {};
+
+	// Handle forwardRef objects
+	if (tag && typeof tag === "object" && tag.$$typeof === Symbol.for('reactor.forward_ref')) {
+		const { ref, ...restProps } = p;
+		return tag.render({ ...restProps, children }, ref);
+	}
+
 	if (typeof tag === "function") {
-		const rendered = tag({ ...(props || {}), children });
+		const rendered = tag({ ...p, children });
 		if (rendered instanceof HTMLElement) {
-			const p = props || {};
 			// merge className
 			if (p.className) {
 				rendered.className = rendered.className
 					? rendered.className + " " + p.className
 					: p.className;
 			}
-			// apply props except className/children
-			const { className, children: _c, ...rest } = p;
+			// apply props except className/children/ref
+			// We exclude 'ref' here because it should be handled inside the component 
+			// if it's a component, or handled by forwardRef above.
+			const { className, children: _c, ref, ...rest } = p;
 			applyProps(rendered, rest);
 		}
 		return rendered;
@@ -53,8 +62,19 @@ export function createReactor(tag: any, props: any, ...children: any[]) {
 	// Append children before applying props so form controls (like <select>)
 	// can correctly pick up their value/selection after options exist.
 	for (const child of children.flat()) attachChild(el, child);
-	applyProps(el, props);
+	applyProps(el, p);
 	return el;
+}
+
+/**
+ * forwardRef helper
+ * Usage: const MyComp = forwardRef((props, ref) => <div ref={ref} />)
+ */
+export function forwardRef(render: any) {
+	return {
+		$$typeof: Symbol.for('reactor.forward_ref'),
+		render
+	};
 }
 
 // Attaches a child node to a parent DOM element, handling various child types.

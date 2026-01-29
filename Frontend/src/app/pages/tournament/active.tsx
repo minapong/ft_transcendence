@@ -1,4 +1,4 @@
-import {useState, useEffect, navigate} from "Reactor"
+import { useState, useEffect, navigate } from "Reactor"
 import { getAuth } from "@/core/lib/auth"
 import { apiFetch } from "@/core/lib/api"
 // Temporary placeholder user — replace with real login context later
@@ -35,7 +35,7 @@ export default function ActiveTournamentPage() {
   function handleStartGame(match: any) {
     if (!currentUser) {
       alert("Please login");
-      return; 
+      return;
     }
     const isPlayer =
       match.p1.id === currentUser.id || match.p2.id === currentUser.id;
@@ -113,7 +113,7 @@ export default function ActiveTournamentPage() {
       <div className="text-lg font-bold">
         Logged in as:{" "}
         <span className="text-cyan-400">
-         {currentUser?.username ?? "Guest"} - ID: {currentUser?.id ?? "—"}
+          {currentUser?.username ?? "Guest"} - ID: {currentUser?.id ?? "—"}
         </span>
       </div>
 
@@ -129,7 +129,7 @@ export default function ActiveTournamentPage() {
           {pendingMatches.map((match: any) => (
             <div
               key={match.id}
-              className="bg-gray-800 p-6 rounded-2xl shadow-lg text-center"
+              className="fx-energy energy-low bg-gray-800 p-6 rounded-2xl shadow-lg text-center"
             >
               <p className="text-xl mb-4">
                 <strong>{match.p1.name}</strong> vs{" "}
