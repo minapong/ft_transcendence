@@ -7,10 +7,12 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=file:./transcendence.db
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=super-dev-secret-change-me1
     restart: always
     networks:
       - app_net
+    env_file: 
+      - ./Backend/.env
 
   nginx:
     image: ${IMAGE_FRONTEND:-transcendence-frontend:local}
@@ -23,8 +25,8 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:8080"
+      # - "443:443"
     networks:
       - app_net
     restart: always
