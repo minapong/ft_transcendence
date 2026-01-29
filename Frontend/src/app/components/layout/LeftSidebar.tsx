@@ -26,14 +26,18 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 	const asideRef = useRef<HTMLDivElement | null>(null);
 	const backdropRef = useRef<HTMLDivElement | null>(null);
 	const navRef = useRef<HTMLElement | null>(null);
+	const isClosingRef = useRef(false);
 
-	// Sync pendingPath with actual activePath
+	// Sync pendingPath only after the overlay is fully closed.
+	// This prevents the active link from snapping back mid-animation.
 	useEffect(() => {
-		setPendingPath(null);
-	}, [activePath]);
+		if (mode !== "overlay") return;
+		if (!isOverlayOpen) setPendingPath(null);
+	}, [activePath, isOverlayOpen, mode]);
 
 	// 1. IMPROVED CLOSING: Trigger animation BEFORE unmounting in overlay mode
 	const closeAndNavigate = useCallback((href?: string) => {
+		if (isClosingRef.current) return;
 		if (href && mode === "overlay") setPendingPath(normalizePath(href));
 
 		if (mode === "static") {
@@ -45,12 +49,15 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		const backdrop = backdropRef.current;
 		if (!aside) return;
 
+		isClosingRef.current = true;
+
 		// Play exit animations
 		const asideAnim = animate(aside, { x: "-100%" }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
 		const backdropAnim = backdrop ? animate(backdrop, { opacity: 0 }, { duration: 0.25 }) : null;
 
 		// Wait for both to finish before cleanup
 		Promise.all([asideAnim.finished, backdropAnim?.finished || Promise.resolve()]).then(() => {
+			isClosingRef.current = false;
 			if (setIsOverlayOpen) setIsOverlayOpen(false);
 			if (href) navigate(href);
 			window.dispatchEvent(new Event("sidebar:resume"));
