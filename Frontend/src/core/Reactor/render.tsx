@@ -107,6 +107,9 @@ export function navigate(
     window.dispatchEvent(new Event("routechange"));
   }
 
+  // Always render to ensure UI matches current state, 
+  // unless it's a redundant push that wouldn't change anything.
+  // BUT we render anyway because state might have changed.
   renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
 }
 

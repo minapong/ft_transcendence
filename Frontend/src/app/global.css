@@ -28,3 +28,51 @@
         text-decoration: none;
     }
 }
+
+@layer components {
+    .input-shell {
+        width: 100%;
+        padding: 0.625rem 1rem;
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        outline: none;
+    }
+
+    .input-shell::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    .input-shell:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .input-shell--error {
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .input-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #6b7280;
+        /* Tailwind gray-500 */
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+
+    .input-error-msg {
+        font-size: 10px;
+        color: rgba(248, 113, 113, 0.8);
+        /* Tailwind red-400 */
+        font-weight: 500;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: -0.025em;
+    }
+}

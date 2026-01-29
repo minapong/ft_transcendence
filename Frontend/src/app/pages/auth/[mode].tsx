@@ -1,4 +1,4 @@
-import { useRef, navigate, useEffect, useLocation } from "Reactor";
+import { useRef, navigate, useEffect, useLocation, useState } from "Reactor";
 import { setAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
 import { connectPresenceWS } from "@/core/lib/presence";
@@ -13,16 +13,19 @@ type AuthForm = {
     username?: string;
 };
 
+type ValidationError = {
+    field: "email" | "password" | "username" | "general";
+    message: string;
+};
+
 /**
- * Pure validation logic.
- * Returns error string if invalid, null if valid.
+ * Pure, classified validation logic.
  */
-function validateAuth(mode: AuthMode, data: AuthForm): string | null {
-    if (!data.email || !data.password) {
-        return "Missing email or password";
-    }
+function validateAuth(mode: AuthMode, data: AuthForm): ValidationError | null {
+    if (!data.email) return { field: "email", message: "Endpoint address required" };
+    if (!data.password) return { field: "password", message: "Security key required" };
     if (mode === "signup" && !data.username) {
-        return "Username is required for signup";
+        return { field: "username", message: "Network handle required" };
     }
     return null;
 }
@@ -30,9 +33,10 @@ function validateAuth(mode: AuthMode, data: AuthForm): string | null {
 export default function AuthPage() {
     const auth = useAuth();
     const location = useLocation();
+    const [uiError, setUiError] = useState<ValidationError | null>(null);
 
-    // Step 1: Derive mode from routing (URL is the source of truth)
-    const mode: AuthMode = location.includes("signup") ? "signup" : "login";
+    // Step 1: Derive mode from routing (URL segments are the source of truth)
+    const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
 
     useEffect(() => {
         if (auth?.token) navigate("/user/me", { replace: true });
@@ -47,16 +51,20 @@ export default function AuthPage() {
     const handleSubmit = async (e: any) => {
         e?.preventDefault?.();
 
+        // 1. Capture data immediately BEFORE any state-triggered re-renders
         const data: AuthForm = {
             email: emailRef.current?.value || "",
             password: passwordRef.current?.value || "",
             username: usernameRef.current?.value || ""
         };
 
-        // Step 8: Use pure validation
+        // 2. Now clear errors and proceed
+        setUiError(null);
+
+        // Step 8: Use classified validation
         const validationError = validateAuth(mode, data);
         if (validationError) {
-            alert(validationError); // Still using alert for now, but logic is decoupled
+            setUiError(validationError);
             return;
         }
 
@@ -75,7 +83,7 @@ export default function AuthPage() {
             const resData = await res.json();
 
             if (!res.ok) {
-                alert(resData.error || `${mode} failed`);
+                setUiError({ field: "general", message: resData.error || `${mode} failed` });
                 return;
             }
 
@@ -84,7 +92,7 @@ export default function AuthPage() {
             navigate("/user/me", { replace: true });
         } catch (err) {
             console.error("Auth failed:", err);
-            alert("Connection error. Is the backend running?");
+            setUiError({ field: "general", message: "System connection failure. Retry authentication." });
         }
     };
 
@@ -117,11 +125,18 @@ export default function AuthPage() {
                         noValidate
                     >
                         <div className="flex flex-col gap-4">
+                            {uiError?.field === "general" && (
+                                <div className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium uppercase tracking-wider animate-in fade-in slide-in-from-top-1">
+                                    {uiError.message}
+                                </div>
+                            )}
+
                             <Input
                                 ref={emailRef}
                                 label="Endpoint Address"
                                 placeholder="name@example.com"
                                 type="email"
+                                error={uiError?.field === "email" ? uiError.message : undefined}
                             />
 
                             {mode === "signup" && (
@@ -129,6 +144,7 @@ export default function AuthPage() {
                                     ref={usernameRef}
                                     label="Network handle"
                                     placeholder="Choose a username"
+                                    error={uiError?.field === "username" ? uiError.message : undefined}
                                 />
                             )}
 
@@ -137,6 +153,7 @@ export default function AuthPage() {
                                 label="Security Key"
                                 type="password"
                                 placeholder="••••••••"
+                                error={uiError?.field === "password" ? uiError.message : undefined}
                             />
                         </div>
 
@@ -153,7 +170,10 @@ export default function AuthPage() {
                             {mode === "login" ? "New operative?" : "Already verified?"}
                         </span>
                         <button
-                            onClick={() => navigate(mode === "login" ? "/auth/signup" : "/auth/login")}
+                            onClick={() => {
+                                setUiError(null);
+                                navigate(mode === "login" ? "/auth/signup" : "/auth/login");
+                            }}
                             className="text-sm font-bold text-accent hover:underline decoration-accent/30 underline-offset-4 cursor-pointer"
                         >
                             {mode === "login" ? "Create Account" : "Login"}

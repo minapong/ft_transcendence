@@ -39,7 +39,10 @@ export default function SidebarLink({ label, href, icon, iconActive, active, col
 		<a
 			ref={ref}
 			href={href}
-			onClick={onClick}
+			onClick={(e: any) => {
+				e?.preventDefault?.();
+				onClick();
+			}}
 			onPointerEnter={handlePointerEnter}
 			onPointerLeave={handlePointerLeave}
 			onPointerDown={handlePointerDown}

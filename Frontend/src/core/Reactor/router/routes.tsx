@@ -79,7 +79,6 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
 
   // Normalize: collapse slashes, remove trailing slash, strip query/hash
   let path = rawPath.replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
-  if (original !== path) history.replaceState({}, "", path);
   path = path.split(/[?#]/)[0];
 
   // try static route (case-insensitive lookup)

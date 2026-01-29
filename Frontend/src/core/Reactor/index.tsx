@@ -1,5 +1,5 @@
 // Exports the createReactor function for creating custom elements.
-export { createReactor, Fragment } from './createReactor';
+export { createReactor, Fragment, forwardRef } from './createReactor';
 
 // Exports functions for rendering and initializing routes.
 export { renderRoute, initRouter, navigate } from "./render";

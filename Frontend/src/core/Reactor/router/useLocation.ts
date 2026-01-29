@@ -1,4 +1,4 @@
-import { useState, useEffect } from "Reactor";
+import { useState, useEffect } from "../hooks";
 
 /**
  * useLocation Hook
@@ -20,7 +20,7 @@ export function useLocation() {
 
     // Listen for custom programmatic navigation event
     window.addEventListener("routechange", handleSync);
-    
+
     // Listen for browser Back/Forward button clicks
     window.addEventListener("popstate", handleSync);
 
