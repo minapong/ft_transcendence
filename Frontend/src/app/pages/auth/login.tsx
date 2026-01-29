@@ -1,6 +1,7 @@
 import { useRef, navigate, useEffect } from "Reactor";
 import { setAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
+import { vEmail, vPasswordLogin } from "@/core/lib/input/validators";
 
 import { connectPresenceWS } from "@/core/lib/presence";
 import { useAuth } from "@/core/lib/useAuth";
@@ -14,18 +15,23 @@ export default function LoginPage() {
   const passwordRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = async () => {
-    const email = emailRef.current?.value || "";
-    const password = passwordRef.current?.value || "";
+    const emailRaw = emailRef.current?.value || "";
+    const passwordRaw = passwordRef.current?.value || "";
 
-    if (!email || !password) {
-      alert("Missing email or password");
-      return;
+    const ve = vEmail(emailRaw);
+    const vp = vPasswordLogin(passwordRaw);
+    try {
+      const email = unwrap(vEmail(emailRaw));
+      const password = unwrap(vPassword(passRaw));
+
+    } catch (e: any) {
+      alert(e.message);
     }
 
     const res = await apiFetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email: email, password: password })
     });
 
     const data = await res.json();
@@ -53,6 +59,7 @@ export default function LoginPage() {
       <input
         ref={passwordRef}
         type="password"
+        onKeyDown={(e) => e.key === "Enter" && handleLogin()}
         className="px-4 py-2 rounded text-gray"
         placeholder="Password"
       />

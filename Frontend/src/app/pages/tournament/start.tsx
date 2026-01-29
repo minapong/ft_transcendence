@@ -1,6 +1,7 @@
 import { getAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
 import {useState, useEffect, navigate} from "Reactor"
+import { vTournamentName } from "@/core/lib/input/validators";
 
 
 export default function TournamentPage() {
@@ -77,10 +78,15 @@ export default function TournamentPage() {
 			setError("Please select number of players");
 			return;
 		}
+		const v = vTournamentName(tournamentName);
+		if (!v.ok) {
+			setError(v.error);
+			return;
+		}
 		const res = await apiFetch("/api/tournament/create", {
         method: "POST",
         // headers: { "Content-Type": "application/json" }, //apiFetch sets same header
-        body: JSON.stringify({ name: tournamentName, max_players  }),
+        body: JSON.stringify({ name: v.value, max_players  }),
       });
       const data = await res.json();
       if (!res.ok) {

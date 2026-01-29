@@ -1,6 +1,7 @@
 import { useRef, navigate } from "Reactor";
 import { setAuth } from "@/core/lib/auth";
 import { connectPresenceWS } from "@/core/lib/presence";
+import { vEmail,vUsername, vPassword } from "@/core/lib/input/validators";
 import { apiFetch } from "@/core/lib/api";
 
 
@@ -18,12 +19,18 @@ export default function SignupPage() {
       alert("Missing email, username or password");
       return;
     }
+    const ve = vEmail(email);
+    const vu = vUsername(username);
+    const vp = vPassword(password);
+    if (!ve.ok) return alert(ve.error);
+    if (!vu.ok) return alert(vu.error);
+    if (!vp.ok) return alert(vp.error);
 
     try {
       const res = await apiFetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, password })
+        body: JSON.stringify({ email: ve.value, username: vu.value, password:vp.value })
       });
 
       const data = await res.json();
@@ -33,7 +40,7 @@ export default function SignupPage() {
         return;
       }
 
-      // Optional: auto-login after signup (recommended UX)
+      //auto-login after signup
       setAuth(data);
       connectPresenceWS();
       navigate("/user/me");

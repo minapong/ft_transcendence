@@ -1,6 +1,7 @@
 import { apiFetch } from "@/core/lib/api";
 import { navigate, useEffect, useState } from "Reactor";
 import { useAuth } from "@/core/lib/useAuth";
+import { vUsername } from "@/core/lib/input/validators";
 
 type OutgoingRow = {
   to: { id: number; username: string; avatarId?: number | null };
@@ -57,17 +58,15 @@ export default function FriendsPage() {
   }, [token]);
 
   async function sendRequest() {
-    const username = newUsername.trim();
-    if (!username) {
-      setMsg("Enter a valid username");
+    const v = vUsername(newUsername);
+    if (!v.ok){
+      setMsg(v.error);
       return;
     }
 
-    setMsg(null);
-
     const res = await apiFetch(`/api/friends/request`, { 
       method: "POST",
-      body: JSON.stringify({username}),
+      body: JSON.stringify({vUsername}),
     });
     
     const data = await res.json().catch(() => ({}));
