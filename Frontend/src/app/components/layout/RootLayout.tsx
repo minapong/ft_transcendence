@@ -3,6 +3,7 @@ import { useLocation } from "Reactor/router/useLocation";
 import Header from "@/app/components/layout/Header";
 import LeftSidebar from "@/app/components/layout/LeftSidebar";
 import ModalRoot from "Reactor/ModalRoot";
+import { isSpecialLayout } from "Reactor/render";
 import { useScreen } from "@/app/hooks/useScreen";
 
 export default function RootLayout({ children }) {
@@ -36,8 +37,7 @@ export default function RootLayout({ children }) {
     }
   };
 
-  const isGameRoute = pathname.startsWith("/game");
-  const hideSidebar = isGameRoute || pathname.startsWith("/auth") || pathname === "/login";
+  const hideSidebar = isSpecialLayout(pathname);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">

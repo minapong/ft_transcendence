@@ -15,6 +15,15 @@ type CallbackEntry = { kind: "callback"; fn: any; deps: any[] };
 
 type HookEntry = StateEntry | MemoEntry | RefEntry | CallbackEntry;
 
+export function cleanupContext(key: string) {
+	const ctx = contextMap.get(key);
+	if (ctx) {
+		cleanupEffects(ctx);
+		ctx.effects.length = 0;
+		ctx.pendingEffects.length = 0;
+	}
+}
+
 // unique storage for only useEffects
 type EffectEntry = { deps?: any[]; cleanup: (() => void) | null };
 // unique storage for only useEffects

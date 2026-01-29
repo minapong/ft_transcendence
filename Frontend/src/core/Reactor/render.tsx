@@ -1,5 +1,5 @@
 import rootLayout from "@/app/components/layout/RootLayout";
-import { resetHooks, flushEffects, runPendingRefs } from "./hooks";
+import { resetHooks, flushEffects, runPendingRefs, cleanupContext } from "./hooks";
 import { getRoutes, resolvePage } from "./router/routes";
 
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
@@ -9,7 +9,10 @@ export const LAYOUT_KEY = "__layout__";
 let lastKnownPath = "";
 
 // Define which paths require a different layout look
-const isSpecial = (p: string) => p.startsWith("/game") || p.startsWith("/auth") || p === "/login";
+export const isSpecialLayout = (p: string) => {
+  const path = p.toLowerCase().split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  return path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
+};
 
 // Renders the current route by resolving the page component and updating the DOM.
 export function renderRoute(triggerKey?: string) {
@@ -18,7 +21,7 @@ export function renderRoute(triggerKey?: string) {
   //normalize cuurent page url points to
 
   // Check if layout needs to swap (from normal to special or vice versa)
-  const layoutNeedsUpdate = lastKnownPath && isSpecial(normalizedPath) !== isSpecial(lastKnownPath);
+  const layoutNeedsUpdate = lastKnownPath && isSpecialLayout(normalizedPath) !== isSpecialLayout(lastKnownPath);
 
   // Update last known path
   lastKnownPath = normalizedPath;
@@ -32,11 +35,16 @@ export function renderRoute(triggerKey?: string) {
     // get current page
     const pageKey = `page:${normalizedPath}`;
     // Use different layout keys for normal vs special layouts
-    const layoutKey = isSpecial(normalizedPath) ? "__layout__:special" : "__layout__:normal";
+    const layoutKey = isSpecialLayout(normalizedPath) ? "__layout__:special" : "__layout__:normal";
     let inner = document.getElementById("spa-root");
 
     // if page is not loaded or someone ordered layout re render through passing triggerKey props
     if (!inner || triggerKey?.startsWith(LAYOUT_KEY) || layoutNeedsUpdate) {
+      if (layoutNeedsUpdate) {
+        const prevLayoutKey = isSpecialLayout(lastKnownPath) ? "__layout__:special" : "__layout__:normal";
+        cleanupContext(prevLayoutKey);
+      }
+
       renderSubtree(
         () => rootLayout({ children: null }), //build the outer shell first
         root, // mount at root
