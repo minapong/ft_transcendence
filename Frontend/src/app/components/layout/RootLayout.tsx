@@ -1,41 +1,62 @@
 import { useState, useEffect } from "Reactor";
+import { useLocation } from "Reactor/router/useLocation";
 import Header from "@/app/components/layout/Header";
 import LeftSidebar from "@/app/components/layout/LeftSidebar";
 import ModalRoot from "Reactor/ModalRoot";
-
-export type ScreenSize = "mobile" | "tablet" | "desktop";
+import { isSpecialLayout } from "Reactor/render";
+import { useScreen } from "@/app/hooks/useScreen";
 
 export default function RootLayout({ children }) {
-  const [screen, setScreen] = useState<ScreenSize>("desktop");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const screen = useScreen();
+  const sidebarMode = screen === "desktop" ? "static" : "overlay";
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = useLocation();
 
+  // Reset states when switching between static and overlay
   useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w < 640) setScreen("mobile");
-      else if (w < 1024) setScreen("tablet");
-      else setScreen("desktop");
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+    if (sidebarMode === "static") {
+      setIsOverlayOpen(false);
+    } else {
+      setIsCollapsed(false);
+    }
+  }, [sidebarMode]);
+
+  // LeftSidebar handles its own navigation and closing in overlay mode
+
+  const handleToggle = () => {
+    if (sidebarMode === "overlay") {
+      if (isOverlayOpen) {
+        // Dispatch close and wait for animation via isOverlayOpen flipping to false
+        window.dispatchEvent(new Event("sidebar:close"));
+      } else {
+        setIsOverlayOpen(true);
+      }
+    } else {
+      setIsCollapsed(v => !v);
+    }
+  };
+
+  const hideSidebar = isSpecialLayout(pathname);
 
   return (
-    <div className="min-h-screen bg-linear-to-br text-slate-100 from-start via-mid to-end grid grid-rows-[auto_1fr]">
-      <Header screen={screen} />
+    <div className="h-screen flex flex-col overflow-hidden">
+      <Header
+        onMenuToggle={handleToggle}
+        showMenuButton={!hideSidebar}
+      />
 
-      <div className="flex flex-1">
-        <LeftSidebar
-          screen={screen}
-          open={sidebarOpen}
-          setOpen={setSidebarOpen}
-        />
+      <div className="flex flex-1 overflow-hidden">
+        {!hideSidebar && (
+          <LeftSidebar
+            mode={sidebarMode}
+            isCollapsed={isCollapsed}
+            isOverlayOpen={isOverlayOpen}
+            setIsOverlayOpen={setIsOverlayOpen}
+          />
+        )}
 
-        <main
-          id="spa-root"
-          className="flex-1 relative overflow-hidden"
-        >
+        <main id="spa-root" className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>

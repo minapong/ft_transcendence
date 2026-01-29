@@ -306,22 +306,183 @@ export default function Item({ category, id }) {
 }
 ```
 
-### Navigation
+### Navigation with `navigate()`
+
+Programmatic navigation helper that enables any code to trigger a route change with advanced control options.
+
+#### Basic Usage
 
 ```tsx
 import { navigate } from "Reactor";
 
-// Basic
+// Simple navigation
 navigate("/dashboard");
+navigate("/game/pong");
+navigate("/user/profile");
+```
 
-// With state (accessible via history.state)
-navigate("/game/pong", { state: { mode: "2p" } });
+#### Function Signature
 
-// Replace (no back button entry)
-navigate("/auth/login", { replace: true });
+```ts
+export function navigate(
+  path: string,
+  opts?: {
+    replace?: boolean;      // Force replace current history entry (no back button)
+    triggerLayout?: boolean; // Force re-render of entire layout
+    state?: any;            // Pass state to route (accessible via history.state)
+  }
+): void
+```
 
-// Trigger layout re-render
-navigate("/", { triggerLayout: true });
+#### Features
+
+**1. Automatic Path Normalization**
+- Appends leading slash if missing: `"dashboard"` → `"/dashboard"`
+- Only updates history if path actually changed
+- Prevents unnecessary re-renders
+
+```tsx
+navigate("dashboard");      // ✓ Becomes /dashboard
+navigate("/dashboard");     // ✓ Same result
+navigate("/dashboard");     // ✓ No update (already there)
+```
+
+**2. History Management (pushState vs replaceState)**
+
+**Push (default):** Creates new back button entry
+```tsx
+// Sequence: Home → Dashboard → Profile
+navigate("/dashboard");      // Back takes you to Home ✓
+navigate("/profile");        // Back takes you to Dashboard ✓
+```
+
+**Replace:** Overwrites current history entry (no back button)
+```tsx
+// Use case: After login (don't want back to login page)
+navigate("/auth/login");           // User at /home → /auth/login
+navigate("/dashboard", { replace: true });  // User at /dashboard
+                                   // Back goes to /home, NOT /auth/login ✓
+```
+
+**3. State Passing**
+
+Pass arbitrary data to the route (survives browser back/forward):
+```tsx
+// Sender
+navigate("/game/pong", { 
+  state: { 
+    opponent: "AI",
+    difficulty: "hard",
+    returnTo: "/dashboard"
+  } 
+});
+
+// Receiver (in pong.tsx)
+const routeState = history.state;
+console.log(routeState.opponent);    // "AI"
+console.log(routeState.difficulty);  // "hard"
+```
+
+**4. Layout Re-render**
+
+Force the entire layout (header, sidebar, main) to re-render:
+```tsx
+// Normal: Only re-render current page
+navigate("/settings");
+
+// Force layout re-render (useful after auth changes, theme changes)
+navigate("/dashboard", { triggerLayout: true });
+```
+
+Common use cases:
+- After user login (update header auth info)
+- After theme toggle (refresh all components)
+- After permission changes (update sidebar links)
+
+#### Examples
+
+```tsx
+// Scenario 1: User Login Flow
+function LoginPage() {
+  const handleLogin = async (email, password) => {
+    const user = await authenticateUser(email, password);
+    // Replace login page, update layout with new user info
+    navigate("/", { 
+      replace: true,
+      triggerLayout: true,
+      state: { justLoggedIn: true }
+    });
+  };
+  return <form onSubmit={handleLogin}>...</form>;
+}
+
+// Scenario 2: Game Navigation with Opponents
+function GameModeSelect() {
+  const startGame = (opponent) => {
+    navigate("/game/pong", {
+      state: { opponent, startTime: Date.now() }
+    });
+  };
+  return (
+    <>
+      <button onClick={() => startGame("AI")}>vs AI</button>
+      <button onClick={() => startGame("Online")}>vs Player</button>
+    </>
+  );
+}
+
+// Scenario 3: After Tournament Creation
+function TournamentSetup() {
+  const handleCreate = async (tournament) => {
+    const created = await api.createTournament(tournament);
+    navigate(`/tournament/${created.id}`, {
+      triggerLayout: true  // Refresh sidebar tournament links
+    });
+  };
+}
+
+// Scenario 4: Fallback to Home After Error
+function ErrorBoundary() {
+  const handleReset = () => {
+    navigate("/", { 
+      replace: true,  // Don't add error page to history
+      triggerLayout: true
+    });
+  };
+}
+```
+
+#### Implementation Details
+
+```ts
+// Internal flow
+export function navigate(path: string, opts?: NavigateOptions) {
+  // 1. Normalize: "dashboard" → "/dashboard"
+  const target = normalizePath(path.startsWith("/") ? path : `/${path}`);
+  const current = normalizePath(window.location.pathname);
+
+  // 2. Check if URL actually changed
+  const shouldUpdateHistory = opts?.replace || target !== current;
+
+  // 3. Update browser history
+  if (shouldUpdateHistory) {
+    const method = opts?.replace ? "replaceState" : "pushState";
+    history[method](opts?.state ?? {}, "", target);
+  }
+
+  // 4. Trigger route rendering
+  renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
+}
+```
+
+#### URL Normalization Rules
+
+Applied automatically to all paths:
+```ts
+path
+  .replace(/\/{2,}/g, "/")     // "//dashboard" → "/dashboard"
+  .replace(/\/+$/, "")         // "/dashboard/" → "/dashboard"
+  .split(/[?#]/)[0]            // "/dashboard?tab=1#section" → "/dashboard"
 ```
 
 ### URL Normalization

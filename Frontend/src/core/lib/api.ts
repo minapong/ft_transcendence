@@ -8,8 +8,9 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
 
   const headers = new Headers(options.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
- if (options.body && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
+  if (options.body && !headers.has("Content-Type")) {
+    const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+    if (!isFormData) headers.set("Content-Type", "application/json");
   }
 
   const url = path.startsWith("http") ? path : `${API_BASE}${path}`;

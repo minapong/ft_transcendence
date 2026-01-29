@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
-export async function requireAuth(req: FastifyRequest, reply: FastifyReply) {
+export async function requireAuth(req: FastifyRequest, reply: FastifyReply): Promise<void>  {
   try {
     await req.jwtVerify();
   } catch {

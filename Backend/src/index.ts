@@ -4,6 +4,7 @@ import jwt from "@fastify/jwt";
 
 import websocket from "@fastify/websocket";
 import fastifyStatic from "@fastify/static";
+import multipart from "@fastify/multipart";
 import path from "path";
 
 import { registerPresenceWs} from "./routes/presence.ws.js";
@@ -20,6 +21,10 @@ import { registerProfileRoutes } from "./routes/profile.js";
 import { registerMeRoutes } from "./routes/me.js";
 import { registerStatsRoutes } from "./routes/stats.js";
 import { registerFriendRoutes } from "./routes/friends.js";
+import { registerAvatarRoutes } from "./routes/avatar.routes.js";
+import { registerProfileSettingsRoutes } from "./routes/settings.routes.js";
+
+
 
 
 const server = Fastify({ logger: true });
@@ -28,7 +33,7 @@ const server = Fastify({ logger: true });
 async function start() {
 	await server.register(cors, {
 	  origin: ["http://localhost:5173"], // frontend address
-	  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+	  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 	  allowedHeaders: ["Content-Type", "Authorization"],
 	});
 
@@ -47,6 +52,10 @@ async function start() {
       prefix: "/static/",
     });
 
+    await server.register(multipart, {
+      limits: { fileSize: 2 * 1024 * 1024 },
+    });
+
     registerPresenceWs(server);
     registerPresenceRoutes(server);
 
@@ -58,6 +67,8 @@ async function start() {
     registerMeRoutes(server);
     registerStatsRoutes(server);
     registerFriendRoutes(server);
+    registerAvatarRoutes(server);
+    registerProfileSettingsRoutes(server);
 
     server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
       if (err){ process.exit(1); throw err; }

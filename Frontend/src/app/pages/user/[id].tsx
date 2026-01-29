@@ -208,6 +208,26 @@ export default function ProfilePage(props?: { id?: string }) {
       <p className="text-sm mt-4">
         Joined: {new Date(user.created_at).toLocaleDateString()}
       </p>
+      {/* rivate fields (backend returns null if not friend) */}
+      {user.canSeePrivate ? (
+        (user.age != null || user.location != null) ? (
+          <div className="mt-3 text-sm text-gray-300">
+            {user.age != null && <p>Age: {user.age}</p>}
+            {user.location != null && <p>Location: {user.location}</p>}
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-gray-500">
+            This user hasn’t set age/location.
+          </p>
+        )
+      ) : (
+        !isMe && (
+          <p className="mt-3 text-sm text-gray-500">
+            Age & location are visible to friends only.
+          </p>
+        )
+      )}
+
       {user.avatarId != null && <p>Avatar: {user.avatarId}</p>}
     </div>
   );
