@@ -1,0 +1,51 @@
+/**
+ * Motion Tokens
+ * 
+ * Pure design token values for animation and transitions.
+ * No selectors or classes - values only.
+ * 
+ * Categories:
+ * - Animation durations
+ * - Easing functions
+ * - Transition timings
+ * - Energy layer animation
+ */
+
+@theme {
+    /* ========================================
+     Animation Durations
+     ======================================== */
+
+    --duration-instant: 50ms;
+    --duration-fast: 120ms;
+    --duration-normal: 180ms;
+    --duration-medium: 300ms;
+    --duration-slow: 500ms;
+    --duration-slower: 800ms;
+
+    /* ========================================
+     Easing Functions
+     ======================================== */
+
+    --ease-linear: linear;
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* ========================================
+     Energy Layer Animation
+     ======================================== */
+
+    --energy-duration: 30s;
+    --energy-duration-focus: 60s;
+
+    /* ========================================
+     Energy State Opacity
+     ======================================== */
+
+    --energy-opacity-low: 0.15;
+    --energy-opacity-medium: 0.45;
+    --energy-opacity-high: 0.65;
+    --energy-opacity-critical: 0.85;
+}

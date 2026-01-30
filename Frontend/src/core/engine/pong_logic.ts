@@ -1,4 +1,4 @@
-import { PongAI, updateAIParameters } from './pong_ai'
+import { PongAI } from './pong_ai'
 
 
 let GAME_WIDTH: number;
@@ -70,7 +70,7 @@ export function pongLogic(
 		let width = window.innerWidth;
 
 		// Sync AI parameters as well
-		updateAIParameters();
+		// updateAIParameters();
 
 		if (width < 640) {
 			GAME_WIDTH = 320;

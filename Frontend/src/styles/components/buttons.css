@@ -1,0 +1,39 @@
+/**
+ * Button Components
+ * 
+ * Component styles for button variants.
+ * Consumes design tokens for colors, spacing, shadows, and motion.
+ */
+
+.glass-pill {
+    border: 1px solid var(--color-border-soft);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow:
+        0 12px 25px rgba(0, 0, 0, 0.28),
+        inset 0 0 10px color-mix(in srgb, var(--color-accent) 25%, transparent);
+    backdrop-filter: blur(var(--blur-sm));
+}
+
+.bleed-btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid var(--color-border-strong);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+.bleed-btn::after {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+        radial-gradient(circle at 20% 20%, var(--color-danger-soft), transparent 45%),
+        radial-gradient(circle at 80% 40%, color-mix(in srgb, var(--color-accent) 25%, transparent), transparent 45%);
+    transform: rotate(8deg);
+    opacity: 0.75;
+    z-index: -1;
+}
+
+.bleed-btn--hero {
+    box-shadow: 0 0 24px rgba(34, 211, 238, 0.35);
+}

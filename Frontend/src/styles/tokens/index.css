@@ -1,0 +1,13 @@
+/**
+ * Design Tokens - Index
+ * 
+ * Aggregates all design token files.
+ * Import order matters: colors and typography first, then spacing, motion, effects.
+ */
+
+@import "./colors.css";
+@import "./typography.css";
+@import "./spacing.css";
+@import "./motion.css";
+@import "./elevation.css";
+@import "./radius.css";

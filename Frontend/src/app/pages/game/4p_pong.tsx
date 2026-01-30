@@ -1,6 +1,6 @@
 import { pong4PLogic } from "@/core/engine/4p_pong_logic";
 import { navigate, useEffect, useRef, useEventListener } from "Reactor";
-import "@/styles/pong4game.css"
+import "@/styles/game/pong-4player.css"
 
 type NavState4P = {
 	mode: "4p";

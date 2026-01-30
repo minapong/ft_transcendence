@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'Reactor';
+import { navigate, useEffect, useRef } from 'Reactor';
 import { apiFetch } from "@/core/lib/api";
 import { useScreen } from "@/app/hooks/useScreen";
 
@@ -494,6 +494,7 @@ export default function App() {
 								transition-all duration-300 ease-out
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
+							onClick={() => navigate("/game/pre_match_scene")}
 							style={{
 								background: 'var(--color-accent)',
 								color: '#000000',

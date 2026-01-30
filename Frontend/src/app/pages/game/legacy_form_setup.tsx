@@ -1,10 +1,12 @@
-import {navigate, useState} from "Reactor"
+import { navigate, useState } from "Reactor"
 import { unwrap } from "@/core/lib/input/unwrap";
 import { vPlayerName } from "@/core/lib/input/validators";
 
 
 
-export default function SingleGame() {
+
+/** @deprecated This form is being phased out in favor of match scenes. */
+export default function LegacyFormSetup() {
 
     function start2P() {
         const p1Raw = (document.getElementById("p1") as HTMLInputElement).value || "Player 1";
@@ -21,14 +23,14 @@ export default function SingleGame() {
             return;
         }
 
-		navigate("/game/pong", {
-			state: {
-			  mode: "2p",
-			  p1,
-			  p2
-			}
-		});
-	}
+        navigate("/game/pong", {
+            state: {
+                mode: "2p",
+                p1,
+                p2
+            }
+        });
+    }
 
     function startAI() {
         const p1Raw = (document.getElementById("p1_ai") as HTMLInputElement).value || "Player";
@@ -38,23 +40,23 @@ export default function SingleGame() {
         let difficulty: "easy" | "medium" | "hard";
 
         try {
-          p1 = unwrap(vPlayerName(p1Raw, "Player"));
-          if (difficultyRaw !== "easy" && difficultyRaw !== "medium" && difficultyRaw !== "hard") {
-              throw new Error("Invalid difficulty");
-          }
-          difficulty = difficultyRaw;
-          } catch (e: any) {
-              alert(e.message);
-              return;
+            p1 = unwrap(vPlayerName(p1Raw, "Player"));
+            if (difficultyRaw !== "easy" && difficultyRaw !== "medium" && difficultyRaw !== "hard") {
+                throw new Error("Invalid difficulty");
+            }
+            difficulty = difficultyRaw;
+        } catch (e: any) {
+            alert(e.message);
+            return;
         }
 
-		navigate("/game/pong", {
-			state: {
-			  mode: "ai",
-			  p1,
-			  difficulty
-			}
-		  });
+        navigate("/game/pong", {
+            state: {
+                mode: "ai",
+                p1,
+                difficulty
+            }
+        });
     }
 
     function start4P() {
@@ -74,17 +76,17 @@ export default function SingleGame() {
             alert(e.message);
             return;
         }
-		navigate("/game/4p_pong", {
-			state: {
-			  mode: "4p",
-			  p1,
-			  p2,
-			  p3,
-			  p4,
-			}
-		});
+        navigate("/game/4p_pong", {
+            state: {
+                mode: "4p",
+                p1,
+                p2,
+                p3,
+                p4,
+            }
+        });
     }
-	
+
     return (
         <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center py-10">
             <h1 className="text-4xl font-bold mb-10">Single Game</h1>
