@@ -93,6 +93,31 @@
     --color-sidebar-active-glow: var(--color-accent);
     --color-sidebar-active-sheen: var(--color-accent-soft);
     --color-sidebar-active-hot: #ff1f4b;
+
+    /* ========================================
+     Button Colors
+     ======================================== */
+
+    --color-btn-primary-bg: var(--color-accent);
+    --color-btn-primary-text: #000000;
+    --color-btn-primary-hover: var(--color-accent-hover);
+
+    --color-btn-secondary-bg: var(--color-surface);
+    --color-btn-secondary-text: var(--color-primary);
+    --color-btn-secondary-hover: var(--color-surface-strong);
+    --color-btn-secondary-border: var(--color-border-soft);
+
+    --color-btn-game-bg: rgba(255, 255, 255, 0.8);
+    --color-btn-game-text: #000000;
+    --color-btn-game-active: rgba(255, 255, 255, 1);
+
+    --color-btn-success-bg: #22c55e;
+    --color-btn-success-text: #000000;
+    --color-btn-success-hover: #16a34a;
+
+    --color-btn-danger-bg: var(--color-danger);
+    --color-btn-danger-text: #ffffff;
+    --color-btn-danger-hover: #dc1c47;
 }
 
 /* ========================================

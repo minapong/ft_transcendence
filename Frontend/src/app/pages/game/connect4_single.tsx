@@ -4,30 +4,30 @@ import { getAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
 
 
-type Player = { 
-  id: number; 
-  name: string 
+type Player = {
+  id: number;
+  name: string
 };
 
-type Match = { 
-  id: string; 
-  p1: Player; 
-  p2: Player; 
-  status: "matched" | "started" | "finished" 
+type Match = {
+  id: string;
+  p1: Player;
+  p2: Player;
+  status: "matched" | "started" | "finished"
 };
 
 export default function Connect4Single() {
 
-    const auth = getAuth();
-    const user = auth?.user;
-    const token = auth?.token;
+  const auth = getAuth();
+  const user = auth?.user;
+  const token = auth?.token;
 
-    if (!user) {
+  if (!user) {
     return (
       <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl mb-4">Please login to play matchmaking.</p>
-          <button onClick={() => (navigate("/auth/login"))} className="bg-blue-500 px-6 py-3 rounded text-xl">
+          <button onClick={() => (navigate("/auth/login"))} className="btn btn-primary btn-lg">
             Go to Login
           </button>
         </div>
@@ -119,7 +119,7 @@ export default function Connect4Single() {
 
   // ──────────────── Start Game ────────────────
   async function startGame() {
-    if (!match || match.p1.id !==user.id) return;
+    if (!match || match.p1.id !== user.id) return;
 
     // Stop polling before navigating
     if (intervalRef.current) {
@@ -164,7 +164,7 @@ export default function Connect4Single() {
       {status === "loading" && <p className="text-xl">Checking match status…</p>}
 
       {status === "idle" && (
-        <button onClick={join} className="bg-blue-500 px-6 py-3 rounded text-xl">
+        <button onClick={join} className="btn btn-primary btn-lg">
           Join Queue
         </button>
       )}
@@ -178,17 +178,17 @@ export default function Connect4Single() {
             {match.p1.id !== user.id && " — Only host can start the game"}
           </p>
           {match.status === "matched" && match.p1.id === user.id && (
-            <button onClick={startGame} className="bg-green-500 px-6 py-3 rounded text-xl">
+            <button onClick={startGame} className="btn btn-success btn-lg">
               Start Game
             </button>
           )}
-          {match.status === "started" && match.p1.id === user.id && 
+          {match.status === "started" && match.p1.id === user.id &&
             <p className="text-xl">Game started! You can play now.</p> && (
-            <button onClick={startGame} className="bg-green-500 px-6 py-3 rounded text-xl">
-              Re-Start Game
-            </button>
-          )}
-          {match.status === "started" && match.p1.id !== user.id && 
+              <button onClick={startGame} className="btn btn-success btn-lg">
+                Re-Start Game
+              </button>
+            )}
+          {match.status === "started" && match.p1.id !== user.id &&
             <p className="text-xl">Game started! You can play now on Host Session.</p>
           }
         </div>
