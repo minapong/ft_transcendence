@@ -64,3 +64,20 @@ export function vLocation(raw: unknown, allowed: readonly string[]): Validation<
   if (!allowed.includes(s)) return { ok: false, error: "Invalid location" };
   return { ok: true, value: s };
 }
+
+export function vPlayerName(raw: unknown, fallback: string): Validation<string> {
+  const s = normalizeText(String(raw ?? ""), 24); // 24 max
+  if (!s) return { ok: true, value: fallback };
+
+  // allow letters/numbers/spaces/_/-
+  if (!/^[a-zA-Z0-9 _-]+$/.test(s)) {
+    return { ok: false, error: "Name can contain letters, numbers, spaces, _ and -" };
+  }
+
+  // avoid only spaces (normalizeText already trims/collapses)
+  if (s.length < 1 || s.length > 20) {
+    return { ok: false, error: "Name must be 1-20 chars" };
+  }
+
+  return { ok: true, value: s };
+}
