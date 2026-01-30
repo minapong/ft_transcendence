@@ -35,6 +35,11 @@ export default function AuthPage() {
     const location = useLocation();
     const [uiError, setUiError] = useState<ValidationError | null>(null);
 
+    // State for input values
+    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
     // Derive mode from routing (URL segments are the source of truth)
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
 
@@ -42,20 +47,15 @@ export default function AuthPage() {
         if (auth?.token) navigate("/user/me", { replace: true });
     }, [auth?.token]);
 
-    // Superset refs
-    const emailRef = useRef<HTMLInputElement>(null);
-    const usernameRef = useRef<HTMLInputElement>(null);
-    const passwordRef = useRef<HTMLInputElement>(null);
-
     // Single submit pipeline
     const handleSubmit = async (e: any) => {
         e?.preventDefault?.();
 
         //Capture data immediately BEFORE any state-triggered re-renders
         const data: AuthForm = {
-            email: emailRef.current?.value || "",
-            password: passwordRef.current?.value || "",
-            username: usernameRef.current?.value || ""
+            email,
+            password,
+            username: mode === "signup" ? username : undefined
         };
 
         // Now clear errors and proceed
@@ -162,7 +162,8 @@ export default function AuthPage() {
                             )}
 
                             <Input
-                                ref={emailRef}
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
                                 label="Endpoint Address"
                                 placeholder="name@example.com"
                                 type="email"
@@ -171,7 +172,8 @@ export default function AuthPage() {
 
                             {mode === "signup" && (
                                 <Input
-                                    ref={usernameRef}
+                                    value={username}
+                                    onChange={e => setUsername(e.target.value)}
                                     label="Network handle"
                                     placeholder="Choose a username"
                                     error={uiError?.field === "username" ? uiError.message : undefined}
@@ -179,7 +181,8 @@ export default function AuthPage() {
                             )}
 
                             <Input
-                                ref={passwordRef}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
                                 label="Security Key"
                                 type="password"
                                 placeholder="••••••••"

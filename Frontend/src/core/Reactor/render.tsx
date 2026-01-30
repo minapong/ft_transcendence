@@ -1,6 +1,6 @@
 import rootLayout from "@/app/components/layout/RootLayout";
 import { resetHooks, flushEffects, runPendingRefs, cleanupContext } from "./hooks";
-import { getRoutes, resolvePage } from "./router/routes";
+import { getRoutes, resolvePage, isSpecialLayout } from "./router/routes";
 
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
 export const LAYOUT_KEY = "__layout__";
@@ -8,11 +8,6 @@ export const LAYOUT_KEY = "__layout__";
 // Track the last known path for layout swap detection
 let lastKnownPath = "";
 
-// Define which paths require a different layout look
-export const isSpecialLayout = (p: string) => {
-  const path = p.toLowerCase().split(/[?#]/)[0].replace(/\/+$/, "") || "/";
-  return path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
-};
 
 // Renders the current route by resolving the page component and updating the DOM.
 export function renderRoute(triggerKey?: string) {
