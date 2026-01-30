@@ -66,15 +66,20 @@ export function vLocation(raw: unknown, allowed: readonly string[]): Validation<
 }
 
 export function vPlayerName(raw: unknown, fallback: string): Validation<string> {
-  const s = normalizeText(String(raw ?? ""), 24); // 24 max
-  if (!s) return { ok: true, value: fallback };
+  const rawStr = String(raw ?? "");
 
-  // allow letters/numbers/spaces/_/-
-  if (!/^[a-zA-Z0-9 _-]+$/.test(s)) {
+  // allow empty => fallback
+  if (!rawStr.trim()) return { ok: true, value: fallback };
+
+  // eject forbidden chars BEFORE normalizeText can strip them
+  // allowed: letters, numbers, spaces, _ and -
+  if (/[^a-zA-Z0-9 _-]/.test(rawStr)) {
     return { ok: false, error: "Name can contain letters, numbers, spaces, _ and -" };
   }
 
-  // avoid only spaces (normalizeText already trims/collapses)
+  // now normalize (trim/collapse spaces + length cap)
+  const s = normalizeText(rawStr, 24);
+
   if (s.length < 1 || s.length > 20) {
     return { ok: false, error: "Name must be 1-20 chars" };
   }

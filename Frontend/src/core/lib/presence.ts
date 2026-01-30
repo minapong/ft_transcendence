@@ -15,9 +15,9 @@ export function connectPresenceWS() {
 
   ws = new WebSocket(`${WS_BASE}/ws/presence?token=${encodeURIComponent(token)}`);
 
-  ws.onopen = () => console.log("presence ws open");
+  // ws.onopen = () => console.log("presence ws open");
   ws.onclose = () => {
-    console.log("presence ws closed");
+    // console.log("presence ws closed");
     ws = null;
   };
 
@@ -26,11 +26,11 @@ export function connectPresenceWS() {
       const msg = JSON.parse(ev.data);
       window.dispatchEvent(new CustomEvent(PRESENCE_EVENT, { detail: msg }));
     } catch {
-      console.log("bad ws msg", ev.data);
+      // console.log("bad ws msg", ev.data);
     }
   };
 
-  ws.onerror = (e) => console.log("ws error", e);
+  // ws.onerror = (e) => console.log("ws error", e);
 
   return ws;
 }
