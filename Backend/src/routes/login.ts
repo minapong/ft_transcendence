@@ -16,7 +16,7 @@ export async function registerLoginRoutes(server: FastifyInstance) {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return reply.code(400).send({ error: "Missing email or password" });
+        return reply.code(200).send({ ok: false, error: "Missing email or password" });
       }
 
       try {
@@ -33,9 +33,9 @@ export async function registerLoginRoutes(server: FastifyInstance) {
       });
       } catch (err: any) {
         if (err.message === "INVALID_CREDENTIALS") {
-          return reply.code(401).send({ error: "Invalid credentials" });
+          return reply.code(200).send({ ok: false, error: "Invalid credentials" });
         }
-        console.error("LOGIN ERROR:", err);
+        // console.error("LOGIN ERROR:", err);
         reply.code(500).send({ error: "Internal server error" });
       }
     }

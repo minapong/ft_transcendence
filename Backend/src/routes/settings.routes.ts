@@ -33,8 +33,8 @@ export async function registerProfileSettingsRoutes(server: FastifyInstance) {
         return reply.send({ user });
       } catch (e: any) {
         const msg = e?.message;
-        if (msg === "AGE_INVALID") return reply.code(400).send({ error: "Invalid age" });
-        if (msg === "LOCATION_TOO_LONG") return reply.code(400).send({ error: "Location too long" });
+        if (msg === "AGE_INVALID") return reply.code(200).send({ ok: false, error: "Invalid age" });
+        if (msg === "LOCATION_TOO_LONG") return reply.code(200).send({ ok:false,  error: "Location too long" });
         return reply.code(500).send({ error: "Internal server error" });
       }
     }

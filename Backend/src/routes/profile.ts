@@ -9,13 +9,13 @@ export async function registerProfileRoutes(server: FastifyInstance) {
     async (req, reply) => {
       const targetId = Number(req.params.id);
       if (!Number.isFinite(targetId)) {
-        return reply.code(400).send({ error: "Invalid user id" });
+        return reply.code(200).send({ OK: false, error: "Invalid user id" });
       }
 
       const viewerId = Number((req.user as any).userId);
-console.log("[GET /api/users/:id]", { viewerId, targetId });
+// console.log("[GET /api/users/:id]", { viewerId, targetId });
       const user = await ProfileIdService.getProfileForViewer(viewerId, targetId);
-      if (!user) return reply.code(404).send({ error: "User not found" });
+      if (!user) return reply.code(200).send({ ok: false, error: "User not found" });
 
       return reply.send(user);
     }

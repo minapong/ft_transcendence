@@ -23,7 +23,7 @@ export async function registerMeRoutes(server: FastifyInstance) {
                 });
             
             if (!me)
-                return reply.code(404).send({error: "User not found"});
+                return reply.code(200).send({ok: false, error: "User not found"});
             return reply.send({
                 ...me,
                 avatarUrl: me.avatar?.file_path ? `/static/${me.avatar.file_path}` : null,

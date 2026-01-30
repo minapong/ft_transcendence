@@ -71,7 +71,7 @@ export default function FriendsPage() {
     });
     
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    if (!res.ok || data.ok === false) {
       setMsg(data.error || "Failed to send request");
       return;
     }
@@ -84,7 +84,7 @@ export default function FriendsPage() {
     setMsg(null);
     const res = await apiFetch(`/api/friends/accept/${userId}`, { method: "POST" });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    if (!res.ok || data.ok === false) {
       setMsg(data.error || "Failed to accept");
       return;
     }
@@ -96,7 +96,7 @@ export default function FriendsPage() {
     setMsg(null);
     const res = await apiFetch(`/api/friends/${userId}`, { method: "DELETE" });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    if (!res.ok || data.ok === false) {
       setMsg(data.error || "Failed to remove");
       return;
     }
@@ -169,7 +169,7 @@ export default function FriendsPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => navigate(`user/${r.from.id}`)}
+                        onClick={() => navigate(`/user/${r.from.id}`)}
                         className="bg-gray-700 px-3 py-2 rounded font-bold hover:bg-gray-600"
                       >
                         View
@@ -216,7 +216,7 @@ export default function FriendsPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => navigate(`user/${r.to.id}`)}
+                        onClick={() => navigate(`/user/${r.to.id}`)}
                         className="bg-gray-700 px-3 py-2 rounded font-bold hover:bg-gray-600"
                       >
                         View

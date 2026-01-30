@@ -26,15 +26,16 @@ export default function MePage() {
       try {
         // 1. Profile (/api/me)
         const profileRes = await apiFetch("/api/me");
-        if (!profileRes.ok) throw new Error("Failed to load profile");
+        if (!profileRes.ok)
+            throw new Error("Failed to load profile");
         const profileData = await profileRes.json();
-        console.log("[ME] /api/me JSON =", profileData);
+        // console.log("[ME] /api/me JSON =", profileData);
        
 
         setProfile(profileData);
-        console.log("[ME] profileData.username =", profileData?.username);
-        console.log("[ME] profileData.email =", profileData?.email);
-        console.log("[ME] profileData.created_at =", profileData?.created_at);
+        // console.log("[ME] profileData.username =", profileData?.username);
+        // console.log("[ME] profileData.email =", profileData?.email);
+        // console.log("[ME] profileData.created_at =", profileData?.created_at);
 
 
         const userId = profileData.id;

@@ -15,7 +15,7 @@ export async function registerAuthRoutes(server: FastifyInstance) {
       const { email, username, password } = req.body;
 
       if (!email || !username || !password) {
-        return reply.code(400).send({ error: "Missing fields" });
+        return reply.code(200).send({ ok: false, error: "Missing fields" });
       }
 
       try {
@@ -30,14 +30,14 @@ export async function registerAuthRoutes(server: FastifyInstance) {
         
       } catch (err: any) {
         if (err.message === "EMAIL_ALREADY_EXISTS") {
-          return reply.code(409).send({ error: "Email already used" });
+          return reply.code(200).send({ok:false, error: "Email already used" });
         }
         if (err.message === "USERNAME_ALREADY_EXISTS") {
-          return reply.code(409).send({ error: "Username already used" });
+          return reply.code(200).send({ ok: false, error: "Username already used" });
         }
         if (err?.code === "P2002") {
           // err.meta.target usually contains ["username"] or ["email"]
-          return reply.code(409).send({ error: "Email or username already used" });
+          return reply.code(200).send({ok: false,  error: "Email or username already used" });
         }
         console.error("SIGNUP ERROR:", err);
         return reply.code(500).send({ error: "Internal server error" });
