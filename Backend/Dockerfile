@@ -11,6 +11,7 @@ COPY prisma.config.js ./
 RUN  npx prisma generate
 COPY src ./src
 COPY assets ./assets
+COPY script ./script
 RUN npm run build
 
 #production stage
@@ -28,5 +29,5 @@ COPY --from=build /app/assets ./assets
 
 COPY --from=build /app/dist ./dist
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy &&  node prisma/seedAvatars.js && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy &&  node prisma/seedAvatars.js && node dist/src/index.js"]
 

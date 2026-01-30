@@ -8,6 +8,8 @@ services:
       - "3000"
     networks:
       - app_net
+    # env_file: 
+    #   - ./Backend/.env
 
   frontend:
     build:

@@ -1,18 +1,20 @@
 import { getAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
-import { useState, useEffect, navigate } from "Reactor"
+import {useState, useEffect, navigate} from "Reactor"
+import { vTournamentName } from "@/core/lib/input/validators";
+import { unwrap } from "@/core/lib/input/unwrap";
 
 
 export default function TournamentPage() {
 	const auth = getAuth();
 	const user = auth?.user;
 
-
-	const [tournament, setTournament] = useState(null);
-	const [max_players, setMax_players] = useState(4);
-	const [tournamentName, setTournamentName] = useState("");
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
+//   if (!isAdmin) console.log("user is not admin");
+  const [tournament, setTournament] = useState(null);
+  const [max_players, setMax_players] = useState(4);
+  const [tournamentNameRaw, setTournamentName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
 	const isAdmin = user?.isAdmin || false;
 
@@ -58,29 +60,40 @@ export default function TournamentPage() {
 			// Silent fail on refresh — don't show error banner for refresh
 		}
 	};
-
+	
 	const handleCreateTournament = async () => {
-		try {
-			if (max_players === 0) {
-				setError("Please select number of players");
-				return;
-			}
-			const res = await apiFetch("/api/tournament/create", {
-				method: "POST",
-				// headers: { "Content-Type": "application/json" }, //apiFetch sets same header
-				body: JSON.stringify({ name: tournamentName, max_players }),
-			});
-			const data = await res.json();
-			if (!res.ok) {
-				setError(data.error || "Failed to create tournament");
-				return;
-			}
-			setTournament(data.tournament);
-			setError("");
-		} catch {
-			setError("Network error creating tournament");
+		
+		if (max_players === 0) {
+			setError("Please select number of players");
+			return;
 		}
-	};
+		let name:string;
+		try {
+			name = unwrap(vTournamentName(tournamentNameRaw));
+		} catch (e: any){
+			setError(e.message);
+			return;
+		}
+
+		try {
+		const res = await apiFetch("/api/tournament/create", {
+			method: "POST",
+			// headers: { "Content-Type": "application/json" }, //apiFetch sets same header
+			body: JSON.stringify({ name, max_players  }),
+     	});
+
+		const data = await res.json();
+		if (!res.ok) {
+			setError(data.error || "Failed to create tournament");
+			return;
+     	}
+
+		setTournament(data.tournament);
+		setError("");
+		} catch {
+		setError("Network error creating tournament");
+    }
+  };
 
 	const handleRegister = async () => {
 		if (!tournament) return;
@@ -168,7 +181,7 @@ export default function TournamentPage() {
 					<input
 						type="text"
 						placeholder="Enter Tournament Name"
-						value={tournamentName}
+						value={tournamentNameRaw}
 						onChange={e => setTournamentName(e.target.value)}
 						className="bg-gray-800 text-white px-3 py-2 rounded border border-gray-700 w-64"
 					/>

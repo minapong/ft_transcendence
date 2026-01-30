@@ -5,6 +5,14 @@ import { connectPresenceWS } from "@/core/lib/presence";
 import { useAuth } from "@/core/lib/useAuth";
 import Input from "@/app/components/ui/Input";
 
+import {
+  vEmail,
+  vPasswordLogin,
+  vPassword,
+  vUsername,
+} from "@/core/lib/input/validators";
+import { unwrap } from "@/core/lib/input/unwrap";
+
 type AuthMode = "login" | "signup";
 
 type AuthForm = {
@@ -18,16 +26,56 @@ type ValidationError = {
     message: string;
 };
 
-/**
- * Pure, classified validation logic.
- */
-function validateAuth(mode: AuthMode, data: AuthForm): ValidationError | null {
-    if (!data.email) return { field: "email", message: "Endpoint address required" };
-    if (!data.password) return { field: "password", message: "Security key required" };
-    if (mode === "signup" && !data.username) {
-        return { field: "username", message: "Network handle required" };
+type Result<T, E> =
+  | { ok: true; data: T }
+  | { ok: false; error: E };
+
+function sanitizeAuth(mode: AuthMode, raw: AuthForm): Result<AuthForm, ValidationError> {
+  const emailRaw = (raw.email ?? "").trim();
+  const usernameRaw = (raw.username ?? "").trim();
+  const passwordRaw = raw.password ?? "";
+
+  let email: string;
+  let password: string;
+  let username: string | undefined;
+
+  try {
+    email = unwrap(vEmail(emailRaw));
+  } catch (e: any) {
+    return { ok: false, error: { field: "email", message: e?.message || "Invalid email" } };
+  }
+
+  if (mode === "signup") {
+    try {
+      username = unwrap(vUsername(usernameRaw));
+    } catch (e: any) {
+      return { ok: false, error: { field: "username", message: e?.message || "Invalid username" } };
     }
-    return null;
+  }
+
+  try {
+    password =
+      mode === "login"
+        ? unwrap(vPasswordLogin(passwordRaw))
+        : unwrap(vPassword(passwordRaw));
+  } catch (e: any) {
+    return { ok: false, error: { field: "password", message: e?.message || "Invalid password" } };
+  }
+
+  // Extra guard: signup must have username after sanitization
+  if (mode === "signup" && !username) {
+    return {
+      ok: false,
+      error: { field: "username", message: "Network handle required" },
+    };
+  }
+
+  return {
+    ok: true,
+    data: mode === "login"
+      ? { email, password }
+      : { email, password, username },
+  };
 }
 
 export default function AuthPage() {
@@ -52,7 +100,7 @@ export default function AuthPage() {
         e?.preventDefault?.();
 
         //Capture data immediately BEFORE any state-triggered re-renders
-        const data: AuthForm = {
+        const raw: AuthForm = {
             email: emailRef.current?.value || "",
             password: passwordRef.current?.value || "",
             username: usernameRef.current?.value || ""
@@ -61,24 +109,19 @@ export default function AuthPage() {
         // Now clear errors and proceed
         setUiError(null);
 
-        // Use classified validation
-        const validationError = validateAuth(mode, data);
-        if (validationError) {
-            setUiError(validationError);
+        const sanitized = sanitizeAuth(mode, raw);
+          if ("error" in sanitized) {
+             setUiError(sanitized.error);
             return;
         }
 
         const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
-        const body = mode === "login"
-            ? { email: data.email, password: data.password }
-            : { email: data.email, password: data.password, username: data.username };
-
         try {
             const res = await apiFetch(endpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(sanitized.data),
+        });
 
             const resData = await res.json();
 

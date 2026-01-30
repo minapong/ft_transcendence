@@ -1,8 +1,6 @@
 import { useState, useEffect, navigate } from "Reactor"
 import { getAuth } from "@/core/lib/auth"
 import { apiFetch } from "@/core/lib/api"
-// Temporary placeholder user — replace with real login context later
-// const mockUser = { id: 6, name: "Player1" };
 
 export default function ActiveTournamentPage() {
   const auth = getAuth();
