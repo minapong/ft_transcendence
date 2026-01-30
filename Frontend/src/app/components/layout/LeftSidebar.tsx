@@ -18,8 +18,6 @@ interface SidebarProps {
 	isCollapsed?: boolean;
 	hidden?: boolean;
 }
-export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false }: SidebarProps & { mode: "overlay" | "static" }) {
-
 export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false, hidden = false }: SidebarProps & { mode: "overlay" | "static" }) {
 
 	const activePath = normalizePath(useLocation());
