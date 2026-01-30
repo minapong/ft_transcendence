@@ -19,7 +19,7 @@ function PanelButton({ icon, label, onClick }) {
 }
 
 
-export default function Header({ onMenuToggle, showMenuButton }) {
+export default function Header({ onMenuToggle, isSpecialPage }) {
   const screen = useScreen();
   const auth = useAuth();
 
@@ -87,18 +87,21 @@ export default function Header({ onMenuToggle, showMenuButton }) {
     >
 
       <div className="flex items-center gap-[clamp(0.4rem,2vw,0.75rem)] z-10 flex-shrink-0 flex-nowrap">
-        {showMenuButton && (
-          <button
-            className="flex items-center justify-center w-10 h-10 rounded-md bg-[var(--color-surface)] text-xl mr-2 flex-shrink-0"
-            aria-label="Open sidebar menu"
-            onClick={() => {
+        <button
+          className="flex items-center justify-center w-10 h-10 rounded-md bg-[var(--color-surface)] text-xl flex-shrink-0 transition-colors hover:bg-[var(--color-surface-strong)]"
+          aria-label={isSpecialPage ? "Go Home" : "Open sidebar menu"}
+          onClick={() => {
+            if (isSpecialPage) {
+              navigate("/");
+            } else {
               console.log("[Header] Menu toggle: overlay open");
               onMenuToggle();
-            }}
-          >
-            <span className="icon-[solar--sidebar-minimalistic-bold-duotone]" />
-          </button>
-        )}
+            }
+          }}
+        >
+          <span className={isSpecialPage ? "icon-[solar--home-smile-bold-duotone]" : "icon-[solar--sidebar-minimalistic-bold-duotone]"} />
+        </button>
+
         <div
           className="flex items-center gap-[clamp(0.4rem,1.5vw,0.75rem)] cursor-pointer group flex-shrink-0"
           onClick={() => navigate("/")}
@@ -230,6 +233,6 @@ export default function Header({ onMenuToggle, showMenuButton }) {
           </div>
         )}
       </div>
-    </header>
+    </header >
   );
 }
