@@ -1,10 +1,35 @@
 import { pongLogic } from "@/core/engine/pong_logic";
-import { navigate, useEffect, useRef } from "Reactor";
+import { navigate, useEffect, useRef, useLocation } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 
+// Define types for navigation state
+type TournamentMode = {
+    mode: "tournament";
+    p1: { id: number; name: string };
+    p2: { id: number; name: string };
+    matchId: number;
+};
+
+type AIMode = {
+    mode: "ai";
+    p1: string;
+    difficulty: "easy" | "medium" | "hard";
+};
+
+type TwoPlayerMode = {
+    mode: "2p";
+    p1: string;
+    p2: string;
+};
+
+type NavigationState = TournamentMode | AIMode | TwoPlayerMode;
+
 export default function PongGame() {
+    // useLocation ensures component re-renders on navigation changes
+    useLocation();
+
     // Read navigation state (tournament or free play)
-    const navState = history.state as any;
+    const navState = history.state as NavigationState | undefined;
 
     // Create refs for all DOM elements
     const ballRef = useRef<HTMLDivElement>(null);
