@@ -10,18 +10,18 @@ import { useState, useEffect } from "../hooks";
  * - Custom programmatic navigation (routechange event)
  */
 export function useLocation() {
-  // Initialize state with the current browser path
-  const [location, setLocation] = useState(window.location.pathname);
+  const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
 
-  // CRITICAL: If the cached state doesn't match the current URL (e.g. after a layout swap),
-  // we must return the fresh URL immediately to prevent rendering stale UI during the transition.
-  const currentPath = window.location.pathname;
-  if (location !== currentPath) {
-    // We can't call setLocation during render directly without a guard in some frameworks,
-    // but in our Reactor, we just want to ensure the next render is correct and this one returns the truth.
-    setLocation(currentPath);
-    return currentPath;
-  }
+  // Initialize state with the current browser path
+  const [location, setLocation] = useState(currentPath);
+
+  // Sync state if it's stale (next tick)
+  // This replaces the direct setLocation during render which caused infinite recursion and hook mismatches.
+  useEffect(() => {
+    if (location !== currentPath) {
+      setLocation(currentPath);
+    }
+  }, [location, currentPath]);
 
   useEffect(() => {
     const handleSync = () => {
