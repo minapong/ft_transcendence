@@ -17,15 +17,15 @@ export async function registerAvatarRoutes(server: FastifyInstance) {
           parts: 5,
         },
       });
-      server.log.info({ gotFile: !!file }, "avatar upload got file");
+      // server.log.info({ gotFile: !!file }, "avatar upload got file");
 
-      if (file) {
-        server.log.info(
-          { fieldname: file.fieldname, filename: file.filename, mimetype: file.mimetype },
-          "avatar upload file meta"
-        );
-      } 
-      server.log.info({ fieldname: file.fieldname }, "[AVATAR] BEFORE FIELDNAME CHECK");
+      // if (file) {
+      //   server.log.info(
+      //     { fieldname: file.fieldname, filename: file.filename, mimetype: file.mimetype },
+      //     "avatar upload file meta"
+      //   );
+      // } 
+      // server.log.info({ fieldname: file.fieldname }, "[AVATAR] BEFORE FIELDNAME CHECK");
 
       if (!file) return reply.code(400).send({ error: "Missing file (fiels name avatar)" });
       if (file.fieldname !== "avatar") {

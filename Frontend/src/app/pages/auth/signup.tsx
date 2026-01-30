@@ -2,7 +2,9 @@ import { useRef, navigate } from "Reactor";
 import { setAuth } from "@/core/lib/auth";
 import { connectPresenceWS } from "@/core/lib/presence";
 import { vEmail,vUsername, vPassword } from "@/core/lib/input/validators";
+import { unwrap } from "@/core/lib/input/unwrap";
 import { apiFetch } from "@/core/lib/api";
+
 
 
 export default function SignupPage() {
@@ -11,26 +13,28 @@ export default function SignupPage() {
   const passwordRef = useRef<HTMLInputElement>(null);
 
   const handleSignup = async () => {
-    const email = emailRef.current?.value.trim() || "";
-    const username = usernameRef.current?.value.trim() || "";
-    const password = passwordRef.current?.value || "";
+    const emailRaw = emailRef.current?.value.trim() || "";
+    const usernameRaw = usernameRef.current?.value.trim() || "";
+    const passwordRaw = passwordRef.current?.value || "";
 
-    if (!email || !username || !password) {
-      alert("Missing email, username or password");
+    let email:string;
+    let username: string;
+    let password: string;
+
+    try {
+      email = unwrap(vEmail(emailRaw));
+      username = unwrap(vUsername(usernameRaw));
+      password = unwrap(vPassword(passwordRaw));
+    } catch (e:any) {
+      alert(e.message);
       return;
     }
-    const ve = vEmail(email);
-    const vu = vUsername(username);
-    const vp = vPassword(password);
-    if (!ve.ok) return alert(ve.error);
-    if (!vu.ok) return alert(vu.error);
-    if (!vp.ok) return alert(vp.error);
 
     try {
       const res = await apiFetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: ve.value, username: vu.value, password:vp.value })
+        body: JSON.stringify({ email, username, password })
       });
 
       const data = await res.json();

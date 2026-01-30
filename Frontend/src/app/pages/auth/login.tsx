@@ -2,6 +2,7 @@ import { useRef, navigate, useEffect } from "Reactor";
 import { setAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
 import { vEmail, vPasswordLogin } from "@/core/lib/input/validators";
+import { unwrap } from "@/core/lib/input/unwrap";
 
 import { connectPresenceWS } from "@/core/lib/presence";
 import { useAuth } from "@/core/lib/useAuth";
@@ -18,20 +19,22 @@ export default function LoginPage() {
     const emailRaw = emailRef.current?.value || "";
     const passwordRaw = passwordRef.current?.value || "";
 
-    const ve = vEmail(emailRaw);
-    const vp = vPasswordLogin(passwordRaw);
+    let email: string;
+    let password: string;
+    
     try {
-      const email = unwrap(vEmail(emailRaw));
-      const password = unwrap(vPassword(passRaw));
+      email = unwrap(vEmail(emailRaw));
+      password = unwrap(vPasswordLogin(passwordRaw));
 
     } catch (e: any) {
       alert(e.message);
+      return;
     }
 
     const res = await apiFetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, password: password })
+      body: JSON.stringify({ email, password })
     });
 
     const data = await res.json();

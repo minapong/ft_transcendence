@@ -1,10 +1,9 @@
-import { unwrap } from "@/core/lib/input/unwrap";
+import type { Validation } from "./validators";
 
-try {
-  const email = unwrap(vEmail(emailRaw));
-  const password = unwrap(vPassword(passRaw));
-
-  // use email/password
-} catch (e: any) {
-  alert(e.message);
+export function unwrap<T>(v: Validation<T>): T {
+  if ("error" in v){
+    throw new Error(v.error);
+  }
+  return v.value;
 }
+
