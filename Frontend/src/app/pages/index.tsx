@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'Reactor';
+import { apiFetch } from "@/core/lib/api";
 
 // Crispy Pong Animation Component
 function PongAnimation() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		const frameId = { current: 0 }; // Mutable ref-like object for cleanup within this closure
@@ -145,7 +145,7 @@ function PongAnimation() {
 			window.removeEventListener('resize', resizeCanvas);
 			if (frameId.current) cancelAnimationFrame(frameId.current);
 		};
-	}, []);
+	});
 
 	return (
 		<canvas

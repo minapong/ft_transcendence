@@ -76,7 +76,7 @@ export default function Connect4Game() {
       }
       cleanup();
     };
-  }, [matchId, p1, p2]);
+  }); // No dependencies - run on every render to handle RootLayout re-renders
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center py-6">

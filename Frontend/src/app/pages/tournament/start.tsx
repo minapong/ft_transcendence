@@ -113,7 +113,7 @@ export default function TournamentPage() {
 		} catch {
 			setError("Network error registering");
 		}
-	};
+};
 
 	const handleStartTournament = async () => {
 		if (!tournament) return;

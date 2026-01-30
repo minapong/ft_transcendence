@@ -1,6 +1,6 @@
 import rootLayout from "@/app/components/layout/RootLayout";
 import { resetHooks, flushEffects, runPendingRefs, cleanupContext } from "./hooks";
-import { getRoutes, resolvePage } from "./router/routes";
+import { getRoutes, resolvePage, isSpecialLayout } from "./router/routes";
 
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
 export const LAYOUT_KEY = "__layout__";
@@ -8,11 +8,6 @@ export const LAYOUT_KEY = "__layout__";
 // Track the last known path for layout swap detection
 let lastKnownPath = "";
 
-// Define which paths require a different layout look
-export const isSpecialLayout = (p: string) => {
-  const path = p.toLowerCase().split(/[?#]/)[0].replace(/\/+$/, "") || "/";
-  return path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
-};
 
 // Renders the current route by resolving the page component and updating the DOM.
 export function renderRoute(triggerKey?: string) {
@@ -25,6 +20,9 @@ export function renderRoute(triggerKey?: string) {
 
   // Update last known path
   lastKnownPath = normalizedPath;
+
+  // Update document title
+  document.title = getPageTitle(normalizedPath);
 
   const routes = getRoutes();
   const { component, params } = resolvePage(routes, rawPath);
@@ -85,6 +83,34 @@ export function initRouter() {
 function normalizePath(rawPath: string) {
   let path = rawPath.toLowerCase().replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
   return path.split(/[?#]/)[0];
+}
+
+// Generates a human-readable page title from the route path
+function getPageTitle(path: string): string {
+  const normalized = normalizePath(path);
+
+  // Handle homepage
+  if (normalized === "/") return "Mina - Home";
+
+  // Split path into segments and capitalize each
+  const segments = normalized.split("/").filter(Boolean);
+
+  // Convert segments to title case and join
+  const title = segments
+    .map(segment => {
+      // Handle common abbreviations
+      if (segment === "4p") return "4P";
+
+      // Replace underscores with spaces and capitalize
+      return segment
+        .replace(/_/g, " ")
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    })
+    .join(" - ");
+
+  return `Mina - ${title}`;
 }
 
 function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key: string, opts?: { track?: boolean }) {

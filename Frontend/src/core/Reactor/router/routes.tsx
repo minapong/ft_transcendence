@@ -105,3 +105,9 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
   // 3. Not found
   return { component: routes.static["/notfound"], params: {} };
 }
+
+// Define which paths require a different layout look
+export const isSpecialLayout = (p: string) => {
+  const path = p.toLowerCase().split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  return path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
+};
