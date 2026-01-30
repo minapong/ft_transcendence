@@ -1,5 +1,5 @@
 import { pong4PLogic } from "@/core/engine/4p_pong_logic";
-import { navigate, useEffect, useRef } from "Reactor";
+import { navigate, useEffect, useRef, useEventListener } from "Reactor";
 import "@/styles/pong4game.css"
 
 type NavState4P = {
@@ -41,6 +41,41 @@ export default function Pong4PGame() {
 	const bottomLeftBtnRef = useRef<HTMLButtonElement>(null);
 	const bottomRightBtnRef = useRef<HTMLButtonElement>(null);
 
+	// Input Ref
+	const inputRef = useRef({
+		w: false, s: false,
+		num6: false, num3: false,
+		v: false, b: false,
+		left: false, right: false
+	});
+
+	// Event Listeners
+	useEventListener("keydown", (e: KeyboardEvent) => {
+		const k = e.key;
+		if (k === 'w') inputRef.current.w = true;
+		if (k === 's') inputRef.current.s = true;
+		if (k === '6') inputRef.current.num6 = true;
+		if (k === '3') inputRef.current.num3 = true;
+		if (k === 'ArrowLeft') inputRef.current.left = true;
+		if (k === 'ArrowRight') inputRef.current.right = true;
+		if (k === 'v') inputRef.current.v = true;
+		if (k === 'b') inputRef.current.b = true;
+
+		if (['ArrowLeft', 'ArrowRight', ' '].includes(k)) e.preventDefault();
+	});
+
+	useEventListener("keyup", (e: KeyboardEvent) => {
+		const k = e.key;
+		if (k === 'w') inputRef.current.w = false;
+		if (k === 's') inputRef.current.s = false;
+		if (k === '6') inputRef.current.num6 = false;
+		if (k === '3') inputRef.current.num3 = false;
+		if (k === 'ArrowLeft') inputRef.current.left = false;
+		if (k === 'ArrowRight') inputRef.current.right = false;
+		if (k === 'v') inputRef.current.v = false;
+		if (k === 'b') inputRef.current.b = false;
+	});
+
 	useEffect(() => {
 		const overlay = document.getElementById("winnerOverlay")!;
 		const text = document.getElementById("winnerText")!;
@@ -78,6 +113,7 @@ export default function Pong4PGame() {
 				scoreRedDisplay: scoreRedRef.current,
 				scoreBlueDisplay: scoreBlueRef.current
 			},
+			inputRef,
 			(winner) => {
 				text.textContent = winner === "red" ? "Red Team Wins! 🏆" : "Blue Team Wins! 🏆";
 				overlay.classList.remove("hidden");

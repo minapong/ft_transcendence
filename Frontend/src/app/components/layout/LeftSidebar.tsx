@@ -1,5 +1,5 @@
 import SidebarLink from "@/app/components/ui/SidebarLink"
-import { navigate, useEffect, useRef, useState, useCallback } from "Reactor"
+import { navigate, useEffect, useRef, useState, useCallback, useEventListener } from "Reactor"
 import { useLocation } from "Reactor/router/useLocation"
 import { animate, stagger } from "motion"
 
@@ -143,11 +143,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		}
 	}, [mode, isCollapsed, hidden]);
 
-	useEffect(() => {
-		const handleClose = () => closeAndNavigate();
-		window.addEventListener("sidebar:close", handleClose);
-		return () => window.removeEventListener("sidebar:close", handleClose);
-	}, [closeAndNavigate]);
+	useEventListener("sidebar:close", () => closeAndNavigate());
 
 	function isActive(current: string, target: string) {
 		return current === target || current.startsWith(target + "/");

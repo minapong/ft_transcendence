@@ -1,4 +1,4 @@
-import { PongAI } from './pong_ai'
+import { PongAI, updateAIParameters } from './pong_ai'
 
 
 let GAME_WIDTH: number;
@@ -42,6 +42,7 @@ export function pongLogic(
 	p1: string,
 	p2: string,
 	onWin: (winner: string, scoreP1: number, scoreP2: number) => void,  //scores added
+	inputRef: { current: { w: boolean; s: boolean; up: boolean; down: boolean } },
 	useAI: boolean = false,
 	aiDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
 ) {
@@ -67,6 +68,9 @@ export function pongLogic(
 
 	function handle_parameters() {
 		let width = window.innerWidth;
+
+		// Sync AI parameters as well
+		updateAIParameters();
 
 		if (width < 640) {
 			GAME_WIDTH = 320;
@@ -187,10 +191,6 @@ export function pongLogic(
 	dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 	dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 
-	let upPressed = false;
-	let downPressed = false;
-	let wPressed = false;
-	let sPressed = false;
 
 	let scoreLeft = 0;
 	let scoreRight = 0;
@@ -218,12 +218,9 @@ export function pongLogic(
 	const simulateKeyPress = (key: string, action: 'down' | 'up') => {
 		if (gameEnded) return;
 
-		const event = new KeyboardEvent(`key${action}`, {
-			key: key,
-			bubbles: true,
-			cancelable: true
-		});
-		document.dispatchEvent(event);
+		// Update inputRef directly for AI
+		if (key === 'ArrowUp') inputRef.current.up = action === 'down';
+		if (key === 'ArrowDown') inputRef.current.down = action === 'down';
 	};
 
 	// Initialize AI if needed
@@ -232,56 +229,29 @@ export function pongLogic(
 		aiPlayer.start(getGameState, simulateKeyPress);
 	}
 
-	// Define handlers
-	const keydownHandler = (e: KeyboardEvent) => {
-		if ((e.key === "ArrowUp" || e.key === "ArrowDown")) {
-			e.preventDefault();
-			if (useAI && e.isTrusted)
-				return;
-		}
-
-		if (e.key === 'ArrowUp') upPressed = true;
-		if (e.key === 'ArrowDown') downPressed = true;
-		if (e.key === 'w') wPressed = true;
-		if (e.key === 's') sPressed = true;
-	};
-
-	const keyupHandler = (e: KeyboardEvent) => {
-		if ((e.key === "ArrowUp" || e.key === "ArrowDown")) {
-			e.preventDefault();
-			if (useAI && e.isTrusted)
-				return;
-		}
-
-		if (e.key === 'ArrowUp') upPressed = false;
-		if (e.key === 'ArrowDown') downPressed = false;
-		if (e.key === 'w') wPressed = false;
-		if (e.key === 's') sPressed = false;
-	};
-
 	left_up_But.addEventListener("pointerdown", e => {
-		wPressed = true;
+		inputRef.current.w = true;
 	});
 	left_up_But.addEventListener("pointerup", e => {
-		wPressed = false;
+		inputRef.current.w = false;
 	});
 	left_down_But.addEventListener("pointerdown", e => {
-		sPressed = true;
+		inputRef.current.s = true;
 	});
 	left_down_But.addEventListener("pointerup", e => {
-		sPressed = false;
+		inputRef.current.s = false;
 	});
 	right_up_But.addEventListener("pointerdown", e => {
-		upPressed = true;
+		inputRef.current.up = true;
 	});
 	right_up_But.addEventListener("pointerup", e => {
-		upPressed = false;
+		inputRef.current.up = false;
 	});
 	right_down_But.addEventListener("pointerdown", e => {
-		downPressed = true;
+		inputRef.current.down = true;
 	});
 	right_down_But.addEventListener("pointerup", e => {
-		downPressed = false;
+		inputRef.current.down = false;
 	});
 
 	const pauseHandler = () => {
@@ -301,8 +271,6 @@ export function pongLogic(
 		}
 	};
 	// Attach
-	document.addEventListener('keydown', keydownHandler);
-	document.addEventListener('keyup', keyupHandler);
 	pause.addEventListener("click", pauseHandler);
 
 	let animationId: number | null = null;
@@ -378,17 +346,20 @@ export function pongLogic(
 	}
 
 	function movePaddle() {
+		// Read inputs from Ref
+		const { w, s, up, down } = inputRef.current;
+
 		// Left paddle (W / S)
-		if (wPressed)
+		if (w)
 			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
-		if (sPressed)
+		if (s)
 			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
 		left_p.style.top = `${paddleY_Left}px`;
 
 		// Right paddle (Arrow Up / Down or AI)
-		if (upPressed)
+		if (up)
 			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
-		if (downPressed)
+		if (down)
 			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
 
 		right_p.style.top = `${paddleY_Right}px`;
@@ -450,8 +421,7 @@ export function pongLogic(
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
 
 		window.removeEventListener("resize", handle_parameters);
-		document.removeEventListener('keydown', keydownHandler);
-		document.removeEventListener('keyup', keyupHandler);
+		// No event listeners to remove here anymore!
 		pause.removeEventListener('click', pauseHandler);
 	};
 }
