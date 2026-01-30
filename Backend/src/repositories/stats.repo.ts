@@ -102,7 +102,15 @@ export async function getUserAggregatedStats(userId: number) {
     },
   });
 
-  if (!stats) return null;
+  // Return default zero stats for users who haven't played yet
+  if (!stats) {
+    return {
+      wins: 0,
+      losses: 0,
+      tournamentWins: 0,
+      lastMatchAt: null,
+    };
+  }
 
   return {
     wins: stats.wins,
@@ -133,24 +141,24 @@ export async function getLeaderboardData(limit: number = 50): Promise<Leaderboar
   });
 
   return raw.map((entry: any) => {
-      const totalGames = entry.wins + entry.losses;
-      const winRate = totalGames > 0
-        ? Math.round((entry.wins / totalGames) * 100)
-        : 0;
+    const totalGames = entry.wins + entry.losses;
+    const winRate = totalGames > 0
+      ? Math.round((entry.wins / totalGames) * 100)
+      : 0;
 
-      return {
-        user: {
-          id: entry.user.id,
-          username: entry.user.username,
-        },
-        wins: entry.wins,
-        losses: entry.losses,
-        totalGames,
-        total_score: entry.total_score || 0,
-        winRate,
-        tournament_championships: entry.tournament_championships,
-      };
-    });
+    return {
+      user: {
+        id: entry.user.id,
+        username: entry.user.username,
+      },
+      wins: entry.wins,
+      losses: entry.losses,
+      totalGames,
+      total_score: entry.total_score || 0,
+      winRate,
+      tournament_championships: entry.tournament_championships,
+    };
+  });
 }
 
 // ─────────────────────────────────────────────

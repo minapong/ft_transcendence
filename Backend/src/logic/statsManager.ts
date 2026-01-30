@@ -9,7 +9,6 @@ import {
 
 export async function getUserStats(userId: number) {
   const base = await getUserAggregatedStats(userId);
-  if (!base) return null;
 
   const totalGames = base.wins + base.losses;
   const winRate = totalGames > 0 ? Math.round((base.wins / totalGames) * 100) : 0;

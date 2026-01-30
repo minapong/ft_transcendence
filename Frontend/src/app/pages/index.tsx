@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'Reactor';
+import { apiFetch } from "@/core/lib/api";
 
 // Crispy Pong Animation Component
 function PongAnimation() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	try{
+
+		const profileRes = apiFetch("/api/meee");
+	}catch(e){
+		console.log(e);
+	}
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
