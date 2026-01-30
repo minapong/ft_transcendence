@@ -1,6 +1,9 @@
 import { apiFetch } from "@/core/lib/api";
 import { navigate, useEffect, useState } from "Reactor";
 import { useAuth } from "@/core/lib/useAuth";
+import { vUsername } from "@/core/lib/input/validators";
+import { unwrap } from "@/core/lib/input/unwrap";
+
 
 type OutgoingRow = {
   to: { id: number; username: string; avatarId?: number | null };
@@ -23,7 +26,7 @@ export default function FriendsPage() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<string | null>(null);
 
-  const [newUsername, setNewUsername] = useState("");
+  const [newUsernameRaw, setNewUsername] = useState("");
 
   useEffect(() => {
     if (!token) navigate("/auth/login");
@@ -56,14 +59,16 @@ export default function FriendsPage() {
     reload();
   }, [token]);
 
+
   async function sendRequest() {
-    const username = newUsername.trim();
-    if (!username) {
-      setMsg("Enter a valid username");
+    let username:string;
+
+    try {
+      username = unwrap(vUsername(newUsernameRaw));
+    } catch (e:any){
+      setMsg(e.message);
       return;
     }
-
-    setMsg(null);
 
     const res = await apiFetch(`/api/friends/request`, { 
       method: "POST",
@@ -128,7 +133,7 @@ export default function FriendsPage() {
           <input
             className="bg-gray-800 border border-gray-700 rounded px-3 py-2 w-48"
             placeholder="User name (e.g. fox)"
-            value={newUsername}
+            value={newUsernameRaw}
             onChange={(e: any) => setNewUsername(e.target.value)}
           />
           <button

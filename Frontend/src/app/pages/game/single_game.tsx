@@ -1,11 +1,25 @@
-import {navigate} from "Reactor"
+import {navigate, useState} from "Reactor"
+import { unwrap } from "@/core/lib/input/unwrap";
+import { vPlayerName } from "@/core/lib/input/validators";
+
 
 
 export default function SingleGame() {
 
     function start2P() {
-        const p1 = (document.getElementById("p1") as HTMLInputElement).value || "Player 1";
-        const p2 = (document.getElementById("p2") as HTMLInputElement).value || "Player 2";
+        const p1Raw = (document.getElementById("p1") as HTMLInputElement).value || "Player 1";
+        const p2Raw = (document.getElementById("p2") as HTMLInputElement).value || "Player 2";
+
+        let p1: string;
+        let p2: string;
+
+        try {
+            p1 = unwrap(vPlayerName(p1Raw, "Player 1"));
+            p2 = unwrap(vPlayerName(p2Raw, "Player 2"));
+        } catch (e: any) {
+            alert(e.message);
+            return;
+        }
 
 		navigate("/game/pong", {
 			state: {
@@ -17,8 +31,22 @@ export default function SingleGame() {
 	}
 
     function startAI() {
-        const p1 = (document.getElementById("p1_ai") as HTMLInputElement).value || "Player";
-        const difficulty = (document.getElementById("difficulty") as HTMLSelectElement).value;
+        const p1Raw = (document.getElementById("p1_ai") as HTMLInputElement).value || "Player";
+        const difficultyRaw = (document.getElementById("difficulty") as HTMLSelectElement).value;
+
+        let p1: string;
+        let difficulty: "easy" | "medium" | "hard";
+
+        try {
+          p1 = unwrap(vPlayerName(p1Raw, "Player"));
+          if (difficultyRaw !== "easy" && difficultyRaw !== "medium" && difficultyRaw !== "hard") {
+              throw new Error("Invalid difficulty");
+          }
+          difficulty = difficultyRaw;
+          } catch (e: any) {
+              alert(e.message);
+              return;
+        }
 
 		navigate("/game/pong", {
 			state: {
@@ -30,11 +58,22 @@ export default function SingleGame() {
     }
 
     function start4P() {
-        const p1 = (document.getElementById("t1p1") as HTMLInputElement).value || "P1";
-        const p2 = (document.getElementById("t1p2") as HTMLInputElement).value || "P2";
-        const p3 = (document.getElementById("t2p1") as HTMLInputElement).value || "P3";
-        const p4 = (document.getElementById("t2p2") as HTMLInputElement).value || "P4";
+        const p1Raw = (document.getElementById("t1p1") as HTMLInputElement).value || "P1";
+        const p2Raw = (document.getElementById("t1p2") as HTMLInputElement).value || "P2";
+        const p3Raw = (document.getElementById("t2p1") as HTMLInputElement).value || "P3";
+        const p4Raw = (document.getElementById("t2p2") as HTMLInputElement).value || "P4";
 
+        let p1: string, p2: string, p3: string, p4: string;
+
+        try {
+            p1 = unwrap(vPlayerName(p1Raw, "P1"));
+            p2 = unwrap(vPlayerName(p2Raw, "P2"));
+            p3 = unwrap(vPlayerName(p3Raw, "P3"));
+            p4 = unwrap(vPlayerName(p4Raw, "P4"));
+        } catch (e: any) {
+            alert(e.message);
+            return;
+        }
 		navigate("/game/4p_pong", {
 			state: {
 			  mode: "4p",

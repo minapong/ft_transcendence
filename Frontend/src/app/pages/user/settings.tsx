@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState, navigate } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 import { useAuth } from "@/core/lib/useAuth";
+import { vAge, vUsername } from "@/core/lib/input/validators";
+import { unwrap } from "@/core/lib/input/unwrap";
 
 const WAREHOUSES = [
   "Mina Port W-001",
@@ -12,7 +14,7 @@ const WAREHOUSES = [
   "Mina Port W-404",
 ];
 
-const MAX_BYTES = 2 * 1024 * 1024; // must match backend (2MB)
+const MAX_BYTES = 2 * 1024 * 1024; // matches backend, nginx (2MB)
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export default function UserSettingsPage() {
@@ -38,7 +40,7 @@ export default function UserSettingsPage() {
   // ----------------------------
   // Basics state (age/location)
   // ----------------------------
-  const [age, setAge] = useState<number | "">("");
+  const [ageRaw, setAgeRaw] = useState<string | "">("");
   const [location, setLocation] = useState<string>("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [msgBasics, setMsgBasics] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export default function UserSettingsPage() {
 
         // fields to read from /api/me:
         // data.age, data.location
-        setAge(typeof data?.age === "number" ? data.age : "");
+        setAgeRaw(typeof data?.age === "number" ? String(data.age) : "");
         setLocation(typeof data?.location === "string" ? data.location : "");
       } catch (e: any) {
         if (!cancelled) setMsgBasics(e?.message || "Failed to load profile");
@@ -108,7 +110,7 @@ export default function UserSettingsPage() {
       return;
     }
 
-    // client-side checks (backend still enforces!)
+    // client-side checks (backend still enforces)
     if (!ALLOWED.has(f.type)) {
       setSelected(null);
       setMsgAvatar("Only JPG / PNG / WEBP are allowed");
@@ -137,8 +139,7 @@ export default function UserSettingsPage() {
 
     try {
       const fd = new FormData();
-      // IMPORTANT field name:
-      // backend expects file.fieldname === "avatar"
+      // IMPORTANT field name: backend expects file.fieldname === "avatar"
       fd.append("avatar", selected);
 
       const res = await apiFetch("/api/me/avatar", {
@@ -153,8 +154,7 @@ export default function UserSettingsPage() {
         return;
       }
 
-      // fields to read from response:
-      // data.avatarUrl, data.avatarId
+      // fields read from response: data.avatarUrl, data.avatarId
       setProfile((prev: any) => ({
         ...(prev ?? {}),
         avatarUrl: data.avatarUrl ?? prev?.avatarUrl ?? null,
@@ -184,12 +184,19 @@ export default function UserSettingsPage() {
     setMsgBasics(null);
 
     try {
-      // client-side validation (backend must validate too)
-      const ageValue = age === "" ? null : Number(age);
-      if (ageValue != null && (!Number.isFinite(ageValue) || ageValue < 0 || ageValue > 130)) {
-        setMsgBasics("Age must be between 0 and 130");
+      
+      const raw = ageRaw.trim();
+ 
+      if (raw !== "" && !/^\d+$/.test(raw)) {
+        setMsgBasics("Age must be a whole number");
         return;
       }
+      if (raw.length > 3) {
+        setMsgBasics("Age must be 0-130");
+      return;
+      }
+      const ageValueRaw = raw === "" ? null : Number(raw);
+      const  ageValue = unwrap(vAge(ageValueRaw));
 
       const body = {
         age: ageValue,
@@ -210,16 +217,19 @@ export default function UserSettingsPage() {
 
       // expects data.user from backend
       const updatedUser = data.user ?? null;
-
-      if (updatedUser) {
-        setProfile((prev: any) => ({ ...(prev ?? {}), ...updatedUser }));
-        setAge(typeof updatedUser?.age === "number" ? updatedUser.age : age);
-        setLocation(typeof updatedUser?.location === "string" ? updatedUser.location : location);
+      if (!updatedUser) {
+        setMsgBasics("This input cannot be used");
+        return;
       }
 
+      // sync UI from backend truth
+      setProfile((prev: any) => ({ ...(prev ?? {}), ...updatedUser }));
+      setAgeRaw(typeof updatedUser.age === "number" ? String(updatedUser.age) : "");
+      setLocation(typeof updatedUser.location === "string" ? updatedUser.location : "");
+
       setMsgBasics("Saved ✅");
-    } catch {
-      setMsgBasics("Network error");
+    } catch (e: any) {
+      setMsgBasics(e?.message || "Invalid input");
     } finally {
       setSavingProfile(false);
     }
@@ -358,8 +368,14 @@ export default function UserSettingsPage() {
               min={0}
               max={130}
               className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
-              value={age}
-              onChange={(e: any) => setAge(e.target.value === "" ? "" : Number(e.target.value))}
+              value={ageRaw}
+              onKeyDown={(e:any) => {
+                if (["e", "E", "+", "-", "."].includes(e.key)) e.preventDefault();
+              }}
+              onChange={(e:any) => {
+                setAgeRaw(e.target.value );
+                if (msgBasics) setMsgBasics(null);
+              }}
               placeholder="e.g. 21"
             />
             <p className="text-xs text-gray-400 mt-1">Optional</p>
@@ -370,7 +386,10 @@ export default function UserSettingsPage() {
             <select
               className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
               value={location}
-              onChange={(e: any) => setLocation(e.target.value)}
+              onChange={(e:any) => {
+                setLocation(e.target.value);
+                if (msgBasics) setMsgBasics(null);
+              }}
             >
               <option value="">— select warehouse —</option>
               {WAREHOUSES.map((w) => (
