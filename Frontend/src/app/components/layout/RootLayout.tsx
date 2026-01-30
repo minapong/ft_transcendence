@@ -47,14 +47,13 @@ export default function RootLayout({ children }) {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {!hideSidebar && (
-          <LeftSidebar
-            mode={sidebarMode}
-            isCollapsed={isCollapsed}
-            isOverlayOpen={isOverlayOpen}
-            setIsOverlayOpen={setIsOverlayOpen}
-          />
-        )}
+        <LeftSidebar
+          mode={sidebarMode}
+          isCollapsed={isCollapsed}
+          isOverlayOpen={isOverlayOpen}
+          setIsOverlayOpen={setIsOverlayOpen}
+          hidden={hideSidebar}
+        />
 
         <main id="spa-root" className="flex-1 overflow-y-auto">
           {children}

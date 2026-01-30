@@ -16,8 +16,9 @@ interface SidebarProps {
 	isOverlayOpen: boolean;
 	setIsOverlayOpen?: (v: boolean | ((p: boolean) => boolean)) => void;
 	isCollapsed?: boolean;
+	hidden?: boolean;
 }
-export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false }: SidebarProps & { mode: "overlay" | "static" }) {
+export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false, hidden = false }: SidebarProps & { mode: "overlay" | "static" }) {
 
 	const activePath = normalizePath(useLocation());
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
@@ -29,13 +30,11 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 	const isClosingRef = useRef(false);
 
 	// Sync pendingPath only after the overlay is fully closed.
-	// This prevents the active link from snapping back mid-animation.
 	useEffect(() => {
-		if (mode !== "overlay") return;
+		if (hidden || mode !== "overlay") return;
 		if (!isOverlayOpen) setPendingPath(null);
-	}, [activePath, isOverlayOpen, mode]);
+	}, [activePath, isOverlayOpen, mode, hidden]);
 
-	// IMPROVED CLOSING: Trigger animation BEFORE unmounting in overlay mode
 	const closeAndNavigate = useCallback((href?: string) => {
 		if (isClosingRef.current) return;
 		if (href && mode === "overlay") setPendingPath(normalizePath(href));
@@ -51,46 +50,37 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 
 		isClosingRef.current = true;
 
-		// Play exit animations
 		const asideAnim = animate(aside, { x: "-100%" }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
 		const backdropAnim = backdrop ? animate(backdrop, { opacity: 0 }, { duration: 0.25 }) : null;
 
-		// Wait for both to finish before cleanup
 		Promise.all([asideAnim.finished, backdropAnim?.finished || Promise.resolve()]).then(() => {
 			isClosingRef.current = false;
 			if (setIsOverlayOpen) setIsOverlayOpen(false);
 			if (href) navigate(href);
 			window.dispatchEvent(new Event("sidebar:resume"));
 		});
-	}, [mode, setIsOverlayOpen, setPendingPath]); // navigate is stable via Reactor/render
+	}, [mode, setIsOverlayOpen, setPendingPath]);
 
-	// INITIAL POSITION (No-Clobber)
-	// We set the initial state manually to prevent React's 'style' prop from overriding animations on re-render
 	useEffect(() => {
-		if (mode !== "overlay" || !asideRef.current) return;
+		if (hidden || mode !== "overlay" || !asideRef.current) return;
 		if (!isOverlayOpen) {
 			asideRef.current.style.transform = "translateX(-100%)";
 		}
-	}, [mode]); // Only runs when switching TO overlay mode
+	}, [mode, hidden]);
 
-
-	// OVERLAY ANIMATION CONTROLLER
 	useEffect(() => {
-		if (mode !== "overlay") return;
+		if (hidden || mode !== "overlay") return;
 		const aside = asideRef.current;
 		const backdrop = backdropRef.current;
 		const nav = navRef.current;
 		if (!aside) return;
 
 		if (isOverlayOpen) {
-			// Entrance: We specify 'from' as -100 to ensure we slide even if snapped
 			animate(aside, { x: [-100, 0] }, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
 			if (backdrop) {
 				animate(backdrop, { opacity: [0, 1] }, { duration: 0.25 });
 				backdrop.style.pointerEvents = "auto";
 			}
-
-			// Staggered Entrance for Links
 			if (nav) {
 				animate(
 					Array.from(nav.children),
@@ -99,18 +89,20 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 				);
 			}
 		} else {
-			// Initial/Snapped Position
 			animate(aside, { x: "-100%" }, { duration: 0 });
 			if (backdrop) {
 				animate(backdrop, { opacity: 0 }, { duration: 0 });
 				backdrop.style.pointerEvents = "none";
 			}
 		}
-	}, [mode, isOverlayOpen]);
+	}, [mode, isOverlayOpen, hidden]);
 
-	// Body lock & Inert for Overlay
 	useEffect(() => {
-		if (mode !== "overlay") return;
+		if (hidden || mode !== "overlay") {
+			document.body.style.overflow = "";
+			document.getElementById("spa-root")?.removeAttribute("inert");
+			return;
+		}
 		const root = document.getElementById("spa-root");
 		if (isOverlayOpen) {
 			document.body.style.overflow = "hidden";
@@ -123,13 +115,10 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			document.body.style.overflow = "";
 			root?.removeAttribute("inert");
 		}
-	}, [mode, isOverlayOpen]);
+	}, [mode, isOverlayOpen, hidden]);
 
-	// DESKTOP (STATIC) FOLDING: The Cinematic Illusion
 	useEffect(() => {
-		if (mode !== "static" || !asideRef.current) return;
-
-		// Direct width animation for smooth layout + reclaimed space
+		if (hidden || mode !== "static" || !asideRef.current) return;
 		animate(
 			asideRef.current,
 			{
@@ -139,9 +128,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }
 		);
 
-		// Staggered Link reaction for Desktop
-
-		// Staggered Link reaction for Desktop
 		if (navRef.current) {
 			animate(
 				Array.from(navRef.current.children),
@@ -155,9 +141,8 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 				}
 			);
 		}
-	}, [mode, isCollapsed]);
+	}, [mode, isCollapsed, hidden]);
 
-	// EXTERNAL CLOSE TRIGGER
 	useEffect(() => {
 		const handleClose = () => closeAndNavigate();
 		window.addEventListener("sidebar:close", handleClose);
@@ -167,6 +152,21 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 	function isActive(current: string, target: string) {
 		return current === target || current.startsWith(target + "/");
 	}
+
+	// ALWAYS process SidebarLinks to keep hook counts stable
+	const sidebarLinks = links.map(link => (
+		<SidebarLink
+			label={link.label}
+			href={link.href}
+			icon={link.icon}
+			iconActive={link.iconActive}
+			active={isActive(resolvedPath, link.href)}
+			collapsed={isCollapsed}
+			onClick={() => { if (link.href) closeAndNavigate(link.href); }}
+		/>
+	));
+
+	if (hidden) return null;
 
 	if (mode === "static") {
 		return (
@@ -178,24 +178,13 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			>
 				<div className="w-72 flex-shrink-0">
 					<nav ref={navRef as any} className="flex flex-col gap-3.5 px-3 pt-6">
-						{links.map(link => (
-							<SidebarLink
-								label={link.label}
-								href={link.href}
-								icon={link.icon}
-								iconActive={link.iconActive}
-								active={isActive(resolvedPath, link.href)}
-								collapsed={isCollapsed}
-								onClick={() => { if (link.href) navigate(link.href); }}
-							/>
-						))}
+						{sidebarLinks}
 					</nav>
 				</div>
 			</aside>
 		);
 	}
 
-	// OVERLAY RENDER: Permanent DOM with visibility/pointer control
 	if (mode === "overlay") {
 		return (
 			<div
@@ -239,17 +228,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 					</div>
 
 					<nav ref={navRef as any} className="flex flex-col gap-3 px-4">
-						{links.map(link => (
-							<SidebarLink
-								label={link.label}
-								href={link.href}
-								icon={link.icon}
-								iconActive={link.iconActive}
-								active={isActive(resolvedPath, link.href)}
-								collapsed={false}
-								onClick={() => closeAndNavigate(link.href)}
-							/>
-						))}
+						{sidebarLinks}
 					</nav>
 				</aside>
 			</div>
@@ -258,8 +237,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 
 	return null;
 }
-
-/* ---------------- utils ---------------- */
 
 function normalizePath(raw: string) {
 	const p = raw.toLowerCase().replace(/\/+$/, "");
