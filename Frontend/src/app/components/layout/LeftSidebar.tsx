@@ -166,8 +166,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		/>
 	));
 
-	if (hidden) return null;
-
+	// Use CSS to hide instead of returning null to maintain consistent hook calls
 	if (mode === "static") {
 		return (
 			<aside
@@ -175,6 +174,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 				role="navigation"
 				aria-label="Main navigation"
 				className="sidebar-shell bg-(--color-surface) h-full overflow-hidden flex-shrink-0 z-30 border-r border-(--color-border-soft) flex flex-col origin-left will-change-[width,opacity]"
+				style={{ display: hidden ? "none" : "flex" }}
 			>
 				<div className="w-72 flex-shrink-0">
 					<nav ref={navRef as any} className="flex flex-col gap-3.5 px-3 pt-6">
@@ -190,6 +190,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			<div
 				className="z-[110]"
 				style={{
+					display: hidden ? "none" : "block",
 					opacity: isOverlayOpen ? 1 : 0,
 					pointerEvents: isOverlayOpen ? "auto" : "none",
 				}}

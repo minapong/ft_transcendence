@@ -118,7 +118,7 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
           <div className="flex flex-col leading-tight whitespace-nowrap">
             <div className="flex items-center gap-2">
               <span className="text-[clamp(1rem,4vw,1.5rem)] font-bold tracking-[0.06em] text-primary transition-colors group-hover:text-accent">
-                MINA&nbsp;PONG
+                MINA&nbsp;GAMES
               </span>
             </div>
             <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">

@@ -5,14 +5,16 @@ import LeftSidebar from "@/app/components/layout/LeftSidebar";
 import ModalRoot from "Reactor/ModalRoot";
 import { isSpecialLayout } from "Reactor/router/routes";
 import { useScreen } from "@/app/hooks/useScreen";
-import { useLocation } from "Reactor/router/useLocation";
 
 export default function RootLayout({ children }) {
   const screen = useScreen();
   const sidebarMode = screen === "desktop" ? "static" : "overlay";
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const pathname = useLocation();
+
+  // Don't use useLocation() here - it can be stale during layout transitions
+  // RootLayout is re-rendered on every route change anyway, so direct access is safe
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
 
   // Reset states when switching between static and overlay
   useEffect(() => {
