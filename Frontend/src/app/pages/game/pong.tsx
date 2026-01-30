@@ -1,10 +1,24 @@
 import { pongLogic } from "@/core/engine/pong_logic";
-import { navigate, useEffect } from "Reactor";
+import { navigate, useEffect, useRef } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 
 export default function PongGame() {
     // Read navigation state (tournament or free play)
     const navState = history.state as any;
+
+    // Create refs for all DOM elements
+    const ballRef = useRef<HTMLDivElement>(null);
+    const leftPaddleRef = useRef<HTMLDivElement>(null);
+    const rightPaddleRef = useRef<HTMLDivElement>(null);
+    const pauseBtnRef = useRef<HTMLButtonElement>(null);
+    const leftUpBtnRef = useRef<HTMLButtonElement>(null);
+    const leftDownBtnRef = useRef<HTMLButtonElement>(null);
+    const rightUpBtnRef = useRef<HTMLButtonElement>(null);
+    const rightDownBtnRef = useRef<HTMLButtonElement>(null);
+    const scoreLeftRef = useRef<HTMLSpanElement>(null);
+    const scoreRightRef = useRef<HTMLSpanElement>(null);
+    const winnerOverlayRef = useRef<HTMLDivElement>(null);
+    const winnerTextRef = useRef<HTMLDivElement>(null);
 
     let p1Name: string;
     let p2Name: string;
@@ -38,11 +52,31 @@ export default function PongGame() {
     }
 
     useEffect(() => {
-        const overlay = document.getElementById("winnerOverlay")!;
-        const text = document.getElementById("winnerText")!;
+        // Ensure all refs are populated
+        if (!ballRef.current || !leftPaddleRef.current || !rightPaddleRef.current ||
+            !pauseBtnRef.current || !leftUpBtnRef.current || !leftDownBtnRef.current ||
+            !rightUpBtnRef.current || !rightDownBtnRef.current || !scoreLeftRef.current ||
+            !scoreRightRef.current || !winnerOverlayRef.current || !winnerTextRef.current) {
+            return;
+        }
+
+        const overlay = winnerOverlayRef.current;
+        const text = winnerTextRef.current;
         let winTimeout: number | null = null;
 
         const cleanup = pongLogic(
+            {
+                ball: ballRef.current,
+                leftPaddle: leftPaddleRef.current,
+                rightPaddle: rightPaddleRef.current,
+                pauseBtn: pauseBtnRef.current,
+                leftUpBtn: leftUpBtnRef.current,
+                leftDownBtn: leftDownBtnRef.current,
+                rightUpBtn: rightUpBtnRef.current,
+                rightDownBtn: rightDownBtnRef.current,
+                scoreLeft: scoreLeftRef.current,
+                scoreRight: scoreRightRef.current,
+            },
             p1Name,
             p2Name,
             (winner: string, scoreP1: number, scoreP2: number) => {
@@ -105,19 +139,21 @@ export default function PongGame() {
 				text-lg sm:text-xl lg:text-2xl 
 				font-bold mb-2
 				">
-                <span id="scoreLeft">{p1Name}: 0</span>
-                <span id="scoreRight">{p2Name}: 0</span>
+                <span ref={scoreLeftRef} id="scoreLeft">{p1Name}: 0</span>
+                <span ref={scoreRightRef} id="scoreRight">{p2Name}: 0</span>
             </div>
 
             {/* LEFT TOUCH CONTROLS */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
                 <button
+                    ref={leftUpBtnRef}
                     id="left-up"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
                     ▲
                 </button>
                 <button
+                    ref={leftDownBtnRef}
                     id="left-down"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
@@ -138,6 +174,7 @@ export default function PongGame() {
             >
                 {/* Left paddle */}
                 <div
+                    ref={leftPaddleRef}
                     id="left_p"
                     className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
 							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
@@ -145,6 +182,7 @@ export default function PongGame() {
 
                 {/* Right paddle */}
                 <div
+                    ref={rightPaddleRef}
                     id="right_p"
                     className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
 							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
@@ -152,6 +190,7 @@ export default function PongGame() {
 
                 {/* Ball */}
                 <div
+                    ref={ballRef}
                     id="ball"
                     className="absolute 
 							w-3 h-3 sm:w-4 sm:h-4 
@@ -174,12 +213,14 @@ export default function PongGame() {
             {/* RIGHT TOUCH CONTROLS */}
             <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
                 <button
+                    ref={rightUpBtnRef}
                     id="right-up"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
                     ▲
                 </button>
                 <button
+                    ref={rightDownBtnRef}
                     id="right-down"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
@@ -189,6 +230,7 @@ export default function PongGame() {
 
             {/* Pause button */}
             <button
+                ref={pauseBtnRef}
                 id="pauseBtn"
                 className="
 					mt-3 sm:mt-4 
@@ -202,11 +244,12 @@ export default function PongGame() {
 
             {/* Winner overlay */}
             <div
+                ref={winnerOverlayRef}
                 id="winnerOverlay"
                 className="hidden absolute inset-0 flex bg-black/70 items-center justify-center 
 							text-white text-2xl sm:text-3xl lg:text-4xl font-bold z-50"
             >
-                <div id="winnerText"></div>
+                <div ref={winnerTextRef} id="winnerText"></div>
             </div>
         </div>
     );
