@@ -1,5 +1,5 @@
 import { pongLogic } from "@/core/engine/pong_logic";
-import { navigate, useEffect, useRef, useLocation } from "Reactor";
+import { navigate, useEffect, useRef, useLocation, openModal, closeModal } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 
 // Define types for navigation state
@@ -42,8 +42,6 @@ export default function PongGame() {
     const rightDownBtnRef = useRef<HTMLButtonElement>(null);
     const scoreLeftRef = useRef<HTMLSpanElement>(null);
     const scoreRightRef = useRef<HTMLSpanElement>(null);
-    const winnerOverlayRef = useRef<HTMLDivElement>(null);
-    const winnerTextRef = useRef<HTMLDivElement>(null);
 
     let p1Name: string;
     let p2Name: string;
@@ -81,13 +79,9 @@ export default function PongGame() {
         if (!ballRef.current || !leftPaddleRef.current || !rightPaddleRef.current ||
             !pauseBtnRef.current || !leftUpBtnRef.current || !leftDownBtnRef.current ||
             !rightUpBtnRef.current || !rightDownBtnRef.current || !scoreLeftRef.current ||
-            !scoreRightRef.current || !winnerOverlayRef.current || !winnerTextRef.current) {
+            !scoreRightRef.current) {
             return;
         }
-
-        const overlay = winnerOverlayRef.current;
-        const text = winnerTextRef.current;
-        let winTimeout: number | null = null;
 
         const cleanup = pongLogic(
             {
@@ -105,8 +99,27 @@ export default function PongGame() {
             p1Name,
             p2Name,
             (winner: string, scoreP1: number, scoreP2: number) => {
-                text.textContent = `${winner} Wins! 🏆 ${scoreP1} - ${scoreP2}`;
-                overlay.classList.remove("hidden");
+                // Navigation handler for modal buttons
+                const handleNavigate = (destination: "tournament" | "home") => {
+                    closeModal();
+                    if (destination === "tournament") {
+                        navigate("/tournament/active", { replace: true });
+                    } else {
+                        navigate("/game/single_game", { replace: true });
+                    }
+                };
+
+                // Show winner modal
+                openModal({
+                    type: "pong-winner",
+                    payload: {
+                        winner,
+                        scoreP1,
+                        scoreP2,
+                        isTournament: matchId !== null,
+                        onNavigate: handleNavigate
+                    }
+                });
 
                 // If this was a tournament match, report result directly
                 if (matchId !== null && p1Id !== null && p2Id !== null) {
@@ -128,27 +141,13 @@ export default function PongGame() {
                             console.warn("[Pong] Failed to report tournament result:", err);
                         });
                 }
-
-                // Navigate back after 2 seconds
-                winTimeout = window.setTimeout(() => {
-                    if (matchId !== null) {
-                        navigate("/tournament/active", { replace: true });
-                    } else {
-                        navigate("/game/single_game", { replace: true });
-                    }
-                }, 2000);
             },
             useAI,
             aiDifficulty
         );
 
-        overlay.classList.add("hidden");
-
         // Cleanup function runs on unmount
         return () => {
-            if (winTimeout !== null) {
-                clearTimeout(winTimeout);
-            }
             cleanup();
         };
     });
@@ -266,16 +265,6 @@ export default function PongGame() {
             >
                 ⏸️ Pause
             </button>
-
-            {/* Winner overlay */}
-            <div
-                ref={winnerOverlayRef}
-                id="winnerOverlay"
-                className="hidden absolute inset-0 flex bg-black/70 items-center justify-center 
-							text-white text-2xl sm:text-3xl lg:text-4xl font-bold z-50"
-            >
-                <div ref={winnerTextRef} id="winnerText"></div>
-            </div>
         </div>
     );
 }
