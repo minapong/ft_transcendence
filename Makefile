@@ -22,6 +22,23 @@ build-prod:
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) build
 
 # ==============================================================================
+# 🌱 Database Seeding
+# ==============================================================================
+
+seed-dev:
+	@echo "🌱 Seeding database (dev)..."
+	docker compose -p $(PROJECT_NAME)_dev \
+		-f $(COMPOSE_BASE) -f $(COMPOSE_DEV) \
+		exec backend npm run seed
+
+seed-prod:
+	@echo "🌱 Seeding database (prod)..."
+	docker compose -p $(PROJECT_NAME)_prod \
+		-f $(COMPOSE_PROD) \
+		exec backend npm run seed:prod
+
+
+# ==============================================================================
 # 🚀 Run Targets
 # ==============================================================================
 
@@ -32,6 +49,22 @@ dev: build-dev
 prod: build-prod
 	@echo "🌐 Starting production environment..."
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) up -d
+
+# ==============================================================================
+# 🌱 Bootstrap (build + run + seed)
+# ==============================================================================
+
+dev-seed: build-dev
+	@echo "🚀 Starting development environment (with seed)..."
+	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up -d
+	@echo "🌱 Seeding development database..."
+	make seed-dev
+
+prod-seed: build-prod
+	@echo "🌐 Starting production environment (with seed)..."
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) up -d
+	@echo "🌱 Seeding production database..."
+	make seed-prod
 
 # ==============================================================================
 # 🧹 Cleanup Targets
@@ -77,10 +110,14 @@ re: fclean
 
 help:
 	@echo "Available targets:"
-	@echo "  make dev        → Run development environment (with hot reload)"
-	@echo "  make prod       → Run production environment (detached mode)"
-	@echo "  make build-dev  → Build dev Docker images"
-	@echo "  make build-prod → Build prod Docker images"
-	@echo "  make clean      → Stop and remove containers"
-	@echo "  make fclean     → Full cleanup (containers, images, volumes)"
-	@echo "  make re         → Rebuild everything from scratch"
+	@echo "  make dev          → Run development environment"
+	@echo "  make dev-seed     → Build, run, and seed development environment"
+	@echo "  make prod         → Run production environment"
+	@echo "  make prod-seed    → Build, run, and seed production environment"
+	@echo "  make build-dev    → Build dev Docker images"
+	@echo "  make build-prod   → Build prod Docker images"
+	@echo "  make seed-dev     → Seed dev database"
+	@echo "  make seed-prod    → Seed prod database"
+	@echo "  make clean        → Stop and remove containers"
+	@echo "  make fclean       → Full cleanup"
+	@echo "  make re           → Rebuild everything"
