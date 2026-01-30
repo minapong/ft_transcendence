@@ -156,7 +156,12 @@ export default function SingleGame() {
                 </button>
             </div>
 
-            <a href="/" className="text-cyan-400 underline hover:text-cyan-200">← Back to Home</a>
+            <button
+                    onClick= {navigate("/")}
+                    className="text-cyan-400 underline hover:text-cyan-200"
+                >
+                    Back to Home
+            </button>
         </div>
     );
 }
