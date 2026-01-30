@@ -1,21 +1,45 @@
-// src/routes/auth.routes.ts
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { AuthService } from "../services/auth.service.js";
 
 interface SignupBody {
-  email: string;
-  username: string;
-  password: string;
+  email?: unknown;
+  username?: unknown;
+  password?: unknown;
 }
+
+function asTrimmedString(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.trim();
+  return s.length ? s : null;
+}
+
+// limits  to avoid DB errors + huge tokens
+const MAX_EMAIL = 320;
+const MAX_USERNAME = 32;
+const MAX_PASSWORD = 128;
 
 export async function registerAuthRoutes(server: FastifyInstance) {
   server.post(
     "/api/auth/signup",
     async (req: FastifyRequest<{ Body: SignupBody }>, reply: FastifyReply) => {
-      const { email, username, password } = req.body;
+      // never destructure req.body directly (it can be undefined)
+      const body = (req.body ?? {}) as SignupBody;
 
+      const email = asTrimmedString(body.email);
+      const username = asTrimmedString(body.username);
+      const password = asTrimmedString(body.password);
+
+      // consistent response shape; 200 for expected failures
       if (!email || !username || !password) {
         return reply.code(200).send({ ok: false, error: "Missing fields" });
+      }
+
+      if (
+        email.length > MAX_EMAIL ||
+        username.length > MAX_USERNAME ||
+        password.length > MAX_PASSWORD
+      ) {
+        return reply.code(200).send({ ok: false, error: "Fields too long" });
       }
 
       try {
@@ -23,26 +47,30 @@ export async function registerAuthRoutes(server: FastifyInstance) {
 
         const token = server.jwt.sign(
           { userId: user.id, email: user.email, isAdmin: user.isAdmin },
-          {expiresIn: "1h" }
-        )
+          { expiresIn: "1h" }
+        );
 
-        return reply.code(201).send({user, token});
-        
+        // use 200 to avoid "Created" semantics; also keeps everything uniform
+        return reply.code(200).send({ ok: true, user, token });
       } catch (err: any) {
-        if (err.message === "EMAIL_ALREADY_EXISTS") {
-          return reply.code(200).send({ok:false, error: "Email already used" });
+        // map known errors to ok:false (still 200)
+        const msg = err?.message;
+
+        if (msg === "EMAIL_ALREADY_EXISTS") {
+          return reply.code(200).send({ ok: false, error: "Email already used" });
         }
-        if (err.message === "USERNAME_ALREADY_EXISTS") {
+        if (msg === "USERNAME_ALREADY_EXISTS") {
           return reply.code(200).send({ ok: false, error: "Username already used" });
         }
         if (err?.code === "P2002") {
-          // err.meta.target usually contains ["username"] or ["email"]
-          return reply.code(200).send({ok: false,  error: "Email or username already used" });
+          return reply
+            .code(200)
+            .send({ ok: false, error: "Email or username already used" });
         }
-        console.error("SIGNUP ERROR:", err);
-        return reply.code(500).send({ error: "Internal server error" });
+
+        //  no console.error; avoid 500 to prevent browser console errors
+        return reply.code(200).send({ ok: false, error: "Server error" });
       }
     }
   );
-}   
-
+}
