@@ -5,6 +5,7 @@ import { IntentPresets } from "@/core/engine/match_intent";
 import { unwrap } from "@/core/lib/input/unwrap";
 import { vPlayerName } from "@/core/lib/input/validators";
 import IntentCard from "./components/IntentCard";
+import { useScreen } from "@/app/hooks/useScreen";
 
 
 /* ============================================================
@@ -26,8 +27,9 @@ export default function PreMatchScene() {
   ];
 
   /* ---- CAROUSEL CONFIG ---- */
-  const CARD_WIDTH = 460;
-  const GAP = 48;
+  const screenSize = useScreen();
+  const CARD_WIDTH = screenSize === "mobile" ? 340 : screenSize === "tablet" ? 400 : 460;
+  const GAP = screenSize === "mobile" ? 24 : screenSize === "tablet" ? 32 : 48;
 
   /* ---- DRAG ENGINE ---- */
   const containerRef = useRef<HTMLDivElement | null>(null);
