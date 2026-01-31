@@ -1,0 +1,584 @@
+/**
+ * Contact Page
+ *
+ * Calm, professional presentation for team governance and responsibilities.
+ */
+
+.contact-page {
+    min-height: 100vh;
+    padding: var(--spacing-12) var(--spacing-8);
+    background: linear-gradient(180deg,
+            var(--color-gradient-start),
+            var(--color-gradient-end) 70%);
+    color: var(--color-primary);
+    font-family: var(--font-family-primary);
+}
+
+.contact-shell {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-10);
+}
+
+.contact-hero {
+    padding: var(--spacing-10);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.contact-eyebrow {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-widest);
+    color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+.contact-title {
+    font-size: clamp(2.2rem, 4vw, 3.1rem);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-tight);
+    line-height: var(--line-height-tight);
+}
+
+.contact-subtitle {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+    color: color-mix(in srgb, var(--color-primary) 80%, transparent);
+}
+
+.contact-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.contact-section.panel-surface {
+    padding: var(--spacing-8);
+    border-radius: var(--radius-xl);
+}
+
+.contact-section__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-accent);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+}
+
+.contact-roles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+}
+
+.contact-roles--cards {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(240px, 320px);
+    overflow-x: auto;
+    padding-bottom: var(--spacing-4);
+    scroll-snap-type: x mandatory;
+    justify-content: center;
+}
+
+.contact-role {
+    padding: var(--spacing-4);
+    border: 1px solid var(--color-border-soft);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+    border-radius: var(--radius-lg);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    cursor: pointer;
+    background: color-mix(in srgb, var(--color-primary) 3%, transparent);
+    scroll-snap-align: center;
+    min-height: 220px;
+}
+
+.contact-role:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 38px color-mix(in srgb, var(--color-accent) 20%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+.contact-role.is-active {
+    box-shadow: 0 0 24px color-mix(in srgb, var(--color-accent) 35%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+.contact-role__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    transition: transform 0.25s ease;
+}
+
+.contact-role__shape {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,
+            color-mix(in srgb, var(--color-accent) 75%, transparent),
+            color-mix(in srgb, var(--color-primary) 40%, transparent));
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--color-accent) 35%, transparent);
+    flex-shrink: 0;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.contact-role:hover .contact-role__shape {
+    box-shadow: 0 0 18px color-mix(in srgb, var(--color-accent) 55%, transparent);
+    transform: scale(1.05);
+}
+
+.contact-role__person {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+}
+
+.contact-role__title {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+}
+
+.contact-role__progress {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    text-align: right;
+}
+
+.contact-role__ring-shell {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+}
+
+.contact-role__ring {
+    width: 56px;
+    height: 56px;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.contact-role__ring-track {
+    fill: none;
+    stroke: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    stroke-width: 6;
+}
+
+.contact-role__ring-progress {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 6;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 32px 32px;
+    transition: stroke-dashoffset 0.4s ease;
+}
+
+.contact-role:hover .contact-role__ring,
+.contact-role.is-active .contact-role__ring {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-accent) 45%, transparent));
+}
+
+.contact-role__ring-value {
+    position: absolute;
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+}
+
+.contact-role__progress-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contact-role__progress-value {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+}
+
+.contact-role__progress-label {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+.contact-role__progress-bar {
+    display: grid;
+    gap: var(--spacing-2);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.contact-role__progress-bar:hover {
+    transform: scale(1.01);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+.contact-role__progress-bar--detail {
+    width: min(320px, 100%);
+}
+
+.contact-role__progress-bar-label {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+.contact-role__progress-track {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    overflow: hidden;
+}
+
+.contact-role__progress-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg,
+            color-mix(in srgb, var(--color-accent) 80%, transparent),
+            color-mix(in srgb, var(--color-primary) 45%, transparent));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 35%, transparent);
+    transition: width 0.35s ease;
+    width: var(--progress);
+}
+
+.contact-role__achievements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.contact-role__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    color: color-mix(in srgb, var(--color-accent) 90%, white 10%);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-role__chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+.contact-role:hover .contact-role__progress-fill,
+.contact-role.is-active .contact-role__progress-fill {
+    width: var(--progress);
+}
+
+.contact-role-detail {
+    display: grid;
+    gap: var(--spacing-6);
+}
+
+.contact-role-detail__header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    align-items: center;
+}
+
+.contact-role-detail__eyebrow {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-widest);
+    color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+.contact-role-detail__name {
+    margin: var(--spacing-1) 0 0;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+.contact-role-detail__title {
+    margin: var(--spacing-1) 0 0;
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 65%, transparent);
+}
+
+.contact-role-detail__grid {
+    display: grid;
+    gap: var(--spacing-6);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.contact-role__block {
+    display: grid;
+    gap: var(--spacing-2);
+}
+
+.contact-role__label {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+
+.contact-role__list {
+    margin: 0;
+    padding-left: var(--spacing-6);
+    display: grid;
+    gap: var(--spacing-2);
+    color: color-mix(in srgb, var(--color-primary) 85%, transparent);
+    line-height: var(--line-height-relaxed);
+}
+
+.contact-role__item {
+    position: relative;
+    padding-left: var(--spacing-5);
+}
+
+.contact-role__item::before {
+    content: "◆";
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    font-size: 0.6rem;
+    color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+
+.contact-role__milestones {
+    display: grid;
+    gap: var(--spacing-3);
+}
+
+.contact-role__milestone {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent);
+    display: grid;
+    gap: var(--spacing-2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.contact-role__milestone:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--color-accent) 25%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+.contact-role__milestone-head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-3);
+    align-items: center;
+}
+
+.contact-role__milestone-title {
+    margin: 0;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-md);
+}
+
+.contact-role__milestone-value {
+    font-size: var(--font-size-sm);
+    color: color-mix(in srgb, var(--color-accent) 80%, transparent);
+    font-weight: var(--font-weight-semibold);
+}
+
+.contact-role__milestone-impact {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.25s ease;
+}
+
+.contact-role__milestone:hover .contact-role__milestone-impact,
+.contact-role.is-active .contact-role__milestone-impact {
+    max-height: 60px;
+    opacity: 1;
+}
+
+.contact-role__milestone-track {
+    position: relative;
+    height: 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    overflow: hidden;
+}
+
+.contact-role__milestone-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg,
+            color-mix(in srgb, var(--color-accent) 75%, transparent),
+            color-mix(in srgb, var(--color-primary) 40%, transparent));
+    transition: width 0.3s ease;
+    width: var(--milestone);
+}
+
+.contact-role__milestone:hover .contact-role__milestone-fill,
+.contact-role.is-active .contact-role__milestone-fill {
+    width: var(--milestone);
+}
+
+.contact-copy {
+    display: grid;
+    gap: var(--spacing-3);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+    color: color-mix(in srgb, var(--color-primary) 82%, transparent);
+}
+
+.contact-feedback {
+    display: grid;
+    gap: var(--spacing-4);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.contact-feedback__summary {
+    display: grid;
+    gap: var(--spacing-3);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.contact-feedback__metric {
+    padding: var(--spacing-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+    display: grid;
+    gap: 4px;
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+}
+
+.contact-feedback__metric strong {
+    font-size: var(--font-size-lg);
+    color: var(--color-primary);
+}
+
+.contact-feedback__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+    align-items: center;
+}
+
+.contact-feedback__label {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+}
+
+.contact-feedback__select {
+    padding: 8px 12px;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+    color: var(--color-primary);
+}
+
+.contact-feedback__card {
+    padding: var(--spacing-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--color-accent) 12%, transparent);
+    display: grid;
+    gap: var(--spacing-2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-feedback__card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+.contact-feedback__card h3 {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+}
+
+.contact-feedback__card p {
+    margin: 0;
+    color: color-mix(in srgb, var(--color-primary) 75%, transparent);
+    line-height: var(--line-height-relaxed);
+}
+
+.contact-feedback__head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-3);
+    align-items: center;
+}
+
+.contact-feedback__rating {
+    font-weight: var(--font-weight-semibold);
+    color: color-mix(in srgb, var(--color-accent) 80%, transparent);
+}
+
+.contact-feedback__summary-text {
+    font-weight: var(--font-weight-semibold);
+}
+
+.contact-feedback__detail {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.25s ease;
+}
+
+.contact-feedback__card:hover .contact-feedback__detail {
+    max-height: 80px;
+    opacity: 1;
+}
+
+@media (max-width: 720px) {
+    .contact-page {
+        padding: var(--spacing-10) var(--spacing-4);
+    }
+
+    .contact-hero {
+        padding: var(--spacing-8);
+    }
+
+    .contact-role__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .contact-role__progress {
+        margin-left: 0;
+        text-align: left;
+    }
+}
