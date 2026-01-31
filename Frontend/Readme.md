@@ -3,15 +3,15 @@
 ## 🧭 Overview
 This is the **frontend** of the ft_transcendence project.  
 Built as a **Single Page Application (SPA)** using **TypeScript**, with **Tailwind CSS** for styling.  
-It targets the latest stable **Mozilla Firefox**.
+It must run flawlessly on the latest stable version of **Mozilla Firefox**.
 
 ---
 
 ## 🧱 Base Responsibilities
-- SPA routing with **Back/Forward navigation**  
-- Core **Pong** and **Connect4** game screens  
-- **Tournament** and **Matchmaking** UI (HTTP-based)  
-- Integration with backend APIs (Fastify + JWT)  
+- SPA routing with full **Back/Forward navigation** support  
+- Core **Pong game interface** (canvas + controls)  
+- **Tournament** and **Matchmaking** UI  
+- Integration with backend APIs (Fastify)  
 - Clean console — no warnings or errors  
 
 ---
@@ -19,12 +19,9 @@ It targets the latest stable **Mozilla Firefox**.
 ## ⚙️ Tech Stack
 - **TypeScript** – main language  
 - **Tailwind CSS** – frontend toolkit *(Minor Module)*  
-- **Reactor** – custom SPA runtime  
+- **Babylon.js** – 3D graphics for enhanced Pong experience  
+- **WebSockets (WSS)** – for real-time gameplay and chat  
 - **Docker** – full containerized deployment  
-
-Planned/Optional:
-- **Babylon.js** – enhanced visuals (planned)
-- **WebSockets (WSS)** – realtime gameplay/chat (planned)
 
 ---
 
@@ -87,7 +84,7 @@ npm run dev
 ```
 
 Then open 👉 **[https://localhost:5173](https://localhost:5173)**
-(Use HTTPS locally if required by your setup)
+(Use HTTPS even locally for compliance)
 
 ---
 
@@ -101,9 +98,6 @@ Then open 👉 **[https://localhost:5173](https://localhost:5173)**
 | **Santiago**     | JWT + 2FA & GDPR / Account Deletion          |
 ---
 
-🧩 *This frontend forms the visual layer of ft_transcendence, integrating directly with the Fastify backend and planned real-time WebSocket services for gameplay and chat.*
-
-## 🔔 Changelog
-- v2.0.0 — Added login page and JWT wiring, dashboard skeleton (leaderboard/history consuming stats routes), and tournament/pong integration (client-side).
+🧩 *This frontend forms the visual layer of ft_transcendence, integrating directly with the Fastify backend and real-time WebSocket services for gameplay and chat.*
 
 ```

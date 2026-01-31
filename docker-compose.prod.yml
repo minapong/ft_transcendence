@@ -6,9 +6,14 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=file:./transcendence.db
+      - JWT_SECRET=${JWT_SECRET}
+    # env_file:
+    #   - ./Backend/.env
     restart: always
     networks:
       - app_net
+
 
   nginx:
     image: ${IMAGE_FRONTEND:-transcendence-frontend:local}

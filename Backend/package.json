@@ -1,7 +1,7 @@
 {
     "name": "ft_transcendence-backend",
     "version": "1.0.0",
-    "main": "dist/index.js",
+    "main": "dist/src/index.js",
     "type": "module",
     "scripts": {
         "dev": "tsc && node dist/src/index.js",
@@ -9,11 +9,16 @@
         "start": "node dist/src/index.js",
         "migrate": "npx prisma migrate deploy",
         "prisma:generate": "npx prisma generate",
-        "prisma:studio": "npx prisma studio"
+        "prisma:studio": "npx prisma studio",
+        "seed": "npx prisma migrate deploy && tsx script/seed_all.ts",
+        "seed:prod": "npx prisma migrate deploy && node dist/script/seed_all.js"
     },
     "dependencies": {
         "@fastify/cors": "^8.5.0",
         "@fastify/jwt": "^7.0.0",
+        "@fastify/multipart": "^8.3.1",
+        "@fastify/static": "^7.0.4",
+        "@fastify/websocket": "^8.3.1",
         "@prisma/adapter-better-sqlite3": "^7.2.0",
         "@prisma/client": "^7.2.0",
         "bcrypt": "^6.0.0",

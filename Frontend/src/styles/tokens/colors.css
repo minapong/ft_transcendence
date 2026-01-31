@@ -1,0 +1,230 @@
+/**
+ * Color Tokens
+ * 
+ * Pure design token values for the color system.
+ * No selectors or classes - values only.
+ * 
+ * Categories:
+ * - Brand colors (primary, accent)
+ * - Surface colors (backgrounds, cards)
+ * - Border colors
+ * - Text colors
+ * - State colors (hover, active, danger)
+ * - Navigation colors (sidebar, panel)
+ * - Energy/effect colors
+ */
+
+@theme {
+    /* ========================================
+     Brand Colors
+     ======================================== */
+
+    --color-primary: #ffffff;
+    --color-accent: #22d3ee;
+    --color-accent-soft: #0093d7;
+    --color-accent-hover: color-mix(in srgb, var(--color-accent) 85%, white);
+
+    /* ========================================
+     Surface Colors
+     ======================================== */
+
+    --color-surface: rgba(255, 255, 255, 0.04);
+    --color-surface-strong: rgba(255, 255, 255, 0.08);
+
+    /* ========================================
+     Panel Colors
+     ======================================== */
+
+    --color-panel: rgba(6, 12, 30, 0.94);
+    --color-panel-border: rgba(255, 255, 255, 0.08);
+
+    /* ========================================
+     Border Colors
+     ======================================== */
+
+    --color-border-soft: rgba(255, 255, 255, 0.04);
+    --color-border-strong: rgba(255, 255, 255, 0.12);
+
+    /* ========================================
+     Navigation Colors
+     ======================================== */
+
+    --color-navpanel: #020c1f;
+
+    /* ========================================
+     Gradient Colors
+     ======================================== */
+
+    --color-gradient-start: #0f172a;
+    --color-gradient-mid: #0a1022;
+    --color-gradient-end: #050b1a;
+
+    /* ========================================
+     Energy Layer Colors
+     ======================================== */
+
+    --color-energy-start: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    --color-energy-end: color-mix(in srgb, var(--color-accent-soft) 40%, transparent);
+
+    /* ========================================
+     State Colors
+     ======================================== */
+
+    --color-danger: #ff1f4b;
+    --color-danger-soft: color-mix(in srgb, #ff1f4b 70%, transparent);
+
+    /* ========================================
+     Sidebar Specific Colors
+     ======================================== */
+
+    --color-sidebar-bg: var(--color-navpanel);
+    --color-sidebar-border: var(--color-border-soft);
+    --color-sidebar-toggle-bg: rgba(255, 255, 255, 0.05);
+    --color-sidebar-toggle-border: var(--color-border-strong);
+    --color-sidebar-toggle-text: var(--color-accent);
+    --color-sidebar-toggle-hover-bg: rgba(255, 255, 255, 0.08);
+    --color-sidebar-toggle-hover-text: #000000;
+    --color-sidebar-link-bg: var(--color-surface);
+    --color-sidebar-link-border: var(--color-border-soft);
+    --color-sidebar-link-text: var(--color-primary);
+    --color-sidebar-link-hover-bg: var(--color-surface-strong);
+    --color-sidebar-link-hover-text: #ffffff;
+    --color-sidebar-active-text: var(--color-primary);
+    --color-sidebar-active-glow: var(--color-accent);
+    --color-sidebar-active-sheen: var(--color-accent-soft);
+    --color-sidebar-active-hot: #ff1f4b;
+
+    /* ========================================
+     Button Colors
+     ======================================== */
+
+    --color-btn-primary-bg: var(--color-accent);
+    --color-btn-primary-text: #000000;
+    --color-btn-primary-hover: var(--color-accent-hover);
+
+    --color-btn-secondary-bg: var(--color-surface);
+    --color-btn-secondary-text: var(--color-primary);
+    --color-btn-secondary-hover: var(--color-surface-strong);
+    --color-btn-secondary-border: var(--color-border-soft);
+
+    --color-btn-game-bg: rgba(255, 255, 255, 0.8);
+    --color-btn-game-text: #000000;
+    --color-btn-game-active: rgba(255, 255, 255, 1);
+
+    --color-btn-success-bg: #22c55e;
+    --color-btn-success-text: #000000;
+    --color-btn-success-hover: #16a34a;
+
+    --color-btn-danger-bg: var(--color-danger);
+    --color-btn-danger-text: #ffffff;
+    --color-btn-danger-hover: #dc1c47;
+}
+
+/* ========================================
+   Tailwind Color System (for compatibility)
+   ======================================== */
+
+:root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.145 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.145 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.985 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.396 0.141 25.723);
+    --destructive-foreground: oklch(0.637 0.237 25.331);
+    --border: oklch(0.269 0 0);
+    --input: oklch(0.269 0 0);
+    --ring: oklch(0.439 0 0);
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(0.269 0 0);
+    --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary-tw: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent-tw: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border-tw: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}

@@ -2,38 +2,41 @@
 
 ## 🧭 Overview
 This is the **backend** for the ft_transcendence project.  
-It provides API routes and authentication logic for the SPA along with tournament and matchmaking services.
+It provides all API routes, authentication logic, and real-time services (chat, multiplayer, blockchain integration).
 
-MVP-2 status: JWT auth, tournaments, matchmaking, and profile endpoints are available. WebSockets/chat and blockchain are planned.
+Initially, it serves the **mandatory base** (SPA hosting, Pong data, HTTPS),  
+and later scales into **module integrations** such as:
+- User Management  
+- Live Chat  
+- Blockchain (Avalanche)  
+- AI / Multiplayer services  
 
 ---
 ## 🧱 Base Responsibilities
-- Serve API for SPA  
+- Serve frontend SPA content via HTTPS  
+- Provide secure WebSocket (WSS) connection  
 - Manage tournament and matchmaking data  
-- JWT authentication and route guards  
-- Use environment variables for secrets  
+- Ensure environment variables are used for secrets  
 - No unhandled errors or insecure endpoints  
 
 ---
 
-## 🧩 Modules
-| Module | Status | Description |
-|--------|--------|-------------|
-| **User Management** | ✅ | JWT auth (signup/login), `/api/me`, profile lookup |
-| **Tournaments** | ✅ | Create/register/start/advance/result endpoints |
-| **Matchmaking (HTTP)** | ✅ | Queue + active matches for Connect4 |
-| **Statistics** | 🚧 | Routes present; repository queries pending |
-| **WebSockets** | 🧪 | Planned realtime gameplay/chat layer |
-| **Live Chat** | 🧪 | Planned, piggybacks on WebSockets |
-| **Blockchain** | 🧪 | Planned (optional) |
+## 🧩 Modules Built on Top
+| Module | Description |
+|--------|-------------|
+| **User Management** | Authentication, profile system, avatar uploads |
+| **Live Chat** | Real-time messaging using WSS |
+| **Blockchain** | Tournament scores stored on Avalanche via Solidity smart contracts |
+| **Multiplayer** | Socket-based real-time gameplay sync |
 
 ---
 
 ## ⚙️ Tech Stack
-- **Node.js + Fastify**  
-- **Prisma + SQLite (better-sqlite3 adapter)**  
-- **TypeScript**  
-- **Dockerized deployment**  
+- **Node.js + Fastify** – *(Major Module: Backend Framework)*  
+- **SQLite** – *(Minor Module: Database)*  
+- **TypeScript** – optional for backend logic  
+- **WebSocket (WSS)** – real-time communication layer  
+- **Dockerized deployment** – production-ready setup  
 
 ---
 
@@ -46,9 +49,6 @@ npm install
 npm run dev
 ```
 
-## 🔔 Changelog
-- v2.0.0 — Added JWT auth (signup/login/me), tournaments and matchmaking routes; stats routes scaffolded; WebSockets pending.
-
 ---
 
 
@@ -59,7 +59,7 @@ npm run dev
 | **Hashir**       | SPA,  UI integration |
 | **Abdul Rehman** | Pong gameplay logic                            |
 | **Natalia**      | Docker & HTTPS configuration                   |
-| **Santiago**     | Tournament, Matchmaking, AI Opponent, Dashboard |
+| **Santiago**     | Tournament, Matchmaking, AI Oponent, Dashboard |
 ---
 
 
