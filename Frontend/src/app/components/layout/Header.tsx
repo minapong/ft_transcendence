@@ -175,7 +175,7 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
                 <PanelButton
                   icon="icon-[mdi--tune-variant]"
                   label="System Prefs"
-                  onClick={() => navigate("user/settings")}
+                  onClick={() => navigate("/user/settings")}
                 />
               </div>
 
