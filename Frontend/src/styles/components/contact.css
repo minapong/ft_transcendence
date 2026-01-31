@@ -1,0 +1,278 @@
+/**
+ * Contact Page
+ *
+ * Command interface layout for team governance and role authority.
+ */
+
+.contact-page {
+    min-height: 100vh;
+    padding: var(--spacing-12) var(--spacing-8);
+    background: radial-gradient(circle at top,
+            rgba(34, 211, 238, 0.08),
+            transparent 55%),
+        linear-gradient(180deg,
+            var(--color-gradient-start),
+            var(--color-gradient-end) 80%);
+    color: var(--color-primary);
+    font-family: var(--font-family-primary);
+}
+
+.contact-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-10);
+}
+
+.contact-hero {
+    padding: var(--spacing-10);
+    border-radius: var(--radius-xl);
+    display: grid;
+    gap: var(--spacing-4);
+}
+
+.contact-hero__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.contact-eyebrow {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-widest);
+    color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+.contact-title {
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-tight);
+    line-height: var(--line-height-tight);
+}
+
+.contact-subtitle {
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+    color: color-mix(in srgb, var(--color-primary) 75%, transparent);
+    max-width: 640px;
+}
+
+.contact-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-4);
+}
+
+.contact-status__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: color-mix(in srgb, var(--color-primary) 75%, transparent);
+}
+
+.contact-status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+
+.contact-status__dot--ok {
+    background: color-mix(in srgb, var(--color-accent) 80%, #22c55e);
+}
+
+.contact-status__dot--locked {
+    background: color-mix(in srgb, var(--color-accent) 70%, var(--color-danger));
+}
+
+.contact-status__dot--ready {
+    background: color-mix(in srgb, var(--color-accent) 65%, #22c55e);
+}
+
+.contact-matrix {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.15fr);
+    gap: var(--spacing-8);
+    align-items: start;
+}
+
+.contact-nodes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.contact-node {
+    width: 100%;
+    text-align: left;
+    padding: var(--spacing-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-soft);
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    gap: var(--spacing-4);
+    align-items: center;
+    transition: border-color var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out);
+    cursor: pointer;
+}
+
+.contact-node:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    transform: translateY(-2px);
+}
+
+.contact-node--active {
+    border-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 25%, transparent);
+    background: rgba(34, 211, 238, 0.08);
+}
+
+.contact-node__glyph {
+    font-size: 1.5rem;
+    color: var(--color-accent);
+}
+
+.contact-node__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.contact-node__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+}
+
+.contact-node__people {
+    font-size: var(--font-size-sm);
+    color: color-mix(in srgb, var(--color-primary) 65%, transparent);
+}
+
+.contact-detail {
+    padding: var(--spacing-8);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+    min-height: 420px;
+}
+
+.contact-detail__header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    align-items: center;
+}
+
+.contact-detail__eyebrow {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-widest);
+    color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+.contact-detail__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+.contact-detail__people {
+    font-size: var(--font-size-sm);
+    color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+}
+
+.contact-detail__glyph {
+    font-size: 2.2rem;
+    color: var(--color-accent);
+}
+
+.contact-detail__section h3 {
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-3);
+}
+
+.contact-detail__section ul {
+    margin: 0;
+    padding-left: var(--spacing-6);
+    display: grid;
+    gap: var(--spacing-2);
+    color: color-mix(in srgb, var(--color-primary) 85%, transparent);
+    line-height: var(--line-height-relaxed);
+}
+
+.contact-detail__meta {
+    display: grid;
+    gap: var(--spacing-4);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.contact-detail__meta h4 {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-widest);
+    color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+    margin-bottom: var(--spacing-2);
+}
+
+.contact-detail__meta p {
+    margin: 0;
+    line-height: var(--line-height-relaxed);
+    color: color-mix(in srgb, var(--color-primary) 82%, transparent);
+}
+
+.contact-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.contact-section.panel-surface {
+    padding: var(--spacing-8);
+    border-radius: var(--radius-xl);
+}
+
+.contact-section__title {
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-widest);
+    color: var(--color-accent);
+}
+
+.contact-copy {
+    display: grid;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+    color: color-mix(in srgb, var(--color-primary) 82%, transparent);
+}
+
+@media (max-width: 960px) {
+    .contact-matrix {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-detail {
+        min-height: unset;
+    }
+}
+
+@media (max-width: 720px) {
+    .contact-page {
+        padding: var(--spacing-10) var(--spacing-4);
+    }
+
+    .contact-hero {
+        padding: var(--spacing-8);
+    }
+}
