@@ -94,8 +94,8 @@
 
   #p4_game #game_board { width: 380px; height: 380px; }
 
-  #p4_game #left_p, #p4_game #right_p { width: 16px; height: 96px; }
-  #p4_game #upper_p, #p4_game #lower_p { width: 96px; height: 16px; }
+  #p4_game #left_p, #p4_game #right_p { width: 12px; height: 80px; }
+  #p4_game #upper_p, #p4_game #lower_p { width: 80px; height: 12px; }
 
   #p4_game #left_p { left: 16px; }
   #p4_game #right_p { right: 16px; }
@@ -136,8 +136,8 @@
 
   #p4_game #game_board { width: 500px; height: 500px; }
 
-  #p4_game #left_p, #p4_game #right_p { width: 24px; height: 120px; }
-  #p4_game #upper_p, #p4_game #lower_p { width: 120px; height: 24px; }
+  #p4_game #left_p, #p4_game #right_p { width: 12px; height: 96px; }
+  #p4_game #upper_p, #p4_game #lower_p { width: 96px; height: 12px; }
 
   #p4_game #left_p { left: 16px; }
   #p4_game #right_p { right: 16px; }
