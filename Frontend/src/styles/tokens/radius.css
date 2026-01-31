@@ -1,0 +1,37 @@
+/**
+ * Radius Tokens
+ * 
+ * Pure design token values for border radius.
+ * No selectors or classes - values only.
+ */
+
+@theme {
+    /* ========================================
+     Border Radius Scale
+     ======================================== */
+
+    --radius-none: 0;
+    --radius-sm: 0.375rem;
+    /* 6px */
+    --radius-md: 0.625rem;
+    /* 10px */
+    --radius-lg: 0.875rem;
+    /* 14px */
+    --radius-xl: 1rem;
+    /* 16px */
+    --radius-2xl: 1.5rem;
+    /* 24px */
+    --radius-full: 9999px;
+}
+
+/* Tailwind compatibility */
+:root {
+    --radius: 0.625rem;
+}
+
+@theme inline {
+    --radius-sm-tw: calc(var(--radius) - 4px);
+    --radius-md-tw: calc(var(--radius) - 2px);
+    --radius-lg-tw: var(--radius);
+    --radius-xl-tw: calc(var(--radius) + 4px);
+}

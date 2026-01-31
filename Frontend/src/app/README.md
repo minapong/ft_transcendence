@@ -16,7 +16,7 @@ app/
 ├── components/     # Reusable UI pieces
 │   ├── layout/     # Header, Sidebar, RootLayout
 │   └── ui/         # Buttons, inputs, etc.
-├── hooks/          # App-specific React hooks
+├── hooks/          # App-specific Reactor hooks
 ├── main.tsx        # App entry point
 └── global.css      # Global styles import
 ```

@@ -1,0 +1,58 @@
+/**
+ * Spacing Tokens
+ * 
+ * Pure design token values for spacing system.
+ * No selectors or classes - values only.
+ * 
+ * Categories:
+ * - Spacing scale (0-20)
+ * - Layout dimensions
+ * - Component-specific spacing
+ */
+
+@theme {
+    /* ========================================
+     Spacing Scale
+     ======================================== */
+
+    --spacing-0: 0;
+    --spacing-1: 0.25rem;
+    /* 4px */
+    --spacing-2: 0.5rem;
+    /* 8px */
+    --spacing-3: 0.75rem;
+    /* 12px */
+    --spacing-4: 1rem;
+    /* 16px */
+    --spacing-5: 1.25rem;
+    /* 20px */
+    --spacing-6: 1.5rem;
+    /* 24px */
+    --spacing-7: 1.75rem;
+    /* 28px */
+    --spacing-8: 2rem;
+    /* 32px */
+    --spacing-10: 2.5rem;
+    /* 40px */
+    --spacing-12: 3rem;
+    /* 48px */
+    --spacing-16: 4rem;
+    /* 64px */
+    --spacing-20: 5rem;
+    /* 80px */
+
+    /* ========================================
+     Layout Dimensions
+     ======================================== */
+
+    --header-height: clamp(68px, 8vh, 82px);
+
+    /* ========================================
+     Viewport-Relative Spacing
+     ======================================== */
+
+    --spacing-height-offset: 10vh;
+    --spacing-body-screen-height: 90vh;
+    --spacing-width-offset: 15vw;
+    --spacing-width-screen: 85vw;
+}

@@ -1,14 +1,10 @@
 @import "tailwindcss";
 @plugin "@iconify/tailwind4";
-@import "../styles/theme.css";
-@import "../styles/layout.css";
-@import "../styles/animations.css";
-@import "../styles/effects.css";
-@import "../styles/utilities.css";
+@import "../styles/index.css";
 
 @layer base {
     body {
-        background: linear-gradient(135deg, var(--color-start), var(--color-mid), var(--color-end));
+        background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-mid), var(--color-gradient-end));
         background-attachment: fixed;
         color: var(--color-primary);
         min-height: 100vh;
@@ -19,7 +15,7 @@
 
     /* Prevent Safari/Chrome from showing white during bounces */
     html {
-        background: var(--color-start);
+        background: var(--color-gradient-start);
     }
 
     a,

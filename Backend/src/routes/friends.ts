@@ -18,36 +18,36 @@ export async function registerFriendRoutes(app: FastifyInstance) {
       const { username } = req.body ?? {}
 
       if (!username || typeof username !== "string") {
-          return reply.code(400).send({error: "Username is required"})
+        return reply.code(200).send({ ok: false, error: "Username is required" });
       }
 
       const target = await UserRepo.findByUsername(username);
       if (!target) {
-        return reply.code(404).send({ error: "User not found" });
+        return reply.code(200).send({ ok: false, error: "User not found" });
       }
 
       const other = target.id;
 
       if (other === me)
-        return reply.code(400).send({ error: "Cannot friend yourself" });
+        return reply.code(200).send({ ok: false, error: "Cannot friend yourself" });
 
       // block duplicates both directions (A->B or B->A)
       const ab = await FriendRepo.find(me, other);
       const ba = await FriendRepo.find(other, me);
       if (ab) {
         if (ab.status === "pending")
-          return reply.code(409).send({ error: "Friend request already sent" });
+          return reply.code(200).send({ ok:false, error: "Friend request already sent" });
 
         if (ab.status === "accepted")
-          return reply.code(409).send({ error: "You are already friends" });
+          return reply.code(200).send({ ok:false, error: "You are already friends" });
       }
 
       if (ba) {
         if (ba.status === "pending")
-         return reply.code(409).send({ error: "This user already sent you a friend request",});
+         return reply.code(200).send({ ok: false, error: "This user already sent you a friend request",});
 
         if (ba.status === "accepted")
-         return reply.code(409).send({ error: "You are already friends" });
+         return reply.code(200).send({ ok: false, error: "You are already friends" });
 
       }
       
@@ -77,10 +77,17 @@ export async function registerFriendRoutes(app: FastifyInstance) {
     async (req: any, reply) => {
       const me = getUserId(req);
       const requester = Number(req.params.id);
-      if (!Number.isFinite(requester)) return reply.code(400).send({ error: "Invalid id" });
+      if (!Number.isFinite(requester)) 
+        return reply.code(200).send({ ok: false,  error: "Invalid id" });
 
       // requester->me must exist pending
-      const row = await FriendRepo.accept(me, requester);
+      let row;
+
+      try {
+        row = await FriendRepo.accept(me, requester);
+      } catch {
+        return reply.code(200).send({ ok: false, error: "No pending request from this user" });
+      }
 
       // Optional: create reverse accepted row (so both users have "friend" in list)
       const reverse = await FriendRepo.exists(me, requester);
@@ -91,7 +98,7 @@ export async function registerFriendRoutes(app: FastifyInstance) {
         await FriendRepo.setStatus(me, requester, "accepted");
       }
 
-      sendToUsers(requester, { type: "friend_request_accepted", byUserId: me });
+      // sendToUsers(requester, { type: "friend_request_accepted", byUserId: me });
 
       return reply.send({ ok: true, accepted: row });
     }
@@ -140,13 +147,14 @@ export async function registerFriendRoutes(app: FastifyInstance) {
     async (req: any, reply) => {
       const me = getUserId(req);
       const other = Number(req.params.id);
-      if (!Number.isFinite(other)) return reply.code(400).send({ error: "Invalid id" });
+      if (!Number.isFinite(other))
+        return reply.code(200).send({ ok: false, error: "Invalid id" });
 
       // try delete both directions (if you created reverse row)
       await FriendRepo.remove(me, other).catch(() => {});
       await FriendRepo.remove(other, me).catch(() => {});
 
-      sendToUsers(other, { type: "friend_removed", byUserId: me });
+      // sendToUsers(other, { type: "friend_removed", byUserId: me });
 
       return reply.send({ ok: true });
     }

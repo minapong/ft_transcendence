@@ -7,7 +7,6 @@ The previous structure had:
 - Mixed concerns (UI and logic in same directories)
 - No clear "where do I put this?" answer
 
-**Goal:** A new dev answers "where do I edit?" in 3 seconds.
 
 ---
 

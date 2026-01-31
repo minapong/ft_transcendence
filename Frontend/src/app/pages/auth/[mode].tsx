@@ -125,7 +125,7 @@ export default function AuthPage() {
 
             const resData = await res.json();
 
-            if (!res.ok) {
+            if (!res.ok  || resData.ok === false) {
                 setUiError({ field: "general", message: resData.error || `${mode} failed` });
                 return;
             }
@@ -134,7 +134,7 @@ export default function AuthPage() {
             connectPresenceWS();
             navigate("/user/me", { replace: true });
         } catch (err) {
-            console.error("Auth failed:", err);
+            //  console.error("Auth failed:", err);
             setUiError({ field: "general", message: "System connection failure. Retry authentication." });
         }
     };
@@ -206,7 +206,7 @@ export default function AuthPage() {
 
                             <Input
                                 ref={emailRef}
-                                label="Endpoint Address"
+                                label="Email Address"
                                 placeholder="name@example.com"
                                 type="email"
                                 error={uiError?.field === "email" ? uiError.message : undefined}
@@ -215,7 +215,7 @@ export default function AuthPage() {
                             {mode === "signup" && (
                                 <Input
                                     ref={usernameRef}
-                                    label="Network handle"
+                                    label="Username (minimum 3 symbols"
                                     placeholder="Choose a username"
                                     error={uiError?.field === "username" ? uiError.message : undefined}
                                 />
@@ -223,7 +223,7 @@ export default function AuthPage() {
 
                             <Input
                                 ref={passwordRef}
-                                label="Security Key"
+                                label="Password (8-20 symbols)"
                                 type="password"
                                 placeholder="••••••••"
                                 error={uiError?.field === "password" ? uiError.message : undefined}

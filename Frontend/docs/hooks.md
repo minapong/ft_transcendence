@@ -15,5 +15,4 @@ in useState() function useState can take both callback function and variable as 
 
 setState(()=>state+1) or setState("hashir") 
 
-similarly you can try useEffect , useRef , useMemo how React uses.
 
