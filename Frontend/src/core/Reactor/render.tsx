@@ -66,16 +66,14 @@ export function initRouter() {
     // Notify reactive components immediately so they can update icons/visibility
     window.dispatchEvent(new Event("routechange"));
 
-    const animate = !isSpecialLayout(window.location.pathname);
-    if (!animate) {
-      renderRoute();
-      return;
-    }
-
     if (isTransitioning) return;
     isTransitioning = true;
     try {
-      await startTransition();
+      // Popstate is spatially backward
+      await startTransition({
+        direction: "backward",
+        weight: isHeavyRoute(window.location.pathname) ? "heavy" : "normal"
+      });
       renderRoute();
       await endTransition();
     } finally {
@@ -129,26 +127,21 @@ function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key:
 }
 
 // Programmatic navigation helper
-// Programmatic navigation helper
 export async function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean; state?: any }) {
   const target = normalizePath(path);
   const current = normalizePath(window.location.pathname);
   const shouldUpdate = opts?.replace || target !== current;
 
   if (isTransitioning) return;
-
-  const animate = !isSpecialLayout(target);
-
-  if (!animate) {
-    if (shouldUpdate) history[opts?.replace ? "replaceState" : "pushState"](opts?.state ?? {}, "", target);
-    window.dispatchEvent(new Event("routechange"));
-    renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
-    return;
-  }
-
   isTransitioning = true;
+
   try {
-    await startTransition();
+    // Spatial forward + Route weight detection
+    await startTransition({
+      direction: "forward",
+      weight: isHeavyRoute(target) ? "heavy" : "normal"
+    });
+
     if (shouldUpdate) history[opts?.replace ? "replaceState" : "pushState"](opts?.state ?? {}, "", target);
     window.dispatchEvent(new Event("routechange"));
     renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
@@ -156,4 +149,13 @@ export async function navigate(path: string, opts?: { replace?: boolean; trigger
   } finally {
     isTransitioning = false;
   }
+}
+
+/**
+ * Determines if a route is "heavy" (e.g. game or tournament) 
+ * to trigger a more deliberate signature move.
+ */
+function isHeavyRoute(path: string): boolean {
+  const p = normalizePath(path);
+  return p.startsWith("/game") || p.startsWith("/tournament");
 }
