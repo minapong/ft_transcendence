@@ -35,18 +35,17 @@ function PongAnimation() {
 		// Game State
 		const ball = {
 			x: 0, y: 0,
-			speedX: 2, speedY: 1.5, // Slowed down
-			radius: 8, maxSpeed: 4  // Slowed down
+			speedX: 4, speedY: 3,
+			radius: 8, maxSpeed: 8
 		};
 
 		const paddleWidth = 12;
 		const paddleHeight = 120;
 		const paddleOffset = 60;
 
-		// AI State: add targetY (Slowed down)
-		const leftPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 1.5, targetY: 0 };
-		// AI State: add targetY (Slowed down)
-		const rightPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 1.5, targetY: 0 };
+		// AI State: add targetY
+		const leftPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 3.5, targetY: 0 };
+		const rightPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 3.5, targetY: 0 };
 
 		// Assets
 		const BALL_COLOR = '#ffffff';
@@ -336,148 +335,77 @@ function PongAnimation() {
 			ref={canvasRef}
 			style={{
 				position: 'fixed',
-				top: '5%',
-				left: '-15%', // Left bias
-				width: '120%', // Slightly wider to cover offset
-				height: '90%',
+				top: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
 				zIndex: 5,
-				opacity: 0.25, // Increased visibility
-				filter: 'blur(16px) saturate(0.6)', // Relaxed blur and higher sat
+				opacity: 0.4,
 				pointerEvents: 'none'
 			}}
 		/>
 	);
 }
 
-// Connect4 Ghost Component - signalling variety (Right Biased)
+// Connect4 Ghost Component - signalling variety (Right Biased & Dropping)
 function Connect4Ghost() {
 	return (
 		<div
 			style={{
 				position: 'fixed',
-				top: '10%',
-				right: '-10%', // Right bias
+				top: '-50%', // Start from top
+				right: '5%', // Right bias
 				zIndex: 4,
 				display: 'flex',
 				flexDirection: 'column',
-				gap: '20px',
-				opacity: 0.25, // Increased visibility
-				filter: 'blur(30px) saturate(0.7)', // Relaxed blur and higher sat
+				gap: '60px',
+				opacity: 0.2,
+				filter: 'blur(35px) saturate(0.7)',
 				pointerEvents: 'none',
-				transform: 'rotate(15deg)'
+				animation: 'connect4Drop 80s linear infinite'
 			}}
 		>
 			<div className="w-[500px] h-[500px] rounded-full" style={{ background: '#facc15' }} />
 			<div className="w-[450px] h-[450px] rounded-full" style={{ background: '#ef4444' }} />
+			<div className="w-[550px] h-[550px] rounded-full" style={{ background: '#facc15' }} />
 		</div>
 	);
 }
 
-// Layer 2: Energy Flow - slow diagonal light bands
-function EnergyFlow() {
+// Center Core - Mandatory anchor
+function CenterCore() {
 	return (
 		<div
-			className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
-			style={{ opacity: 0.05 }}
-		>
-			<div
-				className="absolute inset-[-100%] z-0"
-				style={{
-					background: `linear-gradient(45deg, 
-						transparent 45%, 
-						rgba(0, 255, 255, 0.4) 50%, 
-						transparent 55%)`,
-					backgroundSize: '200% 200%',
-					animation: 'energyFlow 60s linear infinite'
-				}}
-			/>
-		</div>
-	);
-}
-
-// Layer 3: Unifying Neutral Layer - Vignette & Grain
-function ArenaUnification() {
-	return (
-		<>
-			{/* Vignette - darkens edges, clears center */}
-			<div
-				className="fixed inset-0 z-[15] pointer-events-none"
-				style={{
-					background: 'radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.5) 100%)'
-				}}
-			/>
-			{/* Very subtle grain/noise */}
-			<div
-				className="fixed inset-0 z-[16] pointer-events-none opacity-[0.03]"
-				style={{
-					backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
-				}}
-			/>
-		</>
-	);
-}
-
-// Layer 4: Arena Particles - subtle chaos
-function ArenaParticles() {
-	const particles = Array.from({ length: 12 }).map((_, i) => ({
-		id: i,
-		size: Math.random() * 4 + 2,
-		top: `${Math.random() * 100}%`,
-		left: `${Math.random() * 100}%`,
-		delay: `${Math.random() * 10}s`,
-		duration: `${Math.random() * 20 + 10}s`,
-	}));
-
-	return (
-		<div className="fixed inset-0 pointer-events-none z-[2]">
-			{particles.map((p) => (
-				<div
-					key={p.id}
-					className="absolute rounded-full"
-					style={{
-						width: p.size,
-						height: p.size,
-						top: p.top,
-						left: p.left,
-						background: 'var(--color-accent)',
-						opacity: 0.15,
-						filter: 'blur(2px)',
-						animation: `particleDrift ${p.duration} ease-in-out infinite alternate,
-									particleFade ${p.duration} ease-in-out infinite alternate`,
-						animationDelay: p.delay
-					}}
-				/>
-			))}
-		</div>
+			className="fixed inset-0 pointer-events-none z-[1]"
+			style={{
+				background: 'radial-gradient(circle at center, rgba(0, 255, 255, 0.12) 0%, transparent 60%)',
+				pointerEvents: 'none'
+			}}
+		/>
 	);
 }
 
 export default function App() {
 	return (
 		<div className="min-h-screen w-full relative overflow-hidden isolation-isolate">
-			{/* Crispy Pong Animation (Backgrounded) */}
+			{/* Crispy Pong Animation */}
 			<PongAnimation />
 
-			{/* Connect4 Ghost Signal (Right Biased) */}
+			{/* Connect 4 Drop Motion */}
 			<Connect4Ghost />
 
-			{/* Layer 2: Energy Flow Signal */}
-			<EnergyFlow />
+			{/* Center Core Anchor */}
+			<CenterCore />
 
-			{/* Layer 3: Unifying Neutral Layer */}
-			<ArenaUnification />
-
-			{/* Layer 4: Arena Particles Chaos */}
-			<ArenaParticles />
-
-			{/* Layer 1: Deep Space Base (Static, calm) */}
+			{/* Animated gradient background - alive, not loud */}
 			<div
 				className="absolute inset-0 -z-10"
 				style={{
-					background: `radial-gradient(circle at 50% 50%, 
-						var(--color-mid) 0%, 
-						var(--color-start) 100%)`,
-					animation: 'gradientPulse 15s ease-in-out infinite'
+					background: `linear-gradient(180deg, 
+						var(--color-start) 0%, 
+						var(--color-mid) 50%, 
+						var(--color-end) 100%)`,
+					animation: 'gradientShift 20s ease-in-out infinite'
 				}}
 			>
 				{/* Faint grid drift - barely visible, echoes Pong court + Connect4 grid */}
@@ -509,12 +437,12 @@ export default function App() {
 				/>
 			</div>
 
-			{/* Main content - vertically centered */}
+			{/* Main content - vertically centered but biased */}
 			<div className="flex items-center justify-center min-h-screen px-6 py-12 relative z-20">
-				<div className="flex flex-col items-center gap-8 max-w-5xl w-full">
+				<div className="flex flex-col items-center gap-12 max-w-5xl w-full">
 
-					{/* Intent Split: 3 Cards */}
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-8">
+					{/* Intent Split: 3 Cards - Shifted UPWARD */}
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full -mt-16 mb-4">
 
 						{/* PLAY Card */}
 						<button
@@ -523,8 +451,9 @@ export default function App() {
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
 							style={{
-								background: 'var(--color-panel)',
-								border: '1px solid var(--color-border-strong)',
+								background: 'rgba(255, 255, 255, 0.03)',
+								backdropFilter: 'blur(12px)',
+								boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.4)',
 								outlineColor: 'var(--color-accent)'
 							}}
 						>
@@ -552,8 +481,9 @@ export default function App() {
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
 							style={{
-								background: 'var(--color-panel)',
-								border: '1px solid var(--color-border-strong)',
+								background: 'rgba(255, 255, 255, 0.03)',
+								backdropFilter: 'blur(12px)',
+								boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.4)',
 								outlineColor: 'var(--color-accent)'
 							}}
 						>
@@ -581,8 +511,9 @@ export default function App() {
 								hover:scale-105 active:scale-98
 								focus-visible:outline-2 focus-visible:outline-offset-4"
 							style={{
-								background: 'var(--color-panel)',
-								border: '1px solid var(--color-border-strong)',
+								background: 'rgba(255, 255, 255, 0.03)',
+								backdropFilter: 'blur(12px)',
+								boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.4)',
 								outlineColor: 'var(--color-accent)'
 							}}
 						>
@@ -603,8 +534,8 @@ export default function App() {
 						</button>
 					</div>
 
-					{/* Smart CTAs - replacing dumb "PLAY NOW" */}
-					<div className="flex flex-col sm:flex-row gap-4 items-center">
+					{/* Smart CTAs - Shifted DOWNWARD */}
+					<div className="flex flex-col sm:flex-row gap-6 items-center mt-8">
 						{/* Primary: Quick Play */}
 						<Button
 							variant="hero"
@@ -639,26 +570,16 @@ export default function App() {
 
 			{/* CSS animations */}
 			<style>{`
-				@keyframes gradientPulse {
-					0%, 100% { filter: brightness(1); }
-					50% { filter: brightness(0.9); }
+				@keyframes gradientShift {
+					0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+					50% { filter: hue-rotate(5deg) brightness(0.95); }
+				}
+
+				@keyframes connect4Drop {
+					0% { transform: translateY(0); }
+					100% { transform: translateY(150%); }
 				}
 				
-				@keyframes energyFlow {
-					0% { transform: translate(-25%, -25%); }
-					100% { transform: translate(25%, 25%); }
-				}
-
-				@keyframes particleDrift {
-					0% { transform: translate(0, 0); }
-					100% { transform: translate(30px, 30px); }
-				}
-
-				@keyframes particleFade {
-					0%, 100% { opacity: 0; }
-					50% { opacity: 0.15; }
-				}
-
 				@keyframes gridDrift {
 					0% { transform: translate(0, 0); }
 					100% { transform: translate(80px, 80px); }
