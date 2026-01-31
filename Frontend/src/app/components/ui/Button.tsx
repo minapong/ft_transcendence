@@ -61,6 +61,8 @@ export interface ButtonProps {
 
 	/** Custom data attributes */
 	[key: `data-${string}`]: any;
+	onPointerDown?: (e: PointerEvent) => void;
+	onMouseDown?: (e: MouseEvent) => void;
 }
 
 // ========================================

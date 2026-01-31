@@ -33,7 +33,7 @@ export const IntentPresets = {
         label: "Solo Trial",
         participants: 1,
         ruleset: { difficulty: "medium" },
-        slots: { p1: "Player 1" }
+        slots: { p1: "" }
     }),
 
     "2P": (): Intent => ({
@@ -41,7 +41,7 @@ export const IntentPresets = {
         label: "Duel Protocol",
         participants: 2,
         ruleset: {},
-        slots: { p1: "Player 1", p2: "Player 2" }
+        slots: { p1: "", p2: "" }
     }),
 
     "4P": (): Intent => ({
@@ -49,6 +49,6 @@ export const IntentPresets = {
         label: "Squad Chaos",
         participants: 4,
         ruleset: {},
-        slots: { p1: "Player 1", p2: "Player 2", p3: "Player 3", p4: "Player 4" }
+        slots: { p1: "", p2: "", p3: "", p4: "" }
     })
 };

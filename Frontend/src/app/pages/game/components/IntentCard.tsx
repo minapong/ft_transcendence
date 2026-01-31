@@ -73,13 +73,7 @@ export default function IntentCard({
                 </div>
 
                 {/* Dynamic Content Area — Form-style submission */}
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        if (isActive) onCommit();
-                    }}
-                    className="flex-1 flex flex-col justify-between"
-                >
+                <div className="flex-1 flex flex-col justify-between">
                     <div className="flex-1 flex flex-col justify-center space-y-5">
                         {intent.type === "AI" && (
                             <>
@@ -88,7 +82,7 @@ export default function IntentCard({
                                     value={intent.slots.p1}
                                     disabled={!isActive}
                                     onChange={(e: any) => updateSlot("p1", e.target.value)}
-                                    placeholder="PROTAGONIST"
+                                    placeholder="Player 1"
                                     label="PLAYER 1"
                                     className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
                                 />
@@ -113,7 +107,7 @@ export default function IntentCard({
                                     value={intent.slots.p1}
                                     disabled={!isActive}
                                     onChange={(e: any) => updateSlot("p1", e.target.value)}
-                                    placeholder="PLAYER ONE"
+                                    placeholder="Player 1"
                                     label="CHALLENGER"
                                     className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
                                 />
@@ -127,7 +121,7 @@ export default function IntentCard({
                                     value={intent.slots.p2}
                                     disabled={!isActive}
                                     onChange={(e: any) => updateSlot("p2", e.target.value)}
-                                    placeholder="PLAYER TWO"
+                                    placeholder="Player 2"
                                     label="OPPONENT"
                                     className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
                                 />
@@ -143,7 +137,7 @@ export default function IntentCard({
                                         value={intent.slots[slot as keyof Intent["slots"]]}
                                         disabled={!isActive}
                                         onChange={(e: any) => updateSlot(slot as keyof Intent["slots"], e.target.value)}
-                                        placeholder={`UNIT 0${i + 1}`}
+                                        placeholder={`Player ${i + 1}`}
                                         label={`SQUAD MEMBER ${i + 1}`}
                                         className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50 text-sm"
                                     />
@@ -155,17 +149,21 @@ export default function IntentCard({
                     {/* Action Button */}
                     <div className={!isActive ? "opacity-50 pointer-events-none grayscale" : ""}>
                         <Button
-                            type="submit"
                             variant="hero"
                             size="lg"
                             fullWidth
                             disabled={!isActive}
+                            onMouseDown={(e: any) => {
+                                // Prevent blur which causes focus-stealing re-render
+                                e.preventDefault();
+                                if (isActive) onCommit();
+                            }}
                             className="font-bold tracking-[0.15em] uppercase shadow-[0_0_30px_-5px_rgba(8,145,178,0.5)]"
                         >
                             Initialize Match
                         </Button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     );
