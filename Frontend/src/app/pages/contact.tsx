@@ -1,9 +1,10 @@
 import { useState } from "Reactor";
 
-type RoleDetail = {
+type RoleNode = {
   id: string;
   title: string;
   people: string;
+  initials: string;
   glyph: string;
   responsibilities: string[];
   authority: string;
@@ -11,11 +12,24 @@ type RoleDetail = {
   ownership: string;
 };
 
-const roleDetails: RoleDetail[] = [
+type Signal = {
+  label: string;
+  status: string;
+  detail: string;
+};
+
+type TimelineEvent = {
+  title: string;
+  date: string;
+  outcome: string;
+};
+
+const roleNodes: RoleNode[] = [
   {
     id: "po",
-    title: "Product Owner / Project Manager (PO)",
+    title: "Product Owner / PM",
     people: "Malik Hashir",
+    initials: "MH",
     glyph: "◎",
     responsibilities: [
       "Owns product scope and final feature decisions.",
@@ -30,6 +44,7 @@ const roleDetails: RoleDetail[] = [
     id: "scrum",
     title: "Scrum Master",
     people: "Abdul Rehman",
+    initials: "AR",
     glyph: "△",
     responsibilities: [
       "Owns sprint planning and task decomposition.",
@@ -42,8 +57,9 @@ const roleDetails: RoleDetail[] = [
   },
   {
     id: "leads",
-    title: "Technical Leads / Architects",
+    title: "Technical Leads",
     people: "Santiago & Natalia",
+    initials: "SN",
     glyph: "◇",
     responsibilities: [
       "Define system boundaries and architectural standards.",
@@ -52,12 +68,13 @@ const roleDetails: RoleDetail[] = [
     ],
     authority: "Final technical approval for architecture and data safety.",
     decisions: "Approve structural changes and high-impact refactors.",
-    ownership: "Accountable for system integrity and long-term maintainability.",
+    ownership: "Accountable for system integrity and maintainability.",
   },
   {
     id: "devs",
     title: "Developers",
     people: "All Team Members",
+    initials: "ALL",
     glyph: "□",
     responsibilities: [
       "Deliver assigned features with acceptance criteria met.",
@@ -70,9 +87,50 @@ const roleDetails: RoleDetail[] = [
   },
 ];
 
+const evaluationSignals: Signal[] = [
+  {
+    label: "Defense Passed",
+    status: "Stable",
+    detail: "Core systems defended under evaluation constraints.",
+  },
+  {
+    label: "Module Coverage",
+    status: "13 / 14",
+    detail: "Completed modules aligned with requirement tracking.",
+  },
+  {
+    label: "Reviewer Feedback",
+    status: "Positive",
+    detail: "Architecture and gameplay loop praised for clarity.",
+  },
+];
+
+const timeline: TimelineEvent[] = [
+  {
+    title: "Project Lock",
+    date: "Day 0",
+    outcome: "Roles assigned, scope fixed.",
+  },
+  {
+    title: "Defense",
+    date: "Day 9",
+    outcome: "Gameplay + platform demo validated.",
+  },
+  {
+    title: "Peer Review",
+    date: "Day 10",
+    outcome: "Architecture reviewed, improvements queued.",
+  },
+  {
+    title: "Final Score",
+    date: "Day 11",
+    outcome: "Evaluation-ready status confirmed.",
+  },
+];
+
 export default function Contact() {
-  const [activeRoleId, setActiveRoleId] = useState(roleDetails[0]?.id ?? "po");
-  const activeRole = roleDetails.find((role) => role.id === activeRoleId) ?? roleDetails[0];
+  const [activeRoleId, setActiveRoleId] = useState(roleNodes[0]?.id ?? "po");
+  const activeRole = roleNodes.find((role) => role.id === activeRoleId) ?? roleNodes[0];
 
   return (
     <div className="contact-page">
@@ -83,8 +141,8 @@ export default function Contact() {
             <h1 className="contact-title">ft_transcendence</h1>
           </div>
           <p className="contact-subtitle">
-            Clear role ownership and responsibility model for the ft_transcendence
-            project.
+            A live record of how this team operated, owned responsibility, and
+            delivered under evaluation.
           </p>
           <div className="contact-status">
             <span className="contact-status__item">
@@ -102,75 +160,101 @@ export default function Contact() {
           </div>
         </header>
 
-        <section className="contact-matrix" aria-label="Role matrix">
-          <div className="contact-nodes" role="tablist" aria-label="Role nodes">
-            {roleDetails.map((role) => {
+        <section className="contact-map" aria-label="Contributor signal map">
+          <div className="contact-orbit" aria-hidden="true">
+            <span className="contact-orbit__ring"></span>
+            <span className="contact-orbit__ring contact-orbit__ring--inner"></span>
+          </div>
+          <div className="contact-center panel-surface">
+            <p className="contact-center__eyebrow">Mission Core</p>
+            <h2 className="contact-center__title">ft_transcendence</h2>
+            <p className="contact-center__subtitle">Team signal map</p>
+          </div>
+          <div className="contact-nodes">
+            {roleNodes.map((role) => {
               const isActive = role.id === activeRoleId;
               return (
                 <button
                   key={role.id}
                   type="button"
-                  className={`contact-node${isActive ? " contact-node--active" : ""}`}
+                  className={`contact-node contact-node--${role.id}${isActive ? " contact-node--active" : ""}`}
                   onClick={() => setActiveRoleId(role.id)}
                   aria-pressed={isActive}
                 >
                   <span className="contact-node__glyph" aria-hidden="true">
                     {role.glyph}
                   </span>
-                  <div className="contact-node__content">
-                    <span className="contact-node__title">{role.title}</span>
-                    <span className="contact-node__people">{role.people}</span>
-                  </div>
+                  <span className="contact-node__initials">{role.initials}</span>
+                  <span className="contact-node__title">{role.title}</span>
+                  <span className="contact-node__people">{role.people}</span>
                 </button>
               );
             })}
           </div>
-
           <div className="contact-detail panel-surface" role="region" aria-live="polite">
             <div className="contact-detail__header">
               <div>
                 <p className="contact-detail__eyebrow">Responsibility Zone</p>
-                <h2 className="contact-detail__title">{activeRole.title}</h2>
+                <h3 className="contact-detail__title">{activeRole.title}</h3>
                 <p className="contact-detail__people">{activeRole.people}</p>
               </div>
               <span className="contact-detail__glyph" aria-hidden="true">
                 {activeRole.glyph}
               </span>
             </div>
-
             <div className="contact-detail__section">
-              <h3>Core responsibilities</h3>
+              <h4>Core responsibilities</h4>
               <ul>
                 {activeRole.responsibilities.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
             </div>
-
             <div className="contact-detail__meta">
               <div>
-                <h4>Authority scope</h4>
+                <h5>Authority scope</h5>
                 <p>{activeRole.authority}</p>
               </div>
               <div>
-                <h4>Decision power</h4>
+                <h5>Decision power</h5>
                 <p>{activeRole.decisions}</p>
               </div>
               <div>
-                <h4>Failure ownership</h4>
+                <h5>Failure ownership</h5>
                 <p>{activeRole.ownership}</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="contact-section panel-surface">
-          <h2 className="contact-section__title">Decision Responsibility Model</h2>
-          <div className="contact-copy">
-            <p>Product scope and priorities are finalized by the Product Owner.</p>
-            <p>Technical architecture decisions are validated by Technical Leads.</p>
-            <p>Process cadence and delivery flow are enforced by the Scrum Master.</p>
-            <p>Implementation is carried out collaboratively by all developers.</p>
+        <section className="contact-signals">
+          <div className="contact-section panel-surface">
+            <h2 className="contact-section__title">Evaluation Signals</h2>
+            <div className="contact-signal-grid">
+              {evaluationSignals.map((signal) => (
+                <div key={signal.label} className="contact-signal">
+                  <div className="contact-signal__badge">{signal.status}</div>
+                  <h3>{signal.label}</h3>
+                  <p>{signal.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="contact-section panel-surface">
+            <h2 className="contact-section__title">Evaluation Timeline</h2>
+            <ol className="contact-timeline">
+              {timeline.map((event) => (
+                <li key={event.title} className="contact-timeline__item">
+                  <div className="contact-timeline__dot"></div>
+                  <div>
+                    <h3>{event.title}</h3>
+                    <p className="contact-timeline__meta">{event.date}</p>
+                    <p>{event.outcome}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
