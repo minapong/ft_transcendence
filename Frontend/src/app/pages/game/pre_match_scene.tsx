@@ -1,305 +1,320 @@
-import { useState } from "Reactor";
+import { useState, useEffect } from "Reactor";
 import { navigate } from "Reactor";
-import { Intent, IntentPresets, IntentType, Difficulty } from "@/core/engine/match_intent";
+import { Intent, IntentPresets, Difficulty } from "@/core/engine/match_intent";
+import Button from "@/app/components/ui/Button";
+import Input from "@/app/components/ui/Input";
 
-/**
- * This screen exists to prepare and commit a match.
- * It is not a selector. It is not a settings page. It is not a dashboard.
- * It is a commit gate.
- */
+/* ============================================================
+   IntentCard — Glassmorphic, immersive
+   ============================================================ */
+
+interface IntentCardProps {
+  intent: Intent;
+  updateSlot: (slotKey: keyof Intent["slots"], value: string) => void;
+  updateRuleset: (key: string, value: any) => void;
+  onCommit: () => void;
+  isActive: boolean;
+  href: string;
+}
+
+function IntentCard({
+  intent,
+  updateSlot,
+  updateRuleset,
+  onCommit,
+  isActive,
+  href
+}: IntentCardProps) {
+  return (
+    <div
+      className={`relative h-[580px] w-full flex flex-col rounded-[32px] overflow-hidden transition-all duration-500 ease-out border backdrop-blur-2xl ${isActive
+        ? "bg-[#0B0F29]/80 border-cyan-400/30 shadow-[0_0_80px_-20px_rgba(0,163,218,0.4)] scale-100 opacity-100 z-10 ring-1 ring-cyan-400/20"
+        : "bg-[#050812]/40 border-white/5 shadow-none scale-[0.92] opacity-50 grayscale-[0.8] hover:opacity-70 hover:scale-[0.94]"
+        }`}
+    >
+      {/* Dynamic Background Mesh */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-600/10 transition-opacity duration-700 ${isActive ? "opacity-100" : "opacity-0"
+          }`}
+      />
+
+      {/* Scanline Effect */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20" />
+
+      <div className="relative z-10 flex-1 flex flex-col p-8 sm:p-10 space-y-8">
+        {/* Header */}
+        <div className="flex items-center gap-5">
+          <div className={`
+            h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-500
+            ${isActive ? "bg-cyan-500/20 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.3)]" : "bg-white/5 text-slate-500"}
+          `}>
+            <div className={`w-6 h-6 rounded-full border-[3px] ${isActive ? "border-cyan-400" : "border-slate-600"}`} />
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-cyan-200/50 mb-1">
+              Active Protocol
+            </p>
+            <p className={`text-lg font-bold tracking-wide transition-colors ${isActive ? "text-white" : "text-slate-500"}`}>
+              {intent.label}
+            </p>
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="space-y-4">
+          <h1 className={`text-5xl font-black leading-[1.05] tracking-tight transition-colors duration-300 ${isActive ? "text-white drop-shadow-xl" : "text-slate-600"}`}>
+            {intent.type === "AI" && "Survive The Machine"}
+            {intent.type === "2P" && "Face Your Rival"}
+            {intent.type === "4P" && "Team Warfare"}
+          </h1>
+          <div className={`h-1.5 w-24 rounded-full transition-all duration-500 ${isActive ? "bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_15px_rgba(34,211,238,0.6)]" : "bg-slate-800"}`} />
+        </div>
+
+        {/* Dynamic Content Area */}
+        <div className="flex-1 flex flex-col justify-center space-y-5">
+          {intent.type === "AI" && (
+            <>
+              <Input
+                value={intent.slots.p1}
+                disabled={!isActive}
+                onChange={(e: any) => updateSlot("p1", e.target.value)}
+                placeholder="PROTAGONIST"
+                label="PLAYER 1"
+                className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
+              />
+              <SelectInput
+                value={intent.ruleset.difficulty}
+                disabled={!isActive}
+                onChange={(e: any) => updateRuleset("difficulty", e.target.value)}
+                label="DIFFICULTY CLASS"
+              >
+                <option value="easy">STANDARD</option>
+                <option value="medium">ADVANCED</option>
+                <option value="hard">NIGHTMARE</option>
+              </SelectInput>
+            </>
+          )}
+
+          {intent.type === "2P" && (
+            <>
+              <Input
+                value={intent.slots.p1}
+                disabled={!isActive}
+                onChange={(e: any) => updateSlot("p1", e.target.value)}
+                placeholder="PLAYER ONE"
+                label="CHALLENGER"
+                className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
+              />
+              <div className="flex items-center gap-4 px-2">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+                <span className="text-[10px] font-black tracking-[0.2em] text-cyan-200/50">VS</span>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+              </div>
+              <Input
+                value={intent.slots.p2}
+                disabled={!isActive}
+                onChange={(e: any) => updateSlot("p2", e.target.value)}
+                placeholder="PLAYER TWO"
+                label="OPPONENT"
+                className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
+              />
+            </>
+          )}
+
+          {intent.type === "4P" && (
+            <div className="grid grid-cols-2 gap-4">
+              {["p1", "p2", "p3", "p4"].map((slot, i) => (
+                <Input
+                  key={slot}
+                  value={intent.slots[slot as keyof Intent["slots"]]}
+                  disabled={!isActive}
+                  onChange={(e: any) => updateSlot(slot as keyof Intent["slots"], e.target.value)}
+                  placeholder={`UNIT 0${i + 1}`}
+                  label={`SQUAD MEMBER ${i + 1}`}
+                  className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50 text-sm"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Action Button */}
+        <div className={!isActive ? "opacity-50 pointer-events-none grayscale" : ""}>
+          <Button
+            variant="hero"
+            size="lg"
+            fullWidth
+            onClick={onCommit}
+            disabled={!isActive}
+            className="font-bold tracking-[0.15em] uppercase shadow-[0_0_30px_-5px_rgba(8,145,178,0.5)]"
+          >
+            Initialize Match
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --- Styled Select Component (Matches Input.tsx) --- */
+
+const SelectInput = ({ value, onChange, disabled, children, label }: any) => (
+  <div className="flex flex-col gap-1.5 w-full">
+    {label && (
+      <label className="input-label">
+        {label}
+      </label>
+    )}
+    <div className="relative fx-energy energy-low focus-within:energy-medium transition-all duration-300 rounded-lg">
+      <select
+        value={value}
+        disabled={disabled}
+        onChange={onChange}
+        className="input-shell appearance-none cursor-pointer bg-black/40 border-white/10 text-cyan-50"
+      >
+        {children}
+      </select>
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-cyan-500/50">
+        ▼
+      </div>
+    </div>
+  </div>
+);
+
+
+/* ============================================================
+   PreMatchScene — PS-style Intent Carousel
+   ============================================================ */
+
 export default function PreMatchScene() {
-  // Single source of truth: Intent
-  const [intent, setIntent] = useState<Intent>(IntentPresets.AI());
+  const [index, setIndex] = useState(0);
 
-  // Switch intent type
-  const switchIntent = (type: IntentType) => {
-    setIntent(IntentPresets[type]());
-  };
+  const [solo, setSolo] = useState(IntentPresets.AI());
+  const [duel, setDuel] = useState(IntentPresets["2P"]());
+  const [squad, setSquad] = useState(IntentPresets["4P"]());
 
-  // Update intent slots
-  const updateSlot = (slotKey: keyof Intent["slots"], value: string) => {
-    setIntent({ ...intent, slots: { ...intent.slots, [slotKey]: value } });
-  };
+  // Define intents with their specific routes
+  const intents = [
+    { state: solo, set: setSolo, href: "/game/ai" },
+    { state: duel, set: setDuel, href: "/game/pong" },
+    { state: squad, set: setSquad, href: "/game/4p_pong" },
+  ];
 
-  // Update intent ruleset
-  const updateRuleset = (key: string, value: any) => {
-    setIntent({ ...intent, ruleset: { ...intent.ruleset, [key]: value } });
-  };
+  const commit = () => {
+    const activeRoute = intents[index].href;
+    const intent = intents[index].state;
 
-  // Commit the intent
-  const commitMatch = () => {
+    // Transform Intent (Storage Shape) -> Navigation State (Game Engine Shape)
+    let navState: any = {};
+
     if (intent.type === "AI") {
-      navigate("/game/pong", { state: { mode: "ai", p1: intent.slots.p1, difficulty: intent.ruleset.difficulty } });
+      navState = {
+        mode: "ai",
+        p1: intent.slots.p1,
+        difficulty: intent.ruleset.difficulty || "medium"
+      };
     } else if (intent.type === "2P") {
-      navigate("/game/pong", { state: { mode: "2p", p1: intent.slots.p1, p2: intent.slots.p2 } });
+      navState = {
+        mode: "2p",
+        p1: intent.slots.p1,
+        p2: intent.slots.p2
+      };
     } else if (intent.type === "4P") {
-      navigate("/game/4p_pong", { state: { mode: "4p", p1: intent.slots.p1, p2: intent.slots.p2, p3: intent.slots.p3, p4: intent.slots.p4 } });
+      navState = {
+        mode: "4p",
+        p1: intent.slots.p1,
+        p2: intent.slots.p2,
+        p3: intent.slots.p3,
+        p4: intent.slots.p4
+      };
     }
+
+    navigate(activeRoute, { state: navState });
   };
+
+  /* Keyboard navigation */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Ignore keys if user is typing in an input
+      if (document.activeElement?.tagName === "INPUT") {
+        if (e.key === "Enter") commit();
+        return;
+      }
+
+      if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
+      if (e.key === "ArrowRight") setIndex((i) => Math.min(intents.length - 1, i + 1));
+      if (e.key === "Enter") commit();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [index, intents]);
+
+  /* ---- CAROUSEL CONFIG ---- */
+  const CARD_WIDTH = 460;
+  const GAP = 48;
 
   return (
-    <section className="relative min-h-[calc(100vh-var(--header-height))] w-full overflow-hidden flex flex-col justify-center">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full hero-orb hero-orb--accent" />
-        <div className="absolute -bottom-20 right-[-10%] h-80 w-80 rounded-full hero-orb hero-orb--accent-soft" />
-        <div className="absolute inset-y-0 left-0 w-[55%] hero-sheen" />
-        <div className="absolute inset-y-0 left-0 w-[50%] hero-blood" />
-        <div className="absolute inset-0 fx-veil" />
-        <div className="absolute inset-0 fx-noise" />
+    <section className="relative h-[calc(100vh-var(--header-height))] w-full flex flex-col justify-center overflow-hidden bg-black selection:bg-cyan-500/30">
+
+      {/* Deep Space Background */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#0B0F29] via-[#02040a] to-black" />
+
+      {/* Atmospheric Glows */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[10%] w-[800px] h-[800px] bg-blue-900/20 rounded-full blur-[120px] mix-blend-screen animate-[pulse_8s_infinite]" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-cyan-900/10 rounded-full blur-[100px] mix-blend-screen animate-[pulse_12s_infinite]" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 py-12 lg:py-16">
-        <div className="grid items-center gap-10 lg:gap-12 lg:grid-cols-[1.2fr_0.8fr]">
-          {/* Primary Zone (Left): Narrative + Identity */}
-          <div className="relative lg:-mt-6">
-            <div className="absolute -left-8 top-8 hidden h-[70%] w-px hero-line lg:block" />
-            <div className="absolute -left-16 top-12 hidden h-16 w-16 rounded-full border border-border-strong hero-node lg:block" />
-
-            <div className="relative rounded-[28px] p-6 sm:p-8 panel-surface">
-
-              <div className="relative">
-                {/* Configuration Phase */}
-                <div className="space-y-6">
-                  {/* Intent Switcher */}
-                  <div className="flex gap-4 text-xs tracking-widest uppercase text-slate-500">
-                    {["AI", "2P", "4P"].map((m) => (
-                      <button
-                        key={m}
-                        onClick={() => switchIntent(m as IntentType)}
-                        className={`transition-all duration-300 ${intent.type === m ? "text-accent font-bold scale-105" : "hover:text-slate-300"}`}
-                      >
-                        {m} Intent
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="logo-mark logo-mark--ominous relative h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center overflow-hidden"
-                      aria-hidden="true"
-                    >
-                      <span className="logo-orb" />
-                      <span className="logo-scratch" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.4em] text-slate-400">
-                        Active Intent
-                      </p>
-                      <p className="text-sm font-semibold text-accent-soft">
-                        {intent.label}
-                      </p>
-                    </div>
-                  </div>
-
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.02] text-primary">
-                    {intent.type === "AI" && "Survive the Machine"}
-                    {intent.type === "2P" && "Face Your Rival"}
-                    {intent.type === "4P" && "Team Warfare"}
-                  </h1>
-
-                  <div className="h-px w-24 hero-divider" />
-
-                  {/* Participant Slots & Declarations */}
-                  <div className="space-y-4 max-w-lg min-h-[120px]">
-                    {intent.type === "AI" && (
-                      <>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Participant Slot</label>
-                          <input
-                            value={intent.slots.p1}
-                            onChange={(e) => updateSlot('p1', e.target.value)}
-                            className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none transition-all focus:bg-accent/5"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Threat Level</label>
-                          <select
-                            value={intent.ruleset.difficulty}
-                            onChange={(e) => updateRuleset('difficulty', e.target.value as Difficulty)}
-                            className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none appearance-none transition-all focus:bg-accent/5"
-                          >
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                          </select>
-                        </div>
-                      </>
-                    )}
-
-                    {intent.type === "2P" && (
-                      <>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Participant Slot 1</label>
-                          <input
-                            value={intent.slots.p1}
-                            onChange={(e) => updateSlot('p1', e.target.value)}
-                            className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none transition-all focus:bg-accent/5"
-                          />
-                        </div>
-                        <div className="flex items-center justify-center text-xs text-accent-soft uppercase tracking-widest my-2">- VS -</div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Participant Slot 2</label>
-                          <input
-                            value={intent.slots.p2}
-                            onChange={(e) => updateSlot('p2', e.target.value)}
-                            className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none transition-all focus:bg-accent/5"
-                          />
-                        </div>
-                      </>
-                    )}
-
-                    {intent.type === "4P" && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <div className="text-[10px] uppercase tracking-widest text-accent">Team Alpha</div>
-                          <input
-                            value={intent.slots.p1}
-                            onChange={(e) => updateSlot('p1', e.target.value)}
-                            className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
-                            placeholder="Slot 1"
-                          />
-                          <input
-                            value={intent.slots.p2}
-                            onChange={(e) => updateSlot('p2', e.target.value)}
-                            className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
-                            placeholder="Slot 2"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <div className="text-[10px] uppercase tracking-widest text-red-400">Team Omega</div>
-                          <input
-                            value={intent.slots.p3}
-                            onChange={(e) => updateSlot('p3', e.target.value)}
-                            className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
-                            placeholder="Slot 3"
-                          />
-                          <input
-                            value={intent.slots.p4}
-                            onChange={(e) => updateSlot('p4', e.target.value)}
-                            className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
-                            placeholder="Slot 4"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Commit Phase */}
-                <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-white/5 mt-6">
-                  <button
-                    onClick={commitMatch}
-                    className="bleed-btn bleed-btn--hero rounded-lg bg-accent text-primary text-base font-semibold px-6 py-3 transition hover:bg-accent-soft flex items-center gap-2 cursor-pointer w-full sm:w-auto justification-center"
-                  >
-                    <span
-                      className="icon-[mdi--sword-cross] text-lg"
-                      aria-hidden="true"
-                    />
-                    <span>Commit Protocol</span>
-                  </button>
-                </div>
-              </div>
+      <div className="relative w-full z-10 perspective-[1000px]">
+        <div
+          className="flex items-center transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] will-change-transform"
+          style={{
+            transform: `translateX(calc(50vw - ${index * (CARD_WIDTH + GAP)}px - ${CARD_WIDTH / 2}px))`
+          }}
+        >
+          {intents.map((entry, i) => (
+            <div
+              key={entry.state.type}
+              className="flex-shrink-0 transition-all duration-500 will-change-transform"
+              style={{
+                width: CARD_WIDTH,
+                marginRight: i === intents.length - 1 ? 0 : GAP
+              }}
+              onClick={() => setIndex(i)}
+            >
+              <IntentCard
+                intent={entry.state}
+                href={entry.href}
+                updateSlot={(k, v) =>
+                  entry.set({
+                    ...entry.state,
+                    slots: { ...entry.state.slots, [k]: v },
+                  })
+                }
+                updateRuleset={(k, v) =>
+                  entry.set({
+                    ...entry.state,
+                    ruleset: { ...entry.state.ruleset, [k]: v },
+                  })
+                }
+                onCommit={commit}
+                isActive={i === index}
+              />
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* Secondary Zone (Right): Live Context / Arena State */}
-          <div className="relative w-full max-w-[440px] lg:justify-self-end lg:mt-10">
-            <div className="absolute -inset-6 rounded-[32px] panel-halo" />
-            <div className="relative rounded-[32px] p-5 sm:p-6 panel-surface panel-surface--heavy">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                    Arena feed
-                  </p>
-                  <p className="text-lg font-semibold text-primary">
-                    Mina Core Relay
-                  </p>
-                </div>
-                <div className="glass-pill flex items-center gap-2 sm:gap-3 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs">
-                  <span
-                    className="icon-[mdi--pulse] text-accent text-lg"
-                    aria-hidden="true"
-                  />
-                  <span className="text-xs uppercase tracking-[0.3em] text-slate-300">
-                    Signal
-                  </span>
-                  <span className="text-sm text-primary">Steady</span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4">
-                <div className="rounded-2xl border border-border-soft bg-black/30 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                      Arena
-                    </span>
-                    <span className="text-sm text-accent">
-                      Bloodmoon Chapel
-                    </span>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-sm text-slate-300">Rally streak</span>
-                    <span className="text-base font-semibold text-primary">14</span>
-                  </div>
-                  <div className="mt-3 h-2 w-full rounded-full bg-white/10">
-                    <div className="h-2 w-[68%] rounded-full bg-accent" />
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-border-soft bg-white/5 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                        Echo feed
-                      </p>
-                      <p className="text-base font-semibold text-primary">
-                        Spectator wardens
-                      </p>
-                    </div>
-                    <span
-                      className="icon-[mdi--radio-tower] text-2xl text-accent-soft"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    <div className="rounded-xl border border-border-soft bg-black/30 p-3">
-                      <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                        Latency
-                      </p>
-                      <p className="text-base font-semibold text-primary">12ms</p>
-                    </div>
-                    <div className="rounded-xl border border-border-soft bg-black/30 p-3">
-                      <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                        Threat
-                      </p>
-                      <p className="text-base font-semibold text-accent">
-                        Omen 08
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="avatar-shell relative w-9 h-9 sm:w-10 sm:h-10 rounded-full cursor-pointer transition flex items-center justify-center">
-                    <span
-                      className="icon-[mdi--ghost] text-accent text-lg"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                      Operator
-                    </p>
-                    <p className="text-sm font-semibold text-primary">Mina</p>
-                  </div>
-                </div>
-                <a href="/tournament/start" className="bleed-btn rounded-lg bg-accent text-primary text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-3.5 sm:py-2 transition hover:bg-accent-soft">
-                  Join queue
-                </a>
-              </div>
-            </div>
+      {/* Bottom hint */}
+      <div className="absolute bottom-10 left-0 right-0 text-center pointer-events-none">
+        <div className="inline-flex items-center gap-6 px-6 py-2 rounded-full bg-white/5 border border-white/5 backdrop-blur-md">
+          <span className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-slate-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            Navigate
+          </span>
+          <div className="flex gap-1">
+            <div className="w-8 h-8 rounded-lg border border-white/20 flex items-center justify-center text-white/50 text-xs shadow-lg">←</div>
+            <div className="w-8 h-8 rounded-lg border border-white/20 flex items-center justify-center text-white/50 text-xs shadow-lg">→</div>
           </div>
         </div>
       </div>

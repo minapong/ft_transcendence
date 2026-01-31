@@ -29,7 +29,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 	const navRef = useRef<HTMLElement | null>(null);
 	const isClosingRef = useRef(false);
 
-	// Sync pendingPath only after the overlay is fully closed.
 	useEffect(() => {
 		if (hidden || mode !== "overlay") return;
 		if (!isOverlayOpen) setPendingPath(null);
@@ -55,9 +54,16 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 
 		Promise.all([asideAnim.finished, backdropAnim?.finished || Promise.resolve()]).then(() => {
 			isClosingRef.current = false;
-			if (setIsOverlayOpen) setIsOverlayOpen(false);
+			if (setIsOverlayOpen) {
+				// Add a delay before closing overlay to allow animation to finish
+				setTimeout(() => {
+					setIsOverlayOpen(false);
+					window.dispatchEvent(new Event("sidebar:resume"));
+				}, 300); // 300ms matches animation duration
+			} else {
+				window.dispatchEvent(new Event("sidebar:resume"));
+			}
 			if (href) navigate(href);
-			window.dispatchEvent(new Event("sidebar:resume"));
 		});
 	}, [mode, setIsOverlayOpen, setPendingPath]);
 
