@@ -24,7 +24,7 @@ const P4_PADDLE_SPEED = 6;
 
 const P4_BALL_SPEED = 2;
 
-const P4_WIN_SCORE = 3;
+const P4_WIN_SCORE = 7;
 
 interface Pong4PElements {
 	ball: HTMLElement;
@@ -226,7 +226,7 @@ export function pong4PLogic(
 	window.addEventListener("resize", handle_parameters);
 
 	let dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
-	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.75;
+	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.6;
 
 	let scoreRed = 0;
 	let scoreBlue = 0;

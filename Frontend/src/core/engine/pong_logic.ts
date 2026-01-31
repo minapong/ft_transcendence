@@ -23,7 +23,7 @@ const PADDLE_SPEED = 6;
 
 const GAME_SPEED = 2;
 
-const WIN_SCORE = 3;
+const WIN_SCORE = 7;
 
 
 export function pongLogic(
