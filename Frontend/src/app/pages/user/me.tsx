@@ -26,10 +26,11 @@ export default function MePage() {
       try {
         // 1. Profile (/api/me)
         const profileRes = await apiFetch("/api/me");
-        if (!profileRes.ok) throw new Error("Failed to load profile");
+        if (!profileRes.ok)
+            throw new Error("Failed to load profile");
         const profileData = await profileRes.json();
         // console.log("[ME] /api/me JSON =", profileData);
-       
+
 
         setProfile(profileData);
         // console.log("[ME] profileData.username =", profileData?.username);
@@ -80,14 +81,14 @@ export default function MePage() {
   }
 
   // console.log("avatarUrl:", profile?.avatarUrl);
-  
+
   if (fetchError) {
     return (
       <div className="p-10 text-center">
         <div className="text-red-400 mb-4">⚠️ {fetchError}</div>
         <button
           onClick={() => window.location.reload()}
-          className="bg-blue-600 px-6 py-3 rounded-lg hover:bg-blue-700"
+          className="btn btn-primary btn-md"
         >
           Try Again
         </button>
@@ -100,21 +101,21 @@ export default function MePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-6">
-       <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-4xl font-bold">
-        {profile?.avatarUrl ? (
-          <img
-            src={profile.avatarUrl}
-            className="w-full h-full object-cover"
-            alt="avatar"
-            onError={(e) => {
-              console.warn("avatar failed to load:", profile?.avatarUrl);
-              (e.currentTarget as HTMLImageElement).style.display = "none";
-            }}
-          />
-        ) : (
-          <span>{profile?.username?.[0]?.toUpperCase() || "?"}</span>
-        )}
-      </div>
+          <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-4xl font-bold">
+            {profile?.avatarUrl ? (
+              <img
+                src={profile.avatarUrl}
+                className="w-full h-full object-cover"
+                alt="avatar"
+                onError={(e) => {
+                  console.warn("avatar failed to load:", profile?.avatarUrl);
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <span>{profile?.username?.[0]?.toUpperCase() || "?"}</span>
+            )}
+          </div>
 
           <div>
             <h1 className="text-4xl font-bold">{profile?.username || "Player"}</h1>
@@ -124,14 +125,14 @@ export default function MePage() {
             </p>
           </div>
         </div>
-         
-        <button onClick={() => navigate("/user/friends")} className="bg-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-600">
+
+        <button onClick={() => navigate("/user/friends")} className="btn btn-secondary btn-sm">
           Friends
         </button>
 
         <button
           onClick={logout}
-          className="bg-red-600 px-6 py-3 rounded-lg font-bold hover:bg-red-700 transition"
+          className="btn btn-danger btn-md"
         >
           Logout
         </button>
@@ -158,7 +159,7 @@ export default function MePage() {
             </p>
             <button
               onClick={() => navigate("/single_game")}
-              className="bg-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition"
+              className="btn btn-primary btn-md"
             >
               Start Playing
             </button>
@@ -168,15 +169,13 @@ export default function MePage() {
             {achievements.map((ach: any) => (
               <div
                 key={ach.id}
-                className={`p-6 rounded-lg border ${
-                  ach.unlocked ? "bg-green-900/30 border-green-500" : "bg-gray-800 border-gray-700 opacity-70"
-                }`}
+                className={`p-6 rounded-lg border ${ach.unlocked ? "bg-green-900/30 border-green-500" : "bg-gray-800 border-gray-700 opacity-70"
+                  }`}
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
-                      ach.unlocked ? "bg-green-500 text-black" : "bg-gray-600 text-gray-300"
-                    }`}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${ach.unlocked ? "bg-green-500 text-black" : "bg-gray-600 text-gray-300"
+                      }`}
                   >
                     {ach.unlocked ? "🏆" : "🔒"}
                   </div>

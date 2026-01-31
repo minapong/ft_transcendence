@@ -1,12 +1,12 @@
 import SidebarLink from "@/app/components/ui/SidebarLink"
-import { navigate, useEffect, useRef, useState, useCallback } from "Reactor"
+import { navigate, useEffect, useRef, useState, useCallback, useEventListener } from "Reactor"
 import { useLocation } from "Reactor/router/useLocation"
 import { animate, stagger } from "motion"
 
 const links = [
 	{ label: "Home", href: "/", icon: "icon-[solar--home-smile-bold-duotone]", iconActive: "icon-[solar--home-smile-linear]" },
 	{ label: "Tournament", href: "/tournament/start", icon: "icon-[solar--cup-star-bold-duotone]", iconActive: "icon-[solar--cup-star-linear]" },
-	{ label: "Pong", href: "/game/single_game", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
+	{ label: "Pong", href: "/game/legacy_form_setup", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
 	{ label: "Connect4", href: "/game/connect4_single", icon: "icon-[solar--widget-5-bold-duotone]", iconActive: "icon-[solar--widget-5-linear]" },
 	{ label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
 	{ label: "Dashboard", href: "/dashboard", icon: "icon-[solar--chart-square-bold-duotone]", iconActive: "icon-[solar--chart-square-linear]" },
@@ -29,7 +29,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 	const navRef = useRef<HTMLElement | null>(null);
 	const isClosingRef = useRef(false);
 
-	// Sync pendingPath only after the overlay is fully closed.
 	useEffect(() => {
 		if (hidden || mode !== "overlay") return;
 		if (!isOverlayOpen) setPendingPath(null);
@@ -55,9 +54,13 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 
 		Promise.all([asideAnim.finished, backdropAnim?.finished || Promise.resolve()]).then(() => {
 			isClosingRef.current = false;
-			if (setIsOverlayOpen) setIsOverlayOpen(false);
+			if (setIsOverlayOpen) {
+				setIsOverlayOpen(false);
+				window.dispatchEvent(new Event("sidebar:resume"));
+			} else {
+				window.dispatchEvent(new Event("sidebar:resume"));
+			}
 			if (href) navigate(href);
-			window.dispatchEvent(new Event("sidebar:resume"));
 		});
 	}, [mode, setIsOverlayOpen, setPendingPath]);
 
@@ -143,11 +146,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		}
 	}, [mode, isCollapsed, hidden]);
 
-	useEffect(() => {
-		const handleClose = () => closeAndNavigate();
-		window.addEventListener("sidebar:close", handleClose);
-		return () => window.removeEventListener("sidebar:close", handleClose);
-	}, [closeAndNavigate]);
+	useEventListener("sidebar:close", () => closeAndNavigate());
 
 	function isActive(current: string, target: string) {
 		return current === target || current.startsWith(target + "/");
@@ -166,8 +165,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		/>
 	));
 
-	if (hidden) return null;
-
+	// Use CSS to hide instead of returning null to maintain consistent hook calls
 	if (mode === "static") {
 		return (
 			<aside
@@ -175,6 +173,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 				role="navigation"
 				aria-label="Main navigation"
 				className="sidebar-shell bg-(--color-surface) h-full overflow-hidden flex-shrink-0 z-30 border-r border-(--color-border-soft) flex flex-col origin-left will-change-[width,opacity]"
+				style={{ display: hidden ? "none" : "flex" }}
 			>
 				<div className="w-72 flex-shrink-0">
 					<nav ref={navRef as any} className="flex flex-col gap-3.5 px-3 pt-6">
@@ -190,6 +189,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			<div
 				className="z-[110]"
 				style={{
+					display: hidden ? "none" : "block",
 					opacity: isOverlayOpen ? 1 : 0,
 					pointerEvents: isOverlayOpen ? "auto" : "none",
 				}}

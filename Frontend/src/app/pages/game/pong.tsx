@@ -1,10 +1,55 @@
 import { pongLogic } from "@/core/engine/pong_logic";
-import { navigate, useEffect } from "Reactor";
+import { navigate, useEffect, useRef, useLocation, openModal, closeModal, useEventListener } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 
+// Define types for navigation state
+type TournamentMode = {
+    mode: "tournament";
+    p1: { id: number; name: string };
+    p2: { id: number; name: string };
+    matchId: number;
+};
+
+type AIMode = {
+    mode: "ai";
+    p1: string;
+    difficulty: "easy" | "medium" | "hard";
+};
+
+type TwoPlayerMode = {
+    mode: "2p";
+    p1: string;
+    p2: string;
+};
+
+type NavigationState = TournamentMode | AIMode | TwoPlayerMode;
+
 export default function PongGame() {
+    // useLocation ensures component re-renders on navigation changes
+    useLocation();
+
     // Read navigation state (tournament or free play)
-    const navState = history.state as any;
+    const navState = history.state as NavigationState | undefined;
+
+    // Create refs for all DOM elements
+    const ballRef = useRef<HTMLDivElement>(null);
+    const leftPaddleRef = useRef<HTMLDivElement>(null);
+    const rightPaddleRef = useRef<HTMLDivElement>(null);
+    const pauseBtnRef = useRef<HTMLButtonElement>(null);
+    const leftUpBtnRef = useRef<HTMLButtonElement>(null);
+    const leftDownBtnRef = useRef<HTMLButtonElement>(null);
+    const rightUpBtnRef = useRef<HTMLButtonElement>(null);
+    const rightDownBtnRef = useRef<HTMLButtonElement>(null);
+    const scoreLeftRef = useRef<HTMLSpanElement>(null);
+    const scoreRightRef = useRef<HTMLSpanElement>(null);
+
+    // Input state ref - Source of Truth for game, updated via hooks
+    const inputRef = useRef({
+        w: false,
+        s: false,
+        up: false,
+        down: false
+    });
 
     let p1Name: string;
     let p2Name: string;
@@ -37,17 +82,81 @@ export default function PongGame() {
         return null;
     }
 
+    // --- INPUT HANDLING ---
+    // Update ref directly. No re-renders needed for input updates (Game Loop reads ref).
+
+    // KeyDown Handler
+    useEventListener("keydown", (e: KeyboardEvent) => {
+        if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
+
+        if (e.key === "w") inputRef.current.w = true;
+        if (e.key === "s") inputRef.current.s = true;
+        if (e.key === "ArrowUp") inputRef.current.up = true;
+        if (e.key === "ArrowDown") inputRef.current.down = true;
+
+        // Prevent scrolling with arrows
+        if (["ArrowUp", "ArrowDown", " "].includes(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    // KeyUp Handler
+    useEventListener("keyup", (e: KeyboardEvent) => {
+        if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
+
+        if (e.key === "w") inputRef.current.w = false;
+        if (e.key === "s") inputRef.current.s = false;
+        if (e.key === "ArrowUp") inputRef.current.up = false;
+        if (e.key === "ArrowDown") inputRef.current.down = false;
+    });
+
+
     useEffect(() => {
-        const overlay = document.getElementById("winnerOverlay")!;
-        const text = document.getElementById("winnerText")!;
-        let winTimeout: number | null = null;
+        // Ensure all refs are populated
+        if (!ballRef.current || !leftPaddleRef.current || !rightPaddleRef.current ||
+            !pauseBtnRef.current || !leftUpBtnRef.current || !leftDownBtnRef.current ||
+            !rightUpBtnRef.current || !rightDownBtnRef.current || !scoreLeftRef.current ||
+            !scoreRightRef.current) {
+            return;
+        }
 
         const cleanup = pongLogic(
+            {
+                ball: ballRef.current,
+                leftPaddle: leftPaddleRef.current,
+                rightPaddle: rightPaddleRef.current,
+                pauseBtn: pauseBtnRef.current,
+                leftUpBtn: leftUpBtnRef.current,
+                leftDownBtn: leftDownBtnRef.current,
+                rightUpBtn: rightUpBtnRef.current,
+                rightDownBtn: rightDownBtnRef.current,
+                scoreLeft: scoreLeftRef.current,
+                scoreRight: scoreRightRef.current,
+            },
             p1Name,
             p2Name,
             (winner: string, scoreP1: number, scoreP2: number) => {
-                text.textContent = `${winner} Wins! 🏆 ${scoreP1} - ${scoreP2}`;
-                overlay.classList.remove("hidden");
+                // Navigation handler for modal buttons
+                const handleNavigate = (destination: "tournament" | "home") => {
+                    closeModal();
+                    if (destination === "tournament") {
+                        navigate("/tournament/active", { replace: true });
+                    } else {
+                        navigate("/game/single_game", { replace: true });
+                    }
+                };
+
+                // Show winner modal
+                openModal({
+                    type: "pong-winner",
+                    payload: {
+                        winner,
+                        scoreP1,
+                        scoreP2,
+                        isTournament: matchId !== null,
+                        onNavigate: handleNavigate
+                    }
+                });
 
                 // If this was a tournament match, report result directly
                 if (matchId !== null && p1Id !== null && p2Id !== null) {
@@ -69,27 +178,15 @@ export default function PongGame() {
                             console.warn("[Pong] Failed to report tournament result:", err);
                         });
                 }
-
-                // Navigate back after 2 seconds
-                winTimeout = window.setTimeout(() => {
-                    if (matchId !== null) {
-                        navigate("/tournament/active", { replace: true });
-                    } else {
-                        navigate("/game/single_game", { replace: true });
-                    }
-                }, 2000);
             },
+            inputRef, // <--- Pass the live input ref to the engine
             useAI,
             aiDifficulty
         );
 
-        overlay.classList.add("hidden");
-
         // Cleanup function runs on unmount
+        // Note: useEventListener cleans itself up! We only need to clean up the game loop here.
         return () => {
-            if (winTimeout !== null) {
-                clearTimeout(winTimeout);
-            }
             cleanup();
         };
     });
@@ -105,19 +202,21 @@ export default function PongGame() {
 				text-lg sm:text-xl lg:text-2xl 
 				font-bold mb-2
 				">
-                <span id="scoreLeft">{p1Name}: 0</span>
-                <span id="scoreRight">{p2Name}: 0</span>
+                <span ref={scoreLeftRef} id="scoreLeft">{p1Name}: 0</span>
+                <span ref={scoreRightRef} id="scoreRight">{p2Name}: 0</span>
             </div>
 
             {/* LEFT TOUCH CONTROLS */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
                 <button
+                    ref={leftUpBtnRef}
                     id="left-up"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
                     ▲
                 </button>
                 <button
+                    ref={leftDownBtnRef}
                     id="left-down"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
@@ -138,6 +237,7 @@ export default function PongGame() {
             >
                 {/* Left paddle */}
                 <div
+                    ref={leftPaddleRef}
                     id="left_p"
                     className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
 							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
@@ -145,6 +245,7 @@ export default function PongGame() {
 
                 {/* Right paddle */}
                 <div
+                    ref={rightPaddleRef}
                     id="right_p"
                     className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
 							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
@@ -152,6 +253,7 @@ export default function PongGame() {
 
                 {/* Ball */}
                 <div
+                    ref={ballRef}
                     id="ball"
                     className="absolute 
 							w-3 h-3 sm:w-4 sm:h-4 
@@ -174,12 +276,14 @@ export default function PongGame() {
             {/* RIGHT TOUCH CONTROLS */}
             <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
                 <button
+                    ref={rightUpBtnRef}
                     id="right-up"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
                     ▲
                 </button>
                 <button
+                    ref={rightDownBtnRef}
                     id="right-down"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
@@ -189,6 +293,7 @@ export default function PongGame() {
 
             {/* Pause button */}
             <button
+                ref={pauseBtnRef}
                 id="pauseBtn"
                 className="
 					mt-3 sm:mt-4 
@@ -199,15 +304,6 @@ export default function PongGame() {
             >
                 ⏸️ Pause
             </button>
-
-            {/* Winner overlay */}
-            <div
-                id="winnerOverlay"
-                className="hidden absolute inset-0 flex bg-black/70 items-center justify-center 
-							text-white text-2xl sm:text-3xl lg:text-4xl font-bold z-50"
-            >
-                <div id="winnerText"></div>
-            </div>
         </div>
     );
 }

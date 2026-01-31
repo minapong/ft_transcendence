@@ -1,9 +1,9 @@
 import { useState, useEffect } from "Reactor";
-import { useLocation } from "Reactor/router/useLocation";
+
 import Header from "@/app/components/layout/Header";
 import LeftSidebar from "@/app/components/layout/LeftSidebar";
 import ModalRoot from "Reactor/ModalRoot";
-import { isSpecialLayout } from "Reactor/render";
+import { isSpecialLayout } from "Reactor/router/routes";
 import { useScreen } from "@/app/hooks/useScreen";
 
 export default function RootLayout({ children }) {
@@ -11,7 +11,10 @@ export default function RootLayout({ children }) {
   const sidebarMode = screen === "desktop" ? "static" : "overlay";
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const pathname = useLocation();
+
+  // Don't use useLocation() here - it can be stale during layout transitions
+  // RootLayout is re-rendered on every route change anyway, so direct access is safe
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
 
   // Reset states when switching between static and overlay
   useEffect(() => {
@@ -43,7 +46,7 @@ export default function RootLayout({ children }) {
     <div className="h-screen flex flex-col overflow-hidden">
       <Header
         onMenuToggle={handleToggle}
-        showMenuButton={!hideSidebar}
+        isSpecialPage={hideSidebar}
       />
 
       <div className="flex flex-1 overflow-hidden">

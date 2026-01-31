@@ -13,8 +13,7 @@ services:
     restart: always
     networks:
       - app_net
-    env_file: 
-      - ./Backend/.env
+
 
   nginx:
     image: ${IMAGE_FRONTEND:-transcendence-frontend:local}
