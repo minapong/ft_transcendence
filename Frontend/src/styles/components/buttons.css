@@ -63,15 +63,15 @@
 
 /* Primary Button - Main CTA */
 .btn-primary {
-    background: var(--color-btn-primary-bg);
-    color: var(--color-btn-primary-text);
+    background: var(--color-accent);
+    color: #000000;
+    font-weight: var(--font-weight-bold);
     box-shadow:
         var(--shadow-md),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: var(--color-btn-primary-hover);
     transform: scale(1.05);
     box-shadow:
         var(--shadow-lg),
@@ -82,11 +82,11 @@
     transform: scale(0.98);
 }
 
-/* Secondary Button - Alternative action */
+/* Secondary Button - Alternative action (Choose Mode style) */
 .btn-secondary {
-    background: var(--color-btn-secondary-bg);
-    color: var(--color-btn-secondary-text);
-    border: 1px solid var(--color-btn-secondary-border);
+    background: var(--color-surface);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border-soft);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -144,22 +144,23 @@
     transform: scale(0.98);
 }
 
-/* Hero Button - Enhanced primary with energy effect */
+/* Hero Button - Enhanced primary with energy effect (Quick Play style) */
 .btn-hero {
     position: relative;
     isolation: isolate;
-    background: var(--color-btn-primary-bg);
-    color: var(--color-btn-primary-text);
+    background: var(--color-accent);
+    color: #000000;
+    font-weight: var(--font-weight-bold);
     box-shadow:
-        var(--shadow-xl),
-        var(--glow-medium);
+        0 20px 40px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-hero:hover:not(:disabled) {
-    background: var(--color-btn-primary-hover);
     transform: scale(1.05);
     box-shadow:
-        var(--shadow-2xl),
+        0 25px 50px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
         var(--glow-strong);
 }
 

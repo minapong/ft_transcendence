@@ -1,6 +1,7 @@
 import { navigate, useEffect, useRef } from 'Reactor';
 import { apiFetch } from "@/core/lib/api";
 import { useScreen } from "@/app/hooks/useScreen";
+import Button from "@/app/components/ui/Button";
 
 // Crispy Pong Animation Component
 function PongAnimation() {
@@ -489,38 +490,21 @@ export default function App() {
 					{/* Smart CTAs - replacing dumb "PLAY NOW" */}
 					<div className="flex flex-col sm:flex-row gap-4 items-center">
 						{/* Primary: Quick Play */}
-						<button
-							className="group fx-energy energy-high relative px-12 py-4 rounded-xl text-xl font-bold tracking-wide
-								transition-all duration-300 ease-out
-								hover:scale-105 active:scale-98
-								focus-visible:outline-2 focus-visible:outline-offset-4"
-							onClick={() => navigate("/game/pre_match_scene")}
-							style={{
-								background: 'var(--color-accent)',
-								color: '#000000',
-								boxShadow: `
-									0 20px 40px rgba(0, 0, 0, 0.35),
-									inset 0 1px 0 rgba(255, 255, 255, 0.3)
-								`,
-								outlineColor: 'var(--color-accent)'
-							}}
+						<Button
+							variant="hero"
+							size="xl"
+							href="/game/pre_match_scene"
 						>
 							Quick Play
-						</button>
+						</Button>
 
 						{/* Secondary: Choose Mode */}
-						<button
-							className="px-8 py-3 rounded-xl text-base font-medium
-								transition-all duration-200
-								hover:scale-105 active:scale-95"
-							style={{
-								background: 'var(--color-surface)',
-								color: 'var(--color-primary)',
-								border: '1px solid var(--color-border-soft)'
-							}}
+						<Button
+							variant="secondary"
+							size="lg"
 						>
 							Choose Mode
-						</button>
+						</Button>
 					</div>
 
 					{/* Live signal - ONE line, creates urgency */}
