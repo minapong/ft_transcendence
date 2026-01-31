@@ -324,7 +324,7 @@ function PongAnimation() {
 		};
 
 		frameId.current = requestAnimationFrame(animate);
-		console.log("index page useeffect")
+		// console.log("index page useeffect")
 		return () => {
 			if (frameId.current) cancelAnimationFrame(frameId.current);
 		};

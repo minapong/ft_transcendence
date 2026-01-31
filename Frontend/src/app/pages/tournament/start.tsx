@@ -21,6 +21,8 @@ export default function TournamentPage() {
 	// Fetch active tournament on load
 	useEffect(() => {
 		// console.log("Tournament fetch triggered");
+		if (!user) return;
+		
 		let mounted = true;
 
 		const loadTournament = async () => {

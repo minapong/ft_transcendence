@@ -4,7 +4,7 @@ import { hashPassword } from "../src/services/auth.service.js"; // wherever your
 // import crypto from "crypto";
 
 const users = await prisma.user.count();
-if (users > 9) {
+if (users > 0) {
   console.log("Database already seeded, skipping.");
   process.exit(0);
 }
@@ -38,6 +38,7 @@ async function seedUsers() {
 
   for (let i = 1; i <= USER_COUNT; i++) {
     const username = `user${i}`;
+    const password = `pass${username}`;
 
   const user = await prisma.user.upsert({
     where: { username },
@@ -45,7 +46,7 @@ async function seedUsers() {
     create: {
       email: `${username}@example.com`,
       username,
-      password_hash: hashPassword(username),
+      password_hash: hashPassword(password),
       isAdmin: i === 1,
     },
   });

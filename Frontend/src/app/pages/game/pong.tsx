@@ -196,14 +196,29 @@ export default function PongGame() {
 
             {/* Scoreboard */}
             <div className="
-				flex justify-between 
-				w-full max-w-[320px] sm:max-w-[500px] lg:max-w-[800px] 
-				text-white 
-				text-lg sm:text-xl lg:text-2xl 
-				font-bold mb-2
-				">
-                <span ref={scoreLeftRef} id="scoreLeft">{p1Name}: 0</span>
-                <span ref={scoreRightRef} id="scoreRight">{p2Name}: 0</span>
+            flex items-center justify-between
+            w-full max-w-[320px] sm:max-w-[500px] lg:max-w-[800px]
+            px-4 py-2
+            rounded-full
+            bg-gradient-to-b from-white/10 to-white/5
+            backdrop-blur-sm
+            shadow-md shadow-black/40
+            text-slate-100
+            text-sm sm:text-base lg:text-lg
+            font-semibold
+            mb-4
+            ">
+
+            <span ref={scoreLeftRef} className="flex-1 text-left">
+                {p1Name}: 0
+            </span>
+
+            <span className="text-slate-400 px-3">—</span>
+
+            <span ref={scoreRightRef} className="flex-1 text-right">
+                {p2Name}: 0
+            </span>
+
             </div>
 
             {/* LEFT TOUCH CONTROLS */}
@@ -224,32 +239,58 @@ export default function PongGame() {
                 </button>
             </div>
 
-            {/* Game board */}
-            <div
+                {/* Game board */}
+                <div
                 id="game_board"
                 className="
-					bg-gray-800 border-4 sm:border-6 lg:border-8 border-white rounded-lg relative
-					w-[320px] h-[200px]
-					sm:w-[400px] sm:h-[280px]
-					lg:w-[600px] lg:h-[380px]
-					xl:w-[800px] xl:h-[500px]
-				"
-            >
+                    bg-[#1e293b]
+                    border-4 sm:border-6 lg:border-8 border-[#475569]
+                    rounded-lg relative
+                    w-[320px] h-[200px]
+                    sm:w-[400px] sm:h-[280px]
+                    lg:w-[600px] lg:h-[380px]
+                    xl:w-[800px] xl:h-[500px]
+                "
+                style={{
+                    boxShadow: `
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+                    0 8px 30px rgba(0, 0, 0, 0.6)
+                    `,
+                }}
+                >
+
+
+
                 {/* Left paddle */}
                 <div
-                    ref={leftPaddleRef}
-                    id="left_p"
-                    className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
-							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
+                ref={leftPaddleRef}
+                id="left_p"
+                className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
+                            w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[#f8fafc]"
+                style={{
+                    boxShadow: `
+                    inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+                    0 0 8px rgba(56, 189, 248, 0.25)
+                    `,
+                }}
                 />
+
+
 
                 {/* Right paddle */}
                 <div
-                    ref={rightPaddleRef}
-                    id="right_p"
-                    className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
-							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
+                ref={rightPaddleRef}
+                id="right_p"
+                className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
+                            w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
+                style={{
+                    boxShadow: `
+                    inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+                    0 0 8px rgba(56, 189, 248, 0.25)
+                    `,
+                }}
                 />
+
 
                 {/* Ball */}
                 <div

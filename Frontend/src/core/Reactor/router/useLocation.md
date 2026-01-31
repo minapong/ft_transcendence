@@ -194,7 +194,7 @@ import { useEffect } from "Reactor";
 useEffect(() => {
   const handleNavigation = () => {
     // Clean up previous subscription
-    console.log("Navigation happened!");
+    // console.log("Navigation happened!");
   };
 
   window.addEventListener("routechange", handleNavigation);
