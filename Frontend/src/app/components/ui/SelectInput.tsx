@@ -1,4 +1,5 @@
 interface SelectInputProps {
+    id?: string;
     value: string;
     onChange: (e: any) => void;
     disabled?: boolean;
@@ -7,15 +8,16 @@ interface SelectInputProps {
     className?: string;
 }
 
-const SelectInput = ({ value, onChange, disabled, children, label }: SelectInputProps) => (
+const SelectInput = ({ id, value, onChange, disabled, children, label }: SelectInputProps) => (
     <div className="flex flex-col gap-1.5 w-full">
         {label && (
-            <label className="input-label">
+            <label className="input-label" htmlFor={id}>
                 {label}
             </label>
         )}
         <div className="relative fx-energy energy-low focus-within:energy-medium transition-all duration-300 rounded-lg">
             <select
+                id={id}
                 value={value}
                 disabled={disabled}
                 onChange={onChange}

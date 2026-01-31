@@ -35,6 +35,14 @@ export default function IntentCard({
             {/* Scanline Effect */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20" />
 
+            {/* Interaction Mask for Inactive Cards */}
+            {!isActive && (
+                <div
+                    className="absolute inset-0 z-[100] cursor-pointer bg-transparent"
+                    aria-hidden="true"
+                />
+            )}
+
             <div className="relative z-10 flex-1 flex flex-col p-8 sm:p-10 space-y-8">
                 {/* Header */}
                 <div className="flex items-center gap-5">
@@ -64,87 +72,100 @@ export default function IntentCard({
                     <div className={`h-1.5 w-24 rounded-full transition-all duration-500 ${isActive ? "bg-gradient-to-r from-cyan-400 to-blue-500 shadow-[0_0_15px_rgba(34,211,238,0.6)]" : "bg-slate-800"}`} />
                 </div>
 
-                {/* Dynamic Content Area */}
-                <div className="flex-1 flex flex-col justify-center space-y-5">
-                    {intent.type === "AI" && (
-                        <>
-                            <Input
-                                value={intent.slots.p1}
-                                disabled={!isActive}
-                                onChange={(e: any) => updateSlot("p1", e.target.value)}
-                                placeholder="PROTAGONIST"
-                                label="PLAYER 1"
-                                className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
-                            />
-                            <SelectInput
-                                value={intent.ruleset.difficulty}
-                                disabled={!isActive}
-                                onChange={(e: any) => updateRuleset("difficulty", e.target.value)}
-                                label="DIFFICULTY CLASS"
-                            >
-                                <option value="easy">STANDARD</option>
-                                <option value="medium">ADVANCED</option>
-                                <option value="hard">NIGHTMARE</option>
-                            </SelectInput>
-                        </>
-                    )}
-
-                    {intent.type === "2P" && (
-                        <>
-                            <Input
-                                value={intent.slots.p1}
-                                disabled={!isActive}
-                                onChange={(e: any) => updateSlot("p1", e.target.value)}
-                                placeholder="PLAYER ONE"
-                                label="CHALLENGER"
-                                className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
-                            />
-                            <div className="flex items-center gap-4 px-2">
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-                                <span className="text-[10px] font-black tracking-[0.2em] text-cyan-200/50">VS</span>
-                                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-                            </div>
-                            <Input
-                                value={intent.slots.p2}
-                                disabled={!isActive}
-                                onChange={(e: any) => updateSlot("p2", e.target.value)}
-                                placeholder="PLAYER TWO"
-                                label="OPPONENT"
-                                className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
-                            />
-                        </>
-                    )}
-
-                    {intent.type === "4P" && (
-                        <div className="grid grid-cols-2 gap-4">
-                            {["p1", "p2", "p3", "p4"].map((slot, i) => (
+                {/* Dynamic Content Area — Form-style submission */}
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (isActive) onCommit();
+                    }}
+                    className="flex-1 flex flex-col justify-between"
+                >
+                    <div className="flex-1 flex flex-col justify-center space-y-5">
+                        {intent.type === "AI" && (
+                            <>
                                 <Input
-                                    key={slot}
-                                    value={intent.slots[slot as keyof Intent["slots"]]}
+                                    id={`${intent.type.toLowerCase()}-p1`}
+                                    value={intent.slots.p1}
                                     disabled={!isActive}
-                                    onChange={(e: any) => updateSlot(slot as keyof Intent["slots"], e.target.value)}
-                                    placeholder={`UNIT 0${i + 1}`}
-                                    label={`SQUAD MEMBER ${i + 1}`}
-                                    className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50 text-sm"
+                                    onChange={(e: any) => updateSlot("p1", e.target.value)}
+                                    placeholder="PROTAGONIST"
+                                    label="PLAYER 1"
+                                    className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
                                 />
-                            ))}
-                        </div>
-                    )}
-                </div>
+                                <SelectInput
+                                    id={`${intent.type.toLowerCase()}-difficulty`}
+                                    value={intent.ruleset.difficulty}
+                                    disabled={!isActive}
+                                    onChange={(e: any) => updateRuleset("difficulty", e.target.value)}
+                                    label="DIFFICULTY CLASS"
+                                >
+                                    <option value="easy">STANDARD</option>
+                                    <option value="medium">ADVANCED</option>
+                                    <option value="hard">NIGHTMARE</option>
+                                </SelectInput>
+                            </>
+                        )}
 
-                {/* Action Button */}
-                <div className={!isActive ? "opacity-50 pointer-events-none grayscale" : ""}>
-                    <Button
-                        variant="hero"
-                        size="lg"
-                        fullWidth
-                        onClick={onCommit}
-                        disabled={!isActive}
-                        className="font-bold tracking-[0.15em] uppercase shadow-[0_0_30px_-5px_rgba(8,145,178,0.5)]"
-                    >
-                        Initialize Match
-                    </Button>
-                </div>
+                        {intent.type === "2P" && (
+                            <>
+                                <Input
+                                    id={`${intent.type.toLowerCase()}-p1`}
+                                    value={intent.slots.p1}
+                                    disabled={!isActive}
+                                    onChange={(e: any) => updateSlot("p1", e.target.value)}
+                                    placeholder="PLAYER ONE"
+                                    label="CHALLENGER"
+                                    className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
+                                />
+                                <div className="flex items-center gap-4 px-2">
+                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+                                    <span className="text-[10px] font-black tracking-[0.2em] text-cyan-200/50">VS</span>
+                                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+                                </div>
+                                <Input
+                                    id={`${intent.type.toLowerCase()}-p2`}
+                                    value={intent.slots.p2}
+                                    disabled={!isActive}
+                                    onChange={(e: any) => updateSlot("p2", e.target.value)}
+                                    placeholder="PLAYER TWO"
+                                    label="OPPONENT"
+                                    className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50"
+                                />
+                            </>
+                        )}
+
+                        {intent.type === "4P" && (
+                            <div className="grid grid-cols-2 gap-4">
+                                {["p1", "p2", "p3", "p4"].map((slot, i) => (
+                                    <Input
+                                        key={slot}
+                                        id={`${intent.type.toLowerCase()}-${slot}`}
+                                        value={intent.slots[slot as keyof Intent["slots"]]}
+                                        disabled={!isActive}
+                                        onChange={(e: any) => updateSlot(slot as keyof Intent["slots"], e.target.value)}
+                                        placeholder={`UNIT 0${i + 1}`}
+                                        label={`SQUAD MEMBER ${i + 1}`}
+                                        className="bg-black/40 border-white/10 text-cyan-50 focus:border-cyan-400/50 text-sm"
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action Button */}
+                    <div className={!isActive ? "opacity-50 pointer-events-none grayscale" : ""}>
+                        <Button
+                            type="submit"
+                            variant="hero"
+                            size="lg"
+                            fullWidth
+                            disabled={!isActive}
+                            className="font-bold tracking-[0.15em] uppercase shadow-[0_0_30px_-5px_rgba(8,145,178,0.5)]"
+                        >
+                            Initialize Match
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     );
