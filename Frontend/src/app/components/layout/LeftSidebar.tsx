@@ -15,10 +15,9 @@ const links = [
 interface SidebarProps {
 	isOverlayOpen: boolean;
 	setIsOverlayOpen?: (v: boolean | ((p: boolean) => boolean)) => void;
-	isCollapsed?: boolean;
 	hidden?: boolean;
 }
-export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false, hidden = false }: SidebarProps & { mode: "overlay" | "static" }) {
+export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, hidden = false }: SidebarProps & { mode: "overlay" | "static" }) {
 
 	const activePath = normalizePath(useLocation());
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
@@ -118,33 +117,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			document.body.style.overflow = "";
 			root?.removeAttribute("inert");
 		}
-	}, [mode, isOverlayOpen, hidden]);
-
-	useEffect(() => {
-		if (hidden || mode !== "static" || !asideRef.current) return;
-		animate(
-			asideRef.current,
-			{
-				width: isCollapsed ? "0px" : "18rem",
-				opacity: isCollapsed ? 0 : 1,
-			},
-			{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }
-		);
-
-		if (navRef.current) {
-			animate(
-				Array.from(navRef.current.children),
-				{
-					opacity: isCollapsed ? 0 : 1,
-					x: isCollapsed ? -12 : 0
-				},
-				{
-					delay: stagger(0.03, { from: isCollapsed ? "last" : "first" }),
-					duration: 0.2
-				}
-			);
-		}
-	}, [mode, isCollapsed, hidden]);
+	}, [mode, hidden]);
 
 	useEventListener("sidebar:close", () => closeAndNavigate());
 
@@ -152,7 +125,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		return current === target || current.startsWith(target + "/");
 	}
 
-	// ALWAYS process SidebarLinks to keep hook counts stable
 	const sidebarLinks = links.map(link => (
 		<SidebarLink
 			label={link.label}
@@ -160,7 +132,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			icon={link.icon}
 			iconActive={link.iconActive}
 			active={isActive(resolvedPath, link.href)}
-			collapsed={isCollapsed}
 			onClick={() => { if (link.href) closeAndNavigate(link.href); }}
 		/>
 	));

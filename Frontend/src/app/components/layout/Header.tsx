@@ -1,9 +1,7 @@
-
-import { navigate, useState, useEffect, useRef } from "Reactor";
+import { navigate } from "Reactor";
 import { useScreen } from "@/app/hooks/useScreen";
 import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
-import { animate } from "motion";
 
 // PanelButton extracted for clarity and reusability
 function PanelButton({ icon, label, onClick }) {
@@ -22,39 +20,9 @@ function PanelButton({ icon, label, onClick }) {
 export default function Header({ onMenuToggle, isSpecialPage }) {
   const screen = useScreen();
   const auth = useAuth();
-
   const user = auth?.user || null;
-  const [panelOpen, setPanelOpen] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const panelContentRef = useRef<HTMLDivElement>(null);
-
-  // Close panel when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setPanelOpen(false);
-      }
-    };
-    if (panelOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [panelOpen]);
-
-  // Panel entrance and exit animation
-  useEffect(() => {
-    if (!panelContentRef.current) return;
-    animate(
-      panelContentRef.current,
-      panelOpen
-        ? { opacity: [0, 1], y: [-4, 0] }
-        : { opacity: [1, 0], y: [0, -4] },
-      { duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }
-    );
-  }, [panelOpen]);
 
   const handleLogout = () => {
-    setPanelOpen(false);
     logout();
   };
 
@@ -167,70 +135,62 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
             </button>
           </div>
         ) : (
-          <div ref={panelRef} className="relative">
-            <button
-              onClick={e => {
-                e.stopPropagation();
-                setPanelOpen(v => !v);
-              }}
-              className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)] whitespace-nowrap flex-shrink-0"
+          <details className="relative group">
+            <summary
+              className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)] whitespace-nowrap flex-shrink-0 list-none [&::-webkit-details-marker]:hidden"
             >
               <div className="w-7 h-7 rounded-md bg-[var(--color-surface)] flex items-center justify-center">
                 <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-base" aria-hidden="true" />
               </div>
               <span className="text-sm text-[var(--color-primary)] opacity-85">{user.username}</span>
-              <span className={`icon-[mdi--chevron-down] text-sm text-[var(--color-primary)] opacity-30 transition-transform duration-150 ${panelOpen ? "rotate-180" : ""}`} />
-            </button>
+              <span className="icon-[mdi--chevron-down] text-sm text-[var(--color-primary)] opacity-30 transition-transform duration-150 group-open:rotate-180" />
+            </summary>
 
-            {panelOpen && (
-              <div
-                ref={panelContentRef}
-                className="absolute right-0 top-[calc(100%+8px)] w-60 rounded-xl bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100"
-              >
-                {/* Header Section: More "Command Center" feel */}
-                <div className="px-4 py-4 bg-white/[0.02] border-b border-[var(--color-border-soft)]">
-                  <div className="flex items-center gap-3">
-                    <div className="shrink-0 w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-white/5 flex items-center justify-center shadow-inner">
-                      <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-xl" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-[var(--color-primary)] leading-none mb-1">
-                        {user.username}
-                      </span>
-                      <span className="text-[10px] text-[var(--color-primary)] opacity-40 uppercase tracking-widest font-bold">
-                        Operator
-                      </span>
-                    </div>
+            <div
+              className="absolute right-0 top-[calc(100%+8px)] w-60 rounded-xl bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100"
+            >
+              {/* Header Section: More "Command Center" feel */}
+              <div className="px-4 py-4 bg-white/[0.02] border-b border-[var(--color-border-soft)]">
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-white/5 flex items-center justify-center shadow-inner">
+                    <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-xl" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-[var(--color-primary)] leading-none mb-1">
+                      {user.username}
+                    </span>
+                    <span className="text-[10px] text-[var(--color-primary)] opacity-40 uppercase tracking-widest font-bold">
+                      Operator
+                    </span>
                   </div>
                 </div>
-
-                {/* Actions Section: Better hover & active states */}
-                <div className="p-1.5 space-y-0.5">
-                  <PanelButton
-                    icon="icon-[mdi--badge-account-outline]"
-                    label="Operator File"
-                    onClick={() => { setPanelOpen(false); navigate("/user/me"); }}
-                  />
-                  <PanelButton
-                    icon="icon-[mdi--tune-variant]"
-                    label="System Prefs"
-                    onClick={() => { setPanelOpen(false); navigate("user/settings"); }}
-                  />
-                </div>
-
-                {/* Footer: Dangerous action separation */}
-                <div className="p-1.5 border-t border-[var(--color-border-soft)] bg-black/10">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-3 py-2 flex items-center gap-3 text-left text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
-                  >
-                    <span className="icon-[mdi--power-standby] text-base" />
-                    Terminate Session
-                  </button>
-                </div>
               </div>
-            )}
-          </div>
+
+              <div className="p-1.5 space-y-0.5">
+                <PanelButton
+                  icon="icon-[mdi--badge-account-outline]"
+                  label="Operator File"
+                  onClick={() => navigate("/user/me")}
+                />
+                <PanelButton
+                  icon="icon-[mdi--tune-variant]"
+                  label="System Prefs"
+                  onClick={() => navigate("user/settings")}
+                />
+              </div>
+
+              {/* Footer: Dangerous action separation */}
+              <div className="p-1.5 border-t border-[var(--color-border-soft)] bg-black/10">
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-3 py-2 flex items-center gap-3 text-left text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
+                >
+                  <span className="icon-[mdi--power-standby] text-base" />
+                  Terminate Session
+                </button>
+              </div>
+            </div>
+          </details>
         )}
       </div>
     </header >

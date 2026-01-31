@@ -1,4 +1,5 @@
 import { navigate, useEffect, useRef } from 'Reactor';
+import { animate } from 'motion';
 import { apiFetch } from "@/core/lib/api";
 import { useScreen } from "@/app/hooks/useScreen";
 import Button from "@/app/components/ui/Button";
@@ -112,7 +113,7 @@ function BallChaosArena() {
 						position: 'absolute',
 						width: config.size + 'px',
 						height: config.size + 'px',
-						backgroundColor: 'rgba(255, 255, 255, 0.5)', // Reduced opacity
+						backgroundColor: 'rgba(255, 255, 255, 0.8)',
 						borderRadius: '50%',
 						pointerEvents: 'none'
 					}}
@@ -124,12 +125,33 @@ function BallChaosArena() {
 
 // Connect4 Ghost Component - signalling variety (Right Biased & Dropping)
 function Connect4Ghost() {
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const screenHeight = window.innerHeight;
+		const startY = -screenHeight * 0.5;
+		const endY = screenHeight * 1.5;
+
+		// Use transform directly for reliable animation
+		const controls = animate(
+			container,
+			{ transform: [`translateY(${startY}px)`, `translateY(${endY}px)`] },
+			{ duration: 60, repeat: Infinity, ease: 'linear' }
+		);
+
+		return () => controls.stop();
+	});
+
 	return (
 		<div
+			ref={containerRef}
 			style={{
 				position: 'fixed',
-				top: '-50%', // Start from top
-				right: '5%', // Right bias
+				top: 0,
+				right: '5%',
 				zIndex: 4,
 				display: 'flex',
 				flexDirection: 'column',
@@ -137,7 +159,7 @@ function Connect4Ghost() {
 				opacity: 0.2,
 				filter: 'blur(35px) saturate(0.7)',
 				pointerEvents: 'none',
-				animation: 'connect4Drop 80s linear infinite'
+				willChange: 'transform'
 			}}
 		>
 			<div className="w-[500px] h-[500px] rounded-full" style={{ background: '#facc15' }} />
@@ -194,32 +216,23 @@ export default function App() {
 				<div className="flex flex-col items-center gap-12 max-w-2xl w-full text-center">
 
 					{/* Primary & Secondary Actions Only */}
-					<div className="flex flex-col gap-8 items-center w-full">
-						{/* Primary: Quick Play - LARGE, DOMINANT with glow */}
-						<div
-							className="py-4 rounded-xl"
-							style={{
-								boxShadow: '0 0 30px 10px rgba(0, 255, 255, 0.3), 0 0 60px 20px rgba(0, 255, 255, 0.15)',
-								animation: 'quickPlayPulse 2s ease-in-out infinite'
-							}}
+					<div className="flex flex-col gap-6 items-center w-full">
+						{/* Primary: Quick Play - LARGE, DOMINANT */}
+						<Button
+							variant="hero"
+							size="xl"
+							href="/game/pre_match_scene"
+							className="w-full sm:w-80 h-20 text-2xl"
 						>
-							<Button
-								variant="hero"
-								size="xl"
-								href="/game/pre_match_scene"
-								className="w-full sm:w-80 h-20 text-2xl"
-							>
-								Quick Play
-							</Button>
-						</div>
-
-						{/* Secondary: Choose Mode - Subtler with hover lift */}
+							Choose Mode
+						</Button>
 						<Button
 							variant="secondary"
 							size="lg"
-							className="w-full sm:w-64 transition-all duration-300 hover:shadow-[0_0_20px_6px_rgba(0,255,255,0.2)] hover:-translate-y-1"
+							href="/game/pre_match_scene"
+							className="w-full sm:w-64"
 						>
-							Choose Mode
+							Quick Play
 						</Button>
 					</div>
 
@@ -238,50 +251,7 @@ export default function App() {
 				</footer>
 			</div>
 
-			{/* CSS animations */}
-			<style>{`
-				@keyframes connect4Drop {
-					0% { transform: translateY(0); }
-					100% { transform: translateY(150%); }
-				}
 
-				@keyframes quickPlayPulse {
-					0%, 100% {
-						box-shadow: 0 0 30px 10px rgba(0, 255, 255, 0.3), 0 0 60px 20px rgba(0, 255, 255, 0.15);
-					}
-					50% {
-						box-shadow: 0 0 40px 15px rgba(0, 255, 255, 0.45), 0 0 80px 30px rgba(0, 255, 255, 0.2);
-					}
-				}
-
-				@keyframes ballFloat1 {
-					0%, 100% { transform: translate(0, 0); }
-					25% { transform: translate(80px, 40px); }
-					50% { transform: translate(120px, -30px); }
-					75% { transform: translate(40px, -60px); }
-				}
-
-				@keyframes ballFloat2 {
-					0%, 100% { transform: translate(0, 0); }
-					25% { transform: translate(-60px, -50px); }
-					50% { transform: translate(-100px, 20px); }
-					75% { transform: translate(-40px, 60px); }
-				}
-
-				@keyframes ballFloat3 {
-					0%, 100% { transform: translate(0, 0); }
-					33% { transform: translate(50px, 70px); }
-					66% { transform: translate(-30px, 40px); }
-				}
-
-				@keyframes ballFloat4 {
-					0%, 100% { transform: translate(0, 0); }
-					20% { transform: translate(-50px, 30px); }
-					40% { transform: translate(-80px, -20px); }
-					60% { transform: translate(-30px, -60px); }
-					80% { transform: translate(20px, -30px); }
-				}
-			`}</style>
 		</div>
 	);
 }
