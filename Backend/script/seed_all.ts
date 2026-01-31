@@ -39,14 +39,16 @@ async function seedUsers() {
   for (let i = 1; i <= USER_COUNT; i++) {
     const username = `user${i}`;
 
-    const user = await prisma.user.create({
-      data: {
-        email: `${username}@example.com`,
-        username,
-        password_hash: hashPassword(username),
-        isAdmin: i === 1,
-      },
-    });
+  const user = await prisma.user.upsert({
+    where: { username },
+    update: {},
+    create: {
+      email: `${username}@example.com`,
+      username,
+      password_hash: hashPassword(username),
+      isAdmin: i === 1,
+    },
+  });
 
     users.push(user);
   }
