@@ -149,7 +149,7 @@ export default function UserSettingsPage() {
 
       const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
+      if (!res.ok || data.ok == false) {
         setMsgAvatar(data.error || "Upload failed");
         return;
       }
@@ -210,7 +210,7 @@ export default function UserSettingsPage() {
 
       const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         setMsgBasics(data.error || "Failed to save");
         return;
       }

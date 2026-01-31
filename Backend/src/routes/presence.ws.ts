@@ -7,13 +7,20 @@ import {
 
 export async function registerPresenceWs(server: FastifyInstance) {
   server.get("/ws/presence", { websocket: true }, (connection, req) => {
-    try {
+      const close = (reason: string) => connection.socket.close(1008, reason);
+      
       const token = (req.query as any)?.token;
-      if (!token) return connection.socket.close();
+      if (!token) 
+        return close("missing token");
+      let userId: number;
 
-      const payload = server.jwt.verify(token) as any;
-      const userId = Number(payload.userId);
-      if (!Number.isFinite(userId)) return connection.socket.close();
+      try {
+        const payload = server.jwt.verify(token) as any;
+        userId = Number(payload?.userId);
+        if (!Number.isFinite(userId)) return connection.socket.close("invalid token");
+      } catch {
+        return close("missing token");
+      }
 
       // track this exact connection
       addOnline(userId, connection);
@@ -30,8 +37,5 @@ export async function registerPresenceWs(server: FastifyInstance) {
         //  only goes offline when the LAST connection is removed
         removeOnline(userId, connection);
       });
-    } catch {
-      connection.socket.close();
-    }
   });
 }

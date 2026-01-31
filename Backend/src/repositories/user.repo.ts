@@ -133,15 +133,29 @@ export const UserRepo = {
     });
   },
 
-  async updateBasics(id: number, patch: { age?: number | null; location?: string | null }) {
-    const user = await prisma.user.update({
+async updateBasics(id: number, patch: { age?: number | null; location?: string | null }) {
+  const data: any = {};
+
+  if (patch.age !== undefined) data.age = patch.age;         // allows null to clear
+  if (patch.location !== undefined) data.location = patch.location;
+
+  if (Object.keys(data).length === 0) {
+    // nothing to update; return current user (or throw known error)
+    const user = await prisma.user.findUnique({
       where: { id },
-      data: {
-        age: patch.age ?? undefined,
-        location: patch.location ?? undefined,
-      },
       select: { id: true, email: true, username: true, isAdmin: true, age: true, location: true },
     });
+    if (!user) throw new Error("USER_NOT_FOUND");
     return user;
-  },
+  }
+
+  const user = await prisma.user.update({
+    where: { id },
+    data,
+    select: { id: true, email: true, username: true, isAdmin: true, age: true, location: true },
+  });
+
+  return user;
+}
+
 };

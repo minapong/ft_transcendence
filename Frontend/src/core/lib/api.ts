@@ -17,7 +17,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   const res = await fetch(url, { ...options, headers });
 
   if (res.status === 401 && token) {
-    console.warn("401 → auto logout");
+    // console.warn("401 → auto logout");
     logout(); // closes WS + clears auth + redirects
     return res;
   }

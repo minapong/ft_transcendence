@@ -26,7 +26,8 @@ export default function MePage() {
       try {
         // 1. Profile (/api/me)
         const profileRes = await apiFetch("/api/me");
-        if (!profileRes.ok) throw new Error("Failed to load profile");
+        if (!profileRes.ok)
+            throw new Error("Failed to load profile");
         const profileData = await profileRes.json();
         // console.log("[ME] /api/me JSON =", profileData);
        
