@@ -166,7 +166,7 @@ type StateEntry = { kind: "state"; value: any };
 ```tsx
 // Run once on mount
 useEffect(() => {
-  console.log("mounted");
+  // console.log("mounted");
   return () => console.log("cleanup");
 }, []);
 
