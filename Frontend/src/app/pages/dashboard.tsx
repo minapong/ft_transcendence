@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+console.log("dashboard useeffect");
   useEffect(() => {
     fetchLeaderboard();
     fetchHistory(1);
@@ -145,8 +145,8 @@ export default function Dashboard() {
                 return (
                   <tr key={match.id} className="border-b border-gray-700 hover:bg-gray-750">
                     <td className="p-4">
-                      {match.finished_at 
-                        ? new Date(match.finished_at).toLocaleString() 
+                      {match.finished_at
+                        ? new Date(match.finished_at).toLocaleString()
                         : "Ongoing"}
                     </td>
                     <td className="p-4 text-center">

@@ -184,19 +184,19 @@ export default function UserSettingsPage() {
     setMsgBasics(null);
 
     try {
-      
+
       const raw = ageRaw.trim();
- 
+
       if (raw !== "" && !/^\d+$/.test(raw)) {
         setMsgBasics("Age must be a whole number");
         return;
       }
       if (raw.length > 3) {
         setMsgBasics("Age must be 0-130");
-      return;
+        return;
       }
       const ageValueRaw = raw === "" ? null : Number(raw);
-      const  ageValue = unwrap(vAge(ageValueRaw));
+      const ageValue = unwrap(vAge(ageValueRaw));
 
       const body = {
         age: ageValue,
@@ -259,7 +259,7 @@ export default function UserSettingsPage() {
         <button
           type="button"
           onClick={() => navigate("/user/me")}
-          className="bg-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-600"
+          className="btn btn-secondary btn-sm"
         >
           Back
         </button>
@@ -319,7 +319,7 @@ export default function UserSettingsPage() {
                 type="button"
                 onClick={pickFile}
                 disabled={busyAvatar}
-                className="bg-blue-600 px-4 py-2 rounded font-bold hover:bg-blue-500 disabled:opacity-50"
+                className="btn btn-primary btn-sm"
               >
                 Choose image
               </button>
@@ -328,7 +328,7 @@ export default function UserSettingsPage() {
                 type="button"
                 onClick={uploadAvatar}
                 disabled={busyAvatar || !selected}
-                className="bg-green-600 px-4 py-2 rounded font-bold hover:bg-green-500 disabled:opacity-50"
+                className="btn btn-success btn-sm"
               >
                 {busyAvatar ? "Uploading..." : "Upload"}
               </button>
@@ -341,7 +341,7 @@ export default function UserSettingsPage() {
                   if (fileRef.current) fileRef.current.value = "";
                 }}
                 disabled={busyAvatar}
-                className="bg-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-600 disabled:opacity-50"
+                className="btn btn-secondary btn-sm"
               >
                 Clear
               </button>
@@ -369,11 +369,11 @@ export default function UserSettingsPage() {
               max={130}
               className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
               value={ageRaw}
-              onKeyDown={(e:any) => {
+              onKeyDown={(e: any) => {
                 if (["e", "E", "+", "-", "."].includes(e.key)) e.preventDefault();
               }}
-              onChange={(e:any) => {
-                setAgeRaw(e.target.value );
+              onChange={(e: any) => {
+                setAgeRaw(e.target.value);
                 if (msgBasics) setMsgBasics(null);
               }}
               placeholder="e.g. 21"
@@ -386,7 +386,7 @@ export default function UserSettingsPage() {
             <select
               className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
               value={location}
-              onChange={(e:any) => {
+              onChange={(e: any) => {
                 setLocation(e.target.value);
                 if (msgBasics) setMsgBasics(null);
               }}
@@ -407,7 +407,7 @@ export default function UserSettingsPage() {
             type="button"
             onClick={saveBasics}
             disabled={savingProfile}
-            className="bg-green-600 px-4 py-2 rounded font-bold hover:bg-green-500 disabled:opacity-50"
+            className="btn btn-success btn-sm"
           >
             {savingProfile ? "Saving..." : "Save"}
           </button>

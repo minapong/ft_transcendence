@@ -1,5 +1,4 @@
 
-
 let P4_GAME_WIDTH: number;
 let P4_GAME_HEIGHT: number;
 let P4_WALL_WIDTH: number;
@@ -47,6 +46,14 @@ interface Pong4PElements {
 
 export function pong4PLogic(
 	elements: Pong4PElements,
+	inputRef: {
+		current: {
+			w: boolean; s: boolean;
+			num6: boolean; num3: boolean;
+			v: boolean; b: boolean;
+			left: boolean; right: boolean;
+		}
+	},
 	onWin: (winner: "red" | "blue") => void
 ): () => void {
 	const {
@@ -167,7 +174,7 @@ export function pong4PLogic(
 				paddleX_Upper = paddleX_Upper * (380 / 280);
 				paddleX_Lower = paddleX_Lower * (380 / 280);
 				x = x * (380 / 280);
-				y = y * (380 / 280);
+				y = y * (280 / 280);
 			}
 			else if (state == 4) {
 				paddleY_Left = paddleY_Left * (380 / 500);
@@ -231,85 +238,58 @@ export function pong4PLogic(
 	let scoreRed = 0;
 	let scoreBlue = 0;
 
-	let wPressed = false, sPressed = false;
-	let num6Pressed = false, num3Pressed = false;
-	let leftPressed = false, rightPressed = false;
-	let vPressed = false, bPressed = false;
-
-	/* ---------------- event handlers ---------------- */
-
-	const keydownHandler = (e: KeyboardEvent) => {
-		if (e.key === 'w') wPressed = true;
-		if (e.key === 's') sPressed = true;
-		if (e.key === '6') num6Pressed = true;
-		if (e.key === '3') num3Pressed = true;
-		if (e.key === 'ArrowLeft') leftPressed = true;
-		if (e.key === 'ArrowRight') rightPressed = true;
-		if (e.key === 'v') vPressed = true;
-		if (e.key === 'b') bPressed = true;
-	};
-
-	const keyupHandler = (e: KeyboardEvent) => {
-		if (e.key === 'w') wPressed = false;
-		if (e.key === 's') sPressed = false;
-		if (e.key === '6') num6Pressed = false;
-		if (e.key === '3') num3Pressed = false;
-		if (e.key === 'ArrowLeft') leftPressed = false;
-		if (e.key === 'ArrowRight') rightPressed = false;
-		if (e.key === 'v') vPressed = false;
-		if (e.key === 'b') bPressed = false;
-	};
+	/* ---------------- touch handlers ---------------- */
 
 	leftP_up_But.addEventListener("pointerdown", e => {
-		wPressed = true;
+		inputRef.current.w = true;
 	});
 	leftP_up_But.addEventListener("pointerup", e => {
-		wPressed = false;
+		inputRef.current.w = false;
 	});
 	leftP_down_But.addEventListener("pointerdown", e => {
-		sPressed = true;
+		inputRef.current.s = true;
 	});
 	leftP_down_But.addEventListener("pointerup", e => {
-		sPressed = false;
+		inputRef.current.s = false;
 	});
 
 	rightP_up_But.addEventListener("pointerdown", e => {
-		num6Pressed = true;
+		inputRef.current.num6 = true;
 	});
 	rightP_up_But.addEventListener("pointerup", e => {
-		num6Pressed = false;
+		inputRef.current.num6 = false;
 	});
 	rightP_down_But.addEventListener("pointerdown", e => {
-		num3Pressed = true;
+		inputRef.current.num3 = true;
 	});
 	rightP_down_But.addEventListener("pointerup", e => {
-		num3Pressed = false;
+		inputRef.current.num3 = false;
 	});
 
 	topP_left_But.addEventListener("pointerdown", e => {
-		vPressed = true;
+		inputRef.current.v = true;
 	});
 	topP_left_But.addEventListener("pointerup", e => {
-		vPressed = false;
+		inputRef.current.v = false;
 	});
 	topP_right_But.addEventListener("pointerdown", e => {
-		bPressed = true;
+		inputRef.current.b = true;
 	});
 	topP_right_But.addEventListener("pointerup", e => {
-		bPressed = false;
+		inputRef.current.b = false;
 	});
 
 	bottomP_left_But.addEventListener("pointerdown", e => {
-		leftPressed = true;
+		inputRef.current.left = true;
 	});
 	bottomP_left_But.addEventListener("pointerup", e => {
-		leftPressed = false;
+		inputRef.current.left = false;
 	});
 	bottomP_right_But.addEventListener("pointerdown", e => {
-		rightPressed = true;
+		inputRef.current.right = true;
 	});
 	bottomP_right_But.addEventListener("pointerup", e => {
-		rightPressed = false;
+		inputRef.current.right = false;
 	});
 
 
@@ -319,8 +299,8 @@ export function pong4PLogic(
 		if (!isPaused) moveBall();
 	};
 
-	document.addEventListener('keydown', keydownHandler);
-	document.addEventListener('keyup', keyupHandler);
+	// Removed direct document.addEventListener calls. Inputs come from inputRef now.
+
 	pause.addEventListener('click', pauseHandler);
 
 	/* ---------------- game loop ---------------- */
@@ -409,24 +389,26 @@ export function pong4PLogic(
 	}
 
 	function movePaddles() {
+		const { w, s, num6, num3, v, b, left, right } = inputRef.current;
+
 		// Left paddle (vertical)
-		if (wPressed) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
-		if (sPressed) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
+		if (w) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
+		if (s) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
 		left_p.style.top = `${paddleY_Left}px`;
 
 		// Right paddle (vertical)
-		if (num6Pressed) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
-		if (num3Pressed) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
+		if (num6) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
+		if (num3) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
 		right_p.style.top = `${paddleY_Right}px`;
 
 		// Bottom paddle (horizontal)
-		if (leftPressed) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
-		if (rightPressed) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
+		if (left) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
+		if (right) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
 		lower_p.style.left = `${paddleX_Lower}px`;
 
 		// Top paddle (horizontal)
-		if (vPressed) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
-		if (bPressed) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
+		if (v) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
+		if (b) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
 		upper_p.style.left = `${paddleX_Upper}px`;
 	}
 
@@ -464,8 +446,8 @@ export function pong4PLogic(
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
 		window.removeEventListener("resize", handle_parameters);
-		document.removeEventListener('keydown', keydownHandler);
-		document.removeEventListener('keyup', keyupHandler);
+		// document.removeEventListener('keydown', keydownHandler);
+		// document.removeEventListener('keyup', keyupHandler);
 		pause.removeEventListener('click', pauseHandler);
 
 		onWin(winner);
@@ -483,8 +465,8 @@ export function pong4PLogic(
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
 		window.removeEventListener("resize", handle_parameters);
-		document.removeEventListener('keydown', keydownHandler);
-		document.removeEventListener('keyup', keyupHandler);
+		// document.removeEventListener('keydown', keydownHandler);
+		// document.removeEventListener('keyup', keyupHandler);
 		pause.removeEventListener('click', pauseHandler);
 	};
 }

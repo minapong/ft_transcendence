@@ -95,7 +95,9 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
               navigate("/");
             } else {
               console.log("[Header] Menu toggle: overlay open");
-              onMenuToggle();
+              setTimeout(() => {
+                onMenuToggle();
+              }, 300); // 300ms delay to match sidebar animation
             }
           }}
         >

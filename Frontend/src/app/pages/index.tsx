@@ -1,148 +1,331 @@
-import { useEffect, useRef } from 'Reactor';
+import { navigate, useEffect, useRef } from 'Reactor';
 import { apiFetch } from "@/core/lib/api";
+import { useScreen } from "@/app/hooks/useScreen";
+import Button from "@/app/components/ui/Button";
 
 // Crispy Pong Animation Component
 function PongAnimation() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const screen = useScreen();
+
 	useEffect(() => {
 		const canvas = canvasRef.current;
-		const frameId = { current: 0 }; // Mutable ref-like object for cleanup within this closure
+		const frameId = { current: 0 };
 
-		if (!canvas) {
-			console.log('Pong: Canvas ref missing on mount');
-			return;
-		}
+		if (!canvas) return;
 
-		const ctx = canvas.getContext('2d');
-		if (!ctx) {
-			console.error('Pong: Canvas context missing');
-			return;
-		}
+		const ctx = canvas.getContext('2d', { alpha: true }); // aplha true sets the window transparent
+		if (!ctx) return;
 
-		console.log('Pong: Mounted & Context acquired');
+		// --- PRE-RENDERING (Glows) ---
+		// User requested specialized Gradient Caching using translate
+		const ballRadius = 8;
+		const glowRadius = ballRadius * 3;
 
-		const resizeCanvas = () => {
-			canvas.width = window.innerWidth;
-			canvas.height = window.innerHeight;
-			ctx.clearRect(0, 0, canvas.width, canvas.height); // Force clear on resize
-		};
-		resizeCanvas();
-		window.addEventListener('resize', resizeCanvas);
+		// Create gradient once, centered at 0,0
+		const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowRadius);
+		glowGradient.addColorStop(0, 'rgba(0, 255, 255, 0.4)');
+		glowGradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
 
-		// Game state (re-initialized on every mount)
+		// --- OBJECT POOLING (Trail Ring Buffer) ---
+		const TRACE_LEN = 15;
+		const trailPool = new Array(TRACE_LEN).fill(0).map(() => ({ x: 0, y: 0, active: false }));
+		let trailHead = 0; // Points to the current writing index
+
+		// Game State
 		const ball = {
-			x: canvas.width / 2,
-			y: canvas.height / 2,
-			radius: 8,
-			speedX: 4,
-			speedY: 3,
-			maxSpeed: 8
+			x: 0, y: 0,
+			speedX: 4, speedY: 3,
+			radius: 8, maxSpeed: 8
 		};
 
-		// ... (paddles and other state omitted for brevity, they are local consts) ...
 		const paddleWidth = 12;
 		const paddleHeight = 120;
 		const paddleOffset = 60;
-		const leftPaddle = { x: paddleOffset, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, speed: 3.5 };
-		const rightPaddle = { x: canvas.width - paddleOffset - paddleWidth, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, speed: 3.5 };
-		const trail: { x: number; y: number; opacity: number }[] = [];
-		const maxTrailLength = 15;
 
-		// Helper AI (embedded to access local constants)
-		const updatePaddleAI = (paddle: typeof leftPaddle, targetY: number) => {
-			const paddleCenter = paddle.y + paddle.height / 2;
-			const diff = targetY - paddleCenter;
-			if (Math.abs(diff) > paddle.speed) paddle.y += diff > 0 ? paddle.speed : -paddle.speed;
-			paddle.y = Math.max(0, Math.min(canvas.height - paddle.height, paddle.y));
+		// AI State: add targetY
+		const leftPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 3.5, targetY: 0 };
+		const rightPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 3.5, targetY: 0 };
+
+		// Assets
+		const BALL_COLOR = '#ffffff';
+		const PADDLE_COLOR = '#00ffff';
+		const TRAIL_COLOR = '#00ffff';
+		const CENTER_LINE_COLOR = 'rgba(0, 255, 255, 0.4)';
+
+		// Logical dimensions for game logic (independent of physical pixels)
+		let logicalWidth = 0;
+		let logicalHeight = 0;
+
+		// --- AI PREDICTION ---
+		// Cheap O(1) reflection math
+		const predictBallY = (b: typeof ball, targetX: number, height: number) => {
+			const dx = targetX - b.x;
+			// Safe guard div by zero (shouldn't happen with moving ball)
+			if (Math.abs(b.speedX) < 0.1) return b.y;
+
+			const time = dx / b.speedX;
+			if (time < 0) return height / 2; // Ball moving away, return center
+
+			// Projected Y without walls
+			let finalY = b.y + b.speedY * time;
+
+			// Reflect against walls (0 and height)
+			// Effective bounce area is from radius to height-radius
+			const min = b.radius;
+			const max = height - b.radius;
+			const range = max - min;
+
+			// Normalized to 0-range
+			const relativeY = finalY - min;
+
+			// Number of bounces
+			const bounces = Math.floor(relativeY / range);
+
+			// Even bounces: relativeY % range
+			// Odd bounces: range - (relativeY % range)
+			// effectively: abs(relativeY % (2*range) - range) if we shift origin logic
+			// Simple iterative modulo logic:
+			let remainder = relativeY % (2 * range);
+			if (remainder < 0) remainder += 2 * range; // Handle negative math
+
+			// Triangle wave
+			if (remainder > range) {
+				return max - (remainder - range);
+			} else {
+				return min + remainder;
+			}
 		};
 
-		const animate = () => {
-			// Safety check: if canvas is gone or size is 0
-			if (!canvas || canvas.width === 0) return;
+		const recalculateTargets = () => {
+			// Add noise for imperfection (+/- 10px error range)
+			// User suggested 6, but 10 feels a bit more natural for "imperfect" without being bad.
+			// Let's stick to user's suggestion scale but maybe slightly tuned.
+			const noise = (Math.random() - 0.5) * 20;
 
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			// If ball moving Left, predict Left Paddle. Right Paddle goes to center or stays?
+			// Let's make Right Paddle return to center when idle for "human" feel, or just stay put.
+			// User said "Move paddle toward that (intercept)". Implied idle behavior is up to us.
+			// Let's make idle = center for better gameplay readiness.
 
-			// Update ball
+			if (ball.speedX < 0) {
+				leftPaddle.targetY = predictBallY(ball, leftPaddle.x + leftPaddle.width + ball.radius, logicalHeight) + noise; // Hit right side of left paddle
+				rightPaddle.targetY = logicalHeight / 2 - rightPaddle.height / 2;
+			} else {
+				rightPaddle.targetY = predictBallY(ball, rightPaddle.x - ball.radius, logicalHeight) + noise; // Hit left side of right paddle
+				leftPaddle.targetY = logicalHeight / 2 - leftPaddle.height / 2;
+			}
+		};
+
+		const handleResize = () => {
+			const dpr = window.devicePixelRatio || 1;
+			logicalWidth = window.innerWidth;
+			logicalHeight = window.innerHeight;
+
+			// Set physical dimensions via scaling
+			canvas.width = logicalWidth * dpr;
+			canvas.height = logicalHeight * dpr;
+
+			// CSS dimensions ensure it fits the window
+			canvas.style.width = logicalWidth + 'px';
+			canvas.style.height = logicalHeight + 'px';
+
+			// Scale drawing context so we can use logical coordinates
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+			leftPaddle.x = paddleOffset;
+			rightPaddle.x = logicalWidth - paddleOffset - paddleWidth;
+
+			// Init/Reset positions on first resize or if needed
+			if (ball.x === 0 && ball.y === 0) {
+				ball.x = logicalWidth / 2;
+				ball.y = logicalHeight / 2;
+				leftPaddle.y = logicalHeight / 2 - paddleHeight / 2;
+				rightPaddle.y = logicalHeight / 2 - paddleHeight / 2;
+				// Initial prediction
+				recalculateTargets();
+			}
+		};
+
+		handleResize();
+
+		// Smooth LERP behavior to reduce jitter and look more organic
+		const updateAI = (p: typeof leftPaddle) => {
+			// Target center
+			let target = p.targetY;
+
+			// We predicted Ball Center Y. Paddle needs to align its center to that.
+			// So Paddle Y = Ball Y - Paddle Height / 2
+			// But check if our predict function returned ball center or paddle top?
+			// It returned ball Y.
+			target = target - p.height / 2;
+
+			// Clamp target to bounds
+			const maxPos = logicalHeight - p.height;
+			if (target < 0) target = 0;
+			if (target > maxPos) target = maxPos;
+
+			// Lerp factor (0.08 at 120Hz is responsive but smooth)
+			const lerp = 0.08;
+			p.y += (target - p.y) * lerp;
+
+			// Snap if very close to avoid constant micro-calcs (optional, but saves dirty bits)
+			if (Math.abs(target - p.y) < 0.5) p.y = target;
+
+			// Hard Clamp
+			if (p.y < 0) p.y = 0;
+			else if (p.y > maxPos) p.y = maxPos;
+		};
+
+		// --- FIXED TIMESTEP LOGIC ---
+		const updatePhysics = () => {
+			// Logic
 			ball.x += ball.speedX;
 			ball.y += ball.speedY;
 
-			// Trail
-			trail.push({ x: ball.x, y: ball.y, opacity: 1 });
-			if (trail.length > maxTrailLength) trail.shift();
-
-			// Wall Collisions
-			if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+			if (ball.y < ball.radius) {
+				ball.y = ball.radius;
 				ball.speedY = -ball.speedY;
-				ball.y = ball.y - ball.radius < 0 ? ball.radius : canvas.height - ball.radius;
+			} else if (ball.y > logicalHeight - ball.radius) {
+				ball.y = logicalHeight - ball.radius;
+				ball.speedY = -ball.speedY;
 			}
 
-			// Paddle Collisions (Simplified logic)
-			const hitLeft = ball.x - ball.radius < leftPaddle.x + leftPaddle.width && ball.x + ball.radius > leftPaddle.x && ball.y > leftPaddle.y && ball.y < leftPaddle.y + leftPaddle.height;
-			const hitRight = ball.x + ball.radius > rightPaddle.x && ball.x - ball.radius < rightPaddle.x + rightPaddle.width && ball.y > rightPaddle.y && ball.y < rightPaddle.y + rightPaddle.height;
+			// Collision
+			let hit = false;
+			let isLeft = false;
 
-			if (hitLeft || hitRight) {
+			// Optimization: Only check near paddles
+			if (ball.speedX < 0 && ball.x < leftPaddle.x + leftPaddle.width + ball.radius) {
+				if (ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + leftPaddle.height) {
+					hit = true; isLeft = true;
+				}
+			} else if (ball.speedX > 0 && ball.x > rightPaddle.x - ball.radius) {
+				if (ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + rightPaddle.height) {
+					hit = true; isLeft = false;
+				}
+			}
+
+			if (hit) {
 				ball.speedX = -ball.speedX;
-				const paddle = hitLeft ? leftPaddle : rightPaddle;
-				const hitPos = (ball.y - paddle.y) / paddle.height - 0.5;
+				const p = isLeft ? leftPaddle : rightPaddle;
+				const hitPos = (ball.y - p.y) / p.height - 0.5;
 				ball.speedY += hitPos * 2;
+
 				ball.speedX *= 1.05; ball.speedY *= 1.05;
-				const speed = Math.sqrt(ball.speedX ** 2 + ball.speedY ** 2);
-				if (speed > ball.maxSpeed) { ball.speedX = (ball.speedX / speed) * ball.maxSpeed; ball.speedY = (ball.speedY / speed) * ball.maxSpeed; }
-				ball.x = hitLeft ? leftPaddle.x + leftPaddle.width + ball.radius : rightPaddle.x - ball.radius;
+
+				const sqSpeed = ball.speedX * ball.speedX + ball.speedY * ball.speedY;
+				if (sqSpeed > ball.maxSpeed * ball.maxSpeed) {
+					const scale = ball.maxSpeed / Math.sqrt(sqSpeed);
+					ball.speedX *= scale; ball.speedY *= scale;
+				}
+
+				if (isLeft) ball.x = p.x + p.width + ball.radius;
+				else ball.x = p.x - ball.radius;
+
+				// RECALCULATE TARGETS ON HIT
+				recalculateTargets();
 			}
 
-			// Reset
-			if (ball.x < -50 || ball.x > canvas.width + 50) {
-				ball.x = canvas.width / 2; ball.y = canvas.height / 2;
-				ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4; ball.speedY = (Math.random() - 0.5) * 4;
-				trail.length = 0;
+			if (ball.x < -50 || ball.x > logicalWidth + 50) {
+				ball.x = logicalWidth / 2; ball.y = logicalHeight / 2;
+				ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 4;
+				ball.speedY = (Math.random() - 0.5) * 4;
+				for (let k = 0; k < TRACE_LEN; k++) trailPool[k].active = false;
+
+				// RECALCULATE TARGETS ON RESET
+				recalculateTargets();
 			}
 
-			updatePaddleAI(leftPaddle, ball.y);
-			updatePaddleAI(rightPaddle, ball.y);
+			updateAI(leftPaddle);
+			updateAI(rightPaddle);
 
-			// Resize updates
-			leftPaddle.x = paddleOffset;
-			rightPaddle.x = canvas.width - paddleOffset - paddleWidth;
+			// Update Trail (Ring Buffer)
+			const tNode = trailPool[trailHead];
+			tNode.x = ball.x;
+			tNode.y = ball.y;
+			tNode.active = true;
+			trailHead = (trailHead + 1) % TRACE_LEN;
+		};
 
-			// Draw Trail
-			trail.forEach((point, index) => {
-				const opacity = (index / trail.length) * 0.8;
-				ctx.fillStyle = `rgba(0, 255, 255, ${opacity})`;
-				ctx.beginPath(); ctx.arc(point.x, point.y, ball.radius * (index / trail.length), 0, Math.PI * 2); ctx.fill();
-			});
+		const draw = () => {
+			ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
-			// Draw Ball (Simplified glows for perf/rendering safety)
-			ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
-			// Glows
-			const outerGlow = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ball.radius * 3);
-			outerGlow.addColorStop(0, 'rgba(0, 255, 255, 0.4)'); outerGlow.addColorStop(1, 'rgba(0, 255, 255, 0)');
-			ctx.fillStyle = outerGlow; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius * 3, 0, Math.PI * 2); ctx.fill();
+			// DRAWING
 
-			// Draw Paddles
-			ctx.fillStyle = '#00ffff';
+			// Trail
+			ctx.fillStyle = TRAIL_COLOR;
+			for (let i = 1; i <= TRACE_LEN; i++) {
+				const idx = (trailHead - i + TRACE_LEN) % TRACE_LEN;
+				const node = trailPool[idx];
+				if (!node.active) break;
+
+				const opacity = 1.0 - (i / TRACE_LEN);
+				if (opacity <= 0) continue;
+
+				ctx.globalAlpha = opacity * 0.6;
+				ctx.beginPath();
+				const r = ball.radius * opacity;
+				ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+				ctx.fill();
+			}
+			ctx.globalAlpha = 1.0;
+
+			// Ball & Glow
+			// User Pattern: Create gradient once (0,0), translate to position to draw
+			ctx.save();
+			ctx.translate(ball.x, ball.y);
+			ctx.fillStyle = glowGradient;
+			ctx.beginPath();
+			ctx.arc(0, 0, glowRadius, 0, Math.PI * 2);
+			ctx.fill();
+
+			// Draw Core (at 0,0 relative to translation)
+			ctx.fillStyle = BALL_COLOR;
+			ctx.beginPath();
+			ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.restore();
+
+			// Paddles
+			ctx.fillStyle = PADDLE_COLOR;
 			ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
 			ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
 
-			// Draw center line - bright cyan
-			ctx.setLineDash([10, 15]);
-			ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)'; // Bright cyan
+			// Center Line
+			ctx.strokeStyle = CENTER_LINE_COLOR;
 			ctx.lineWidth = 3;
+			ctx.setLineDash([10, 15]);
 			ctx.beginPath();
-			ctx.moveTo(canvas.width / 2, 0);
-			ctx.lineTo(canvas.width / 2, canvas.height);
+			ctx.moveTo(logicalWidth / 2, 0);
+			ctx.lineTo(logicalWidth / 2, logicalHeight);
 			ctx.stroke();
 			ctx.setLineDash([]);
+		};
 
-			// Loop
+		let lastTime = performance.now();
+		let accumulator = 0;
+		const step = 1000 / 120; // 120 FPS Physics
+
+		const animate = (now: number) => {
+			accumulator += now - lastTime;
+			lastTime = now;
+
+			// Limit accumulator to avoid "spiral of death" if frame rate drops deeply
+			if (accumulator > 100) accumulator = 100;
+
+			while (accumulator >= step) {
+				updatePhysics();
+				accumulator -= step;
+			}
+
+			draw();
 			frameId.current = requestAnimationFrame(animate);
 		};
 
 		frameId.current = requestAnimationFrame(animate);
-
+		console.log("index page useeffect")
 		return () => {
-			console.log('Pong: Unmounting, canceling frame', frameId.current);
-			window.removeEventListener('resize', resizeCanvas);
 			if (frameId.current) cancelAnimationFrame(frameId.current);
 		};
 	});
@@ -307,37 +490,21 @@ export default function App() {
 					{/* Smart CTAs - replacing dumb "PLAY NOW" */}
 					<div className="flex flex-col sm:flex-row gap-4 items-center">
 						{/* Primary: Quick Play */}
-						<button
-							className="group fx-energy energy-high relative px-12 py-4 rounded-xl text-xl font-bold tracking-wide
-								transition-all duration-300 ease-out
-								hover:scale-105 active:scale-98
-								focus-visible:outline-2 focus-visible:outline-offset-4"
-							style={{
-								background: 'var(--color-accent)',
-								color: '#000000',
-								boxShadow: `
-									0 20px 40px rgba(0, 0, 0, 0.35),
-									inset 0 1px 0 rgba(255, 255, 255, 0.3)
-								`,
-								outlineColor: 'var(--color-accent)'
-							}}
+						<Button
+							variant="hero"
+							size="xl"
+							href="/game/pre_match_scene"
 						>
 							Quick Play
-						</button>
+						</Button>
 
 						{/* Secondary: Choose Mode */}
-						<button
-							className="px-8 py-3 rounded-xl text-base font-medium
-								transition-all duration-200
-								hover:scale-105 active:scale-95"
-							style={{
-								background: 'var(--color-surface)',
-								color: 'var(--color-primary)',
-								border: '1px solid var(--color-border-soft)'
-							}}
+						<Button
+							variant="secondary"
+							size="lg"
 						>
 							Choose Mode
-						</button>
+						</Button>
 					</div>
 
 					{/* Live signal - ONE line, creates urgency */}

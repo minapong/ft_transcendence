@@ -1,0 +1,39 @@
+/**
+ * Layout Utilities
+ * 
+ * Single-purpose layout utility classes.
+ * Non-themed, structural helpers.
+ */
+
+.u-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.u-flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.u-flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.u-grid-center {
+    display: grid;
+    place-items: center;
+}
+
+.u-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}

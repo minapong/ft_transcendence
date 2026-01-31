@@ -1,6 +1,6 @@
 import { getAuth } from "@/core/lib/auth";
 import { apiFetch } from "@/core/lib/api";
-import {useState, useEffect, navigate} from "Reactor"
+import { useState, useEffect, navigate } from "Reactor"
 import { vTournamentName } from "@/core/lib/input/validators";
 import { unwrap } from "@/core/lib/input/unwrap";
 
@@ -9,12 +9,12 @@ export default function TournamentPage() {
 	const auth = getAuth();
 	const user = auth?.user;
 
-//   if (!isAdmin) console.log("user is not admin");
-  const [tournament, setTournament] = useState(null);
-  const [max_players, setMax_players] = useState(4);
-  const [tournamentNameRaw, setTournamentName] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+	//   if (!isAdmin) console.log("user is not admin");
+	const [tournament, setTournament] = useState(null);
+	const [max_players, setMax_players] = useState(4);
+	const [tournamentNameRaw, setTournamentName] = useState("");
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
 
 	const isAdmin = user?.isAdmin || false;
 
@@ -60,40 +60,40 @@ export default function TournamentPage() {
 			// Silent fail on refresh — don't show error banner for refresh
 		}
 	};
-	
+
 	const handleCreateTournament = async () => {
-		
+
 		if (max_players === 0) {
 			setError("Please select number of players");
 			return;
 		}
-		let name:string;
+		let name: string;
 		try {
 			name = unwrap(vTournamentName(tournamentNameRaw));
-		} catch (e: any){
+		} catch (e: any) {
 			setError(e.message);
 			return;
 		}
 
 		try {
-		const res = await apiFetch("/api/tournament/create", {
-			method: "POST",
-			// headers: { "Content-Type": "application/json" }, //apiFetch sets same header
-			body: JSON.stringify({ name, max_players  }),
-     	});
+			const res = await apiFetch("/api/tournament/create", {
+				method: "POST",
+				// headers: { "Content-Type": "application/json" }, //apiFetch sets same header
+				body: JSON.stringify({ name, max_players }),
+			});
 
-		const data = await res.json();
-		if (!res.ok) {
-			setError(data.error || "Failed to create tournament");
-			return;
-     	}
+			const data = await res.json();
+			if (!res.ok) {
+				setError(data.error || "Failed to create tournament");
+				return;
+			}
 
-		setTournament(data.tournament);
-		setError("");
+			setTournament(data.tournament);
+			setError("");
 		} catch {
-		setError("Network error creating tournament");
-    }
-  };
+			setError("Network error creating tournament");
+		}
+	};
 
 	const handleRegister = async () => {
 		if (!tournament) return;
@@ -113,7 +113,7 @@ export default function TournamentPage() {
 		} catch {
 			setError("Network error registering");
 		}
-};
+	};
 
 	const handleStartTournament = async () => {
 		if (!tournament) return;
@@ -140,7 +140,7 @@ export default function TournamentPage() {
 			<div className="bg-gray-900 text-white min-h-screen flex items-center justify-center">
 				<div className="text-center">
 					<p className="text-xl mb-4">Please login to join tournament.</p>
-					<button onClick={() => navigate("/auth/login")} className="bg-blue-500 px-6 py-3 rounded text-xl">
+					<button onClick={() => navigate("/auth/login")} className="btn btn-primary btn-lg">
 						Go to Login
 					</button>
 				</div>
@@ -200,7 +200,7 @@ export default function TournamentPage() {
 					</div>
 					<button
 						onClick={handleCreateTournament}
-						className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded font-semibold transition"
+						className="btn btn-primary btn-md"
 					>
 						Create Tournament
 					</button>
@@ -226,7 +226,7 @@ export default function TournamentPage() {
 					{isAdmin && tournament.state === "waiting" && (tournament.registeredPlayers?.length || 0) === (tournament?.max_players ?? max_players) && (
 						<button
 							onClick={handleStartTournament}
-							className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded font-semibold transition w-full"
+							className="btn btn-primary btn-md w-full"
 						>
 							Start Tournament
 						</button>
@@ -235,7 +235,7 @@ export default function TournamentPage() {
 					{canRegister && (
 						<button
 							onClick={handleRegister}
-							className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-semibold transition w-full"
+							className="btn btn-success btn-md w-full"
 						>
 							Join Tournament
 						</button>
