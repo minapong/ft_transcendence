@@ -337,5 +337,212 @@ else
   YLW "wscat not installed; skipping WS tests. Install: npm i -g wscat"
 fi
 
+# --------------------------------------------------------------------
+# INSANE MODE
+# --------------------------------------------------------------------
+if [[ "${INSANE:-0}" == "1" ]]; then
+  echo "=== INSANE MODE (bounded fuzz) ==="
+
+  # Helper: send raw bytes as request body
+  req_raw() {
+    local name="$1"; shift
+    local tmp_body
+    tmp_body="$(mktemp)"
+    local code
+    code="$(curl -sS -o "$tmp_body" -w "%{http_code}" "$@" || echo "000")"
+    if [[ "$code" == "200" || "$code" == "201" ]]; then
+      GRN "PASS [$code] $name"
+    else
+      local snippet
+      snippet="$(tr '\n' ' ' < "$tmp_body" | head -c 240)"
+      RED "FAIL [$code] $name :: $snippet"
+    fi
+    rm -f "$tmp_body"
+  }
+
+  # Build nasty strings (bounded)
+  NUL=$'\0'
+  CR=$'\r'
+  LF=$'\n'
+  TAB=$'\t'
+  RTL=$'\u202E'         # right-to-left override
+  ZWJ=$'\u200D'
+  EMOJI="🤯"
+  VERYLONG="$(python3 - <<'PY'
+print("A"*20000)
+PY
+)"
+  # Deep-ish nesting but bounded (avoid DoS)
+  DEEPNEST="$(python3 - <<'PY'
+n=200
+s="1"
+for _ in range(n):
+  s='{"a":'+s+'}'
+print(s)
+PY
+)"
+
+  # Invalid UTF-8 bytes payload (C3 28 is invalid)
+  INVALID_UTF8_FILE="$(mktemp)"
+  printf '\xC3\x28{"email":"x","password":"y"}' > "$INVALID_UTF8_FILE"
+
+  # -------------------------
+  # AUTH LOGIN insanity
+  # -------------------------
+  echo "--- insane: auth/login ---"
+  req "login body is true" \
+    -X POST "$API_BASE/api/auth/login" -H "Content-Type: application/json" -d 'true'
+
+  req "login body is []" \
+    -X POST "$API_BASE/api/auth/login" -H "Content-Type: application/json" -d '[]'
+
+  req "login body is empty string json" \
+    -X POST "$API_BASE/api/auth/login" -H "Content-Type: application/json" -d '""'
+
+  req "login email contains NUL/CRLF/RTL/emoji" \
+    -X POST "$API_BASE/api/auth/login" -H "Content-Type: application/json" \
+    -d "$(json "{\"email\":\"a${NUL}b${CR}${LF}c${RTL}${EMOJI}@x.com\",\"password\":\"p\"}")"
+
+  req "login huge strings" \
+    -X POST "$API_BASE/api/auth/login" -H "Content-Type: application/json" \
+    -d "{\"email\":\"${VERYLONG}@x.com\",\"password\":\"${VERYLONG}\"}"
+
+  req "login deep nesting body" \
+    -X POST "$API_BASE/api/auth/login" -H "Content-Type: application/json" -d "$DEEPNEST"
+
+  req_raw "login invalid utf8 bytes body" \
+    -X POST "$API_BASE/api/auth/login" -H "Content-Type: application/json" \
+    --data-binary @"$INVALID_UTF8_FILE"
+
+  # Duplicate headers and weird content-type (some servers crash here)
+  req "login duplicated content-type headers" \
+    -X POST "$API_BASE/api/auth/login" \
+    -H "Content-Type: application/json" \
+    -H "Content-Type: text/plain" \
+    -d '{"email":"x","password":"y"}'
+
+  req "login content-type json with charset + weird spaces" \
+    -X POST "$API_BASE/api/auth/login" \
+    -H "Content-Type: application/json ; charset=utf-8" \
+    -d '{"email":"x","password":"y"}'
+
+  # -------------------------
+  # AUTH SIGNUP insanity
+  # -------------------------
+  echo "--- insane: auth/signup ---"
+  req "signup body is null" \
+    -X POST "$API_BASE/api/auth/signup" -H "Content-Type: application/json" -d 'null'
+
+  req "signup extremely large numeric types" \
+    -X POST "$API_BASE/api/auth/signup" -H "Content-Type: application/json" \
+    -d '{"email":"x@y.com","username":"u","password":"p","age":1e309}'
+
+  req "signup username with sql-ish + unicode controls" \
+    -X POST "$API_BASE/api/auth/signup" -H "Content-Type: application/json" \
+    -d "$(json "{\"email\":\"z@z.com\",\"username\":\"' OR 1=1 -- ${RTL}${ZWJ}${EMOJI}\",\"password\":\"pass123\"}")"
+
+  # -------------------------
+  # SETTINGS insanity
+  # -------------------------
+  echo "--- insane: settings/profile ---"
+  req "settings body is [] (no token)" \
+    -X PATCH "$API_BASE/api/me/profile" -H "Content-Type: application/json" -d '[]'
+
+  if [[ -n "$TOKEN" ]]; then
+    req "settings body is [] (token)" \
+      -X PATCH "$API_BASE/api/me/profile" -H "$(auth_header)" -H "Content-Type: application/json" -d '[]'
+
+    req "settings age is NaN string" \
+      -X PATCH "$API_BASE/api/me/profile" -H "$(auth_header)" -H "Content-Type: application/json" -d '{"age":"NaN"}'
+
+    req "settings age is Infinity string" \
+      -X PATCH "$API_BASE/api/me/profile" -H "$(auth_header)" -H "Content-Type: application/json" -d '{"age":"Infinity"}'
+
+    req "settings age is huge exponent" \
+      -X PATCH "$API_BASE/api/me/profile" -H "$(auth_header)" -H "Content-Type: application/json" -d '{"age":1e309}'
+
+    req "settings location with null bytes and CRLF" \
+      -X PATCH "$API_BASE/api/me/profile" -H "$(auth_header)" -H "Content-Type: application/json" \
+      -d "$(json "{\"location\":\"Dubai${NUL}${CR}${LF}Injected\"}")"
+  fi
+
+  # -------------------------
+  # FRIENDS insanity
+  # -------------------------
+  echo "--- insane: friends ---"
+  if [[ -n "$TOKEN" ]]; then
+    req "friends request body is number" \
+      -X POST "$API_BASE/api/friends/request" -H "$(auth_header)" -H "Content-Type: application/json" -d '123'
+
+    req "friends request username extremely long" \
+      -X POST "$API_BASE/api/friends/request" -H "$(auth_header)" -H "Content-Type: application/json" \
+      -d "$(json "{\"username\":\"$VERYLONG\"}")"
+
+    req "friends request username with path traversal" \
+      -X POST "$API_BASE/api/friends/request" -H "$(auth_header)" -H "Content-Type: application/json" \
+      -d '{"username":"../../../../etc/passwd"}'
+
+    req "friends accept id huge integer" \
+      -X POST "$API_BASE/api/friends/accept/999999999999999999999" -H "$(auth_header)"
+
+    req "friends delete id negative" \
+      -X DELETE "$API_BASE/api/friends/-1" -H "$(auth_header)"
+  fi
+
+  # -------------------------
+  # PRESENCE insanity
+  # -------------------------
+  echo "--- insane: presence ---"
+  req "presence status id is float" \
+    "$API_BASE/api/presence/status/1.23"
+
+  req "presence status id is scientific" \
+    "$API_BASE/api/presence/status/1e3"
+
+  if [[ -n "$TOKEN" ]]; then
+    req "presence status id is huge" \
+      "$API_BASE/api/presence/status/999999999999999999999" -H "$(auth_header)"
+  fi
+
+  # -------------------------
+  # AVATAR insanity
+  # -------------------------
+  echo "--- insane: avatar ---"
+  if [[ -n "$TOKEN" ]]; then
+    # Corrupt multipart (wrong boundary)
+    req_raw "avatar corrupt multipart boundary" \
+      -X POST "$API_BASE/api/me/avatar" -H "$(auth_header)" \
+      -H "Content-Type: multipart/form-data; boundary=----abc" \
+      --data-binary $'------zzz\r\nContent-Disposition: form-data; name="avatar"; filename="a.png"\r\nContent-Type: image/png\r\n\r\nxxxx\r\n------zzz--\r\n'
+
+    # Multipart with multiple files (should ignore/deny safely)
+    req "avatar multiple files same field" \
+      -X POST "$API_BASE/api/me/avatar" -H "$(auth_header)" \
+      -F "avatar=@$TMP_TXT;type=text/plain" \
+      -F "avatar=@$TMP_TXT;type=text/plain"
+  fi
+
+  # -------------------------
+  # WS insanity (optional)
+  # -------------------------
+  echo "--- insane: ws/presence ---"
+  if command -v wscat >/dev/null 2>&1; then
+    # invalid query encoding
+    wscat -c "ws://localhost:8080/ws/presence?token=%FF%FE%FD" -w 1 >/dev/null 2>&1 || true
+    # massive token (bounded)
+    BIGTOK="$(python3 - <<'PY'
+print("a"*5000)
+PY
+)"
+    wscat -c "ws://localhost:8080/ws/presence?token=$BIGTOK" -w 1 >/dev/null 2>&1 || true
+  fi
+
+  rm -f "$INVALID_UTF8_FILE" 2>/dev/null || true
+
+  GRN "INSANE MODE DONE."
+fi
+
+
 echo
 GRN "DONE. Any FAIL lines above mean you still have a non-200/201 response or a crash path."
+
