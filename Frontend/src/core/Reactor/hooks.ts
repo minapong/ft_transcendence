@@ -5,6 +5,7 @@
 // ==========================================
 
 // Import renderRoute directly to avoid circular dependency through index
+// Import renderRoute directly to avoid circular dependency through index
 import { renderRoute } from "./render";
 
 // Hook entry types
@@ -115,6 +116,10 @@ export function useState<T>(initial: T): [T, (v: T | ((prev: T) => T)) => void] 
 		const next = typeof newValue === "function"
 			? (newValue as (v: T) => T)(entry!.value)
 			: newValue;
+
+		// Optimization: Don't re-render if state hasn't changed
+		if (next === entry!.value) return;
+
 		entry!.value = next;
 		renderRoute(stateKey);
 	};
@@ -203,6 +208,45 @@ export function useCallback<T extends (...args: any[]) => any>(fn: T, deps: any[
 		return fn;
 	}
 	return prev.fn;
+}
+
+// -----------------------------
+//  useEventListener 
+// -----------------------------
+export function useEventListener<T extends Event>(
+	eventName: string,
+	handler: (event: T) => void,
+	element: EventTarget = window
+) {
+	// Create a ref that stores handler
+	const savedHandler = useRef(handler);
+
+	// Update ref.current value if handler changes.
+	useEffect(() => {
+		savedHandler.current = handler;
+	}, [handler]);
+
+	useEffect(() => {
+		// Define the listening target
+		const targetElement: EventTarget = element;
+		if (!(targetElement && targetElement.addEventListener)) {
+			return;
+		}
+
+		// Create event listener that calls handler function stored in ref
+		const eventListener: EventListener = (event: Event) => {
+			if (savedHandler.current) {
+				(savedHandler.current as (event: Event) => void)(event);
+			}
+		};
+
+		targetElement.addEventListener(eventName, eventListener);
+
+		// Remove event listener on cleanup
+		return () => {
+			targetElement.removeEventListener(eventName, eventListener);
+		};
+	}, [eventName, element]);
 }
 
 function depsChanged(prev: any[] | undefined, next: any[]) {

@@ -1,5 +1,5 @@
 import { closeModal, getCurrentModal, resolveModalRenderer } from "./modal";
-import { useEffect, useRef } from "./hooks";
+import { useEffect, useRef, useEventListener } from "./hooks";
 import type { ModalDescriptor } from "./modal";
 
 const FOCUSABLE_SELECTOR = [
@@ -47,42 +47,49 @@ export default function ModalRoot() {
       panel;
     preferred?.focus();
 
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeModal();
-        return;
-      }
-      if (event.key !== "Tab") return;
-      const focusables = getFocusableElements(panel);
-      if (focusables.length === 0) {
-        event.preventDefault();
-        panel.focus();
-        return;
-      }
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      const active = document.activeElement as HTMLElement | null;
-      if (event.shiftKey) {
-        if (!active || active === first || !panel.contains(active)) {
-          event.preventDefault();
-          last.focus();
-        }
-        return;
-      }
-      if (!active || active === last || !panel.contains(active)) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
+    // Removed direct listener attachment here
 
-    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("keydown", onKey);
+      // document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflowRef.current;
       lastFocusRef.current?.focus();
     };
   }, [modal]);
+
+
+  useEventListener("keydown", (event: KeyboardEvent) => {
+    if (!modal) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+    if (event.key !== "Tab") return;
+
+    const focusables = getFocusableElements(panel);
+    if (focusables.length === 0) {
+      event.preventDefault();
+      panel.focus();
+      return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (event.shiftKey) {
+      if (!active || active === first || !panel.contains(active)) {
+        event.preventDefault();
+        last.focus();
+      }
+      return;
+    }
+    if (!active || active === last || !panel.contains(active)) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
 
   const isOpen = Boolean(modal);
   const layerClass = isOpen ? "modal-layer modal-layer--open" : "modal-layer";

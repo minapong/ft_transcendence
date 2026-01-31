@@ -1,0 +1,13 @@
+/**
+ * Base Global Styles
+ * 
+ * Global element styles and custom Tailwind variants.
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+    body {
+        @apply bg-background text-foreground;
+    }
+}

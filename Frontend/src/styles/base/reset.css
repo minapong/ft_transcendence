@@ -1,0 +1,9 @@
+/**
+ * Base Reset Styles
+ * 
+ * Minimal reset for browser normalization.
+ */
+
+* {
+    /* Removed global border rule to fix flicker */
+}

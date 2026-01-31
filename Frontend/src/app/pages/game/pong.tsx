@@ -1,5 +1,5 @@
 import { pongLogic } from "@/core/engine/pong_logic";
-import { navigate, useEffect, useRef, useLocation, openModal, closeModal } from "Reactor";
+import { navigate, useEffect, useRef, useLocation, openModal, closeModal, useEventListener } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 
 // Define types for navigation state
@@ -43,6 +43,14 @@ export default function PongGame() {
     const scoreLeftRef = useRef<HTMLSpanElement>(null);
     const scoreRightRef = useRef<HTMLSpanElement>(null);
 
+    // Input state ref - Source of Truth for game, updated via hooks
+    const inputRef = useRef({
+        w: false,
+        s: false,
+        up: false,
+        down: false
+    });
+
     let p1Name: string;
     let p2Name: string;
     let useAI = false;
@@ -73,6 +81,35 @@ export default function PongGame() {
         navigate("/game/single_game", { replace: true });
         return null;
     }
+
+    // --- INPUT HANDLING ---
+    // Update ref directly. No re-renders needed for input updates (Game Loop reads ref).
+
+    // KeyDown Handler
+    useEventListener("keydown", (e: KeyboardEvent) => {
+        if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
+
+        if (e.key === "w") inputRef.current.w = true;
+        if (e.key === "s") inputRef.current.s = true;
+        if (e.key === "ArrowUp") inputRef.current.up = true;
+        if (e.key === "ArrowDown") inputRef.current.down = true;
+
+        // Prevent scrolling with arrows
+        if (["ArrowUp", "ArrowDown", " "].includes(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    // KeyUp Handler
+    useEventListener("keyup", (e: KeyboardEvent) => {
+        if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
+
+        if (e.key === "w") inputRef.current.w = false;
+        if (e.key === "s") inputRef.current.s = false;
+        if (e.key === "ArrowUp") inputRef.current.up = false;
+        if (e.key === "ArrowDown") inputRef.current.down = false;
+    });
+
 
     useEffect(() => {
         // Ensure all refs are populated
@@ -142,11 +179,13 @@ export default function PongGame() {
                         });
                 }
             },
+            inputRef, // <--- Pass the live input ref to the engine
             useAI,
             aiDifficulty
         );
 
         // Cleanup function runs on unmount
+        // Note: useEventListener cleans itself up! We only need to clean up the game loop here.
         return () => {
             cleanup();
         };

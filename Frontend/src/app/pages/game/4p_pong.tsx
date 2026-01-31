@@ -1,6 +1,6 @@
 import { pong4PLogic } from "@/core/engine/4p_pong_logic";
-import { navigate, useEffect, useRef } from "Reactor";
-import "@/styles/pong4game.css"
+import { navigate, useEffect, useRef, useEventListener } from "Reactor";
+import "@/styles/game/pong-4player.css"
 
 type NavState4P = {
 	mode: "4p";
@@ -41,6 +41,41 @@ export default function Pong4PGame() {
 	const bottomLeftBtnRef = useRef<HTMLButtonElement>(null);
 	const bottomRightBtnRef = useRef<HTMLButtonElement>(null);
 
+	// Input Ref
+	const inputRef = useRef({
+		w: false, s: false,
+		num6: false, num3: false,
+		v: false, b: false,
+		left: false, right: false
+	});
+
+	// Event Listeners
+	useEventListener("keydown", (e: KeyboardEvent) => {
+		const k = e.key;
+		if (k === 'w') inputRef.current.w = true;
+		if (k === 's') inputRef.current.s = true;
+		if (k === '6') inputRef.current.num6 = true;
+		if (k === '3') inputRef.current.num3 = true;
+		if (k === 'ArrowLeft') inputRef.current.left = true;
+		if (k === 'ArrowRight') inputRef.current.right = true;
+		if (k === 'v') inputRef.current.v = true;
+		if (k === 'b') inputRef.current.b = true;
+
+		if (['ArrowLeft', 'ArrowRight', ' '].includes(k)) e.preventDefault();
+	});
+
+	useEventListener("keyup", (e: KeyboardEvent) => {
+		const k = e.key;
+		if (k === 'w') inputRef.current.w = false;
+		if (k === 's') inputRef.current.s = false;
+		if (k === '6') inputRef.current.num6 = false;
+		if (k === '3') inputRef.current.num3 = false;
+		if (k === 'ArrowLeft') inputRef.current.left = false;
+		if (k === 'ArrowRight') inputRef.current.right = false;
+		if (k === 'v') inputRef.current.v = false;
+		if (k === 'b') inputRef.current.b = false;
+	});
+
 	useEffect(() => {
 		const overlay = document.getElementById("winnerOverlay")!;
 		const text = document.getElementById("winnerText")!;
@@ -78,6 +113,7 @@ export default function Pong4PGame() {
 				scoreRedDisplay: scoreRedRef.current,
 				scoreBlueDisplay: scoreBlueRef.current
 			},
+			inputRef,
 			(winner) => {
 				text.textContent = winner === "red" ? "Red Team Wins! 🏆" : "Blue Team Wins! 🏆";
 				overlay.classList.remove("hidden");
@@ -126,26 +162,26 @@ export default function Pong4PGame() {
 
 				{/* LEFT CONTROLS */}
 				<div id="left_btns" className="absolute -left-20 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-					<button ref={leftUpBtnRef} id="left-up" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬆</button>
-					<button ref={leftDownBtnRef} id="left-down" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬇</button>
+					<button ref={leftUpBtnRef} id="left-up" className="btn btn-game">⬆</button>
+					<button ref={leftDownBtnRef} id="left-down" className="btn btn-game">⬇</button>
 				</div>
 
 				{/* RIGHT CONTROLS */}
 				<div id="right_btns" className="absolute -right-20 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-					<button ref={rightUpBtnRef} id="right-up" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬆</button>
-					<button ref={rightDownBtnRef} id="right-down" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬇</button>
+					<button ref={rightUpBtnRef} id="right-up" className="btn btn-game">⬆</button>
+					<button ref={rightDownBtnRef} id="right-down" className="btn btn-game">⬇</button>
 				</div>
 
 				{/* TOP CONTROLS */}
 				<div id="top_btns" className="absolute -top-20 left-1/2 -translate-x-1/2 flex gap-2">
-					<button ref={topLeftBtnRef} id="top-left" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬅</button>
-					<button ref={topRightBtnRef} id="top-right" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">➡</button>
+					<button ref={topLeftBtnRef} id="top-left" className="btn btn-game">⬅</button>
+					<button ref={topRightBtnRef} id="top-right" className="btn btn-game">➡</button>
 				</div>
 
 				{/* BOTTOM CONTROLS */}
 				<div id="bottom_btns" className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex gap-2">
-					<button ref={bottomLeftBtnRef} id="bottom-left" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">⬅</button>
-					<button ref={bottomRightBtnRef} id="bottom-right" className="w-10 h-10 bg-white/80 text-2xl font-bold rounded-lg active:bg-white">➡</button>
+					<button ref={bottomLeftBtnRef} id="bottom-left" className="btn btn-game">⬅</button>
+					<button ref={bottomRightBtnRef} id="bottom-right" className="btn btn-game">➡</button>
 				</div>
 				<div
 					id="game_board"

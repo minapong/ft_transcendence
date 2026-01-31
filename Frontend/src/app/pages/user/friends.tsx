@@ -61,20 +61,20 @@ export default function FriendsPage() {
 
 
   async function sendRequest() {
-    let username:string;
+    let username: string;
 
     try {
       username = unwrap(vUsername(newUsernameRaw));
-    } catch (e:any){
+    } catch (e: any) {
       setMsg(e.message);
       return;
     }
 
-    const res = await apiFetch(`/api/friends/request`, { 
+    const res = await apiFetch(`/api/friends/request`, {
       method: "POST",
-      body: JSON.stringify({username}),
+      body: JSON.stringify({ username }),
     });
-    
+
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setMsg(data.error || "Failed to send request");
@@ -118,7 +118,7 @@ export default function FriendsPage() {
         <button
           type="button"
           onClick={reload}
-          className="bg-gray-700 px-4 py-2 rounded font-bold hover:bg-gray-600"
+          className="btn btn-secondary btn-sm"
         >
           Refresh
         </button>
@@ -139,7 +139,7 @@ export default function FriendsPage() {
           <button
             type="button"
             onClick={sendRequest}
-            className="bg-blue-600 px-4 py-2 rounded font-bold hover:bg-blue-500"
+            className="btn btn-primary btn-sm"
           >
             Send request
           </button>
@@ -175,21 +175,21 @@ export default function FriendsPage() {
                       <button
                         type="button"
                         onClick={() => navigate(`user/${r.from.id}`)}
-                        className="bg-gray-700 px-3 py-2 rounded font-bold hover:bg-gray-600"
+                        className="btn btn-secondary btn-sm"
                       >
                         View
                       </button>
                       <button
                         type="button"
                         onClick={() => accept(r.from.id)}
-                        className="bg-green-600 px-3 py-2 rounded font-bold hover:bg-green-500"
+                        className="btn btn-success btn-sm"
                       >
                         Accept
                       </button>
                       <button
                         type="button"
                         onClick={() => remove(r.from.id)}
-                        className="bg-red-600 px-3 py-2 rounded font-bold hover:bg-red-500"
+                        className="btn btn-danger btn-sm"
                       >
                         Decline
                       </button>
@@ -222,7 +222,7 @@ export default function FriendsPage() {
                       <button
                         type="button"
                         onClick={() => navigate(`user/${r.to.id}`)}
-                        className="bg-gray-700 px-3 py-2 rounded font-bold hover:bg-gray-600"
+                        className="btn btn-secondary btn-sm"
                       >
                         View
                       </button>
@@ -230,7 +230,7 @@ export default function FriendsPage() {
                       <button
                         type="button"
                         onClick={() => remove(r.to.id)}
-                        className="bg-red-600 px-3 py-2 rounded font-bold hover:bg-red-500"
+                        className="btn btn-danger btn-sm"
                       >
                         {r.status === "pending" ? "Cancel" : "Remove"}
                       </button>

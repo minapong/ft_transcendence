@@ -1,0 +1,239 @@
+/**
+ * Visual Effect Utilities
+ * 
+ * Utility classes for visual effects like energy layers, headers, logos, and hero elements.
+ * These consume design tokens for colors, motion, and elevation.
+ */
+
+/* ========================================
+   Energy Layer Infrastructure
+   ======================================== */
+
+/**
+ * Visual Physics Rules:
+ * 1. IDENTITY Energy: Drifting, ambient, brand-signature (Cyan/Teal). Use for Layout & CTAs.
+ * 2. STATUS Energy: Static, sharp, mechanical (Red/Warnings). NEVER drift or pulse.
+ * 3. EXCLUSIVITY: Only one prominent animation (usually Layout level) per viewport.
+ */
+
+.fx-energy {
+    position: relative;
+    isolation: isolate;
+}
+
+.fx-energy::before {
+    content: "";
+    position: absolute;
+    inset: var(--energy-bleed);
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(120% 120% at 50% 40%,
+            var(--color-energy-start) 0%,
+            var(--color-energy-end) 55%,
+            transparent 100%);
+    filter: blur(var(--energy-blur));
+    opacity: var(--fx-energy-opacity, 0);
+    transition: opacity 0.4s var(--ease-smooth);
+    animation: energy-ambient-drift var(--energy-duration) var(--ease-linear) infinite;
+    will-change: opacity, transform;
+}
+
+@keyframes energy-ambient-drift {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.03);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fx-energy::before {
+        animation: none;
+    }
+}
+
+/* Energy Intensity Utilities (to be used with Tailwind group/state) */
+.energy-low {
+    --fx-energy-opacity: var(--energy-opacity-low);
+}
+
+.energy-focus {
+    --fx-energy-opacity: 0.6;
+    --energy-duration: 60s;
+}
+
+.energy-medium {
+    --fx-energy-opacity: var(--energy-opacity-medium);
+}
+
+.energy-high {
+    --fx-energy-opacity: var(--energy-opacity-high);
+}
+
+.energy-critical {
+    --fx-energy-opacity: var(--energy-opacity-critical);
+}
+
+.energy-none {
+    --fx-energy-opacity: 0;
+}
+
+.energy-static::before {
+    animation: none !important;
+}
+
+/* ========================================
+   Header Surface Effects
+   ======================================== */
+
+.header-surface {
+    background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-mid), var(--color-gradient-end));
+    border-bottom: 1px solid var(--color-border-soft);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--blur-lg));
+}
+
+.header-surface::before,
+.header-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.header-surface::before {
+    background: linear-gradient(120deg,
+            color-mix(in srgb, var(--color-accent) 18%, transparent) 0%,
+            transparent 30%,
+            color-mix(in srgb, var(--color-accent-soft) 20%, transparent) 60%,
+            transparent 100%);
+    filter: blur(var(--blur-xl));
+    opacity: 0.55;
+}
+
+.header-surface::after {
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.04) 0, transparent 35%),
+        radial-gradient(circle at 80% 10%, rgba(0, 0, 0, 0.3) 0, transparent 40%);
+    mix-blend-mode: soft-light;
+    opacity: 0.5;
+}
+
+.fx-veil {
+    background: linear-gradient(120deg,
+            color-mix(in srgb, var(--color-accent) 18%, transparent) 0%,
+            transparent 30%,
+            color-mix(in srgb, var(--color-accent-soft) 20%, transparent) 60%,
+            transparent 100%);
+    filter: blur(var(--blur-xl));
+    opacity: 0.55;
+}
+
+.fx-noise {
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.04) 0, transparent 35%),
+        radial-gradient(circle at 80% 10%, rgba(0, 0, 0, 0.3) 0, transparent 40%);
+    mix-blend-mode: soft-light;
+    opacity: 0.5;
+}
+
+/* ========================================
+   Logo Effects
+   ======================================== */
+
+.logo-mark {
+    border: 1px solid var(--color-border-strong);
+    background:
+        radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--color-accent) 45%, transparent), transparent 55%),
+        conic-gradient(from 150deg,
+            color-mix(in srgb, var(--color-danger) 20%, transparent),
+            color-mix(in srgb, var(--color-gradient-mid) 70%, transparent) 60%,
+            color-mix(in srgb, var(--color-gradient-start) 60%, transparent));
+    box-shadow:
+        0 10px 25px color-mix(in srgb, var(--color-accent) 18%, transparent),
+        inset 0 0 12px color-mix(in srgb, var(--color-accent-soft) 35%, transparent);
+}
+
+.logo-mark::after {
+    content: "";
+    position: absolute;
+    inset: -10px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 70% 20%, color-mix(in srgb, var(--color-accent-soft) 40%, transparent), transparent 40%);
+    filter: blur(18px);
+    opacity: 0.65;
+}
+
+.logo-mark--ominous {
+    background:
+        radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--color-accent) 40%, transparent), transparent 55%),
+        conic-gradient(from 160deg,
+            color-mix(in srgb, var(--color-danger) 25%, transparent),
+            color-mix(in srgb, var(--color-gradient-mid) 70%, transparent) 60%,
+            color-mix(in srgb, var(--color-gradient-start) 55%, transparent));
+}
+
+.logo-orb {
+    position: absolute;
+    inset: 28%;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle at 30% 30%, var(--color-accent), color-mix(in srgb, var(--color-accent-soft) 45%, transparent));
+    box-shadow: 0 0 16px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+.logo-scratch {
+    position: absolute;
+    width: 90%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-danger) 55%, transparent), transparent);
+    transform: rotate(-12deg);
+    opacity: 0.9;
+    filter: drop-shadow(0 0 8px rgba(255, 31, 75, 0.4));
+}
+
+/* ========================================
+   Hero Effects
+   ======================================== */
+
+.hero-orb {
+    filter: blur(var(--blur-3xl));
+}
+
+.hero-orb--accent {
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+.hero-orb--accent-soft {
+    background: color-mix(in srgb, var(--color-accent-soft) 20%, transparent);
+}
+
+.hero-sheen {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 55%);
+    opacity: 0.7;
+}
+
+.hero-blood {
+    background: radial-gradient(circle at 20% 20%, var(--color-danger-soft), transparent 55%);
+    opacity: 0.7;
+}
+
+.hero-line {
+    background: linear-gradient(180deg, var(--color-accent), var(--color-accent-soft), transparent);
+}
+
+.hero-divider {
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-soft), transparent);
+}
+
+.hero-node {
+    background: rgba(0, 0, 0, 0.3);
+    filter: blur(1px);
+}

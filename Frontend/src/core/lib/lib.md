@@ -117,6 +117,6 @@ disconnectPresenceWS();
 | `api.ts` | Authenticated HTTP requests with auto-logout on 401 |
 | `auth.ts` | Auth state management (localStorage + events) |
 | `presence.ts` | WebSocket connection for real-time presence |
-| `useAuth.ts` | React hook for reactive auth state |
+| `useAuth.ts` | Reactor hook for reactive auth state |
 
 The `lib` folder serves as the foundation for authentication flow, API communication, and real-time features throughout the frontend application.

@@ -21,6 +21,7 @@ declare module "Reactor" {
 	export function initRouter(): void;
 	export function renderRoute(triggerKey?: string): void;
 	export function resetHooks(key: string, opts?: { track?: boolean }): void;
+	export function useEventListener<T extends Event>(eventName: string, handler: (event: T) => void, element?: EventTarget): void;
 
 	// Modal functions
 	export type ModalRenderer<T = unknown> = (payload: T) => HTMLElement;
