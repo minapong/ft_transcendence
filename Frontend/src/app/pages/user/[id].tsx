@@ -95,7 +95,7 @@ export default function ProfilePage(props?: { id?: string }) {
       });
       const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         setFriendMsg(data.error || "Failed to send request");
         return;
       }
@@ -118,7 +118,7 @@ export default function ProfilePage(props?: { id?: string }) {
       const res = await apiFetch(`/api/friends/${id}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
+      if (!res.ok || data.ok === false) {
         setFriendMsg(data.error || "Failed to remove");
         return;
       }

@@ -55,11 +55,8 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		Promise.all([asideAnim.finished, backdropAnim?.finished || Promise.resolve()]).then(() => {
 			isClosingRef.current = false;
 			if (setIsOverlayOpen) {
-				// Add a delay before closing overlay to allow animation to finish
-				setTimeout(() => {
-					setIsOverlayOpen(false);
-					window.dispatchEvent(new Event("sidebar:resume"));
-				}, 300); // 300ms matches animation duration
+				setIsOverlayOpen(false);
+				window.dispatchEvent(new Event("sidebar:resume"));
 			} else {
 				window.dispatchEvent(new Event("sidebar:resume"));
 			}
