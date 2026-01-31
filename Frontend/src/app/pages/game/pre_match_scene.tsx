@@ -1,6 +1,6 @@
 import { useState } from "Reactor";
 import { navigate } from "Reactor";
-import { GameType, Difficulty } from "@/core/engine/match_config";
+import { Intent, IntentPresets, IntentType, Difficulty } from "@/core/engine/match_intent";
 
 /**
  * This screen exists to prepare and commit a match.
@@ -8,29 +8,32 @@ import { GameType, Difficulty } from "@/core/engine/match_config";
  * It is a commit gate.
  */
 export default function PreMatchScene() {
-  const [activeMode, setActiveMode] = useState<GameType>("AI");
-  const [declarations, setDeclarations] = useState<{
-    p1: string;
-    p2: string;
-    p3: string;
-    p4: string;
-    difficulty: Difficulty;
-  }>({
-    p1: "Player 1",
-    p2: "Player 2",
-    p3: "Player 3",
-    p4: "Player 4",
-    difficulty: "medium",
-  });
+  // Single source of truth: Intent
+  const [intent, setIntent] = useState<Intent>(IntentPresets.AI());
 
+  // Switch intent type
+  const switchIntent = (type: IntentType) => {
+    setIntent(IntentPresets[type]());
+  };
+
+  // Update intent slots
+  const updateSlot = (slotKey: keyof Intent["slots"], value: string) => {
+    setIntent({ ...intent, slots: { ...intent.slots, [slotKey]: value } });
+  };
+
+  // Update intent ruleset
+  const updateRuleset = (key: string, value: any) => {
+    setIntent({ ...intent, ruleset: { ...intent.ruleset, [key]: value } });
+  };
+
+  // Commit the intent
   const commitMatch = () => {
-    // Declarations -> Conditions
-    if (activeMode === "AI") {
-      navigate("/game/pong", { state: { mode: "ai", p1: declarations.p1, difficulty: declarations.difficulty } });
-    } else if (activeMode === "2P") {
-      navigate("/game/pong", { state: { mode: "2p", p1: declarations.p1, p2: declarations.p2 } });
-    } else if (activeMode === "4P") {
-      navigate("/game/4p_pong", { state: { mode: "4p", p1: declarations.p1, p2: declarations.p2, p3: declarations.p3, p4: declarations.p4 } });
+    if (intent.type === "AI") {
+      navigate("/game/pong", { state: { mode: "ai", p1: intent.slots.p1, difficulty: intent.ruleset.difficulty } });
+    } else if (intent.type === "2P") {
+      navigate("/game/pong", { state: { mode: "2p", p1: intent.slots.p1, p2: intent.slots.p2 } });
+    } else if (intent.type === "4P") {
+      navigate("/game/4p_pong", { state: { mode: "4p", p1: intent.slots.p1, p2: intent.slots.p2, p3: intent.slots.p3, p4: intent.slots.p4 } });
     }
   };
 
@@ -62,8 +65,8 @@ export default function PreMatchScene() {
                     {["AI", "2P", "4P"].map((m) => (
                       <button
                         key={m}
-                        onClick={() => setActiveMode(m as GameType)}
-                        className={`transition-all duration-300 ${activeMode === m ? "text-accent font-bold scale-105" : "hover:text-slate-300"}`}
+                        onClick={() => switchIntent(m as IntentType)}
+                        className={`transition-all duration-300 ${intent.type === m ? "text-accent font-bold scale-105" : "hover:text-slate-300"}`}
                       >
                         {m} Intent
                       </button>
@@ -83,38 +86,36 @@ export default function PreMatchScene() {
                         Active Intent
                       </p>
                       <p className="text-sm font-semibold text-accent-soft">
-                        {activeMode === "AI" && "Solo Trial"}
-                        {activeMode === "2P" && "Duel Protocol"}
-                        {activeMode === "4P" && "Squad Chaos"}
+                        {intent.label}
                       </p>
                     </div>
                   </div>
 
                   <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.02] text-primary">
-                    {activeMode === "AI" && "Survive the Machine"}
-                    {activeMode === "2P" && "Face Your Rival"}
-                    {activeMode === "4P" && "Team Warfare"}
+                    {intent.type === "AI" && "Survive the Machine"}
+                    {intent.type === "2P" && "Face Your Rival"}
+                    {intent.type === "4P" && "Team Warfare"}
                   </h1>
 
                   <div className="h-px w-24 hero-divider" />
 
                   {/* Participant Slots & Declarations */}
                   <div className="space-y-4 max-w-lg min-h-[120px]">
-                    {activeMode === "AI" && (
+                    {intent.type === "AI" && (
                       <>
                         <div className="flex flex-col gap-1">
                           <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Participant Slot</label>
                           <input
-                            value={declarations.p1}
-                            onChange={(e) => setDeclarations({ ...declarations, p1: e.target.value })}
+                            value={intent.slots.p1}
+                            onChange={(e) => updateSlot('p1', e.target.value)}
                             className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none transition-all focus:bg-accent/5"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
                           <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Threat Level</label>
                           <select
-                            value={declarations.difficulty}
-                            onChange={(e) => setDeclarations({ ...declarations, difficulty: e.target.value as Difficulty })}
+                            value={intent.ruleset.difficulty}
+                            onChange={(e) => updateRuleset('difficulty', e.target.value as Difficulty)}
                             className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none appearance-none transition-all focus:bg-accent/5"
                           >
                             <option value="easy">Easy</option>
@@ -125,13 +126,13 @@ export default function PreMatchScene() {
                       </>
                     )}
 
-                    {activeMode === "2P" && (
+                    {intent.type === "2P" && (
                       <>
                         <div className="flex flex-col gap-1">
                           <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Participant Slot 1</label>
                           <input
-                            value={declarations.p1}
-                            onChange={(e) => setDeclarations({ ...declarations, p1: e.target.value })}
+                            value={intent.slots.p1}
+                            onChange={(e) => updateSlot('p1', e.target.value)}
                             className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none transition-all focus:bg-accent/5"
                           />
                         </div>
@@ -139,27 +140,27 @@ export default function PreMatchScene() {
                         <div className="flex flex-col gap-1">
                           <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Participant Slot 2</label>
                           <input
-                            value={declarations.p2}
-                            onChange={(e) => setDeclarations({ ...declarations, p2: e.target.value })}
+                            value={intent.slots.p2}
+                            onChange={(e) => updateSlot('p2', e.target.value)}
                             className="bg-black/30 border border-border-soft rounded px-3 py-2 text-primary focus:border-accent outline-none transition-all focus:bg-accent/5"
                           />
                         </div>
                       </>
                     )}
 
-                    {activeMode === "4P" && (
+                    {intent.type === "4P" && (
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <div className="text-[10px] uppercase tracking-widest text-accent">Team Alpha</div>
                           <input
-                            value={declarations.p1}
-                            onChange={(e) => setDeclarations({ ...declarations, p1: e.target.value })}
+                            value={intent.slots.p1}
+                            onChange={(e) => updateSlot('p1', e.target.value)}
                             className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
                             placeholder="Slot 1"
                           />
                           <input
-                            value={declarations.p2}
-                            onChange={(e) => setDeclarations({ ...declarations, p2: e.target.value })}
+                            value={intent.slots.p2}
+                            onChange={(e) => updateSlot('p2', e.target.value)}
                             className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
                             placeholder="Slot 2"
                           />
@@ -167,14 +168,14 @@ export default function PreMatchScene() {
                         <div className="space-y-2">
                           <div className="text-[10px] uppercase tracking-widest text-red-400">Team Omega</div>
                           <input
-                            value={declarations.p3}
-                            onChange={(e) => setDeclarations({ ...declarations, p3: e.target.value })}
+                            value={intent.slots.p3}
+                            onChange={(e) => updateSlot('p3', e.target.value)}
                             className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
                             placeholder="Slot 3"
                           />
                           <input
-                            value={declarations.p4}
-                            onChange={(e) => setDeclarations({ ...declarations, p4: e.target.value })}
+                            value={intent.slots.p4}
+                            onChange={(e) => updateSlot('p4', e.target.value)}
                             className="w-full bg-black/30 border border-border-soft rounded px-3 py-2 text-primary outline-none transition-all focus:bg-accent/5"
                             placeholder="Slot 4"
                           />
