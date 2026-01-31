@@ -292,15 +292,17 @@ function PongAnimation() {
 			ctx.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
 			ctx.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
 
-			// Center Line
+			// Center Line (Subtle Spine)
 			ctx.strokeStyle = CENTER_LINE_COLOR;
-			ctx.lineWidth = 3;
-			ctx.setLineDash([10, 15]);
+			ctx.lineWidth = 1;
+			ctx.globalAlpha = 0.1; // Barely visible
+			ctx.setLineDash([4, 8]); // Tighter dash
 			ctx.beginPath();
 			ctx.moveTo(logicalWidth / 2, 0);
 			ctx.lineTo(logicalWidth / 2, logicalHeight);
 			ctx.stroke();
 			ctx.setLineDash([]);
+			ctx.globalAlpha = 1.0;
 		};
 
 		let lastTime = performance.now();
@@ -429,10 +431,9 @@ export default function App() {
 
 				{/* Subtle animated noise overlay */}
 				<div
-					className="absolute inset-0 opacity-[0.03]"
+					className="absolute inset-0"
 					style={{
-						backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' /%3E%3C/svg%3E")`,
-						animation: 'noiseDrift 30s linear infinite'
+						background: `linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.8) 100%)`
 					}}
 				/>
 			</div>
