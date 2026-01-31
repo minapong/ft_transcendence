@@ -35,17 +35,18 @@ function PongAnimation() {
 		// Game State
 		const ball = {
 			x: 0, y: 0,
-			speedX: 4, speedY: 3,
-			radius: 8, maxSpeed: 8
+			speedX: 2, speedY: 1.5, // Slowed down
+			radius: 8, maxSpeed: 4  // Slowed down
 		};
 
 		const paddleWidth = 12;
 		const paddleHeight = 120;
 		const paddleOffset = 60;
 
-		// AI State: add targetY
-		const leftPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 3.5, targetY: 0 };
-		const rightPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 3.5, targetY: 0 };
+		// AI State: add targetY (Slowed down)
+		const leftPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 1.5, targetY: 0 };
+		// AI State: add targetY (Slowed down)
+		const rightPaddle = { x: 0, y: 0, width: paddleWidth, height: paddleHeight, speed: 1.5, targetY: 0 };
 
 		// Assets
 		const BALL_COLOR = '#ffffff';
@@ -335,33 +336,148 @@ function PongAnimation() {
 			ref={canvasRef}
 			style={{
 				position: 'fixed',
-				top: 0,
-				left: 0,
-				width: '100%',
-				height: '100%',
+				top: '5%',
+				left: '-15%', // Left bias
+				width: '120%', // Slightly wider to cover offset
+				height: '90%',
 				zIndex: 5,
-				opacity: 0.4,
+				opacity: 0.25, // Increased visibility
+				filter: 'blur(16px) saturate(0.6)', // Relaxed blur and higher sat
 				pointerEvents: 'none'
 			}}
 		/>
 	);
 }
 
+// Connect4 Ghost Component - signalling variety (Right Biased)
+function Connect4Ghost() {
+	return (
+		<div
+			style={{
+				position: 'fixed',
+				top: '10%',
+				right: '-10%', // Right bias
+				zIndex: 4,
+				display: 'flex',
+				flexDirection: 'column',
+				gap: '20px',
+				opacity: 0.25, // Increased visibility
+				filter: 'blur(30px) saturate(0.7)', // Relaxed blur and higher sat
+				pointerEvents: 'none',
+				transform: 'rotate(15deg)'
+			}}
+		>
+			<div className="w-[500px] h-[500px] rounded-full" style={{ background: '#facc15' }} />
+			<div className="w-[450px] h-[450px] rounded-full" style={{ background: '#ef4444' }} />
+		</div>
+	);
+}
+
+// Layer 2: Energy Flow - slow diagonal light bands
+function EnergyFlow() {
+	return (
+		<div
+			className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+			style={{ opacity: 0.05 }}
+		>
+			<div
+				className="absolute inset-[-100%] z-0"
+				style={{
+					background: `linear-gradient(45deg, 
+						transparent 45%, 
+						rgba(0, 255, 255, 0.4) 50%, 
+						transparent 55%)`,
+					backgroundSize: '200% 200%',
+					animation: 'energyFlow 60s linear infinite'
+				}}
+			/>
+		</div>
+	);
+}
+
+// Layer 3: Unifying Neutral Layer - Vignette & Grain
+function ArenaUnification() {
+	return (
+		<>
+			{/* Vignette - darkens edges, clears center */}
+			<div
+				className="fixed inset-0 z-[15] pointer-events-none"
+				style={{
+					background: 'radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.5) 100%)'
+				}}
+			/>
+			{/* Very subtle grain/noise */}
+			<div
+				className="fixed inset-0 z-[16] pointer-events-none opacity-[0.03]"
+				style={{
+					backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
+				}}
+			/>
+		</>
+	);
+}
+
+// Layer 4: Arena Particles - subtle chaos
+function ArenaParticles() {
+	const particles = Array.from({ length: 12 }).map((_, i) => ({
+		id: i,
+		size: Math.random() * 4 + 2,
+		top: `${Math.random() * 100}%`,
+		left: `${Math.random() * 100}%`,
+		delay: `${Math.random() * 10}s`,
+		duration: `${Math.random() * 20 + 10}s`,
+	}));
+
+	return (
+		<div className="fixed inset-0 pointer-events-none z-[2]">
+			{particles.map((p) => (
+				<div
+					key={p.id}
+					className="absolute rounded-full"
+					style={{
+						width: p.size,
+						height: p.size,
+						top: p.top,
+						left: p.left,
+						background: 'var(--color-accent)',
+						opacity: 0.15,
+						filter: 'blur(2px)',
+						animation: `particleDrift ${p.duration} ease-in-out infinite alternate,
+									particleFade ${p.duration} ease-in-out infinite alternate`,
+						animationDelay: p.delay
+					}}
+				/>
+			))}
+		</div>
+	);
+}
+
 export default function App() {
 	return (
 		<div className="min-h-screen w-full relative overflow-hidden isolation-isolate">
-			{/* Crispy Pong Animation */}
+			{/* Crispy Pong Animation (Backgrounded) */}
 			<PongAnimation />
 
-			{/* Animated gradient background - alive, not loud */}
+			{/* Connect4 Ghost Signal (Right Biased) */}
+			<Connect4Ghost />
+
+			{/* Layer 2: Energy Flow Signal */}
+			<EnergyFlow />
+
+			{/* Layer 3: Unifying Neutral Layer */}
+			<ArenaUnification />
+
+			{/* Layer 4: Arena Particles Chaos */}
+			<ArenaParticles />
+
+			{/* Layer 1: Deep Space Base (Static, calm) */}
 			<div
 				className="absolute inset-0 -z-10"
 				style={{
-					background: `linear-gradient(180deg, 
-						var(--color-start) 0%, 
-						var(--color-mid) 50%, 
-						var(--color-end) 100%)`,
-					animation: 'gradientShift 20s ease-in-out infinite'
+					background: `radial-gradient(circle at 50% 50%, 
+						var(--color-mid) 0%, 
+						var(--color-start) 100%)`,
+					animation: 'gradientPulse 15s ease-in-out infinite'
 				}}
 			>
 				{/* Faint grid drift - barely visible, echoes Pong court + Connect4 grid */}
@@ -523,11 +639,26 @@ export default function App() {
 
 			{/* CSS animations */}
 			<style>{`
-				@keyframes gradientShift {
-					0%, 100% { filter: hue-rotate(0deg) brightness(1); }
-					50% { filter: hue-rotate(5deg) brightness(0.95); }
+				@keyframes gradientPulse {
+					0%, 100% { filter: brightness(1); }
+					50% { filter: brightness(0.9); }
 				}
 				
+				@keyframes energyFlow {
+					0% { transform: translate(-25%, -25%); }
+					100% { transform: translate(25%, 25%); }
+				}
+
+				@keyframes particleDrift {
+					0% { transform: translate(0, 0); }
+					100% { transform: translate(30px, 30px); }
+				}
+
+				@keyframes particleFade {
+					0%, 100% { opacity: 0; }
+					50% { opacity: 0.15; }
+				}
+
 				@keyframes gridDrift {
 					0% { transform: translate(0, 0); }
 					100% { transform: translate(80px, 80px); }
