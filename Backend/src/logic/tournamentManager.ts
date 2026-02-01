@@ -21,6 +21,16 @@ import {
 
 import type { MatchDTO } from "../types/tournament.js";
 
+// helper function for true randonmess on shuffling.
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 // Create a tournament
 export async function createTournament(name: string, maxPlayers: number = 4) {
   // If an active/waiting tournament exists, reuse it
@@ -58,14 +68,14 @@ export async function startTournament(tournamentId: number) {
   if (tournament.state !== "waiting") throw new Error("Tournament already started");
 
   const maxPlayers = tournament.max_players || 4;
-  const players = await getRegisteredPlayers(tournamentId);
+  const players = shuffleArray(await getRegisteredPlayers(tournamentId));
 
   if (players.length !== maxPlayers) {
     throw new Error(`Cannot start tournament. Required ${maxPlayers}, but ${players.length} registered.`);
   }
 
   // Shuffle first round
-  const shuffled = [...players].sort(() => Math.random() - 0.5);
+  const shuffled = shuffleArray(players);
 
   const round = 1;
   let matchNumber = 1;

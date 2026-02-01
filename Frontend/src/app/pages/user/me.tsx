@@ -199,13 +199,12 @@ export default function MePage() {
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 mt-12 space-y-12">
         {/* 2. STATS GRID */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
           <StatCard
             label="Wins"
             value={stats?.wins ?? 0}
             icon={<span className="icon-[solar--cup-first-bold-duotone]" />}
             color="text-yellow-400"
-            trend="+2 this week"
           />
           <StatCard
             label="Win Rate"
@@ -226,8 +225,14 @@ export default function MePage() {
             icon={<span className="icon-[solar--crown-star-bold-duotone]" />}
             color="text-amber-400"
           />
-        </div>
 
+          <StatCard
+            label="XP"
+            value={stats?.totalScore ?? 0}
+            icon={<span className="icon-[solar--star-bold-duotone]" />}
+            color="text-purple-400"
+          />
+        </div>
         {/* 3. ACHIEVEMENTS */}
         <section>
           <div className="flex items-center justify-between mb-6">

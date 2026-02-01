@@ -155,14 +155,14 @@ async function seedMatches(users: { id: number }[]) {
       where: { user_id: winnerId },
       update: {
         wins: { increment: 1 },
-        total_score: { increment: 10 },
+        total_score: { increment: 1 },
         last_match_at: new Date(),
       },
       create: {
         user_id: winnerId,
         wins: 1,
         losses: 0,
-        total_score: 10,
+        total_score: 1,
         last_match_at: new Date(),
       },
     });
@@ -172,14 +172,14 @@ async function seedMatches(users: { id: number }[]) {
       where: { user_id: loserId },
       update: {
         losses: { increment: 1 },
-        total_score: { increment: 5 },
+        total_score: { increment: 0 },
         last_match_at: new Date(),
       },
       create: {
         user_id: loserId,
         wins: 0,
         losses: 1,
-        total_score: 5,
+        total_score: 0,
         last_match_at: new Date(),
       },
     });
@@ -256,11 +256,13 @@ async function seedTournament(users: { id: number }[]) {
   await prisma.statsUser.upsert({
     where: { user_id: champion },
     update: {
+      total_score: { increment: 5 },
       tournament_championships: { increment: 1 },
     },
     create: {
       user_id: champion,
       tournament_championships: 1,
+      total_score: 5,
     },
   });
 
