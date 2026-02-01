@@ -221,8 +221,10 @@ export default function PongGame() {
 
             </div>
 
+            <div className="relative flex items-center justify-center overflow-visible">
+
             {/* LEFT TOUCH CONTROLS */}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
+            <div className="absolute -left-15 sm:-left-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
                 <button
                     ref={leftUpBtnRef}
                     id="left-up"
@@ -233,6 +235,24 @@ export default function PongGame() {
                 <button
                     ref={leftDownBtnRef}
                     id="left-down"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                >
+                    ▼
+                </button>
+            </div>
+
+            {/* RIGHT TOUCH CONTROLS */}
+            <div className="absolute -right-15 sm:-right-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
+                <button
+                    ref={rightUpBtnRef}
+                    id="right-up"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                >
+                    ▲
+                </button>
+                <button
+                    ref={rightDownBtnRef}
+                    id="right-down"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
                     ▼
@@ -314,22 +334,6 @@ export default function PongGame() {
                 />
             </div>
 
-            {/* RIGHT TOUCH CONTROLS */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
-                <button
-                    ref={rightUpBtnRef}
-                    id="right-up"
-                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                >
-                    ▲
-                </button>
-                <button
-                    ref={rightDownBtnRef}
-                    id="right-down"
-                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                >
-                    ▼
-                </button>
             </div>
 
             {/* Pause button */}
