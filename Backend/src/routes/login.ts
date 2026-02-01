@@ -1,6 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
 import { AuthService } from "../services/auth.service.js"
 
+import { unwrap } from "../lib/input/unwrap.js";
+import { vEmail, vPasswordLogin } from "../lib/input/validators.js";
+
 type LoginBody = {
   email?: unknown;
   password?: unknown;
@@ -15,10 +18,17 @@ export async function registerLoginRoutes(server: FastifyInstance) {
     ) => {
       const body = (req.body ?? {}) as LoginBody;
 
-      const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-      const password = typeof body.password === "string" ? body.password : "";
+     let email: string;
+      let password: string;
 
-      if (!email || !password) {
+      try {
+        // Email normalized like signup (trim/lowercase/length + basic format)
+        email = unwrap(vEmail(body.email));
+
+        // Password : only length sanity check
+        password = unwrap(vPasswordLogin(body.password));
+      } catch {
+        // keep malformed input distinct from "wrong credentials"
         return reply.code(200).send({ ok: false, error: "Missing email or password" });
       }
 
@@ -27,20 +37,18 @@ export async function registerLoginRoutes(server: FastifyInstance) {
 
         const token = server.jwt.sign(
           { userId: user.id, email: user.email, isAdmin: user.isAdmin },
-          { expiresIn: "1h"}
+          { expiresIn: "1h" }
         );
 
         return reply.code(200).send({ ok: true, user, token });
       } catch (err: any) {
         const msg = String(err?.message ?? "");
-        // Map known login errors from AuthService
-        if (msg === "INVALID_CREDENTIALS") {
+
+        // Always generic to avoid account enumeration
+        if (msg === "INVALID_CREDENTIALS" || msg === "USER_NOT_FOUND") {
           return reply.code(200).send({ ok: false, error: "Invalid credentials" });
         }
-        if (msg === "USER_NOT_FOUND") {
-          return reply.code(200).send({ ok: false, error: "Invalid credentials" });
-        }
-        // console.error("LOGIN ERROR:", err);
+
         return reply.code(200).send({ ok: false, error: "Internal server error" });
       }
     }
