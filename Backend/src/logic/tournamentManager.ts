@@ -133,18 +133,18 @@ export async function advanceRound(tournamentId: number) {
 
 // Record match result
 export async function recordMatchResult(
-    matchId: number,
-    winnerId: number, 
-    scoreP1: number, 
-    scoreP2: number
-)  {
+  matchId: number,
+  winnerId: number,
+  scoreP1: number,
+  scoreP2: number
+) {
   const matchPlayers = await getMatchPlayers(matchId);
   const validIds = matchPlayers.map(p => p.id);
 
   if (!validIds.includes(winnerId)) throw new Error("Invalid winner for this match");
 
   await recordMatchWinner(matchId, winnerId, scoreP1, scoreP2);
-  
+
   // UPDATE USER STATS (both winner and loser)
   const winnerPlayer = matchPlayers.find(p => p.id === winnerId);
   const loserPlayer = matchPlayers.find(p => p.id !== winnerId);
