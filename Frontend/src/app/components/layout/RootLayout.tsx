@@ -10,16 +10,16 @@ export default function RootLayout({ children }) {
   const screen = useScreen();
   const sidebarMode = screen === "desktop" ? "static" : "overlay";
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSidebarHidden, setIsSidebarHidden] = useState(false);
 
   const pathname = useLocation();
 
-  // Reset states when switching between static and overlay
+  // Reset states when switching modes
   useEffect(() => {
     if (sidebarMode === "static") {
       setIsOverlayOpen(false);
     } else {
-      setIsCollapsed(false);
+      setIsSidebarHidden(false);
     }
   }, [sidebarMode]);
 
@@ -28,13 +28,13 @@ export default function RootLayout({ children }) {
   const handleToggle = () => {
     if (sidebarMode === "overlay") {
       if (isOverlayOpen) {
-        // Dispatch close and wait for animation via isOverlayOpen flipping to false
         window.dispatchEvent(new Event("sidebar:close"));
       } else {
         setIsOverlayOpen(true);
       }
     } else {
-      setIsCollapsed(v => !v);
+      // On desktop, toggle sidebar visibility
+      setIsSidebarHidden(v => !v);
     }
   };
 
@@ -50,10 +50,9 @@ export default function RootLayout({ children }) {
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar
           mode={sidebarMode}
-          isCollapsed={isCollapsed}
           isOverlayOpen={isOverlayOpen}
           setIsOverlayOpen={setIsOverlayOpen}
-          hidden={hideSidebar}
+          hidden={hideSidebar || (sidebarMode === "static" && isSidebarHidden)}
         />
 
         <main id="spa-root" className="flex-1 overflow-y-auto">

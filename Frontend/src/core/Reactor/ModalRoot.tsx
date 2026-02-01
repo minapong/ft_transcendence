@@ -106,7 +106,7 @@ export default function ModalRoot() {
     <div id="modal-root" className={layerClass} role="presentation">
       <div className="modal-backdrop" onClick={closeModal}></div>
       <div
-        className="modal-panel panel-surface panel-surface--heavy"
+        className={`modal-panel panel-surface panel-surface--heavy ${modal!.className ?? ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={modal!.label ?? modal!.type}
