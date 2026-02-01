@@ -19,6 +19,7 @@ let lastKnownPath = "";
 export function renderRoute(triggerKey?: string) {
   const rawPath = window.location.pathname;
   const normalizedPath = normalizePath(rawPath);
+  console.log("🎨 renderRoute:", normalizedPath, triggerKey ? `(trigger: ${triggerKey})` : "");
 
   // Detect layout swap BEFORE updating lastKnownPath
   const prevIsSpecial = lastKnownPath ? isSpecialLayout(lastKnownPath) : null;

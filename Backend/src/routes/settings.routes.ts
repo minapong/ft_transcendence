@@ -1,9 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { requireAuth } from "../plugins/auth.guard.js";
-// import { SettingsService } from "../services/settings.service.js";
-import { UserRepo } from "../repositories/user.repo.js";
+import { ProfileService } from "../services/profile.service.js";
 
-// settings.routes.ts
 type Body = { age?: number | null; location?: string | null };
 
 export async function registerProfileSettingsRoutes(server: FastifyInstance) {
@@ -22,27 +20,29 @@ export async function registerProfileSettingsRoutes(server: FastifyInstance) {
         return reply.code(200).send({ ok: false, error: "No fields to update" });
       }
 
-      const ageRaw = hasAge ? (body.age as any) : undefined;
-      const locRaw = hasLoc ? (body.location as any) : undefined;
-
-      const age =
-        ageRaw === undefined ? undefined : ageRaw === null ? null : Number(ageRaw);
-
-      const location =
-        locRaw === undefined ? undefined : locRaw === null ? null : String(locRaw);
-
-      const patch: { age?: number | null; location?: string | null } = {};
-      if (age !== undefined) patch.age = age;
-      if (location !== undefined) patch.location = location;
-
+     
       try {
-        const user = await UserRepo.updateBasics(userId, patch);
+        const user = await ProfileService.updateBasics(
+          userId,
+          hasAge ? body.age : undefined,
+          hasLoc ? body.location : undefined
+        );
+
         return reply.code(200).send({ ok: true, user });
       } catch (e: any) {
-        const msg = e?.message;
-        if (msg === "AGE_INVALID") return reply.code(200).send({ ok: false, error: "Invalid age" });
-        if (msg === "LOCATION_TOO_LONG") return reply.code(200).send({ ok: false, error: "Location too long" });
-        if (msg === "USER_NOT_FOUND") return reply.code(200).send({ ok: false, error: "User not found" });
+        const msg = String(e?.message ?? "");
+
+        // service can throw UNAUTHORIZED if userId is invalid
+        if (msg === "UNAUTHORIZED") {
+          return reply.code(200).send({ ok: false, error: "Unauthorized" });
+        }
+
+        // validator messages are already user-facing:
+        // "Age must be 0-130", "Invalid location"
+        if (msg) {
+          return reply.code(200).send({ ok: false, error: msg });
+        }
+
         return reply.code(200).send({ ok: false, error: "Server error" });
       }
     }

@@ -153,7 +153,6 @@ export default function AuthPage() {
 
             setAuth(resData);
             connectPresenceWS();
-            // navigate("/user/me", { replace: true }); <--- REMOVED: Redundant, handled by useEffect
         } catch (err) {
             setUiError({ field: "general", message: "System connection failure. Retry authentication." });
         } finally {

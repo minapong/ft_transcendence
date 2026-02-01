@@ -40,6 +40,7 @@ export default function RootLayout({ children }) {
   };
 
   const hideSidebar = isSpecialLayout(pathname);
+  console.log(`[RootLayout] Render: path="${pathname}", hideSidebar=${hideSidebar}, mode=${sidebarMode}, hidden=${hideSidebar || (sidebarMode === "static" && isSidebarHidden)}`);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">

@@ -23,6 +23,10 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, hidden 
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
 	const resolvedPath = mode === "overlay" ? (pendingPath ?? activePath) : activePath;
 
+	useEffect(() => {
+		console.log(`[LeftSidebar] Updated: hidden=${hidden}, mode=${mode}, isOverlayOpen=${isOverlayOpen}, activePath=${activePath}`);
+	});
+
 	const asideRef = useRef<HTMLDivElement | null>(null);
 	const backdropRef = useRef<HTMLDivElement | null>(null);
 	const navRef = useRef<HTMLElement | null>(null);
