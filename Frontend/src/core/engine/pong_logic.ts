@@ -1,4 +1,5 @@
 import { PongAI } from './pong_ai'
+export const GAME_PAUSE_EVENT = "pong:pause";
 
 
 let GAME_WIDTH: number;
@@ -32,16 +33,12 @@ export function pongLogic(
 		leftPaddle: HTMLElement;
 		rightPaddle: HTMLElement;
 		pauseBtn: HTMLElement;
-		leftUpBtn: HTMLElement;
-		leftDownBtn: HTMLElement;
-		rightUpBtn: HTMLElement;
-		rightDownBtn: HTMLElement;
 		scoreLeft: HTMLElement;
 		scoreRight: HTMLElement;
 	},
 	p1: string,
 	p2: string,
-	onWin: (winner: string, scoreP1: number, scoreP2: number) => void,  //scores added
+	onWin: (winner: string, scoreP1: number, scoreP2: number) => void,
 	inputRef: { current: { w: boolean; s: boolean; up: boolean; down: boolean } },
 	useAI: boolean = false,
 	aiDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
@@ -50,13 +47,11 @@ export function pongLogic(
 	const left_p = elements.leftPaddle;
 	const right_p = elements.rightPaddle;
 	const pause = elements.pauseBtn;
-	const left_up_But = elements.leftUpBtn;
-	const left_down_But = elements.leftDownBtn;
-	const right_up_But = elements.rightUpBtn;
-	const right_down_But = elements.rightDownBtn;
+	// Buttons handled via hooks in PongGame
+	// const left_up_But = elements.leftUpBtn;
+	// ...
 
 	let isPaused = false;
-
 
 
 	// Initial ball position (centered in playable area)
@@ -185,8 +180,13 @@ export function pongLogic(
 		RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
 	}
 
-	handle_parameters();
-	window.addEventListener("resize", handle_parameters);
+	const resizeHandler = () => {
+		handle_parameters();
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
+	};
+
+	resizeHandler();
+	window.addEventListener("resize", resizeHandler);
 
 	dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 	dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
@@ -229,54 +229,42 @@ export function pongLogic(
 		aiPlayer.start(getGameState, simulateKeyPress);
 	}
 
-	left_up_But.addEventListener("pointerdown", e => {
-		inputRef.current.w = true;
-	});
-	left_up_But.addEventListener("pointerup", e => {
-		inputRef.current.w = false;
-	});
-	left_down_But.addEventListener("pointerdown", e => {
-		inputRef.current.s = true;
-	});
-	left_down_But.addEventListener("pointerup", e => {
-		inputRef.current.s = false;
-	});
-	right_up_But.addEventListener("pointerdown", e => {
-		inputRef.current.up = true;
-	});
-	right_up_But.addEventListener("pointerup", e => {
-		inputRef.current.up = false;
-	});
-	right_down_But.addEventListener("pointerdown", e => {
-		inputRef.current.down = true;
-	});
-	right_down_But.addEventListener("pointerup", e => {
-		inputRef.current.down = false;
-	});
+	// Event listeners moved to pong.tsx
 
-	const pauseHandler = () => {
-		isPaused = !isPaused;
 
+	const pauseHandler = (e?: Event) => {
+		if (gameEnded) return;
+
+		isPaused = true;
+		pause.textContent = "▶️ Resume";
+
+		if (aiPlayer) {
+			aiPlayer.stop(simulateKeyPress);
+		}
+	};
+
+	window.addEventListener(GAME_PAUSE_EVENT, pauseHandler);
+
+	const toggleHandler = () => {
 		if (isPaused) {
-			pause.textContent = "▶️ Resume";
-			if (aiPlayer) {
-				aiPlayer.stop(simulateKeyPress);
-			}
-		} else {
+			isPaused = false;
 			pause.textContent = "⏸️ Pause";
 			if (aiPlayer) {
 				aiPlayer.start(getGameState, simulateKeyPress);
 			}
 			moveBall();
+		} else {
+			window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
 		}
 	};
-	// Attach
-	pause.addEventListener("click", pauseHandler);
+
+	pause.addEventListener("click", toggleHandler);
 
 	let animationId: number | null = null;
 
 	function moveBall() {
-		if (isPaused || gameEnded) return;
+		console.log("moveBall in ",gameEnded)
+		if (gameEnded || isPaused) return;
 		x += dx;
 		y += dy;
 
@@ -319,20 +307,22 @@ export function pongLogic(
 
 		movePaddle();
 
-		animationId = requestAnimationFrame(moveBall);
-
 		if (x < 0) {
 			scoreRight++;
 			scoreRightDisplay.textContent = `${p2}: ${scoreRight}`;
 			checkWinner();
-			resetBall();
+			if (!gameEnded) resetBall();
 		}
 
 		if (x + BALL_SIZE > PLAYABLE_WIDTH) {
 			scoreLeft++;
 			scoreLeftDisplay.textContent = `${p1}: ${scoreLeft}`;
 			checkWinner();
-			resetBall();
+			if (!gameEnded) resetBall();
+		}
+
+		if (!gameEnded && !isPaused) {
+			animationId = requestAnimationFrame(moveBall);
 		}
 	}
 	function clampPaddle(pos: number, speed: number, min: number, max: number, length: number, movingPositive: boolean): number {
@@ -395,6 +385,7 @@ export function pongLogic(
 	}
 
 	function showWinner(winner: string, scoreP1: number, scoreP2: number) {
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
 		gameEnded = true;
 		isPaused = true;
 		dx = 0;
@@ -404,14 +395,16 @@ export function pongLogic(
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
-		window.removeEventListener("resize", handle_parameters);
+		window.removeEventListener("resize", resizeHandler);
 
 		onWin(winner, scoreP1, scoreP2);
+		console.log("gameEnded in showWinner")
 	}
 
 	moveBall();
 
 	return () => {
+		console.log("gameEnded in return")
 		gameEnded = true;
 		isPaused = true;
 
@@ -420,8 +413,9 @@ export function pongLogic(
 
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
 
-		window.removeEventListener("resize", handle_parameters);
+		window.removeEventListener("resize", resizeHandler);
+		window.removeEventListener(GAME_PAUSE_EVENT, pauseHandler);
 		// No event listeners to remove here anymore!
-		pause.removeEventListener('click', pauseHandler);
+		pause.removeEventListener('click', toggleHandler);
 	};
 }

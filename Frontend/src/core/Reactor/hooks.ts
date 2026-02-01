@@ -216,7 +216,7 @@ export function useCallback<T extends (...args: any[]) => any>(fn: T, deps: any[
 export function useEventListener<T extends Event>(
 	eventName: string,
 	handler: (event: T) => void,
-	element: EventTarget = window
+	element: EventTarget | { current: any } = window
 ) {
 	// Create a ref that stores handler
 	const savedHandler = useRef(handler);
@@ -228,7 +228,10 @@ export function useEventListener<T extends Event>(
 
 	useEffect(() => {
 		// Define the listening target
-		const targetElement: EventTarget = element;
+		const targetElement: EventTarget | null = (element && 'current' in element)
+			? element.current
+			: (element as EventTarget);
+
 		if (!(targetElement && targetElement.addEventListener)) {
 			return;
 		}
@@ -246,7 +249,7 @@ export function useEventListener<T extends Event>(
 		return () => {
 			targetElement.removeEventListener(eventName, eventListener);
 		};
-	}, [eventName, element]);
+	}, [eventName, element]); // Effect re-runs if ref object changes (unlikely) or eventName changes. Ref.current is read on mount/update.
 }
 
 function depsChanged(prev: any[] | undefined, next: any[]) {

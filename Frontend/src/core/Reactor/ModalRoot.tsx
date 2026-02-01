@@ -47,6 +47,8 @@ export default function ModalRoot() {
       panel;
     preferred?.focus();
 
+    window.dispatchEvent(new CustomEvent("game-pause"));
+
     // Removed direct listener attachment here
 
     return () => {
