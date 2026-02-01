@@ -346,26 +346,26 @@ export default function TournamentPage() {
 							<div className="space-y-6">
 								{/* Stats Cards */}
 								<div className="grid grid-cols-2 gap-4">
-									<div className="panel-surface p-6 rounded-2xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 border border-white/5 backdrop-blur-md">
-										<p className="text-xs font-bold uppercase tracking-widest text-cyan-400/70 mb-2">Registration</p>
+									<div className="panel-surface p-4 rounded-xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 border border-white/5 backdrop-blur-md">
+										<p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400/70 mb-1">Registration</p>
 										<div className="flex items-baseline gap-2">
-											<span className="text-4xl font-black text-white">{tournament.registeredPlayers?.length || 0}</span>
-											<span className="text-xl text-gray-500 font-medium">/ {tournament?.max_players ?? max_players}</span>
+											<span className="text-3xl font-black text-white">{tournament.registeredPlayers?.length || 0}</span>
+											<span className="text-sm text-gray-500 font-medium">/ {tournament?.max_players ?? max_players}</span>
 										</div>
-										<div className="w-full bg-gray-800 h-1.5 mt-4 rounded-full overflow-hidden">
+										<div className="w-full bg-gray-800 h-1.5 mt-3 rounded-full overflow-hidden">
 											<div
 												className="h-full bg-cyan-400 transition-all duration-1000 ease-out"
 												style={{ width: `${((tournament.registeredPlayers?.length || 0) / (tournament?.max_players ?? max_players)) * 100}%` }}
 											/>
 										</div>
 									</div>
-									<div className="panel-surface p-6 rounded-2xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 border border-white/5 backdrop-blur-md">
-										<p className="text-xs font-bold uppercase tracking-widest text-purple-400/70 mb-2">Format</p>
-										<div className="flex items-center gap-3">
-											<span className="icon-[solar--sitemap-bold-duotone] text-3xl text-purple-400" />
-											<span className="text-2xl font-bold text-white">Single Elim</span>
+									<div className="panel-surface p-4 rounded-xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 border border-white/5 backdrop-blur-md">
+										<p className="text-[10px] font-bold uppercase tracking-widest text-purple-400/70 mb-1">Format</p>
+										<div className="flex items-center gap-2">
+											<span className="icon-[solar--sitemap-bold-duotone] text-2xl text-purple-400" />
+											<span className="text-xl font-bold text-white">Single Elim</span>
 										</div>
-										<p className="text-xs text-gray-500 mt-3 font-mono">CLASSIC BRACKET SYSTEM</p>
+										<p className="text-[10px] text-gray-500 mt-2 font-mono">CLASSIC BRACKET SYSTEM</p>
 									</div>
 								</div>
 

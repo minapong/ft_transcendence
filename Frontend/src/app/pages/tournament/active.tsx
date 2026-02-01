@@ -152,8 +152,11 @@ export default function ActiveTournamentPage() {
             <div>
               <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight flex items-center gap-4">
                 {tournament.name}
-                <span className="px-3 py-1 bg-white/5 border border-white/10 text-lg rounded-lg font-mono text-gray-400">
-                  #{tournament.id}
+                <span className="inline-flex items-center gap-3 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full font-mono text-sm text-gray-400 select-none">
+                  <span className="flex items-center justify-center w-6 h-6 bg-white/10 rounded-md">
+                    <span className="icon-[solar--hashtag-bold] text-[10px]" />
+                  </span>
+                  <span className="tracking-widest leading-none pt-[2px]">ID: {tournament.id}</span>
                 </span>
               </h1>
               <div className="flex items-center gap-3 mt-2 text-sm text-gray-400 font-medium">
