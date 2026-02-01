@@ -205,7 +205,7 @@ export default function PongGame() {
                 <span ref={scoreLeftRef} id="scoreLeft">{p1Name}: 0</span>
                 <span ref={scoreRightRef} id="scoreRight">{p2Name}: 0</span>
             </div>
-z
+
             {/* LEFT TOUCH CONTROLS */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
                 <button
