@@ -44,13 +44,12 @@ export default function Connect4Single() {
   // ──────────────── Polling effect ────────────────
   useEffect(() => {
     const pollMatch = async () => {
-      // console.log("[poll] fetching match state for user", user.id);
       try {
         const res = await apiFetch(`/api/matchmaking/state/${user.id}`);
         if (!res.ok) return;
 
         const data = await res.json();
-        // console.log("[poll] server response:", data);
+
 
         if (data.state === "active") {
           setMatch(data.match);
@@ -60,7 +59,6 @@ export default function Connect4Single() {
           if (data.match.status === "started" && intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
-            // console.log("[poll] cleared interval, match already started");
           }
         } else if (data.state === "queued") {
           setMatch(null);
@@ -94,7 +92,6 @@ export default function Connect4Single() {
 
   // ──────────────── Join Queue ────────────────
   async function join() {
-    // console.log("[join] user joining queue", user.id);
     try {
       const res = await apiFetch("/api/matchmaking/join", {
         method: "POST",
@@ -102,7 +99,7 @@ export default function Connect4Single() {
         body: JSON.stringify({ userId: user.id, username: user.username }),
       });
       const data = await res.json();
-      // console.log("[join] server response:", data);
+
 
       if (data.status === "waiting") setStatus("waiting");
       else if (data.status === "matched") {
@@ -113,7 +110,6 @@ export default function Connect4Single() {
         setStatus("matched");
       }
     } catch (err) {
-      // console.error("[join] error:", err);
     }
   }
 
@@ -125,23 +121,15 @@ export default function Connect4Single() {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
-      // console.log("[startGame] cleared polling interval");
     }
 
     try {
-      // console.log("[startGame] sending request to start match", match.id);
       const res = await apiFetch("/api/matchmaking/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ matchId: match.id }),
       });
 
-      if (!res.ok) {
-        console.warn("[startGame] failed to start match", res.status);
-        return;
-      }
-
-      // console.log("[startGame] navigating to /connect4");
       navigate("/game/connect4", {
         state: {
           matchId: match.id,
