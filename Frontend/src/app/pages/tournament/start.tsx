@@ -104,7 +104,7 @@ export default function TournamentPage() {
 	};
 
 	const handleStartTournament = async () => {
-		if (!tournament) return;
+		if (!tournament || !isAdmin) return;
 		try {
 			const res = await apiFetch("/api/tournament/start", {
 				method: "POST",
@@ -315,12 +315,29 @@ export default function TournamentPage() {
 
 						{/* Empty State (Non-Admin) */}
 						{!tournament && !isAdmin && (
-							<div className="panel-surface rounded-3xl p-12 text-center border border-white/5 bg-white/[0.02]">
-								<div className="w-24 h-24 mx-auto bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50">
-									<span className="icon-[solar--ghost-smile-bold-duotone] text-5xl text-gray-400" />
+							<div className="space-y-4">
+								<div className="panel-surface rounded-3xl p-12 text-center border border-white/5 bg-white/[0.02]">
+									<div className="w-24 h-24 mx-auto bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50">
+										<span className="icon-[solar--ghost-smile-bold-duotone] text-5xl text-gray-400" />
+									</div>
+									<h2 className="text-2xl font-bold text-white mb-2">No Active Events</h2>
+									<p className="text-gray-400 max-w-sm mx-auto">The arena is currently silent.</p>
 								</div>
-								<h2 className="text-2xl font-bold text-white mb-2">No Active Events</h2>
-								<p className="text-gray-400 max-w-sm mx-auto">The arena is currently silent. Stand by for future tournament announcements.</p>
+
+								{/* Admin Create Notification */}
+								<div className="panel-surface p-6 rounded-2xl bg-gradient-to-br from-purple-900/10 to-gray-900/30 border border-purple-500/10 flex items-center gap-5">
+									<div className="relative shrink-0">
+										<div className="w-12 h-12 rounded-full bg-gray-900 border border-purple-500/30 flex items-center justify-center">
+											<span className="icon-[solar--shield-user-bold-duotone] text-2xl text-purple-400" />
+										</div>
+									</div>
+									<div className="flex-1">
+										<p className="text-xs text-purple-300/60 font-mono mb-1">SYSTEM PROTOCOL</p>
+										<p className="text-sm text-gray-400">
+											Event initialization is restricted to <span className="text-purple-300 font-bold">Administrators</span>.
+										</p>
+									</div>
+								</div>
 							</div>
 						)}
 
@@ -366,30 +383,78 @@ export default function TournamentPage() {
 											)}
 
 											{canRegister && (
-												<button onClick={handleRegister} className="group relative w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xl rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-													<div className="flex items-center justify-center gap-3">
-														<span className="icon-[solar--user-plus-bold] text-2xl group-hover:rotate-12 transition-transform" />
-														JOIN COMBAT
+												<div className="space-y-4">
+													<button onClick={handleRegister} className="group relative w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xl rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+														<div className="flex items-center justify-center gap-3">
+															<span className="icon-[solar--user-plus-bold] text-2xl group-hover:rotate-12 transition-transform" />
+															JOIN COMBAT
+														</div>
+													</button>
+
+													{/* Admin Start Info */}
+													<div className="flex items-center justify-center gap-2 text-xs text-gray-500 font-mono">
+														<span className="icon-[solar--shield-warning-bold] text-purple-400" />
+														<span>Waiting for Admin to launch</span>
 													</div>
-												</button>
+												</div>
 											)}
 
-											{!isRegistered && !isAdmin && isFull && (
-												<div className="flex items-center justify-center gap-3 p-6 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
-													<span className="icon-[solar--lock-keyhole-bold-duotone] text-2xl" />
-													<span className="font-bold tracking-wide">REGISTRATION CLOSED - FULL CAPACITY</span>
+											{!isAdmin && isFull && (
+												<div className="space-y-4">
+													<div className="flex items-center justify-center gap-3 p-6 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+														<span className="icon-[solar--lock-keyhole-bold-duotone] text-2xl" />
+														<span className="font-bold tracking-wide">REGISTRATION CLOSED - FULL CAPACITY</span>
+													</div>
+
+													{/* Admin Start Notification Card */}
+													<div className="panel-surface p-6 rounded-2xl bg-gradient-to-br from-purple-900/20 to-gray-900/50 border border-purple-500/30 flex items-center gap-5 relative overflow-hidden">
+														<div className="absolute inset-0 bg-[url('/assets/pattern-grid.svg')] opacity-5" />
+
+														{/* Admin Avatar Visual */}
+														<div className="relative shrink-0">
+															<div className="w-16 h-16 rounded-full bg-gray-900 border-2 border-purple-400 flex items-center justify-center relative z-10 overflow-hidden">
+																<span className="icon-[solar--shield-user-bold-duotone] text-4xl text-purple-400" />
+															</div>
+															{/* Pulse Effect */}
+															<div className="absolute inset-0 rounded-full bg-purple-500/30 blur-md animate-pulse" />
+															<div className="absolute -bottom-1 -right-1 bg-gray-900 rounded-full p-1 border border-gray-700">
+																<span className="icon-[solar--verified-check-bold] text-purple-400 text-sm" />
+															</div>
+														</div>
+
+														<div className="relative z-10 flex-1">
+															<h3 className="text-lg font-bold text-white mb-1">Awaiting Authorization</h3>
+															<p className="text-sm text-gray-400 leading-relaxed">
+																Tournament start sequence restricted to <span className="text-purple-300 font-medium">Administrators</span>.
+																System is standby for command.
+															</p>
+														</div>
+													</div>
 												</div>
 											)}
 
 											{isRegistered && (
-												<div className="flex flex-col items-center justify-center gap-4 p-8 bg-gradient-to-br from-emerald-900/20 to-gray-900/50 border border-emerald-500/30 rounded-2xl text-emerald-400 relative overflow-hidden">
-													<div className="absolute inset-0 bg-[url('/assets/pattern-grid.svg')] opacity-10" />
-													<div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/40">
-														<span className="icon-[solar--check-circle-bold] text-3xl text-emerald-400" />
+												<div className="space-y-4">
+													<div className="flex flex-col items-center justify-center gap-4 p-8 bg-gradient-to-br from-emerald-900/20 to-gray-900/50 border border-emerald-500/30 rounded-2xl text-emerald-400 relative overflow-hidden">
+														<div className="absolute inset-0 bg-[url('/assets/pattern-grid.svg')] opacity-10" />
+														<div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/40">
+															<span className="icon-[solar--check-circle-bold] text-3xl text-emerald-400" />
+														</div>
+														<div className="text-center z-10">
+															<h3 className="text-xl font-bold text-white">Registration Confirmed</h3>
+															<p className="text-emerald-400/70 text-sm mt-1">Ready for deployment.</p>
+														</div>
 													</div>
-													<div className="text-center z-10">
-														<h3 className="text-xl font-bold text-white">Registration Confirmed</h3>
-														<p className="text-emerald-400/70 text-sm mt-1">Awaiting deployment coordinates...</p>
+
+													{/* Sticky Admin Notification for Registered Users */}
+													<div className="panel-surface p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 flex items-center gap-4">
+														<div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0 border border-purple-500/20">
+															<span className="icon-[solar--shield-user-bold-duotone] text-xl text-purple-400" />
+														</div>
+														<p className="text-xs text-purple-200/80 leading-relaxed">
+															<span className="font-bold text-purple-300">Admin Clearance Required</span><br />
+															Waiting for an Administrator to initiate the match sequence.
+														</p>
 													</div>
 												</div>
 											)}
