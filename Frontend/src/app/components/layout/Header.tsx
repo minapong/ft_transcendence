@@ -1,7 +1,8 @@
-import { navigate } from "Reactor";
+import { navigate, useEffect, useState } from "Reactor";
 import { useScreen } from "@/app/hooks/useScreen";
 import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
+import { apiFetch } from "@/core/lib/api";
 
 // PanelButton extracted for clarity and reusability
 function PanelButton({ icon, label, onClick }) {
@@ -21,10 +22,39 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
   const screen = useScreen();
   const auth = useAuth();
   const user = auth?.user || null;
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const handleLogout = () => {
     logout();
   };
+
+  useEffect(() => {
+    if (!user) {
+      setAvatarUrl(null);
+      return;
+    }
+
+    // Fetch latest profile to get avatar
+    const loadProfile = async () => {
+      try {
+        const res = await apiFetch("/api/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.avatarUrl) {
+            setAvatarUrl(data.avatarUrl);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load header avatar", e);
+      }
+    };
+
+    loadProfile();
+
+    const handleAvatarUpdate = () => loadProfile();
+    window.addEventListener("user:avatar-update", handleAvatarUpdate);
+    return () => window.removeEventListener("user:avatar-update", handleAvatarUpdate);
+  }, [user]);
 
   const statusCards = [
     {
@@ -139,10 +169,14 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
             <summary
               className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)] whitespace-nowrap flex-shrink-0 list-none [&::-webkit-details-marker]:hidden"
             >
-              <div className="w-7 h-7 rounded-md bg-[var(--color-surface)] flex items-center justify-center">
-                <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-base" aria-hidden="true" />
+              <div className="w-8 h-8 rounded-md bg-[var(--color-surface)] flex items-center justify-center overflow-hidden border border-white/10 relative">
+                {avatarUrl ? (
+                  <img src={avatarUrl} className="w-full h-full object-cover" alt="User avatar" />
+                ) : (
+                  <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-lg" aria-hidden="true" />
+                )}
               </div>
-              <span className="text-sm text-[var(--color-primary)] opacity-85">{user.username}</span>
+              <span className="text-sm text-[var(--color-primary)] opacity-85 ml-1">{user.username}</span>
               <span className="icon-[mdi--chevron-down] text-sm text-[var(--color-primary)] opacity-30 transition-transform duration-150 group-open:rotate-180" />
             </summary>
 
@@ -152,8 +186,12 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
               {/* Header Section: More "Command Center" feel */}
               <div className="px-4 py-4 bg-white/[0.02] border-b border-[var(--color-border-soft)]">
                 <div className="flex items-center gap-3">
-                  <div className="shrink-0 w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-white/5 flex items-center justify-center shadow-inner">
-                    <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-xl" />
+                  <div className="shrink-0 w-10 h-10 rounded-lg bg-[var(--color-surface)] border border-white/5 flex items-center justify-center shadow-inner overflow-hidden">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} className="w-full h-full object-cover" alt="User avatar" />
+                    ) : (
+                      <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-xl" />
+                    )}
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-[var(--color-primary)] leading-none mb-1">

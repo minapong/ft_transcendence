@@ -166,6 +166,7 @@ export default function UserSettingsPage() {
       if (fileRef.current) fileRef.current.value = "";
 
       setMsgAvatar("Avatar updated ✅");
+      window.dispatchEvent(new Event("user:avatar-update"));
     } catch {
       setMsgAvatar("Network error");
     } finally {
