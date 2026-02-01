@@ -39,7 +39,7 @@ The project emphasizes real-time systems, game logic, clean architecture, and te
 ### Run the Project
 
 ```bash
-make dev
+make prod-seed 
 ```
 
 This starts:
@@ -223,6 +223,8 @@ Simple, deterministic, and aligned with project constraints.
 
 Main tables:
 - `users`
+- `friends`
+- `avatars`
 - `matches`
 - `match_players`
 - `tournaments`
@@ -232,21 +234,11 @@ Main tables:
 Relationships:
 - Users ↔ Matches (many-to-many)
 - Tournaments ↔ Matches (one-to-many)
+- User ↔ StatsUser (one-to-one)
+- User ↔ Friend (one-to-one)
 
-Main tables:
-
-* `users`
-* `matches`
-* `match_players`
-* `tournaments`
-* `tournament_matches`
-* `stats_user`
-
-Relationships:
-
-* Users ↔ Matches (many-to-many)
-* Tournaments ↔ Matches (one-to-many)
-
+* Cascade deletes for ownership-bound entities
+* SetNull for historical references (winners, selected avatars)
 ---
 
 
@@ -256,26 +248,26 @@ Relationships:
 | Feature                | Description                                  | Owner(s)         |
 |------------------------|----------------------------------------------|------------------|
 | Authentication         | Signup, login, logout, JWT sessions          | mhashir          |
-| User Profile           | Stats, achievements, avatar upload           |  nmagdano|
-| User Presence          | Real-time online status, public profiles     | mhashir          |
-| Pong                   | 2P, 4P, AI, touch controls, pause/resume     | aalkaisi         |
+| User Profile           | Stats, achievements, avatar upload           | mhashir & santiago & nmagdano         |
+| User Presence          | Real-time online status, public profiles     | nmagdano         |
+| Pong                   | 2P, 4P, AI, touch controls, pause/resume     | aalkaisi & saherrer|
 | Connect 4              | Matchmaking, turn indicators, win detection  | aalkaisi         |
 | Tournament System      | Creation, registration, brackets, winner     | saherrer         |
 | Statistics/Leaderboard | Global leaderboard, match history, ratios    | saherrer         |
-| Social                 | Friends system (add/remove)                  |  nmagdano|
+| Social                 | Add/remove friends, extra profile info       | nmagdano        |
 
 ### Authentication & Accounts
 
 * Signup, login, logout
 * JWT sessions
 * User profile with stats and achievements
-	**Owner:** Malik Hashir
+	**Owner:** Malik Hashir, Natalia, Santiago
 
 ### User Presence
 
 * Real-time online status
 * Public user profiles
-	**Owner:** Malik Hashir
+	**Owner:** Natalia
 
 ### Pong
 
@@ -313,7 +305,7 @@ Relationships:
 
 * Friends system (add/remove)
 * Avatar upload
-	**Owner:** Malik Hashir, Natalia
+	**Owner:** Natalia
 
 ---
 
@@ -333,11 +325,12 @@ Relationships:
 | Tournament System                    | Minor | 1      | saherrer    | Bracket, registration, winner  |
 | Game Statistics                      | Minor | 1      | saherrer    | Leaderboard, match history     |
 | Custom Design System                 | Minor | 1      | mhashir     | Custom UI components and design tokens for consistent UX |
-
 | Gamification System                  | Minor | 1      | saherrer    | Achievements, badges, leaderboards, XP/level, persistent & visual |
 | Support for Additional Browsers      | Minor | 1      | saherrer    | Firefox, Safari, Edge compatibility, consistent UI/UX |
+| Use an ORM for database              | Minor | 1      | nmagdano, mhashir    | Prisma ORM         |
 
-**Total:** 16 / 14 points
+
+**Total:** 19 / 14 points
 
 ### Implemented
 
@@ -348,29 +341,17 @@ Relationships:
 | Multiplayer Game (4P Pong)          | Major | 2      | Abdul    |
 | Second Game (Connect 4)             | Major | 2      | Abdul    |
 | AI Opponent                         | Major | 2      | Santiago |
+| User Management                     | Major | 2      | Natalia  |
 | Backend Framework (Fastify)         | Minor | 1      | Hashir   |
 | Tournament System                   | Minor | 1      | Santiago |
 | Game Statistics                     | Minor | 1      | Santiago |
+| Use an ORM                          | Minor | 1      | Natalia  |
 
-**Total:** 13 / 14 points
-
----
+**Total:** 16 / 14 points
 
 
 ---
 ## 👤 Individual Contributions
-
-### mhashir
-- Product ownership, frontend SPA, routing, backend foundation, presence system
-
-### aalkaisi
-- Pong engines (2P, 4P), Connect 4 logic, gameplay mechanics, touch controls
-
-### saherrer
-- Tournament architecture, matchmaking, AI opponent, statistics system
-
-### nmagdano
-- Docker & NGINX, database schema, persistence layer, infrastructure setup
 
 ### Malik Hashir
 
@@ -400,9 +381,8 @@ Relationships:
 * Database schema
 * Persistence layer
 * Infrastructure setup
-
----
-
+* User management
+* CI\CD pipeline & DevOps
 
 ---
 ## 📚 Resources
@@ -422,37 +402,12 @@ AI tools were used for:
 - Documentation drafting
 All AI-generated content was reviewed, understood, and adapted by the team.
 
-AI tools were used for:
-
-* Code review assistance
-* Refactoring suggestions
-* Documentation drafting
-
-All AI-generated content was reviewed, understood, and adapted by the team.
-
----
-
-## 📚 Resources
-
-* Fastify Documentation
-* Prisma ORM Docs
-* SQLite Documentation
-* Tailwind CSS v4
-* Motion One
-* WebSocket RFC 6455
-
----
-
-
 ---
 ## 📝 Notes
 
 * README reflects actual implementation
 * No unimplemented modules are claimed
-* Project is not yet evaluation-ready (missing 1 point)
-
----
-
+* Project is developed & evaluated in 42 labs (without sudo priveleges)
 
 ---
 © 2026 — **MINA GAMES** · ft_transcendence · 42 Network
