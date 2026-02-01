@@ -2,6 +2,7 @@
 COMPOSE_BASE = Docker/docker-compose.yml
 COMPOSE_DEV = Docker/docker-compose.dev.yml
 COMPOSE_PROD = ./docker-compose.prod.yml
+COMPOSE_LOCALPROD = ./docker-compose.localprod.yml
 
 # Container names (optional; for clarity)
 PROJECT_NAME = game_app
@@ -21,6 +22,10 @@ build-prod:
 	@echo "🏗️  Building production images..."
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) build
 
+build-local-prod:
+	@echo "🏗️  Building production images..."
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_LOCALPROD) build
+
 # ==============================================================================
 # 🌱 Database Seeding
 # ==============================================================================
@@ -34,7 +39,7 @@ seed-dev:
 seed-prod:
 	@echo "🌱 Seeding database (prod)..."
 	docker compose -p $(PROJECT_NAME)_prod \
-		-f $(COMPOSE_PROD) \
+		-f $(COMPOSE_LOCALPROD) \
 		exec backend npm run seed:prod
 
 
@@ -50,6 +55,7 @@ prod: build-prod
 	@echo "🌐 Starting production environment..."
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) up -d
 
+
 # ==============================================================================
 # 🌱 Bootstrap (build + run + seed)
 # ==============================================================================
@@ -60,9 +66,9 @@ dev-seed: build-dev
 	@echo "🌱 Seeding development database..."
 	make seed-dev
 
-prod-seed: build-prod
+prod-seed: build-local-prod
 	@echo "🌐 Starting production environment (with seed)..."
-	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) up -d
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_LOCALPROD) up -d
 	@echo "🌱 Seeding production database..."
 	make seed-prod
 
