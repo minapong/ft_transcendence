@@ -1,7 +1,47 @@
 import { prisma } from "../src/db/prisma.js";
 import { hashPassword } from "../src/services/auth.service.js"; // wherever your AuthService lives
-
 // import crypto from "crypto";
+
+const DEFAULTS = [
+  "default_avatars/a1.jpg",
+  "default_avatars/a2.jpg",
+  "default_avatars/a3.jpg",
+  "default_avatars/a4.jpg",
+  "default_avatars/a5.jpg",
+];
+
+export async function ensureDefaultAvatars() {
+  for (const p of DEFAULTS) {
+    const existing = await prisma.avatar.findFirst({ where: { file_path: p } });
+
+    if (!existing) {
+      await prisma.avatar.create({
+        data: {
+          user_id: null,
+          file_path: p,
+          is_default: true,
+        },
+      });
+    } else {
+      // keep them in a consistent "default pool" state
+      await prisma.avatar.update({
+        where: { id: existing.id },
+        data: { is_default: true, user_id: null },
+      });
+    }
+  }
+
+  const defaults = await prisma.avatar.findMany({
+    where: { is_default: true, user_id: null },
+    orderBy: { id: "asc" },
+  });
+
+  if (defaults.length === 0) {
+    throw new Error("Default avatars were not created.");
+  }
+
+  return defaults;
+}
 
 const users = await prisma.user.count();
 if (users > 0) {
@@ -55,6 +95,22 @@ async function seedUsers() {
   }
 
   return users;
+}
+
+async function assignDefaultAvatarsToUsers(users: { id: number }[]) {
+  console.log("Assigning default avatars to users...");
+
+  const defaults = await ensureDefaultAvatars(); // returns Avatar[]
+
+  for (let i = 0; i < users.length; i++) {
+    const u = users[i];
+    const chosen = defaults[i % defaults.length];
+
+    await prisma.user.update({
+      where: { id: u.id },
+      data: { avatarId: chosen.id }, // ✅ your schema field
+    });
+  }
 }
 
 async function seedMatches(users: { id: number }[]) {
@@ -234,6 +290,7 @@ async function main() {
   await seedMatches(users);
   await seedTournament(users);
   await seedFriendsCount(users);
+  await assignDefaultAvatarsToUsers(users);
 
   console.log("✅ Seeding complete.");
 }
