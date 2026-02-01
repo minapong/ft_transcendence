@@ -205,98 +205,90 @@ export default function PongGame() {
                 <span ref={scoreLeftRef} id="scoreLeft">{p1Name}: 0</span>
                 <span ref={scoreRightRef} id="scoreRight">{p2Name}: 0</span>
             </div>
-
-
-
-            <div className="relative flex items-center justify-center overflow-visible">
-
-
-
-                {/* LEFT TOUCH CONTROLS */}
-                <div className="absolute -left-15 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
-                    <button
-                        ref={leftUpBtnRef}
-                        id="left-up"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                    >
-                        ▲
-                    </button>
-                    <button
-                        ref={leftDownBtnRef}
-                        id="left-down"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                    >
-                        ▼
-                    </button>
-                </div>
-
-                {/* RIGHT TOUCH CONTROLS */}
-                <div className="absolute -right-15 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
-                    <button
-                        ref={rightUpBtnRef}
-                        id="right-up"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                    >
-                        ▲
-                    </button>
-                    <button
-                        ref={rightDownBtnRef}
-                        id="right-down"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                    >
-                        ▼
-                    </button>
-                </div>
-
-                {/* Game board */}
-                <div
-                    id="game_board"
-                    className="
-                        bg-gray-800 border-4 sm:border-6 lg:border-8 border-white rounded-lg relative
-                        w-[320px] h-[200px]
-                        sm:w-[400px] sm:h-[280px]
-                        lg:w-[600px] lg:h-[380px]
-                        xl:w-[800px] xl:h-[500px]
-                    "
+z
+            {/* LEFT TOUCH CONTROLS */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
+                <button
+                    ref={leftUpBtnRef}
+                    id="left-up"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
-                    {/* Left paddle */}
-                    <div
-                        ref={leftPaddleRef}
-                        id="left_p"
-                        className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
-                                w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
-                    />
+                    ▲
+                </button>
+                <button
+                    ref={leftDownBtnRef}
+                    id="left-down"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                >
+                    ▼
+                </button>
+            </div>
 
-                    {/* Right paddle */}
-                    <div
-                        ref={rightPaddleRef}
-                        id="right_p"
-                        className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
-                                w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
-                    />
+            {/* Game board */}
+            <div
+                id="game_board"
+                className="
+					bg-gray-800 border-4 sm:border-6 lg:border-8 border-white rounded-lg relative
+					w-[320px] h-[200px]
+					sm:w-[400px] sm:h-[280px]
+					lg:w-[600px] lg:h-[380px]
+					xl:w-[800px] xl:h-[500px]
+				"
+            >
+                {/* Left paddle */}
+                <div
+                    ref={leftPaddleRef}
+                    id="left_p"
+                    className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
+							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
+                />
 
-                    {/* Ball */}
-                    <div
-                        ref={ballRef}
-                        id="ball"
-                        className="absolute 
-                                w-3 h-3 sm:w-4 sm:h-4 
-                                bg-white rounded-full 
-                                top-1/2 left-1/2"
-                        style={{
-                            boxShadow: `
-                                0 0 10px 2px rgba(0, 255, 255, 0.8),
-                                0 0 20px 4px rgba(0, 255, 255, 0.5),
-                                0 0 30px 6px rgba(0, 255, 255, 0.3),
-                                0 0 40px 8px rgba(0, 255, 255, 0.15),
-                                inset 0 0 5px rgba(0, 255, 255, 0.6)
-                            `,
-                            filter: 'brightness(1.2) blur(0.3px)',
-                            transition: 'transform 0.05s linear'
-                        }}
-                    />
-                </div>
+                {/* Right paddle */}
+                <div
+                    ref={rightPaddleRef}
+                    id="right_p"
+                    className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
+							w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
+                />
 
+                {/* Ball */}
+                <div
+                    ref={ballRef}
+                    id="ball"
+                    className="absolute 
+							w-3 h-3 sm:w-4 sm:h-4 
+							bg-white rounded-full 
+							top-1/2 left-1/2"
+                    style={{
+                        boxShadow: `
+							0 0 10px 2px rgba(0, 255, 255, 0.8),
+							0 0 20px 4px rgba(0, 255, 255, 0.5),
+							0 0 30px 6px rgba(0, 255, 255, 0.3),
+							0 0 40px 8px rgba(0, 255, 255, 0.15),
+							inset 0 0 5px rgba(0, 255, 255, 0.6)
+						`,
+                        filter: 'brightness(1.2) blur(0.3px)',
+                        transition: 'transform 0.05s linear'
+                    }}
+                />
+            </div>
+
+            {/* RIGHT TOUCH CONTROLS */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
+                <button
+                    ref={rightUpBtnRef}
+                    id="right-up"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                >
+                    ▲
+                </button>
+                <button
+                    ref={rightDownBtnRef}
+                    id="right-down"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                >
+                    ▼
+                </button>
             </div>
 
             {/* Pause button */}
