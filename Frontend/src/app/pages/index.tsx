@@ -23,6 +23,7 @@ function BallChaosArena() {
 	];
 
 	useEffect(() => {
+
 		const container = containerRef.current;
 		if (!container) return;
 

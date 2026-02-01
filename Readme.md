@@ -333,7 +333,6 @@ Relationships:
 | Tournament System                    | Minor | 1      | saherrer    | Bracket, registration, winner  |
 | Game Statistics                      | Minor | 1      | saherrer    | Leaderboard, match history     |
 | Custom Design System                 | Minor | 1      | mhashir     | Custom UI components and design tokens for consistent UX |
-
 | Gamification System                  | Minor | 1      | saherrer    | Achievements, badges, leaderboards, XP/level, persistent & visual |
 | Support for Additional Browsers      | Minor | 1      | saherrer    | Firefox, Safari, Edge compatibility, consistent UI/UX |
 

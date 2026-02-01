@@ -32,9 +32,17 @@ export default function FriendsPage() {
     if (!token) navigate("/auth/login");
   }, [token]);
 
-  async function reload() {
-    setLoading(true);
-    setMsg(null);
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (msg) {
+      const timer = setTimeout(() => setMsg(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [msg]);
+
+  async function reload(silent = false) {
+    if (!silent) setLoading(true);
+    // Don't clear msg here to allow toast to persist across reloads
 
     try {
       const [inRes, outRes] = await Promise.all([
@@ -153,14 +161,17 @@ export default function FriendsPage() {
           </SecondaryButton>
         </div>
 
-        {/* FEEDBACK MSG */}
+        {/* FEEDBACK TOAST - FIXED POSITION */}
         {msg && (
-          <div className={`mb-8 p-4 rounded-xl border backdrop-blur-md flex items-center gap-3 animation-slide-in ${msg.type === 'error'
-              ? 'bg-red-500/10 border-red-500/30 text-red-200'
-              : 'bg-green-500/10 border-green-500/30 text-green-200'
+          <div className={`fixed bottom-6 right-6 z-50 p-4 rounded-xl border backdrop-blur-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 ${msg.type === 'error'
+            ? 'bg-red-500/20 border-red-500/30 text-red-200'
+            : 'bg-green-500/20 border-green-500/30 text-green-200'
             }`}>
             <span className={`text-xl icon-[solar--${msg.type === 'error' ? 'danger-circle-bold' : 'check-circle-bold'}]`} />
-            {msg.text}
+            <span className="font-medium pr-2">{msg.text}</span>
+            <button onClick={() => setMsg(null)} className="ml-2 hover:bg-white/10 rounded-full p-1 transition-colors">
+              <span className="icon-[solar--close-circle-bold] text-lg opacity-60 hover:opacity-100" />
+            </button>
           </div>
         )}
 
