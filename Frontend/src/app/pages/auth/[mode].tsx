@@ -22,7 +22,7 @@ type AuthForm = {
 };
 
 type ValidationError = {
-    field: "email" | "password" | "username" | "general";
+    field: "email" | "password" | "username" | "general" | "terms";
     message: string;
 };
 
@@ -83,6 +83,11 @@ export default function AuthPage() {
     const location = useLocation();
     const [uiError, setUiError] = useState<ValidationError | null>(null);
     const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+
 
     // Derive mode from routing (URL segments are the source of truth)
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
@@ -96,10 +101,11 @@ export default function AuthPage() {
 
     useEffect(() => {
         setUiError(null);
+        setAcceptedTerms(false);
 
-        if (emailRef.current) emailRef.current.value = "";
-        if (passwordRef.current) passwordRef.current.value = "";
-        if (usernameRef.current) usernameRef.current.value = "";
+        setEmail("");
+        setUsername("");
+        setPassword("");
 
         // Defer focus until DOM + layout are settled
         requestAnimationFrame(() => {
@@ -121,15 +127,19 @@ export default function AuthPage() {
 
         //capture data immediately BEFORE any state-triggered re-renders
         const raw: AuthForm = {
-            email: emailRef.current?.value || "",
-            password: passwordRef.current?.value || "",
-            username: usernameRef.current?.value || ""
+                email,
+                password,
+                username,
         };
 
         // Now clear errors and proceed
         setUiError(null);
         setLoading(true);
-
+        if (mode === "signup" && !acceptedTerms) {
+            setUiError({ field: "terms", message: "You must accept the Terms of Service to continue." });
+            setLoading(false);
+            return;
+        }
         const sanitized = sanitizeAuth(mode, raw);
         if ("error" in sanitized) {
             setUiError(sanitized.error);
@@ -236,6 +246,8 @@ export default function AuthPage() {
                                 placeholder="name@example.com"
                                 type="email"
                                 autoComplete="email"
+                                value={email}
+                                onInput={(e: any) => setEmail(e?.target?.value ?? "")}
                                 error={uiError?.field === "email" ? uiError.message : undefined}
                                 autoFocus
                                 disabled={loading}
@@ -249,6 +261,8 @@ export default function AuthPage() {
                                     label="Username (minimum 3 symbols)"
                                     placeholder="Choose a username"
                                     autoComplete="username"
+                                    value={username}
+                                    onInput={(e: any) => setUsername(e?.target?.value ?? "")}
                                     error={uiError?.field === "username" ? uiError.message : undefined}
                                     disabled={loading}
                                 />
@@ -262,14 +276,50 @@ export default function AuthPage() {
                                 type="password"
                                 placeholder="••••••••"
                                 autoComplete={mode === "login" ? "current-password" : "new-password"}
+                                value={password}
+                                onInput={(e: any) => setPassword(e?.target?.value ?? "")}
                                 error={uiError?.field === "password" ? uiError.message : undefined}
                                 disabled={loading}
                             />
+                            {mode === "signup" && (
+                            <div className="flex flex-col gap-2">
+                                <label className="flex items-start gap-3 text-xs text-white/60 select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={acceptedTerms}
+                                    disabled={loading}
+                                    onChange={(e: any) => {
+                                    setAcceptedTerms(!!e?.target?.checked);
+                                    if (uiError?.field === "terms") setUiError(null);
+                                    }}
+                                    className="mt-1 h-4 w-4 rounded border border-white/20 bg-white/5"
+                                />
+
+                                <span className="leading-5">
+                                    I agree to the{" "}
+                                    <button
+                                    type="button"
+                                    disabled={loading}
+                                    onClick={() => navigate("/terms_of_service")}
+                                    className="underline underline-offset-2 text-white/80 hover:text-white"
+                                    >
+                                    Terms of Service
+                                    </button>
+                                </span>
+                                </label>
+
+                                {uiError?.field === "terms" && (
+                                <div className="text-[10px] uppercase tracking-wider text-red-400">
+                                    {uiError.message}
+                                </div>
+                                )}
+                            </div>
+                            )}
                         </div>
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || (mode === "signup" && !acceptedTerms)}
                             className="w-full py-3 px-6 rounded-xl bg-accent text-gray-950 font-bold tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? "INITIALIZING..." : (mode === "login" ? "AUTHENTICATE" : "REGISTER")}
