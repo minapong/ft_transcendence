@@ -89,7 +89,6 @@ export function initRouter() {
   window.addEventListener("popstate", async () => {
     // Browser has already changed URL. Sync app state.
     const target = normalizePath(window.location.pathname);
-    console.log("🔄 popstate event:", target);
 
     // Notify reactive components (sidebar, header) that URL changed
     window.dispatchEvent(new Event("routechange"));
@@ -164,17 +163,14 @@ function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key:
 export async function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean; state?: any }) {
   const target = normalizePath(path);
   const current = normalizePath(window.location.pathname);
-  console.log("🚀 navigate start:", target, opts?.replace ? "(replace)" : "");
 
   // Debounce: If already navigating to this exact destination, ignore.
   if (isTransitioning && target === transitioningTarget) {
-    console.log("🛑 navigate blocked (already transitioning to target):", target);
     return;
   }
 
   // Optimization: If already there and not forcing, just re-sync UI.
   if (!opts?.replace && target === current && !isTransitioning) {
-    console.log("⏭️ navigate skip (already at target):", target);
     renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
     return;
   }
@@ -192,15 +188,11 @@ export async function navigate(path: string, opts?: { replace?: boolean; trigger
     // 3. Final atomic history check
     const finalCurrent = normalizePath(window.location.pathname);
     if (opts?.replace) {
-      console.log("📌 history.replaceState:", target);
       history.replaceState(opts?.state ?? {}, "", target);
       window.dispatchEvent(new Event("routechange"));
     } else if (target !== finalCurrent) {
-      console.log("📌 history.pushState:", target);
       history.pushState(opts?.state ?? {}, "", target);
       window.dispatchEvent(new Event("routechange"));
-    } else {
-      console.log("⏭️ navigate skip push (already at target):", target);
     }
 
     renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
@@ -211,7 +203,6 @@ export async function navigate(path: string, opts?: { replace?: boolean; trigger
   } finally {
     isTransitioning = false;
     if (transitioningTarget === target) transitioningTarget = null;
-    console.log("🏁 navigate finished:", target);
   }
 }
 
