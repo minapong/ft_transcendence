@@ -71,6 +71,28 @@ export function vTournamentName(raw: unknown): Validation<string> {
   return { ok: true, value: s };
 }
 
+export function vInt(
+  raw: unknown,
+  name = "value",
+  opts?: { min?: number; max?: number }
+): Validation<number> {
+  // Accept numbers or numeric strings, reject objects/arrays
+  const n = Number(raw);
+
+  if (!Number.isFinite(n) || !Number.isInteger(n)) {
+    return { ok: false, error: `${name} must be an integer` };
+  }
+
+  if (opts?.min != null && n < opts.min) {
+    return { ok: false, error: `${name} must be >= ${opts.min}` };
+  }
+  if (opts?.max != null && n > opts.max) {
+    return { ok: false, error: `${name} must be <= ${opts.max}` };
+  }
+
+  return { ok: true, value: n };
+}
+
 export function vIntId(raw: unknown, name = "id"): Validation<number> {
   const n = Number(raw);
   if (!Number.isInteger(n) || n <= 0) {

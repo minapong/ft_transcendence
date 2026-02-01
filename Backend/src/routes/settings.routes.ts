@@ -1,11 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { requireAuth } from "../plugins/auth.guard.js";
-// import { SettingsService } from "../services/settings.service.js";
-import { UserRepo } from "../repositories/user.repo.js";
-import { unwrap } from "../lib/input/unwrap.js";
-import { vAge, vLocation } from "../lib/input/validators.js";
-import { WAREHOUSES } from "../lib/input/locations.js";
-// settings.routes.ts
+import { ProfileService } from "../services/profile.service.js";
+
 type Body = { age?: number | null; location?: string | null };
 
 export async function registerProfileSettingsRoutes(server: FastifyInstance) {
@@ -25,18 +21,29 @@ export async function registerProfileSettingsRoutes(server: FastifyInstance) {
       }
 
      
-      const patch: { age?: number | null; location?: string | null } = {};
-
       try {
-        // Apply EXACT same validation rules as frontend
-        if (hasAge) patch.age = unwrap(vAge(body.age));
-        if (hasLoc) patch.location = unwrap(vLocation(body.location, WAREHOUSES));
+        const user = await ProfileService.updateBasics(
+          userId,
+          hasAge ? body.age : undefined,
+          hasLoc ? body.location : undefined
+        );
 
-        const user = await UserRepo.updateBasics(userId, patch);
         return reply.code(200).send({ ok: true, user });
       } catch (e: any) {
-        // Validation errors use unwrap() -> Error(message)
-        return reply.code(200).send({ ok: false, error: e?.message ?? "Invalid input" });
+        const msg = String(e?.message ?? "");
+
+        // service can throw UNAUTHORIZED if userId is invalid
+        if (msg === "UNAUTHORIZED") {
+          return reply.code(200).send({ ok: false, error: "Unauthorized" });
+        }
+
+        // validator messages are already user-facing:
+        // "Age must be 0-130", "Invalid location"
+        if (msg) {
+          return reply.code(200).send({ ok: false, error: msg });
+        }
+
+        return reply.code(200).send({ ok: false, error: "Server error" });
       }
     }
   );
