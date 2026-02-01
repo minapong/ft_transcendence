@@ -153,7 +153,7 @@ export default function FriendsPage() {
           </div>
 
           <SecondaryButton
-            onClick={reload}
+            onClick={() => reload()}
             loading={loading}
             iconBefore={<span className="icon-[solar--refresh-bold]" />}
           >
