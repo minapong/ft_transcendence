@@ -189,5 +189,4 @@ VITE_API_URL=http://localhost:3000
 
 ---
 
-
 © 2025 ft_transcendence Team · 42 Network Project
