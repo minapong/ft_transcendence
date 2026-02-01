@@ -228,7 +228,6 @@ export default function ProfilePage(props?: { id?: string }) {
         )
       )}
 
-      {user.avatarId != null && <p>Avatar: {user.avatarId}</p>}
     </div>
   );
 }
