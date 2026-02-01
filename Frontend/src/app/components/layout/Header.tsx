@@ -92,7 +92,8 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
             if (isSpecialPage) {
               navigate("/");
             } else {
-              // console.log("[Header] Menu toggle: overlay open");
+              // 
+
               onMenuToggle();
             }
           }}

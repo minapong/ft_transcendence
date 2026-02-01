@@ -172,7 +172,7 @@ export default function PongGame() {
                                 console.warn("[Pong] Tournament result report failed:", res.status);
                                 return;
                             }
-                            // console.log("[Pong] Tournament result reported successfully");
+                            // 
                         })
                         .catch(err => {
                             console.warn("[Pong] Failed to report tournament result:", err);
