@@ -3,10 +3,12 @@ import { apiFetch } from "@/core/lib/api";
 import { useAuth } from "@/core/lib/useAuth";
 import Button, { SecondaryButton } from "@/app/components/ui/Button";
 import { getDefaultAvatar } from "@/core/lib/defaultAvatar";
+import { useScreen } from "@/app/hooks/useScreen";
 
 export default function MePage() {
   const auth = useAuth();
   const token = auth?.token;
+  const screen = useScreen();
 
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
@@ -103,23 +105,33 @@ export default function MePage() {
         </div>
 
         {/* Settings - Absolute Top Right */}
-        <div className="absolute top-6 right-6 z-30">
-          <button
-            onClick={() => navigate("/user/settings")}
-            className="p-3 rounded-full bg-gray-900/40 border border-white/10 text-gray-300 hover:text-cyan-400 hover:bg-gray-800 hover:border-cyan-500/50 transition-all duration-300 backdrop-blur-md group"
-            aria-label="Settings"
-          >
-            <span className="icon-[solar--settings-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-500" />
-          </button>
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 z-30">
+          {screen === "desktop" ? (
+            <button
+              onClick={() => navigate("/user/settings")}
+              className="flex items-center gap-3 px-6 py-3 rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)]"
+            >
+              <span className="icon-[solar--settings-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-500" />
+              <span className="tracking-wide">SETTINGS</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/user/settings")}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+            >
+              <span className="icon-[solar--settings-bold-duotone] text-xl group-hover:rotate-90 transition-transform duration-500" />
+              <span className="tracking-wide text-xs">SETTINGS</span>
+            </button>
+          )}
         </div>
 
         {/* Profile Info Overlay */}
-        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 z-20 flex flex-col md:flex-row items-end justify-start gap-8">
+        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-20 flex flex-col md:flex-row items-start md:items-end justify-start gap-4 md:gap-8">
           {/* Avatar with Glow */}
-          <div className="relative group">
+          <div className="relative group self-center md:self-auto">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
             <div
-              className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-900 flex items-center justify-center z-10 cursor-pointer ring-2 ring-white/10 group-hover:ring-cyan-400/50 transition-all"
+              className="relative w-28 h-28 md:w-40 md:h-40 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-900 flex items-center justify-center z-10 cursor-pointer ring-2 ring-white/10 group-hover:ring-cyan-400/50 transition-all"
               onClick={() => {
                 const url = avatarUrl || getDefaultAvatar(profile?.id);
                 openModal({
@@ -157,9 +169,9 @@ export default function MePage() {
           </div>
 
           {/* Identity */}
-          <div className="mb-3 flex-1">
+          <div className="mb-1 md:mb-3 flex-1 flex flex-col items-center md:items-start text-center md:text-left self-center md:self-auto">
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-xl relative">
+              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-xl relative">
                 {profile?.username}
                 {/* Glitch effect deco */}
                 <span className="absolute -left-[2px] -top-[2px] w-full h-full text-red-500 opacity-0 group-hover:opacity-30 mix-blend-screen animate-pulse pointer-events-none" aria-hidden="true">{profile?.username}</span>

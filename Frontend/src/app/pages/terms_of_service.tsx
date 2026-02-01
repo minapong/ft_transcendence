@@ -2,6 +2,7 @@ import { useState } from "Reactor";
 
 type Section = {
   id: string;
+  iconClass: string;
   title: string;
   lead?: string;
   bullets?: string[];
@@ -10,12 +11,14 @@ type Section = {
 const sections: Section[] = [
   {
     id: "acceptance",
+    iconClass: "icon-[solar--document-text-bold-duotone]",
     title: "Acceptance of Terms",
     lead:
       "By creating an account, launching a match, or using any feature of ft_transcendence, you agree to these Terms. If you disagree, please do not use the platform.",
   },
   {
     id: "what-we-provide",
+    iconClass: "icon-[solar--gamepad-minimalistic-bold-duotone]",
     title: "What ft_transcendence Provides",
     bullets: [
       "Online multiplayer arcade experiences: 2P/4P Pong and Connect4 (with AI where available).",
@@ -26,6 +29,7 @@ const sections: Section[] = [
   },
   {
     id: "eligibility",
+    iconClass: "icon-[solar--user-id-bold-duotone]",
     title: "Eligibility & Accounts",
     bullets: [
       "You must be at least 13 years old (or the minimum age in your region) and able to enter a binding agreement.",
@@ -36,6 +40,7 @@ const sections: Section[] = [
   },
   {
     id: "conduct",
+    iconClass: "icon-[solar--shield-check-bold-duotone]",
     title: "Fair Play & Conduct",
     bullets: [
       "No cheating, automation, match-fixing, griefing, or exploiting bugs.",
@@ -46,6 +51,7 @@ const sections: Section[] = [
   },
   {
     id: "user-content",
+    iconClass: "icon-[solar--chat-line-bold-duotone]",
     title: "User Content & Communications",
     bullets: [
       "You own your chat messages, avatars, and other user content, but grant us a license to host, display, and moderate them inside the service.",
@@ -55,6 +61,7 @@ const sections: Section[] = [
   },
   {
     id: "data-privacy",
+    iconClass: "icon-[solar--lock-password-bold-duotone]",
     title: "Data & Privacy",
     bullets: [
       "We process account data (email, username, hashed password), optional age/location, avatars, presence status, friend links, match stats, and basic technical logs (IP, device, timestamps).",
@@ -64,6 +71,7 @@ const sections: Section[] = [
   },
   {
     id: "availability",
+    iconClass: "icon-[solar--danger-triangle-bold-duotone]",
     title: "Service Availability (Beta)",
     bullets: [
       "ft_transcendence is an educational/portfolio project; features may change, reset, or be unavailable without notice.",
@@ -73,6 +81,7 @@ const sections: Section[] = [
   },
   {
     id: "tournaments",
+    iconClass: "icon-[solar--cup-first-bold-duotone]",
     title: "Tournaments, Leaderboards & Resets",
     bullets: [
       "Rankings are for fun and skill tracking only; no monetary rewards are offered.",
@@ -82,6 +91,7 @@ const sections: Section[] = [
   },
   {
     id: "security",
+    iconClass: "icon-[solar--shield-keyhole-bold-duotone]",
     title: "Security",
     bullets: [
       "Passwords are stored using industry-standard hashing; avoid reusing passwords from other services.",
@@ -91,6 +101,7 @@ const sections: Section[] = [
   },
   {
     id: "third-parties",
+    iconClass: "icon-[solar--global-bold-duotone]",
     title: "Third-Party Services",
     bullets: [
       "Optional integrations (e.g., OAuth identity providers) are subject to their own terms; you are responsible for reviewing them.",
@@ -99,6 +110,7 @@ const sections: Section[] = [
   },
   {
     id: "intellectual-property",
+    iconClass: "icon-[solar--copyright-bold-duotone]",
     title: "Intellectual Property",
     bullets: [
       "Game code, visuals, and branding for ft_transcendence remain the property of the project team, except for open-source components that retain their respective licenses.",
@@ -107,6 +119,7 @@ const sections: Section[] = [
   },
   {
     id: "liability",
+    iconClass: "icon-[solar--scale-bold-duotone]",
     title: "Disclaimers & Liability",
     bullets: [
       "The service is provided \"as is\" and \"as available,\" without warranties of performance, availability, or fitness for a particular purpose.",
@@ -116,6 +129,7 @@ const sections: Section[] = [
   },
   {
     id: "termination",
+    iconClass: "icon-[solar--close-square-bold-duotone]",
     title: "Termination",
     bullets: [
       "You may stop using the service at any time; contact us if you want account data removed where legally allowed.",
@@ -124,6 +138,7 @@ const sections: Section[] = [
   },
   {
     id: "changes",
+    iconClass: "icon-[solar--refresh-bold-duotone]",
     title: "Changes",
     bullets: [
       "We may update these Terms to reflect new features or legal requirements.",
@@ -203,7 +218,10 @@ export default function TermsOfService() {
                 className="legal-section panel-surface"
                 aria-label={section.title}
               >
-                <h2 className="legal-section__title">{section.title}</h2>
+                <h2 className="legal-section__title">
+                  <span className={`legal-icon ${section.iconClass}`} aria-hidden="true" />
+                  {section.title}
+                </h2>
                 {section.lead && <p className="legal-section__text">{section.lead}</p>}
                 {section.bullets && (
                   <ul className="legal-list">
@@ -224,6 +242,10 @@ export default function TermsOfService() {
           <span>ft_transcendence is an educational / portfolio project; no monetary rewards or gambling.</span>
           <span>© 2026 ft_transcendence team · 42 Network project</span>
         </footer>
+
+        <a className="legal-backtotop" href="#legal-top" aria-label="Back to top">
+          ↑ Back to Top
+        </a>
       </div>
     </main>
   );
