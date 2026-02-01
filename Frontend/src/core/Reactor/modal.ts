@@ -5,6 +5,7 @@ export type ModalDescriptor<T = unknown> = {
   payload?: T;
   render?: ModalRenderer<T>;
   label?: string;
+  className?: string;
 };
 
 export type ModalRenderer<T = unknown> = (payload: T) => HTMLElement;

@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "../hooks";
+import { useState, useEventListener } from "Reactor";
 
 /**
  * useLocation Hook
@@ -11,19 +10,9 @@ export function useLocation() {
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
   const [location, setLocation] = useState(currentPath);
 
-  useEffect(() => {
-    const handleSync = () => {
-      setLocation(window.location.pathname);
-    };
-
-    window.addEventListener("routechange", handleSync);
-    window.addEventListener("popstate", handleSync);
-
-    return () => {
-      window.removeEventListener("routechange", handleSync);
-      window.removeEventListener("popstate", handleSync);
-    };
-  }, []);
+  useEventListener("routechange", () => {
+    setLocation(window.location.pathname);
+  });
 
   return location;
 }

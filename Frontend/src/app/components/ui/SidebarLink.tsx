@@ -7,11 +7,10 @@ interface SidebarLinkProps {
 	icon: string;
 	iconActive: string;
 	active: boolean;
-	collapsed: boolean;
 	onClick: () => void;
 }
 
-export default function SidebarLink({ label, href, icon, iconActive, active, collapsed, onClick }: SidebarLinkProps) {
+export default function SidebarLink({ label, href, icon, iconActive, active, onClick }: SidebarLinkProps) {
 	const ref = useRef<HTMLAnchorElement>(null);
 
 	// Direct event handlers - re-attached on every render (Reactor-compatible)
@@ -48,17 +47,16 @@ export default function SidebarLink({ label, href, icon, iconActive, active, col
 			onPointerDown={handlePointerDown}
 			onPointerUp={handlePointerUp}
 			onPointerCancel={handlePointerLeave}
-			title={collapsed ? label : undefined}
-			className={`sidebar-link fx-energy group rounded-lg flex items-center ${!collapsed ? "px-3 py-2.5 justify-between w-full" : "p-1.5 justify-center"} ${active ? "sidebar-link--active energy-focus" : "energy-none"} hover:energy-low`}
+			className={`sidebar-link fx-energy group rounded-lg flex items-center px-3 py-2.5 justify-between w-full ${active ? "sidebar-link--active energy-focus" : "energy-none"} hover:energy-low`}
 		>
-			<span className={`flex items-center ${!collapsed ? "gap-4" : ""}`}>
+			<span className="flex items-center gap-4">
 				<span className={`sidebar-icon-shell ${active ? "sidebar-icon-shell--active" : ""}`}>
 					<span className={`${active ? iconActive : icon} ${active ? "sidebar-icon--active" : ""} text-xl`} />
 				</span>
-				<span className={!collapsed ? "font-medium" : "sr-only"}>{label}</span>
+				<span className="font-medium">{label}</span>
 			</span>
 
-			{!collapsed && <span className="icon-[solar--arrow-right-bold] text-xl opacity-50" />}
+			<span className="icon-[solar--arrow-right-bold] text-xl opacity-50" />
 		</a>
 	);
 }

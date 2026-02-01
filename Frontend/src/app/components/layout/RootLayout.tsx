@@ -1,4 +1,4 @@
-import { useState, useEffect } from "Reactor";
+import { useState, useEffect, useLocation } from "Reactor";
 
 import Header from "@/app/components/layout/Header";
 import LeftSidebar from "@/app/components/layout/LeftSidebar";
@@ -10,18 +10,16 @@ export default function RootLayout({ children }) {
   const screen = useScreen();
   const sidebarMode = screen === "desktop" ? "static" : "overlay";
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSidebarHidden, setIsSidebarHidden] = useState(false);
 
-  // Don't use useLocation() here - it can be stale during layout transitions
-  // RootLayout is re-rendered on every route change anyway, so direct access is safe
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
+  const pathname = useLocation();
 
-  // Reset states when switching between static and overlay
+  // Reset states when switching modes
   useEffect(() => {
     if (sidebarMode === "static") {
       setIsOverlayOpen(false);
     } else {
-      setIsCollapsed(false);
+      setIsSidebarHidden(false);
     }
   }, [sidebarMode]);
 
@@ -30,13 +28,13 @@ export default function RootLayout({ children }) {
   const handleToggle = () => {
     if (sidebarMode === "overlay") {
       if (isOverlayOpen) {
-        // Dispatch close and wait for animation via isOverlayOpen flipping to false
         window.dispatchEvent(new Event("sidebar:close"));
       } else {
         setIsOverlayOpen(true);
       }
     } else {
-      setIsCollapsed(v => !v);
+      // On desktop, toggle sidebar visibility
+      setIsSidebarHidden(v => !v);
     }
   };
 
@@ -52,10 +50,9 @@ export default function RootLayout({ children }) {
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar
           mode={sidebarMode}
-          isCollapsed={isCollapsed}
           isOverlayOpen={isOverlayOpen}
           setIsOverlayOpen={setIsOverlayOpen}
-          hidden={hideSidebar}
+          hidden={hideSidebar || (sidebarMode === "static" && isSidebarHidden)}
         />
 
         <main id="spa-root" className="flex-1 overflow-y-auto">
@@ -64,6 +61,11 @@ export default function RootLayout({ children }) {
       </div>
 
       <ModalRoot />
+
+      {/* Global Route Transition Overlay */}
+      <div id="route-transition" aria-hidden="true">
+        <div className="route-bar"></div>
+      </div>
     </div>
   );
 }

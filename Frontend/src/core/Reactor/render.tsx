@@ -1,9 +1,14 @@
 import rootLayout from "@/app/components/layout/RootLayout";
 import { resetHooks, flushEffects, runPendingRefs, cleanupContext } from "./hooks";
 import { getRoutes, resolvePage, isSpecialLayout } from "./router/routes";
+import { startTransition, endTransition } from "./router/transition";
 
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
 export const LAYOUT_KEY = "__layout__";
+
+// Track navigation state for animated transitions
+let hasNavigated = false;
+let isTransitioning = false;
 
 // Track the last known path for layout swap detection
 let lastKnownPath = "";
@@ -13,71 +18,71 @@ let lastKnownPath = "";
 export function renderRoute(triggerKey?: string) {
   const rawPath = window.location.pathname;
   const normalizedPath = normalizePath(rawPath);
-  //normalize cuurent page url points to
 
-  // Check if layout needs to swap (from normal to special or vice versa)
-  const layoutNeedsUpdate = lastKnownPath && isSpecialLayout(normalizedPath) !== isSpecialLayout(lastKnownPath);
+  // Detect layout swap BEFORE updating lastKnownPath
+  const prevIsSpecial = lastKnownPath ? isSpecialLayout(lastKnownPath) : null;
+  const nextIsSpecial = isSpecialLayout(normalizedPath);
+  const layoutNeedsUpdate = prevIsSpecial !== null && prevIsSpecial !== nextIsSpecial;
 
-  // Update last known path
   lastKnownPath = normalizedPath;
-
-  // Update document title
   document.title = getPageTitle(normalizedPath);
+  window.dispatchEvent(new Event("routechange"));
 
-  const routes = getRoutes();
-  const { component, params } = resolvePage(routes, rawPath);
-
+  const { component, params } = resolvePage(getRoutes(), rawPath);
   const root = document.getElementById("app");
   if (!root) return;
+
   try {
-    // get current page
-    const pageKey = `page:${normalizedPath}`;
-    // Use different layout keys for normal vs special layouts
-    const layoutKey = isSpecialLayout(normalizedPath) ? "__layout__:special" : "__layout__:normal";
+    const layoutKey = nextIsSpecial ? "__layout__:special" : "__layout__:normal";
     let inner = document.getElementById("spa-root");
 
-    // if page is not loaded or someone ordered layout re render through passing triggerKey props
-    if (!inner || triggerKey?.startsWith(LAYOUT_KEY) || layoutNeedsUpdate) {
+    // Re-render layout if type changed, if missing, or if explicitly requested (including via hooks)
+    if (!inner || layoutNeedsUpdate || triggerKey?.startsWith(LAYOUT_KEY)) {
       if (layoutNeedsUpdate) {
-        const prevLayoutKey = isSpecialLayout(lastKnownPath) ? "__layout__:special" : "__layout__:normal";
-        cleanupContext(prevLayoutKey);
+        cleanupContext(prevIsSpecial ? "__layout__:special" : "__layout__:normal");
       }
-
-      renderSubtree(
-        () => rootLayout({ children: null }), //build the outer shell first
-        root, // mount at root
-        layoutKey, // track layout's its state independently with separate keys per type
-        { track: false } // dont check layouts children at all
-      );
+      renderSubtree(() => rootLayout({ children: null }), root, layoutKey, { track: false });
       inner = document.getElementById("spa-root");
-      if (!inner) throw new Error("spa-root not found after rendering RootLayout");
     }
 
-    renderSubtree(() => component(params), inner, pageKey); //after grabing actual page now render that
+    if (inner) renderSubtree(() => component(params), inner, `page:${normalizedPath}`);
   } catch (err) {
     console.error("⚠️ renderRoute error:", err);
   }
 }
 
-// Initializes the router by setting up event listeners for navigation and rendering the initial route.
+// Initializes the router
 export function initRouter() {
   document.addEventListener("click", (e) => {
     if (e.defaultPrevented) return;
-
     const link = (e.target as HTMLElement).closest("a");
-    // Ensure it's a left click and not opening in new tab
     if (link && link.getAttribute("href")?.startsWith("/") && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
       navigate(link.getAttribute("href")!);
     }
   });
 
-  window.addEventListener("popstate", () => {
+  window.addEventListener("popstate", async () => {
+    // Notify reactive components immediately so they can update icons/visibility
     window.dispatchEvent(new Event("routechange"));
-    renderRoute();
+
+    if (isTransitioning) return;
+    isTransitioning = true;
+    try {
+      // Popstate is spatially backward
+      await startTransition({
+        direction: "backward",
+        weight: isHeavyRoute(window.location.pathname) ? "heavy" : "normal"
+      });
+      renderRoute();
+      await endTransition();
+    } finally {
+      isTransitioning = false;
+    }
   });
 
   renderRoute();
+  hasNavigated = true;
 }
 
 function normalizePath(rawPath: string) {
@@ -121,34 +126,36 @@ function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key:
   flushEffects(); // at last after ref flush all the effects execute all effect callback
 }
 
-// Programmatic navigation helper so any code can trigger a route change.
-export function navigate(
-  path: string,
-  opts?: {
-    replace?: boolean; // you can ask forcefull replacement of current url
-    triggerLayout?: boolean; // you can ask forcefull replacement of layout
-    state?: any; // you can pass state to the route
-  }
-) {
-  const target = normalizePath(path.startsWith("/") ? path : `/${path}`); //appends if there is no slash at start
-  const current = normalizePath(window.location.pathname); //get current url
+// Programmatic navigation helper
+export async function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean; state?: any }) {
+  const target = normalizePath(path);
+  const current = normalizePath(window.location.pathname);
+  const shouldUpdate = opts?.replace || target !== current;
 
-  const shouldUpdateHistory = opts?.replace || target !== current; // check if user asked replacement 
+  if (isTransitioning) return;
+  isTransitioning = true;
 
-  if (shouldUpdateHistory) {
-    const method = opts?.replace ? "replaceState" : "pushState";
-    history[method](opts?.state ?? {}, "", target);
+  try {
+    // Spatial forward + Route weight detection
+    await startTransition({
+      direction: "forward",
+      weight: isHeavyRoute(target) ? "heavy" : "normal"
+    });
+
+    if (shouldUpdate) history[opts?.replace ? "replaceState" : "pushState"](opts?.state ?? {}, "", target);
     window.dispatchEvent(new Event("routechange"));
+    renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
+    await endTransition();
+  } finally {
+    isTransitioning = false;
   }
-
-  // Always render to ensure UI matches current state, 
-  // unless it's a redundant push that wouldn't change anything.
-  // BUT we render anyway because state might have changed.
-  renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
 }
 
-
-
-
-
-
+/**
+ * Determines if a route is "heavy" (e.g. game or tournament) 
+ * to trigger a more deliberate signature move.
+ */
+function isHeavyRoute(path: string): boolean {
+  const p = normalizePath(path);
+  return p.startsWith("/game") || p.startsWith("/tournament");
+}

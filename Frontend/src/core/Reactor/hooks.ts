@@ -75,7 +75,7 @@ export function resetHooks(pageKey?: string, opts?: { track?: boolean }) {
 	if (activeHookKey !== DEFAULT_KEY) {
 		const prevCtx = getContext(activeHookKey);
 		if (prevCtx.hookCount !== null && hookIndex !== prevCtx.hookCount) {
-			console.warn(`Reactor: Hook count mismatch for key "${activeHookKey}". Expected ${prevCtx.hookCount}, got ${hookIndex}. This indicates hooks were called conditionally.`);
+			// console.warn(`Reactor: Hook count mismatch for key "${activeHookKey}". Expected ${prevCtx.hookCount}, got ${hookIndex}. This indicates hooks were called conditionally.`);
 		}
 		prevCtx.hookCount = hookIndex;
 	}
@@ -110,7 +110,7 @@ export function useState<T>(initial: T): [T, (v: T | ((prev: T) => T)) => void] 
 	const stateKey = activeHookKey;
 	const setState = (newValue: T | ((v: T) => T)) => {
 		if (isCleaningUp) {
-			console.warn("Reactor: setState ignored during cleanup to prevent re-entry loops.");
+			// console.warn("Reactor: setState ignored during cleanup to prevent re-entry loops.");
 			return;
 		}
 		const next = typeof newValue === "function"
