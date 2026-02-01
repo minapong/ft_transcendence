@@ -1,5 +1,5 @@
 import { getAuth, logout } from "@/core/lib/auth";
-const DANCE_URL="https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+import { useEffect, navigate } from "Reactor";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -31,15 +31,13 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
 
       // Support both styles:
       // 1) { ok:false, error:"ADMIN_ONLY" }
-      // 2) { error:"Admin access required" } (your current requireAdmin)
+      // 2) { error:"Admin access required" } 
       const err = String(data?.error ?? "");
 
       if (err === "ADMIN_ONLY" || err === "Admin access required") {
-        // optional: logout() if you want to wipe the "fake admin" token too
-        // logout();
 
         // redirect
-        window.location.href = DANCE_URL;
+        navigate("/dance");;
       }
     } catch {
       // ignore parse errors
