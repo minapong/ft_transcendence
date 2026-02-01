@@ -1,0 +1,15 @@
+/* Frontend/styles/components/browser-kit.css */
+.browser-badge {
+  position: absolute; /* relative to header */
+  top: 10px;
+  right: 10px;
+  background: #4caf50;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.8;
+  z-index: 101; /* above header content */
+  pointer-events: none; /* so it doesn't block clicks */
+}
