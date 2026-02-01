@@ -45,7 +45,27 @@ export function renderRoute(triggerKey?: string) {
       inner = document.getElementById("spa-root");
     }
 
-    if (inner) renderSubtree(() => component(params), inner, `page:${normalizedPath}`);
+    if (!component) {
+      console.error("🧭 Route resolved to null component for path:", normalizedPath);
+      return;
+    }
+
+    if (inner) {
+      renderSubtree(() => {
+        try {
+          return component(params);
+        } catch (err) {
+          console.error("🧭 Page render error:", err);
+          const errorBox = document.createElement("div");
+          errorBox.innerHTML = `<div style="padding: 2rem; color: #f87171; background: #7f1d1d22; border: 1px solid #7f1d1d44; rounded: 0.5rem; margin: 2rem;">
+                    <h2 style="font-weight: bold; margin-bottom: 0.5rem;">Render Error</h2>
+                    <p style="font-family: monospace; font-size: 0.875rem;">${(err as Error).message}</p>
+                    <button onclick="window.location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">Reload System</button>
+                </div>`;
+          return errorBox;
+        }
+      }, inner, `page:${normalizedPath}`);
+    }
   } catch (err) {
     console.error("⚠️ renderRoute error:", err);
   }
@@ -130,9 +150,13 @@ function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key:
 export async function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean; state?: any }) {
   const target = normalizePath(path);
   const current = normalizePath(window.location.pathname);
-  const shouldUpdate = opts?.replace || target !== current;
+  const isSameTarget = target === current && !opts?.replace;
 
-  if (isTransitioning) return;
+  // If already transitioning, we can skip if it's the same target, 
+  // but if it's different we might have a race condition.
+  // We'll allow replacing a transition if it's new.
+  if (isTransitioning && isSameTarget) return;
+
   isTransitioning = true;
 
   try {
@@ -142,10 +166,15 @@ export async function navigate(path: string, opts?: { replace?: boolean; trigger
       weight: isHeavyRoute(target) ? "heavy" : "normal"
     });
 
-    if (shouldUpdate) history[opts?.replace ? "replaceState" : "pushState"](opts?.state ?? {}, "", target);
+    if (!isSameTarget || opts?.replace) {
+      history[opts?.replace ? "replaceState" : "pushState"](opts?.state ?? {}, "", target);
+    }
+
     window.dispatchEvent(new Event("routechange"));
     renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
     await endTransition();
+  } catch (err) {
+    console.error("🧭 Navigation failed:", err);
   } finally {
     isTransitioning = false;
   }
