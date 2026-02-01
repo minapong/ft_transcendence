@@ -78,7 +78,7 @@ export default function PongGame() {
         p2Name = navState.p2;
     } else {
         // Invalid entry
-        navigate("/game/single_game", { replace: true });
+        navigate("/game/pre_match_scene", { replace: true });
         return null;
     }
 
@@ -142,7 +142,7 @@ export default function PongGame() {
                     if (destination === "tournament") {
                         navigate("/tournament/active", { replace: true });
                     } else {
-                        navigate("/game/single_game", { replace: true });
+                        navigate("/game/pre_match_scene", { replace: true });
                     }
                 };
 
@@ -172,7 +172,7 @@ export default function PongGame() {
                                 console.warn("[Pong] Tournament result report failed:", res.status);
                                 return;
                             }
-                            // console.log("[Pong] Tournament result reported successfully");
+                            // 
                         })
                         .catch(err => {
                             console.warn("[Pong] Failed to report tournament result:", err);
@@ -209,15 +209,15 @@ export default function PongGame() {
             mb-4
             ">
 
-            <span ref={scoreLeftRef} className="flex-1 text-left">
-                {p1Name}: 0
-            </span>
+                <span ref={scoreLeftRef} className="flex-1 text-left">
+                    {p1Name}: 0
+                </span>
 
-            <span className="text-slate-400 px-3">—</span>
+                <span className="text-slate-400 px-3">—</span>
 
-            <span ref={scoreRightRef} className="flex-1 text-right">
-                {p2Name}: 0
-            </span>
+                <span ref={scoreRightRef} className="flex-1 text-right">
+                    {p2Name}: 0
+                </span>
 
             </div>
 
@@ -277,38 +277,38 @@ export default function PongGame() {
                     0 8px 30px rgba(0, 0, 0, 0.6)
                     `,
                 }}
-                >
+            >
 
 
 
                 {/* Left paddle */}
                 <div
-                ref={leftPaddleRef}
-                id="left_p"
-                className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
+                    ref={leftPaddleRef}
+                    id="left_p"
+                    className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
                             w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[#f8fafc]"
-                style={{
-                    boxShadow: `
+                    style={{
+                        boxShadow: `
                     inset 0 0 0 1px rgba(0, 0, 0, 0.12),
                     0 0 8px rgba(56, 189, 248, 0.25)
                     `,
-                }}
+                    }}
                 />
 
 
 
                 {/* Right paddle */}
                 <div
-                ref={rightPaddleRef}
-                id="right_p"
-                className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
+                    ref={rightPaddleRef}
+                    id="right_p"
+                    className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
                             w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
-                style={{
-                    boxShadow: `
+                    style={{
+                        boxShadow: `
                     inset 0 0 0 1px rgba(0, 0, 0, 0.12),
                     0 0 8px rgba(56, 189, 248, 0.25)
                     `,
-                }}
+                    }}
                 />
 
 

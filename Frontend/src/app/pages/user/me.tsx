@@ -17,7 +17,7 @@ export default function MePage() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/auth/login");
+      navigate("/auth/login", { replace: true });
       return;
     }
 
