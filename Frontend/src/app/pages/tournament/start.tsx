@@ -3,6 +3,7 @@ import { apiFetch } from "@/core/lib/api";
 import { useState, useEffect, navigate } from "Reactor"
 import { vTournamentName } from "@/core/lib/input/validators";
 import { unwrap } from "@/core/lib/input/unwrap";
+import UserAvatar from "@/app/components/ui/UserAvatar";
 
 
 export default function TournamentPage() {
@@ -124,21 +125,30 @@ export default function TournamentPage() {
 	// Login prompt
 	if (!user) {
 		return (
-			<div className="min-h-screen flex items-center justify-center p-8">
-				<div className="panel-surface relative w-full max-w-lg p-10 rounded-2xl backdrop-blur-xl">
-					{/* Accent top line */}
-					<div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-60 rounded-t-2xl" />
-					<div className="flex flex-col items-center gap-6 text-center">
-						<div className="w-20 h-20 rounded-full bg-surface border border-accent/30 flex items-center justify-center" style={{ boxShadow: 'var(--glow-medium)' }}>
-							<span className="icon-[solar--cup-star-bold-duotone] text-4xl text-accent" />
+			<div className="min-h-screen flex items-center justify-center p-6 bg-gray-950">
+				<div className="panel-surface relative w-full max-w-lg p-10 rounded-3xl backdrop-blur-2xl border border-white/5 overflow-hidden">
+					<div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 to-cyan-900/10" />
+					<div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+
+					<div className="relative flex flex-col items-center gap-8 text-center z-10">
+						<div className="w-24 h-24 rounded-full bg-surface border border-cyan-500/20 flex items-center justify-center relative group">
+							<div className="absolute inset-0 rounded-full bg-cyan-400/10 animate-pulse" />
+							<span className="icon-[solar--cup-star-bold-duotone] text-5xl text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
 						</div>
-						<div>
-							<p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent/70 mb-2">Arena Protocol</p>
-							<h1 className="text-3xl font-black text-white tracking-tight">Tournament Arena</h1>
+
+						<div className="space-y-2">
+							<p className="text-[10px] font-bold tracking-[0.3em] uppercase text-cyan-400/60">Restricted Access</p>
+							<h1 className="text-4xl font-black text-white tracking-tight">Arena Protocol</h1>
+							<p className="text-lg text-gray-400 max-w-xs mx-auto">Authentication required to enter tournament grounds.</p>
 						</div>
-						<p className="text-lg text-gray-400">Please login to join tournament.</p>
-						<button onClick={() => navigate("/auth/login")} className="btn btn-primary btn-lg mt-4">
-							Go to Login
+
+						<button
+							onClick={() => navigate("/auth/login")}
+							className="btn-hero btn-lg w-full group relative overflow-hidden"
+						>
+							<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+							<span className="icon-[solar--login-3-bold] mr-2" />
+							Authenticate
 						</button>
 					</div>
 				</div>
@@ -149,9 +159,14 @@ export default function TournamentPage() {
 	// Loading
 	if (loading) {
 		return (
-			<div className="min-h-screen flex flex-col items-center justify-center gap-6">
-				<div className="w-14 h-14 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
-				<p className="text-lg text-gray-400">Loading tournament...</p>
+			<div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-gray-950">
+				<div className="relative">
+					<div className="w-16 h-16 border-4 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin" />
+					<div className="absolute inset-0 flex items-center justify-center">
+						<span className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,1)]" />
+					</div>
+				</div>
+				<p className="text-lg text-cyan-400/60 font-mono tracking-widest animate-pulse">INITIALIZING...</p>
 			</div>
 		);
 	}
@@ -162,177 +177,254 @@ export default function TournamentPage() {
 	const isFull = (tournament?.registeredPlayers?.length || 0) >= (tournament?.max_players ?? max_players);
 
 	return (
-		<div className="min-h-screen text-white">
-			{/* Scanline overlay */}
-			<div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_1px]" />
+		<div className="min-h-screen text-white bg-gray-950 pb-20 selection:bg-cyan-500/30">
+			{/* Scanline & Ambient background */}
+			<div className="fixed inset-0 pointer-events-none z-0">
+				<div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_1px]" />
+				<div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 blur-[120px] rounded-full" />
+				<div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-cyan-900/20 blur-[120px] rounded-full" />
+			</div>
 
-			{/* Main content */}
-			<div className="max-w-6xl mx-auto px-6 md:px-12 py-12">
-				{/* Header */}
-				<div className="mb-12 text-center md:text-left">
-					<div className="flex flex-col md:flex-row items-center gap-6 mb-6">
-						<div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-950/80 to-purple-950/50 border border-accent/30 flex items-center justify-center" style={{ boxShadow: 'var(--glow-medium)' }}>
-							<span className="icon-[solar--cup-star-bold-duotone] text-4xl text-accent" />
+			<div className="max-w-7xl mx-auto px-6 md:px-12 py-12 relative z-10">
+
+				{/* Hero Header */}
+				<header className="mb-16 relative">
+					<div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
+						<div className="relative group">
+							<div className="absolute -inset-1 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-3xl opacity-30 blur-lg group-hover:opacity-50 transition-opacity duration-500" />
+							<div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-gray-900 border border-white/10 flex items-center justify-center relative z-10 shadow-2xl">
+								<span className="icon-[solar--cup-star-bold-duotone] text-5xl md:text-6xl text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]" />
+							</div>
 						</div>
-						<div>
-							<p className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent/70 mb-1">Arena Protocol</p>
-							<h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+
+						<div className="space-y-4 flex-1">
+							<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold tracking-[0.2em] uppercase text-cyan-400 mb-2">
+								<span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+								System Online
+							</div>
+							<h1 className="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-500">
 								{tournament ? tournament.name : "Tournament Arena"}
 							</h1>
+
 							{tournament && (
-								<div className="flex items-center gap-3 mt-3">
-									<span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${tournament.state === 'waiting' ? 'bg-amber-950/50 text-amber-400 border border-amber-500/30' :
-											tournament.state === 'active' ? 'bg-green-950/50 text-green-400 border border-green-500/30' :
-												'bg-gray-800 text-gray-400 border border-gray-700'
+								<div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+									<div className={`px-4 py-2 rounded-xl border flex items-center gap-3 ${tournament.state === 'waiting'
+										? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+										: tournament.state === 'active'
+											? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+											: 'bg-gray-800/50 border-gray-700 text-gray-400'
 										}`}>
-										<span className={`w-2 h-2 rounded-full animate-pulse ${tournament.state === 'waiting' ? 'bg-amber-400' :
-												tournament.state === 'active' ? 'bg-green-400' : 'bg-gray-500'
+										<span className={`w-2 h-2 rounded-full animate-pulse ${tournament.state === 'waiting' ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]' :
+											tournament.state === 'active' ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]' : 'bg-gray-400'
 											}`} />
-										{tournament.state}
-									</span>
+										<span className="font-bold uppercase tracking-wider text-sm">{tournament.state}</span>
+									</div>
+									<div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-mono text-sm">
+										<span className="icon-[solar--hashtag-square-bold] mr-2 opacity-50" />
+										ID: {tournament.id}
+									</div>
 								</div>
 							)}
 						</div>
 					</div>
-				</div>
+				</header>
 
-				{/* Error */}
+				{/* Error Toast */}
 				{error && (
-					<div className="mb-8 flex items-center gap-4 px-5 py-4 bg-red-950/30 border border-red-500/30 rounded-xl text-red-400">
-						<span className="icon-[solar--danger-triangle-bold-duotone] text-2xl flex-shrink-0" />
-						<span>{error}</span>
+					<div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+						<div className="flex items-center gap-4 px-6 py-4 bg-red-950/90 border border-red-500/30 rounded-2xl text-red-200 shadow-2xl backdrop-blur-xl">
+							<span className="icon-[solar--danger-triangle-bold-duotone] text-2xl animate-bounce" />
+							<span className="font-medium">{error}</span>
+							<button onClick={() => setError("")} className="ml-2 hover:bg-white/10 p-1 rounded-lg transition-colors">
+								<span className="icon-[solar--close-circle-bold] text-xl" />
+							</button>
+						</div>
 					</div>
 				)}
 
-				{/* Content Grid */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-					{/* Left: Action Card */}
-					<div className="panel-surface relative overflow-hidden rounded-2xl backdrop-blur-md p-8">
-						{/* Accent top line */}
-						<div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent opacity-50" />
+				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-						{/* Admin: Create Tournament */}
+					{/* LEFT COLUMN: Main Action Panel */}
+					<div className="lg:col-span-7 space-y-8">
+
+						{/* Admin Create Panel */}
 						{!tournament && isAdmin && (
-							<div className="space-y-6">
-								<div className="flex items-center gap-3 mb-6">
-									<span className="icon-[solar--add-circle-bold-duotone] text-2xl text-accent" />
-									<h2 className="text-xl font-bold text-white">Create Tournament</h2>
-								</div>
+							<div className="panel-surface panel-surface--heavy relative overflow-hidden rounded-3xl p-8 md:p-10 group">
+								<div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
 
-								<div className="space-y-2">
-									<label className="block text-[11px] font-semibold tracking-wide uppercase text-gray-400">
-										Tournament Name
-									</label>
-									<input
-										type="text"
-										placeholder="Enter a name..."
-										value={tournamentNameRaw}
-										onChange={e => setTournamentName(e.target.value)}
-										className="w-full px-4 py-3 bg-surface border border-border-soft rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 focus:bg-surface-strong transition-all"
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<label className="block text-[11px] font-semibold tracking-wide uppercase text-gray-400">
-										Max Players
-									</label>
-									<div className="flex gap-3">
-										{[4, 8].map(num => (
-											<button
-												key={num}
-												onClick={() => setMax_players(num)}
-												className={`flex-1 py-3 px-4 rounded-xl text-lg font-bold transition-all ${max_players === num
-														? 'bg-accent text-black'
-														: 'bg-surface text-gray-400 border border-border-soft hover:bg-surface-strong hover:text-white'
-													}`}
-												style={max_players === num ? { boxShadow: 'var(--glow-medium)' } : {}}
-											>
-												{num} Players
-											</button>
-										))}
+								<div className="flex items-center gap-4 mb-8">
+									<div className="p-3 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
+										<span className="icon-[solar--add-circle-bold-duotone] text-3xl text-cyan-400" />
+									</div>
+									<div>
+										<h2 className="text-2xl font-bold text-white">Initialize Event</h2>
+										<p className="text-gray-400 text-sm">Configure new tournament parameters</p>
 									</div>
 								</div>
 
-								<button onClick={handleCreateTournament} className="btn btn-primary btn-lg w-full mt-6">
-									<span className="icon-[solar--cup-star-bold] mr-2" />
-									Initialize Tournament
-								</button>
+								<div className="space-y-8">
+									<div className="space-y-3">
+										<label className="text-xs font-bold tracking-widest uppercase text-gray-500">Event Designation</label>
+										<div className="relative">
+											<input
+												type="text"
+												placeholder="Enter tournament name..."
+												value={tournamentNameRaw}
+												onChange={e => setTournamentName(e.target.value)}
+												className="w-full pl-5 pr-4 py-4 bg-gray-900/50 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 focus:bg-gray-900/80 transition-all font-medium text-lg"
+											/>
+											<div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none">
+												<span className="icon-[solar--pen-new-square-linear] text-xl" />
+											</div>
+										</div>
+									</div>
+
+									<div className="space-y-3">
+										<label className="text-xs font-bold tracking-widest uppercase text-gray-500">Bracket Size</label>
+										<div className="grid grid-cols-2 gap-4">
+											{[4, 8].map(num => (
+												<button
+													key={num}
+													onClick={() => setMax_players(num)}
+													className={`relative py-4 px-6 rounded-xl border-2 transition-all duration-300 group/btn ${max_players === num
+														? 'bg-cyan-500/10 border-cyan-400 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]'
+														: 'bg-gray-900/30 border-white/5 text-gray-500 hover:border-white/20 hover:text-gray-300'
+														}`}
+												>
+													<div className="flex flex-col items-center gap-2">
+														<span className="text-3xl font-black">{num}</span>
+														<span className="text-[10px] font-bold uppercase tracking-widest">Contenders</span>
+													</div>
+													{max_players === num && (
+														<span className="absolute top-2 right-2 icon-[solar--check-circle-bold] text-cyan-400" />
+													)}
+												</button>
+											))}
+										</div>
+									</div>
+
+									<div className="pt-4">
+										<button onClick={handleCreateTournament} className="btn-hero btn-xl w-full">
+											<span className="icon-[solar--cup-star-bold] mr-3" />
+											Create Tournament
+										</button>
+									</div>
+								</div>
 							</div>
 						)}
 
-						{/* No tournament & not admin */}
+						{/* Empty State (Non-Admin) */}
 						{!tournament && !isAdmin && (
-							<div className="flex flex-col items-center justify-center py-12 text-center">
-								<span className="icon-[solar--ghost-smile-bold-duotone] text-6xl text-gray-600 mb-6" />
-								<p className="text-xl text-gray-400 font-medium">No Tournament Available</p>
-								<p className="text-sm text-gray-500 mt-2">Check back later or wait for an admin to create one.</p>
+							<div className="panel-surface rounded-3xl p-12 text-center border border-white/5 bg-white/[0.02]">
+								<div className="w-24 h-24 mx-auto bg-gray-800 rounded-full flex items-center justify-center mb-6 opacity-50">
+									<span className="icon-[solar--ghost-smile-bold-duotone] text-5xl text-gray-400" />
+								</div>
+								<h2 className="text-2xl font-bold text-white mb-2">No Active Events</h2>
+								<p className="text-gray-400 max-w-sm mx-auto">The arena is currently silent. Stand by for future tournament announcements.</p>
 							</div>
 						)}
 
-						{/* Tournament exists */}
+						{/* Active Tournament Actions & Stats */}
 						{tournament && (
 							<div className="space-y-6">
-								<div className="flex items-center gap-3 mb-4">
-									<span className="icon-[solar--info-circle-bold-duotone] text-2xl text-accent" />
-									<h2 className="text-xl font-bold text-white">Tournament Info</h2>
-								</div>
-
+								{/* Stats Cards */}
 								<div className="grid grid-cols-2 gap-4">
-									<div className="p-4 bg-surface rounded-xl border border-border-soft">
-										<p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 mb-1">Registered</p>
-										<p className="text-2xl font-bold text-accent">
-											{tournament.registeredPlayers?.length || 0}
-											<span className="text-gray-500">/{tournament?.max_players ?? max_players}</span>
-										</p>
+									<div className="panel-surface p-6 rounded-2xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 border border-white/5 backdrop-blur-md">
+										<p className="text-xs font-bold uppercase tracking-widest text-cyan-400/70 mb-2">Registration</p>
+										<div className="flex items-baseline gap-2">
+											<span className="text-4xl font-black text-white">{tournament.registeredPlayers?.length || 0}</span>
+											<span className="text-xl text-gray-500 font-medium">/ {tournament?.max_players ?? max_players}</span>
+										</div>
+										<div className="w-full bg-gray-800 h-1.5 mt-4 rounded-full overflow-hidden">
+											<div
+												className="h-full bg-cyan-400 transition-all duration-1000 ease-out"
+												style={{ width: `${((tournament.registeredPlayers?.length || 0) / (tournament?.max_players ?? max_players)) * 100}%` }}
+											/>
+										</div>
 									</div>
-									<div className="p-4 bg-surface rounded-xl border border-border-soft">
-										<p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 mb-1">Format</p>
-										<p className="text-2xl font-bold text-white">{tournament?.max_players ?? max_players}P</p>
+									<div className="panel-surface p-6 rounded-2xl bg-gradient-to-br from-gray-800/40 to-gray-900/40 border border-white/5 backdrop-blur-md">
+										<p className="text-xs font-bold uppercase tracking-widest text-purple-400/70 mb-2">Format</p>
+										<div className="flex items-center gap-3">
+											<span className="icon-[solar--sitemap-bold-duotone] text-3xl text-purple-400" />
+											<span className="text-2xl font-bold text-white">Single Elim</span>
+										</div>
+										<p className="text-xs text-gray-500 mt-3 font-mono">CLASSIC BRACKET SYSTEM</p>
 									</div>
 								</div>
 
-								{/* Actions */}
-								<div className="pt-4 space-y-3">
-									{isAdmin && tournament.state === "waiting" && isFull && (
-										<button onClick={handleStartTournament} className="btn btn-primary btn-lg w-full">
-											<span className="icon-[solar--play-bold] mr-2" />
-											Start Tournament
-										</button>
-									)}
+								{/* Interaction Panel */}
+								<div className="panel-surface rounded-3xl p-8 relative overflow-hidden">
+									{/* Waiting State Actions */}
+									{tournament.state === "waiting" && (
+										<div className="space-y-4">
+											{isAdmin && isFull && (
+												<button onClick={handleStartTournament} className="btn-hero btn-xl w-full animate-pulse-slow">
+													<div className="absolute inset-0 bg-white/20 blur opacity-0 hover:opacity-100 transition-opacity" />
+													<span className="icon-[solar--play-circle-bold] mr-3" />
+													Launch Tournament
+												</button>
+											)}
 
-									{canRegister && (
-										<button onClick={handleRegister} className="btn btn-success btn-lg w-full">
-											<span className="icon-[solar--user-plus-bold] mr-2" />
-											Join Tournament
-										</button>
-									)}
+											{canRegister && (
+												<button onClick={handleRegister} className="group relative w-full py-4 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xl rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+													<div className="flex items-center justify-center gap-3">
+														<span className="icon-[solar--user-plus-bold] text-2xl group-hover:rotate-12 transition-transform" />
+														JOIN COMBAT
+													</div>
+												</button>
+											)}
 
-									{!isRegistered && !isAdmin && tournament.state === "waiting" && isFull && (
-										<div className="text-center py-4 text-amber-400 font-medium">
-											<span className="icon-[solar--lock-bold] mr-2" />
-											Tournament is full
+											{!isRegistered && !isAdmin && isFull && (
+												<div className="flex items-center justify-center gap-3 p-6 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+													<span className="icon-[solar--lock-keyhole-bold-duotone] text-2xl" />
+													<span className="font-bold tracking-wide">REGISTRATION CLOSED - FULL CAPACITY</span>
+												</div>
+											)}
+
+											{isRegistered && (
+												<div className="flex flex-col items-center justify-center gap-4 p-8 bg-gradient-to-br from-emerald-900/20 to-gray-900/50 border border-emerald-500/30 rounded-2xl text-emerald-400 relative overflow-hidden">
+													<div className="absolute inset-0 bg-[url('/assets/pattern-grid.svg')] opacity-10" />
+													<div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/40">
+														<span className="icon-[solar--check-circle-bold] text-3xl text-emerald-400" />
+													</div>
+													<div className="text-center z-10">
+														<h3 className="text-xl font-bold text-white">Registration Confirmed</h3>
+														<p className="text-emerald-400/70 text-sm mt-1">Awaiting deployment coordinates...</p>
+													</div>
+												</div>
+											)}
 										</div>
 									)}
 
-									{isRegistered && tournament.state === "waiting" && (
-										<div className="text-center py-4 text-accent font-medium">
-											<span className="icon-[solar--check-circle-bold] mr-2" />
-											You are registered!
-										</div>
-									)}
-
+									{/* Active State Actions */}
 									{tournament.state !== "waiting" && (
-										<div className="p-4 bg-green-950/30 border border-green-500/30 rounded-xl text-center">
-											<p className="text-green-400 font-semibold mb-2">
-												<span className="icon-[solar--play-circle-bold] mr-2" />
-												Tournament is active!
-											</p>
+										<div className="text-center space-y-6">
+											<div className="inline-flex flex-col items-center">
+												<div className="w-20 h-20 relative mb-4">
+													<div className="absolute inset-0 bg-emerald-500 blur-xl opacity-20 animate-pulse" />
+													<span className="icon-[solar--play-circle-bold-duotone] text-7xl text-emerald-400 relative z-10" />
+												</div>
+												<h3 className="text-2xl font-bold text-white">Tournament In Progress</h3>
+												<p className="text-gray-400">Live matches are currently underway</p>
+											</div>
+
 											{isRegistered && (
 												<button
 													onClick={() => navigate("/tournament/active")}
-													className="text-sm text-green-300 hover:text-green-200 underline underline-offset-2"
+													className="btn-primary btn-lg w-full"
 												>
-													View your matches →
+													<span className="icon-[solar--gamepad-bold] mr-2" />
+													Enter Match Lobby
+												</button>
+											)}
+
+											{!isRegistered && (
+												<button
+													onClick={() => navigate("/tournament/active")}
+													className="btn-glass btn-lg w-full"
+												>
+													<span className="icon-[solar--eye-bold] mr-2" />
+													Spectate Matches
 												</button>
 											)}
 										</div>
@@ -342,50 +434,77 @@ export default function TournamentPage() {
 						)}
 					</div>
 
-					{/* Right: Players List */}
-					<div className="panel-surface relative overflow-hidden rounded-2xl backdrop-blur-md p-8">
-						{/* Purple accent top line */}
-						<div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-50" />
-
-						<div className="flex items-center gap-3 mb-6">
-							<span className="icon-[solar--users-group-rounded-bold-duotone] text-2xl text-purple-400" />
-							<h2 className="text-xl font-bold text-white">Registered Players</h2>
-							{tournament && (
-								<span className="ml-auto text-sm text-gray-500">
-									{tournament.registeredPlayers?.length || 0} / {tournament?.max_players ?? max_players}
-								</span>
-							)}
-						</div>
-
-						{!tournament || !tournament.registeredPlayers?.length ? (
-							<div className="flex flex-col items-center justify-center py-16 text-center">
-								<span className="icon-[solar--users-group-rounded-line-duotone] text-5xl text-gray-700 mb-4" />
-								<p className="text-gray-500">No players registered yet</p>
+					{/* RIGHT COLUMN: Player List */}
+					<div className="lg:col-span-12 xl:col-span-5 h-full">
+						<div className="panel-surface relative h-full min-h-[500px] rounded-3xl p-0 overflow-hidden flex flex-col">
+							{/* Header */}
+							<div className="p-6 border-b border-white/5 bg-white/[0.02] backdrop-blur-sm sticky top-0 z-20">
+								<div className="flex items-center justify-between">
+									<h2 className="text-lg font-bold text-white flex items-center gap-3">
+										<span className="icon-[solar--users-group-rounded-bold-duotone] text-purple-400 text-xl" />
+										Roster
+									</h2>
+									<span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold rounded-lg uppercase tracking-wider">
+										{tournament ? `${tournament.registeredPlayers?.length || 0} / ${tournament.max_players ?? max_players}` : "Offline"}
+									</span>
+								</div>
 							</div>
-						) : (
-							<div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-								{tournament.registeredPlayers.map((p: any, i: number) => (
-									<div
-										key={p.id}
-										className="flex items-center gap-4 p-4 bg-surface rounded-xl border border-border-soft hover:bg-surface-strong transition-colors group"
-									>
-										<div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-border-strong flex items-center justify-center text-accent font-bold">
-											{i + 1}
-										</div>
-										<div className="flex-1">
-											<p className="font-semibold text-white group-hover:text-accent transition-colors">{p.name}</p>
-											<p className="text-xs text-gray-500">Player #{p.id}</p>
-										</div>
-										{p.id === user.id && (
-											<span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-cyan-950/50 text-accent rounded-full border border-accent/30">
-												You
-											</span>
-										)}
+
+							{/* List */}
+							<div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+								{!tournament || !tournament.registeredPlayers?.length ? (
+									<div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-40">
+										<span className="icon-[solar--user-block-rounded-linear] text-6xl mb-4" />
+										<p className="font-mono text-sm">NO SIGNALS DETECTED</p>
 									</div>
-								))}
+								) : (
+									tournament.registeredPlayers.map((p: any, i: number) => (
+										<div
+											key={p.id}
+											className={`group flex items-center gap-4 p-3 rounded-xl border transition-all duration-300 ${p.id === user.id
+												? 'bg-cyan-500/10 border-cyan-500/30 shadow-[inset_0_0_20px_rgba(34,211,238,0.1)]'
+												: 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/20'
+												}`}
+										>
+											<div className="relative">
+												<UserAvatar
+													userId={p.id}
+													username={p.name}
+													size="md"
+													className={`border-2 ${p.id === user.id ? 'border-cyan-400' : 'border-gray-700 group-hover:border-gray-500'}`}
+												/>
+												<div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center font-bold text-[8px] z-10 ${p.id === user.id
+													? 'bg-cyan-500 text-black border border-cyan-400'
+													: 'bg-gray-800 text-gray-400 border border-white/10'
+													}`}>
+													{i + 1}
+												</div>
+											</div>
+
+											<div className="flex-1 min-w-0">
+												<div className="flex items-center gap-2">
+													<p className={`font-bold truncate ${p.id === user.id ? 'text-cyan-400' : 'text-gray-200 group-hover:text-white'}`}>
+														{p.name}
+													</p>
+													{p.id === user.id && (
+														<span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-[10px] font-bold text-cyan-300 uppercase leading-none">
+															You
+														</span>
+													)}
+												</div>
+												<p className="text-[10px] text-gray-500 font-mono">OPERATOR ID: {p.id.toString().padStart(4, '0')}</p>
+											</div>
+
+											{p.id === user.id && (
+												<div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse" />
+											)}
+										</div>
+									))
+								)}
 							</div>
-						)}
+						</div>
 					</div>
+
 				</div>
 			</div>
 		</div>
