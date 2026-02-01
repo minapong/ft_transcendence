@@ -77,8 +77,6 @@ export function getRoutes(): RouteMap {
 
   cache = { static: staticRoutes, dynamic: dynamicRoutes };
 
-  console.log("🧭 static routes:", Object.keys(staticRoutes));
-  console.log("🧭 dynamic routes:", dynamicRoutes.map(r => r.path));
 
   return cache;
 }
@@ -92,13 +90,13 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
   let path = rawPath.replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
   path = path.split(/[?#]/)[0];
 
-  // 1. try static route (case-insensitive lookup)
+  //try static route (case-insensitive lookup)
   const staticComponent = routes.static[path.toLowerCase()];
   if (staticComponent) {
     return { component: staticComponent, params: {} };
   }
 
-  // 2. try dynamic routes
+  //try dynamic routes
   for (const route of routes.dynamic) {
     const match = path.match(route.pattern);
     if (match) {
