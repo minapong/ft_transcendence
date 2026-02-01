@@ -2,7 +2,6 @@ import { useEffect, useState, navigate, openModal } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 import { useAuth } from "@/core/lib/useAuth";
 import Button, { SecondaryButton } from "@/app/components/ui/Button";
-import { getDefaultAvatar } from "@/core/lib/defaultAvatar";
 import { useScreen } from "@/app/hooks/useScreen";
 
 export default function MePage() {
@@ -133,7 +132,7 @@ export default function MePage() {
             <div
               className="relative w-28 h-28 md:w-40 md:h-40 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-900 flex items-center justify-center z-10 cursor-pointer ring-2 ring-white/10 group-hover:ring-cyan-400/50 transition-all"
               onClick={() => {
-                const url = avatarUrl || getDefaultAvatar(profile?.id);
+                const url = avatarUrl || "/assets/default-avatar.png";
                 openModal({
                   type: "IMAGE_ZOOM",
                   payload: { url },
@@ -158,7 +157,7 @@ export default function MePage() {
               {avatarUrl ? (
                 <img src={avatarUrl} className="w-full h-full object-cover" alt="avatar" />
               ) : (
-                <img src={getDefaultAvatar(profile?.id)} className="w-full h-full object-cover" alt="Default avatar" />
+                <span className="text-4xl">👤</span>
               )}
 
               {/* Search overlay icon on hover */}
@@ -178,7 +177,7 @@ export default function MePage() {
               </h1>
 
               {/* Level Badge */}
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-cyan-950/40 border border-cyan-500/30 rounded-br-xl rounded-tl-xl backdrop-blur-sm">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-cyan-950/40 border border-cyan-500/30 rounded-br-xl rounded-tl-xl backdrop-blur-sm font-mono">
                 <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-wider">LVL</span>
                 <span className="text-lg font-bold text-cyan-400 leading-none">{stats?.level || 1}</span>
               </div>
@@ -198,7 +197,7 @@ export default function MePage() {
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 mt-12 space-y-12">
         {/* 2. STATS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           <StatCard
             label="Wins"
             value={stats?.wins ?? 0}
@@ -261,19 +260,19 @@ function StatCard({ label, value, icon, color, trend, isPercentage }: any) {
   const isPositive = trend?.includes("+");
 
   return (
-    <div className="relative overflow-hidden bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl group transition-all duration-300 hover:bg-gray-800/60 hover:-translate-y-1">
-      {/* Cyan Accent Border */}
-      <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <div className="relative overflow-hidden bg-gray-900/40 backdrop-blur-md border border-white/5 p-3 md:p-6 rounded-xl md:rounded-2xl group transition-all duration-300 hover:bg-gray-800/60 hover:-translate-y-1">
+      {/* Cyan Accent Border - Always visible */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400/50 via-cyan-400 to-cyan-400/50 shadow-[0_0_10px_rgba(34,211,238,0.3)] opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
 
       <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-lg bg-gray-800/50 text-2xl group-hover:scale-110 transition duration-300 ${color}`}>
+        <div className={`p-2 md:p-3 rounded-lg bg-gray-800/50 text-lg md:text-2xl group-hover:scale-110 transition duration-300 ${color}`}>
           {/* Icon wrapper to ensure color application */}
           {icon}
         </div>
 
         {/* Visual Trend or Mini Chart can go here. For now, trend text */}
         {trend && (
-          <span className={`text-xs px-2 py-1 rounded-full border ${isPositive ? "text-cyan-400 border-cyan-500/30 bg-cyan-950/30" : "text-gray-400 border-gray-700 bg-gray-800"}`}>
+          <span className={`text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full border ${isPositive ? "text-cyan-400 border-cyan-500/30 bg-cyan-950/30" : "text-gray-400 border-gray-700 bg-gray-800"}`}>
             {trend}
           </span>
         )}
@@ -290,8 +289,8 @@ function StatCard({ label, value, icon, color, trend, isPercentage }: any) {
       </div>
 
       <div>
-        <div className={`text-3xl font-bold text-white tracking-tight`}>{value}</div>
-        <div className="text-gray-400 text-sm font-medium mt-1">{label}</div>
+        <div className={`text-xl md:text-3xl font-bold text-white tracking-tight`}>{value}</div>
+        <div className="text-gray-400 text-[10px] md:text-sm font-medium mt-0.5 md:mt-1">{label}</div>
       </div>
     </div>
   );

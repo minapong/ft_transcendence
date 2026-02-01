@@ -149,6 +149,14 @@ const sections: Section[] = [
 
 export default function TermsOfService() {
   const [tocOpen, setTocOpen] = useState(false);
+  const handleJump = (event: any, targetId: string) => {
+    event.preventDefault();
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    setTocOpen(false);
+  };
 
   return (
     <main className="legal-page" id="legal-top">
@@ -202,7 +210,7 @@ export default function TermsOfService() {
             <ul className="legal-toc__list">
               {sections.map((section) => (
                 <li key={section.id} className="legal-toc__item">
-                  <a href={`#${section.id}`} onClick={() => setTocOpen(false)}>
+                  <a href={`#${section.id}`} onClick={(event) => handleJump(event, section.id)}>
                     {section.title}
                   </a>
                 </li>
@@ -230,9 +238,6 @@ export default function TermsOfService() {
                     ))}
                   </ul>
                 )}
-                <a className="legal-top-link" href="#legal-top">
-                  Back to top
-                </a>
               </article>
             ))}
           </section>
@@ -243,7 +248,12 @@ export default function TermsOfService() {
           <span>© 2026 ft_transcendence team · 42 Network project</span>
         </footer>
 
-        <a className="legal-backtotop" href="#legal-top" aria-label="Back to top">
+        <a
+          className="legal-backtotop"
+          href="#legal-top"
+          aria-label="Back to top"
+          onClick={(event) => handleJump(event, "legal-top")}
+        >
           ↑ Back to Top
         </a>
       </div>

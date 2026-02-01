@@ -166,7 +166,7 @@ export default function UserSettingsPage() {
       setSelected(null);
       if (fileRef.current) fileRef.current.value = "";
 
-      setMsgAvatar("Avatar updated ✅");
+      setMsgAvatar("[SUCCESS] Avatar updated");
       window.dispatchEvent(new Event("user:avatar-update"));
     } catch {
       setMsgAvatar("Network error");
@@ -229,7 +229,7 @@ export default function UserSettingsPage() {
       setAgeRaw(typeof updatedUser.age === "number" ? String(updatedUser.age) : "");
       setLocation(typeof updatedUser.location === "string" ? updatedUser.location : "");
 
-      setMsgBasics("Saved ✅");
+      setMsgBasics("[SUCCESS] Saved");
     } catch (e: any) {
       setMsgBasics(e?.message || "Invalid input");
     } finally {
@@ -241,10 +241,11 @@ export default function UserSettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-10 text-white">
-        <div className="animate-pulse space-y-6">
-          <div className="h-10 w-40 bg-gray-700 rounded" />
-          <div className="h-36 w-full bg-gray-800 rounded" />
+      <div className="min-h-screen p-6 md:p-10 text-white">
+        <div className="max-w-4xl mx-auto animate-pulse space-y-8">
+          <div className="h-12 w-48 bg-gray-800/50 rounded-xl" />
+          <div className="h-64 w-full bg-gray-900/50 backdrop-blur-md rounded-2xl border border-white/5" />
+          <div className="h-48 w-full bg-gray-900/50 backdrop-blur-md rounded-2xl border border-white/5" />
         </div>
       </div>
     );
@@ -253,169 +254,229 @@ export default function UserSettingsPage() {
   const currentAvatar = profile?.avatarUrl || null;
 
   return (
-    <div className="p-10 text-white max-w-3xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Profile settings</h1>
+    <div className="min-h-screen text-white pb-20">
+      {/* Scanline overlay */}
+      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_1px]"></div>
 
-        <button
-          type="button"
-          onClick={() => navigate("/user/me")}
-          className="btn btn-secondary btn-sm"
-        >
-          Back
-        </button>
-      </div>
-
-      {/* ----------------------------
-          Avatar card
-      ---------------------------- */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-bold mb-4">Avatar</h2>
-
-        <div className="flex items-center gap-6">
-          {/* Current avatar */}
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-3xl font-bold">
-              {currentAvatar ? (
-                <img
-                  src={currentAvatar}
-                  className="w-full h-full object-cover"
-                  alt="current avatar"
-                  onError={(e) => {
-                    console.warn("current avatar failed:", currentAvatar);
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              ) : (
-                <img src={getDefaultAvatar(profile?.id)} className="w-full h-full object-cover" alt="Default avatar" />
-              )}
-            </div>
-            <div className="text-xs text-gray-400">Current</div>
-          </div>
-
-          {/* Preview avatar */}
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center text-3xl font-bold">
-              {previewUrl ? (
-                <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
-              ) : (
-                <span className="text-gray-400">—</span>
-              )}
-            </div>
-            <div className="text-xs text-gray-400">Preview</div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex-1">
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={onFileChange}
-            />
-
-            <div className="flex gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={pickFile}
-                disabled={busyAvatar}
-                className="btn btn-primary btn-sm"
-              >
-                Choose image
-              </button>
-
-              <button
-                type="button"
-                onClick={uploadAvatar}
-                disabled={busyAvatar || !selected}
-                className="btn btn-success btn-sm"
-              >
-                {busyAvatar ? "Uploading..." : "Upload"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelected(null);
-                  setMsgAvatar(null);
-                  if (fileRef.current) fileRef.current.value = "";
-                }}
-                disabled={busyAvatar}
-                className="btn btn-secondary btn-sm"
-              >
-                Clear
-              </button>
+      {/* Hero Header */}
+      <div className="relative bg-gray-950 border-b border-white/5 py-8 md:py-12 mb-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-950/20 via-purple-950/10 to-gray-950"></div>
+        <div className="max-w-4xl mx-auto px-6 md:px-10 relative z-10">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/30">
+                <span className="icon-[solar--settings-bold-duotone] text-3xl md:text-4xl text-cyan-400" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight">System Preferences</h1>
+                <p className="text-gray-400 text-sm font-mono mt-1">Configure your operator profile</p>
+              </div>
             </div>
 
-            <p className="text-xs text-gray-400 mt-3">Allowed: JPG / PNG / WEBP. Max size: 2MB.</p>
-
-            {msgAvatar && <p className="text-sm text-gray-300 mt-3">{msgAvatar}</p>}
-          </div>
-        </div>
-      </div>
-
-      {/* ----------------------------
-          Basics (age/location)
-      ---------------------------- */}
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-4">Basics</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Age</label>
-            <input
-              type="number"
-              min={0}
-              max={130}
-              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
-              value={ageRaw}
-              onKeyDown={(e: any) => {
-                if (["e", "E", "+", "-", "."].includes(e.key)) e.preventDefault();
-              }}
-              onChange={(e: any) => {
-                setAgeRaw(e.target.value);
-                if (msgBasics) setMsgBasics(null);
-              }}
-              placeholder="e.g. 21"
-            />
-            <p className="text-xs text-gray-400 mt-1">Optional</p>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Location</label>
-            <select
-              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
-              value={location}
-              onChange={(e: any) => {
-                setLocation(e.target.value);
-                if (msgBasics) setMsgBasics(null);
-              }}
+            <button
+              type="button"
+              onClick={() => navigate("/user/me")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-800/50 border border-white/10 text-gray-300 hover:text-cyan-400 hover:bg-gray-700/50 hover:border-cyan-500/30 transition-all duration-300 backdrop-blur-sm group"
             >
-              <option value="">— select warehouse —</option>
-              {WAREHOUSES.map((w) => (
-                <option key={w} value={w}>
-                  {w}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-400 mt-1">Optional</p>
+              <span className="icon-[solar--arrow-left-bold] text-lg group-hover:-translate-x-0.5 transition-transform" />
+              <span className="hidden sm:inline font-medium">Back</span>
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            onClick={saveBasics}
-            disabled={savingProfile}
-            className="btn btn-success btn-sm"
-          >
-            {savingProfile ? "Saving..." : "Save"}
-          </button>
-        </div>
+      <div className="max-w-4xl mx-auto px-6 md:px-10 space-y-8">
+        {/* Avatar Section */}
+        <section className="relative overflow-hidden bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-6 md:p-8 group">
+          {/* Cyan accent border */}
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400/50 via-cyan-400 to-cyan-400/50 shadow-[0_0_10px_rgba(34,211,238,0.3)] opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-        {msgBasics && <p className="text-sm text-gray-300 mt-3">{msgBasics}</p>}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="icon-[solar--user-circle-bold-duotone] text-2xl text-cyan-400" />
+            <h2 className="text-xl font-bold text-white">Avatar</h2>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+            {/* Avatar Previews */}
+            <div className="flex gap-6 shrink-0">
+              {/* Current avatar */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="relative group/avatar">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-30"></div>
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-gray-800 flex items-center justify-center ring-2 ring-white/10">
+                    {currentAvatar ? (
+                      <img
+                        src={currentAvatar}
+                        className="w-full h-full object-cover"
+                        alt="current avatar"
+                        onError={(e) => {
+                          console.warn("current avatar failed:", currentAvatar);
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span className="icon-[solar--user-bold] text-3xl text-gray-500" />
+                    )}
+                  </div>
+                </div>
+                <span className="text-[10px] md:text-xs text-gray-500 uppercase tracking-wider font-mono">Current</span>
+              </div>
+
+              {/* Preview avatar */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="relative">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-gray-800/50 border-2 border-dashed border-gray-700 flex items-center justify-center">
+                    {previewUrl ? (
+                      <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
+                    ) : (
+                      <span className="icon-[solar--gallery-add-bold-duotone] text-2xl text-gray-600" />
+                    )}
+                  </div>
+                </div>
+                <span className="text-[10px] md:text-xs text-gray-500 uppercase tracking-wider font-mono">Preview</span>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex-1 w-full md:w-auto">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={onFileChange}
+              />
+
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                <button
+                  type="button"
+                  onClick={pickFile}
+                  disabled={busyAvatar}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-950/40 border border-cyan-500/40 text-cyan-400 font-medium text-sm hover:bg-cyan-900/50 hover:border-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  <span className="icon-[solar--gallery-bold]" />
+                  Choose
+                </button>
+
+                <button
+                  type="button"
+                  onClick={uploadAvatar}
+                  disabled={busyAvatar || !selected}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 font-medium text-sm hover:bg-emerald-900/50 hover:border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  <span className={busyAvatar ? "icon-[svg-spinners--ring-resize]" : "icon-[solar--upload-bold]"} />
+                  {busyAvatar ? "Uploading..." : "Upload"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelected(null);
+                    setMsgAvatar(null);
+                    if (fileRef.current) fileRef.current.value = "";
+                  }}
+                  disabled={busyAvatar || !selected}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gray-800/50 border border-gray-600/40 text-gray-400 font-medium text-sm hover:bg-gray-700/50 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                >
+                  <span className="icon-[solar--close-circle-bold]" />
+                  Clear
+                </button>
+              </div>
+
+              <p className="text-[10px] md:text-xs text-gray-500 mt-4 font-mono text-center md:text-left">
+                <span className="icon-[solar--info-circle-bold] mr-1 opacity-60" />
+                Allowed: JPG / PNG / WEBP • Max: 2MB
+              </p>
+
+              {msgAvatar && (
+                <div className={`mt-4 px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 ${msgAvatar.includes("[SUCCESS]") ? "bg-emerald-950/40 border border-emerald-500/30 text-emerald-400" : "bg-amber-950/40 border border-amber-500/30 text-amber-400"}`}>
+                  <span className={msgAvatar.includes("[SUCCESS]") ? "icon-[solar--check-circle-bold]" : "icon-[solar--danger-triangle-bold]"} />
+                  {msgAvatar.replace("[SUCCESS] ", "")}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Basics Section */}
+        <section className="relative overflow-hidden bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-6 md:p-8 group">
+          {/* Cyan accent border */}
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-purple-400/50 via-purple-400 to-purple-400/50 shadow-[0_0_10px_rgba(168,85,247,0.3)] opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+          <div className="flex items-center gap-3 mb-6">
+            <span className="icon-[solar--user-id-bold-duotone] text-2xl text-purple-400" />
+            <h2 className="text-xl font-bold text-white">Operator Info</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Age Input */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm text-gray-300 font-medium">
+                <span className="icon-[solar--calendar-bold] text-gray-500" />
+                Age
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={130}
+                className="w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-300"
+                value={ageRaw}
+                onKeyDown={(e: any) => {
+                  if (["e", "E", "+", "-", "."].includes(e.key)) e.preventDefault();
+                }}
+                onChange={(e: any) => {
+                  setAgeRaw(e.target.value);
+                  if (msgBasics) setMsgBasics(null);
+                }}
+                placeholder="e.g. 21"
+              />
+              <p className="text-[10px] text-gray-500 font-mono">Optional field</p>
+            </div>
+
+            {/* Location Input */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm text-gray-300 font-medium">
+                <span className="icon-[solar--map-point-bold] text-gray-500" />
+                Warehouse Location
+              </label>
+              <select
+                className="w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-300 appearance-none cursor-pointer"
+                value={location}
+                onChange={(e: any) => {
+                  setLocation(e.target.value);
+                  if (msgBasics) setMsgBasics(null);
+                }}
+              >
+                <option value="">— select warehouse —</option>
+                {WAREHOUSES.map((w) => (
+                  <option key={w} value={w}>
+                    {w}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-gray-500 font-mono">Optional field</p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex items-center gap-4">
+            <button
+              type="button"
+              onClick={saveBasics}
+              disabled={savingProfile}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-950/40 border border-purple-500/40 text-purple-400 font-bold hover:bg-purple-900/50 hover:border-purple-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+            >
+              <span className={savingProfile ? "icon-[svg-spinners--ring-resize]" : "icon-[solar--diskette-bold]"} />
+              {savingProfile ? "Saving..." : "Save Changes"}
+            </button>
+
+            {msgBasics && (
+              <div className={`px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 ${msgBasics.includes("[SUCCESS]") ? "bg-emerald-950/40 border border-emerald-500/30 text-emerald-400" : "bg-red-950/40 border border-red-500/30 text-red-400"}`}>
+                <span className={msgBasics.includes("[SUCCESS]") ? "icon-[solar--check-circle-bold]" : "icon-[solar--danger-triangle-bold]"} />
+                {msgBasics.replace("[SUCCESS] ", "")}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );
