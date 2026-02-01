@@ -3,6 +3,8 @@ import { useScreen } from "@/app/hooks/useScreen";
 import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
 import { apiFetch } from "@/core/lib/api";
+import "@/styles/components/browser-kit.css";
+
 
 // PanelButton extracted for clarity and reusability
 function PanelButton({ icon, label, onClick }) {
@@ -15,6 +17,14 @@ function PanelButton({ icon, label, onClick }) {
       <span className="font-medium">{label}</span>
     </button>
   );
+}
+
+function getBrowserName(): string {
+  const ua = navigator.userAgent;
+  if (ua.includes("Firefox")) return "Firefox";
+  if (ua.includes("Chrome") || ua.includes("Chromium")) return "Chrome/Brave";
+  if (ua.includes("Safari")) return "Safari";
+  return "Unknown";
 }
 
 
@@ -56,6 +66,18 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
     return () => window.removeEventListener("user:avatar-update", handleAvatarUpdate);
   }, [user]);
 
+    useEffect(() => {
+    const badge = document.createElement("div");
+    badge.className = "browser-badge";
+    badge.innerText = `Browser: ${getBrowserName()}`;
+    const headerEl = document.querySelector("header");
+    if (headerEl) headerEl.appendChild(badge);
+
+    return () => {
+      if (headerEl?.contains(badge)) headerEl.removeChild(badge);
+    };
+  }, []);
+
   const statusCards = [
     {
       icon: "mdi--ghost",
@@ -92,7 +114,8 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
             if (isSpecialPage) {
               navigate("/");
             } else {
-              // console.log("[Header] Menu toggle: overlay open");
+              // 
+
               onMenuToggle();
             }
           }}

@@ -52,7 +52,7 @@ registerModal<PongWinnerPayload>("pong-winner", (payload) => {
             if (destination === "tournament") {
                 window.location.href = "/tournament/active";
             } else {
-                window.location.href = "/game/single_game";
+                window.location.href = "/game/pre_match_scene";
             }
         }
     };

@@ -6,13 +6,15 @@ import { useState, useEventListener } from "Reactor";
  * Safe for components like Sidebar that need to update highlights.
  * WARNING: Do not use in RootLayout if it triggers layout swaps (Hook mismatch risk).
  */
+// Subscribes to window location events and forces re-render
 export function useLocation() {
-  const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
-  const [location, setLocation] = useState(currentPath);
+  const [, setTick] = useState(0);
 
-  useEventListener("routechange", () => {
-    setLocation(window.location.pathname);
-  });
+  const forceUpdate = () => setTick(t => t + 1);
 
-  return location;
+  useEventListener("routechange", forceUpdate);
+  useEventListener("popstate", forceUpdate);
+
+  // Always read strictly from the source of truth to avoid stale state during parent re-renders
+  return typeof window !== "undefined" ? window.location.pathname : "/";
 }

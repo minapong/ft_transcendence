@@ -78,7 +78,7 @@ export default function PongGame() {
         p2Name = navState.p2;
     } else {
         // Invalid entry
-        navigate("/game/single_game", { replace: true });
+        navigate("/game/pre_match_scene", { replace: true });
         return null;
     }
 
@@ -142,7 +142,7 @@ export default function PongGame() {
                     if (destination === "tournament") {
                         navigate("/tournament/active", { replace: true });
                     } else {
-                        navigate("/game/single_game", { replace: true });
+                        navigate("/game/pre_match_scene", { replace: true });
                     }
                 };
 
@@ -172,7 +172,7 @@ export default function PongGame() {
                                 console.warn("[Pong] Tournament result report failed:", res.status);
                                 return;
                             }
-                            // console.log("[Pong] Tournament result reported successfully");
+                            // 
                         })
                         .catch(err => {
                             console.warn("[Pong] Failed to report tournament result:", err);
@@ -209,20 +209,22 @@ export default function PongGame() {
             mb-4
             ">
 
-            <span ref={scoreLeftRef} className="flex-1 text-left">
-                {p1Name}: 0
-            </span>
+                <span ref={scoreLeftRef} className="flex-1 text-left">
+                    {p1Name}: 0
+                </span>
 
-            <span className="text-slate-400 px-3">—</span>
+                <span className="text-slate-400 px-3">—</span>
 
-            <span ref={scoreRightRef} className="flex-1 text-right">
-                {p2Name}: 0
-            </span>
+                <span ref={scoreRightRef} className="flex-1 text-right">
+                    {p2Name}: 0
+                </span>
 
             </div>
 
+            <div className="relative flex items-center justify-center overflow-visible">
+
             {/* LEFT TOUCH CONTROLS */}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
+            <div className="absolute -left-15 sm:-left-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
                 <button
                     ref={leftUpBtnRef}
                     id="left-up"
@@ -233,6 +235,24 @@ export default function PongGame() {
                 <button
                     ref={leftDownBtnRef}
                     id="left-down"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                >
+                    ▼
+                </button>
+            </div>
+
+            {/* RIGHT TOUCH CONTROLS */}
+            <div className="absolute -right-15 sm:-right-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
+                <button
+                    ref={rightUpBtnRef}
+                    id="right-up"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                >
+                    ▲
+                </button>
+                <button
+                    ref={rightDownBtnRef}
+                    id="right-down"
                     className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                 >
                     ▼
@@ -257,38 +277,38 @@ export default function PongGame() {
                     0 8px 30px rgba(0, 0, 0, 0.6)
                     `,
                 }}
-                >
+            >
 
 
 
                 {/* Left paddle */}
                 <div
-                ref={leftPaddleRef}
-                id="left_p"
-                className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
+                    ref={leftPaddleRef}
+                    id="left_p"
+                    className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
                             w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[#f8fafc]"
-                style={{
-                    boxShadow: `
+                    style={{
+                        boxShadow: `
                     inset 0 0 0 1px rgba(0, 0, 0, 0.12),
                     0 0 8px rgba(56, 189, 248, 0.25)
                     `,
-                }}
+                    }}
                 />
 
 
 
                 {/* Right paddle */}
                 <div
-                ref={rightPaddleRef}
-                id="right_p"
-                className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
+                    ref={rightPaddleRef}
+                    id="right_p"
+                    className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
                             w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
-                style={{
-                    boxShadow: `
+                    style={{
+                        boxShadow: `
                     inset 0 0 0 1px rgba(0, 0, 0, 0.12),
                     0 0 8px rgba(56, 189, 248, 0.25)
                     `,
-                }}
+                    }}
                 />
 
 
@@ -314,22 +334,6 @@ export default function PongGame() {
                 />
             </div>
 
-            {/* RIGHT TOUCH CONTROLS */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
-                <button
-                    ref={rightUpBtnRef}
-                    id="right-up"
-                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                >
-                    ▲
-                </button>
-                <button
-                    ref={rightDownBtnRef}
-                    id="right-down"
-                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
-                >
-                    ▼
-                </button>
             </div>
 
             {/* Pause button */}

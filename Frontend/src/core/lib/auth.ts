@@ -27,5 +27,5 @@ export function clearAuth() {
 export function logout() {
   disconnectPresenceWS();   // tell backend you’re gone
   clearAuth();              // update local state + UI
-  navigate("auth/login");       // redirect
+  navigate("/auth/login", { replace: true });       // redirect
 }

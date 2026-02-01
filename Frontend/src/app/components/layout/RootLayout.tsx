@@ -1,4 +1,5 @@
-import { useState, useEffect, useLocation } from "Reactor";
+import { useState, useEffect } from "Reactor";
+import { useLocation } from "Reactor/router/useLocation";
 
 import Header from "@/app/components/layout/Header";
 import LeftSidebar from "@/app/components/layout/LeftSidebar";
@@ -39,6 +40,7 @@ export default function RootLayout({ children }) {
   };
 
   const hideSidebar = isSpecialLayout(pathname);
+  console.log(`[RootLayout] Render: path="${pathname}", hideSidebar=${hideSidebar}, mode=${sidebarMode}, hidden=${hideSidebar || (sidebarMode === "static" && isSidebarHidden)}`);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">

@@ -40,6 +40,8 @@
 @import "./components/avatars.css";
 @import "./components/contact.css";
 @import "./components/legal.css";
+@import "./components/browser-kit.css";
+
 
 /* ========================================
    5. Utilities

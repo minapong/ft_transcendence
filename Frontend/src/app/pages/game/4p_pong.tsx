@@ -14,7 +14,7 @@ export default function Pong4PGame() {
 	const navState = history.state as NavState4P | null;
 
 	if (!navState || navState.mode !== "4p") {
-		navigate("/game/single_game", { replace: true });
+		navigate("/game/pre_match_scene", { replace: true });
 		return null;
 	}
 
@@ -119,7 +119,7 @@ export default function Pong4PGame() {
 				overlay.classList.remove("hidden");
 
 				winTimeout = window.setTimeout(() => {
-					navigate("/game/single_game");
+					navigate("/game/pre_match_scene");
 				}, 2000);
 			}
 		);
@@ -210,7 +210,7 @@ export default function Pong4PGame() {
 			</button>
 
 			<button
-				onClick={() => { navigate("/game/single_game"); }}
+				onClick={() => { navigate("/game/pre_match_scene"); }}
 				className="mt-6 text-cyan-400 underline hover:text-cyan-200"
 			>
 				← Back to menu
