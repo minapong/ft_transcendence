@@ -99,14 +99,15 @@ export default function ModalRoot() {
   }
 
   const content = renderer
-    ? renderer(modal!.payload ?? {})
+    ? renderer({ ...((modal!.payload ?? {}) as any), close: closeModal })
     : renderFallback(modal!);
 
   return (
     <div id="modal-root" className={layerClass} role="presentation">
       <div className="modal-backdrop" onClick={closeModal}></div>
       <div
-        className={`modal-panel panel-surface panel-surface--heavy ${modal!.className ?? ""}`}
+        className={`relative z-50 transform transition-all w-full p-4 md:p-6 flex items-center justify-center group ${modal.className || "max-w-lg"}`}
+        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={modal!.label ?? modal!.type}
@@ -115,12 +116,12 @@ export default function ModalRoot() {
       >
         <button
           type="button"
-          className="modal-close"
+          className="modal-close absolute top-4 right-4 z-[60] p-2 rounded-full bg-black/20 text-gray-400 border border-white/5 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/20 hover:text-red-400 hover:rotate-90 hover:scale-110 active:scale-95"
           aria-label="Close modal"
           onClick={closeModal}
           ref={closeRef}
         >
-          <span className="icon-[solar--close-circle-linear] text-lg" aria-hidden="true" />
+          <span className="icon-[solar--close-circle-bold] text-xl" aria-hidden="true" />
         </button>
         {content}
       </div>
