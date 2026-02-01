@@ -7,12 +7,18 @@ import { unwrap } from "@/core/lib/input/unwrap";
 import { getDefaultAvatar } from "@/core/lib/defaultAvatar";
 
 const WAREHOUSES = [
-  "Mina Port W-001",
-  "Mina Port W-014",
-  "Mina Port W-023",
-  "Mina Port W-107",
-  "Mina Port W-204",
-  "Mina Port W-404",
+  "Lonely Survivors-Warehouses",
+  "Mina Centre",
+  "Dates Market",
+  "Vegetable Market",
+  "New Mina Port",
+  "Stray Cats Road",
+  "Demolished Warehouse",
+  "The Rocks",
+  "Marsa Mina",
+  "42 Abu Dhabi Campus",
+  "Fish Market",
+  "Void sands of North Mina",
 ];
 
 const MAX_BYTES = 2 * 1024 * 1024; // matches backend, nginx (2MB)
