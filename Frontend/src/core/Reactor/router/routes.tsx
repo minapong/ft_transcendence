@@ -130,5 +130,7 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
 // Define which paths require a different layout look
 export const isSpecialLayout = (p: string) => {
   const path = p.toLowerCase().split(/[?#]/)[0].replace(/\/+$/, "") || "/";
-  return path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
+  const isSpecial = path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
+  console.log(`[Router] isSpecialLayout check: "${p}" -> normalized: "${path}" -> result: ${isSpecial}`);
+  return isSpecial;
 };

@@ -88,7 +88,10 @@ export default function AuthPage() {
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
 
     useEffect(() => {
-        if (auth?.token) navigate("/user/me", { replace: true });
+        if (auth?.token) {
+            console.log("[AuthPage] Auth token detected, redirecting to /user/me");
+            navigate("/user/me", { replace: true });
+        }
     }, [auth?.token]);
 
     useEffect(() => {
@@ -151,7 +154,8 @@ export default function AuthPage() {
 
             setAuth(resData);
             connectPresenceWS();
-            navigate("/user/me", { replace: true });
+            console.log("[AuthPage] Login successful, waiting for useEffect redirect...");
+            // navigate("/user/me", { replace: true }); <--- REMOVED: Redundant, handled by useEffect
         } catch (err) {
             setUiError({ field: "general", message: "System connection failure. Retry authentication." });
         } finally {
