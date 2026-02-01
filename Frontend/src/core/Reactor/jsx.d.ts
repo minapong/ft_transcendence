@@ -30,6 +30,7 @@ declare module "Reactor" {
 		payload?: T;
 		render?: ModalRenderer<T>;
 		label?: string;
+		className?: string;
 	};
 	export function openModal<T>(modal: ModalDescriptor<T>): void;
 	export function closeModal(): void;

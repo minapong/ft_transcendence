@@ -1,7 +1,8 @@
-import { useEffect, useState, navigate } from "Reactor";
+import { useEffect, useState, navigate, openModal } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 import { useAuth } from "@/core/lib/useAuth";
 import Button, { SecondaryButton } from "@/app/components/ui/Button";
+import { getDefaultAvatar } from "@/core/lib/defaultAvatar";
 
 export default function MePage() {
   const auth = useAuth();
@@ -89,55 +90,96 @@ export default function MePage() {
     <div className="min-h-screen text-white pb-20">
 
       {/* 1. HERO SECTION */}
-      <div className="relative h-64 md:h-80 w-full overflow-hidden">
+      {/* 0. SCANLINE OVERLAY */}
+      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_1px]"></div>
+
+      {/* 1. HERO SECTION */}
+      <div className="relative h-64 md:h-80 w-full overflow-hidden mb-12">
         {/* Background Gradient/Mesh */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-black z-0"></div>
-        <div className="absolute inset-0 opacity-30 bg-[url('/assets/grid.png')] bg-repeat z-0"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 to-transparent z-10"></div>
+        <div className="absolute inset-0 bg-gray-950 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-950/90 z-10"></div>
+          <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] z-0 mix-blend-overlay"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-cyan-900/20 animate-pulse"></div>
+        </div>
+
+        {/* Settings - Absolute Top Right */}
+        <div className="absolute top-6 right-6 z-30">
+          <button
+            onClick={() => navigate("/user/settings")}
+            className="p-3 rounded-full bg-gray-900/40 border border-white/10 text-gray-300 hover:text-cyan-400 hover:bg-gray-800 hover:border-cyan-500/50 transition-all duration-300 backdrop-blur-md group"
+            aria-label="Settings"
+          >
+            <span className="icon-[solar--settings-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-500" />
+          </button>
+        </div>
 
         {/* Profile Info Overlay */}
-        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 z-20 flex flex-col md:flex-row items-end md:items-center justify-between gap-6">
-          <div className="flex items-end gap-6">
-            {/* Avatar with Glow */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-500"></div>
-              <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-800 flex items-center justify-center text-4xl font-bold z-10">
-                {avatarUrl ? (
-                  <img src={avatarUrl} className="w-full h-full object-cover" alt="avatar" />
-                ) : (
-                  <span>{profile?.username?.[0]?.toUpperCase()}</span>
-                )}
-              </div>
-            </div>
+        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 z-20 flex flex-col md:flex-row items-end justify-start gap-8">
+          {/* Avatar with Glow */}
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+            <div
+              className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-900 flex items-center justify-center z-10 cursor-pointer ring-2 ring-white/10 group-hover:ring-cyan-400/50 transition-all"
+              onClick={() => {
+                const url = avatarUrl || getDefaultAvatar(profile?.id);
+                openModal({
+                  type: "IMAGE_ZOOM",
+                  payload: { url },
+                  className: "!bg-transparent !p-0 !border-none !shadow-none !w-auto !max-w-none !max-h-none !overflow-visible",
+                  render: ({ url }: any) => (
+                    <div className="flex flex-col items-center justify-center outline-none" tabIndex={0} data-modal-autofocus>
+                      <img
+                        src={url}
+                        className="max-h-[60vh] max-w-[80vw] object-contain rounded-xl shadow-2xl border border-white/10"
+                        alt="Zoomed avatar"
+                      />
+                      <div className="mt-6">
+                        <SecondaryButton onClick={() => window.open(url, '_blank')} iconBefore={<span className="icon-[heroicons--arrow-down-tray]" />}>
+                          Open Original
+                        </SecondaryButton>
+                      </div>
+                    </div>
+                  )
+                });
+              }}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} className="w-full h-full object-cover" alt="avatar" />
+              ) : (
+                <img src={getDefaultAvatar(profile?.id)} className="w-full h-full object-cover" alt="Default avatar" />
+              )}
 
-            {/* Text Info */}
-            <div className="mb-2">
-              <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight drop-shadow-lg">
-                {profile?.username}
-              </h1>
-              <div className="flex items-center gap-3 text-gray-300 mt-1">
-                <span className="bg-gray-800/80 px-2 py-0.5 rounded text-sm text-blue-300 border border-blue-500/30">
-                  lvl {stats?.level || 1}
-                </span>
-                <span className="text-sm opacity-80">{profile?.email}</span>
+              {/* Search overlay icon on hover */}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="icon-[solar--magnifer-zoom-in-bold] text-white text-3xl drop-shadow-lg" />
               </div>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 mb-2">
-            <SecondaryButton
-              onClick={() => navigate("/user/settings")}
-              iconBefore={<span>✎</span>}
-            >
-              Edit Profile
-            </SecondaryButton>
-            <Button
-              variant="glass"
-              onClick={() => navigate("/user/settings")}
-            >
-              Settings
-            </Button>
+          {/* Identity */}
+          <div className="mb-3 flex-1">
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-xl relative">
+                {profile?.username}
+                {/* Glitch effect deco */}
+                <span className="absolute -left-[2px] -top-[2px] w-full h-full text-red-500 opacity-0 group-hover:opacity-30 mix-blend-screen animate-pulse pointer-events-none" aria-hidden="true">{profile?.username}</span>
+              </h1>
+
+              {/* Level Badge */}
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-cyan-950/40 border border-cyan-500/30 rounded-br-xl rounded-tl-xl backdrop-blur-sm">
+                <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-wider">LVL</span>
+                <span className="text-lg font-bold text-cyan-400 leading-none">{stats?.level || 1}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-gray-400 font-mono text-sm">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                ONLINE
+              </span>
+              <span className="opacity-50">|</span>
+              <span className="text-gray-500">{profile?.email}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -148,27 +190,28 @@ export default function MePage() {
           <StatCard
             label="Wins"
             value={stats?.wins ?? 0}
-            icon="🏆"
+            icon={<span className="icon-[solar--cup-first-bold-duotone]" />}
             color="text-yellow-400"
-            trend="+2 this week" // Mock data for visual
+            trend="+2 this week"
           />
           <StatCard
             label="Win Rate"
             value={`${stats?.winRate ?? 0}%`}
-            icon="📈"
-            color="text-green-400"
+            icon={<span className="icon-[solar--chart-bold-duotone]" />}
+            color="text-cyan-400"
+            isPercentage
           />
           <StatCard
             label="Matches"
             value={(stats?.wins ?? 0) + (stats?.losses ?? 0)}
-            icon="🎮"
-            color="text-blue-400"
+            icon={<span className="icon-[solar--gamepad-bold-duotone]" />}
+            color="text-purple-400"
           />
           <StatCard
             label="Tournaments"
             value={stats?.tournamentWins ?? 0}
-            icon="👑"
-            color="text-purple-400"
+            icon={<span className="icon-[solar--crown-star-bold-duotone]" />}
+            color="text-amber-400"
           />
         </div>
 
@@ -202,18 +245,41 @@ export default function MePage() {
 
 // Sub-components
 
-function StatCard({ label, value, icon, color, trend }: any) {
+function StatCard({ label, value, icon, color, trend, isPercentage }: any) {
+  const isPositive = trend?.includes("+");
+
   return (
-    <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800 p-6 rounded-2xl hover:bg-gray-800/40 transition duration-300 group">
+    <div className="relative overflow-hidden bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl group transition-all duration-300 hover:bg-gray-800/60 hover:-translate-y-1">
+      {/* Cyan Accent Border */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
       <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-lg bg-gray-800/50 text-2xl group-hover:scale-110 transition duration-300`}>
+        <div className={`p-3 rounded-lg bg-gray-800/50 text-2xl group-hover:scale-110 transition duration-300 ${color}`}>
+          {/* Icon wrapper to ensure color application */}
           {icon}
         </div>
-        {trend && <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded-full">{trend}</span>}
+
+        {/* Visual Trend or Mini Chart can go here. For now, trend text */}
+        {trend && (
+          <span className={`text-xs px-2 py-1 rounded-full border ${isPositive ? "text-cyan-400 border-cyan-500/30 bg-cyan-950/30" : "text-gray-400 border-gray-700 bg-gray-800"}`}>
+            {trend}
+          </span>
+        )}
+
+        {/* Circular Progress for Percentage */}
+        {isPercentage && (
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <svg className="w-full h-full -rotate-90">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-gray-800" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-cyan-400" strokeDasharray="125.6" strokeDashoffset={125.6 - (125.6 * (parseInt(value) || 0) / 100)} strokeLinecap="round" />
+            </svg>
+          </div>
+        )}
       </div>
+
       <div>
-        <div className={`text-3xl font-bold ${color}`}>{value}</div>
-        <div className="text-gray-400 text-sm font-medium">{label}</div>
+        <div className={`text-3xl font-bold text-white tracking-tight`}>{value}</div>
+        <div className="text-gray-400 text-sm font-medium mt-1">{label}</div>
       </div>
     </div>
   );
@@ -221,28 +287,55 @@ function StatCard({ label, value, icon, color, trend }: any) {
 
 function AchievementCard({ data }: any) {
   const unlocked = data.unlocked;
+
+  // Mock progress for locked items (since backend doesn't provide it yet)
+  const progress = unlocked ? 100 : Math.floor(Math.random() * 80) + 10;
+
   return (
-    <div className={`relative overflow-hidden p-6 rounded-2xl border transition-all duration-300 ${unlocked
-        ? "bg-gradient-to-br from-gray-900 to-gray-800 border-yellow-500/20 hover:border-yellow-500/40"
-        : "bg-gray-900/20 border-gray-800 opacity-60 grayscale"
+    <div className={`relative overflow-hidden p-6 rounded-2xl border transition-all duration-300 group ${unlocked
+      ? "bg-gray-900/60 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
+      : "bg-gray-900/40 border-white/5 opacity-75 hover:opacity-100"
       }`}>
-      <div className="flex items-center gap-4 relative z-10">
-        <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl shadow-lg ${unlocked ? "bg-yellow-500/10 text-yellow-400" : "bg-gray-800 text-gray-500"
-          }`}>
-          {unlocked ? "🏆" : "🔒"}
+
+      {/* Background glow for unlocked */}
+      {unlocked && (
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-50"></div>
+      )}
+
+      <div className="relative z-10 flex items-start gap-4">
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl shadow-inner ${unlocked ? "bg-cyan-950/50 text-cyan-400 ring-1 ring-cyan-500/50" : "bg-gray-800/50 text-gray-500 ring-1 ring-gray-700"}`}>
+          {unlocked
+            ? <span className="icon-[solar--cup-star-bold]" />
+            : <span className="icon-[solar--lock-keyhole-minimalistic-bold]" />
+          }
         </div>
-        <div>
-          <h3 className={`font-bold text-lg ${unlocked ? "text-white" : "text-gray-400"}`}>
-            {data.name}
-          </h3>
-          <p className="text-sm text-gray-400 leading-relaxed">
+
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <h3 className={`font-bold text-lg leading-tight mb-1 ${unlocked ? "text-cyan-50" : "text-gray-400"}`}>
+              {data.name}
+            </h3>
+            {unlocked && <span className="icon-[solar--check-circle-bold] text-cyan-400 text-lg" />}
+          </div>
+
+          <p className="text-xs text-gray-400 leading-relaxed mb-3">
             {data.description}
           </p>
+
+          {/* Progress Bar */}
+          <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ${unlocked ? 'bg-cyan-400 shadow-[0_0_8px_cyan]' : 'bg-gray-600'}`}
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          {!unlocked && (
+            <div className="text-[10px] text-right text-gray-500 mt-1 font-mono">
+              {Math.floor(progress / 10)} / 10
+            </div>
+          )}
         </div>
       </div>
-      {unlocked && (
-        <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/10 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
-      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useScreen } from "@/app/hooks/useScreen";
 import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
 import { apiFetch } from "@/core/lib/api";
+import { getDefaultAvatar } from "@/core/lib/defaultAvatar";
 
 // PanelButton extracted for clarity and reusability
 function PanelButton({ icon, label, onClick }) {
@@ -173,7 +174,7 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
                 {avatarUrl ? (
                   <img src={avatarUrl} className="w-full h-full object-cover" alt="User avatar" />
                 ) : (
-                  <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-lg" aria-hidden="true" />
+                  <img src={getDefaultAvatar(user?.id)} className="w-full h-full object-cover" alt="Default avatar" />
                 )}
               </div>
               <span className="text-sm text-[var(--color-primary)] opacity-85 ml-1">{user.username}</span>
@@ -190,7 +191,7 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
                     {avatarUrl ? (
                       <img src={avatarUrl} className="w-full h-full object-cover" alt="User avatar" />
                     ) : (
-                      <span className="icon-[mdi--account] text-[var(--color-primary)] opacity-60 text-xl" />
+                      <img src={getDefaultAvatar(user?.id)} className="w-full h-full object-cover" alt="Default avatar" />
                     )}
                   </div>
                   <div className="flex flex-col">

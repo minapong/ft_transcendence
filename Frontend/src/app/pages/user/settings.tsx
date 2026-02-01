@@ -4,6 +4,7 @@ import { apiFetch } from "@/core/lib/api";
 import { useAuth } from "@/core/lib/useAuth";
 import { vAge, vUsername } from "@/core/lib/input/validators";
 import { unwrap } from "@/core/lib/input/unwrap";
+import { getDefaultAvatar } from "@/core/lib/defaultAvatar";
 
 const WAREHOUSES = [
   "Mina Port W-001",
@@ -287,7 +288,7 @@ export default function UserSettingsPage() {
                   }}
                 />
               ) : (
-                <span>{profile?.username?.[0]?.toUpperCase() || "?"}</span>
+                <img src={getDefaultAvatar(profile?.id)} className="w-full h-full object-cover" alt="Default avatar" />
               )}
             </div>
             <div className="text-xs text-gray-400">Current</div>
