@@ -128,14 +128,14 @@ export default function MePage() {
         <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-20 flex flex-col md:flex-row items-start md:items-end justify-start gap-4 md:gap-8">
           {/* Avatar with Glow */}
           <div className="relative group self-center md:self-auto">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+            <div className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-50 ${avatarUrl ? 'group-hover:opacity-100' : ''} transition duration-500`}></div>
             <div
-              className="relative w-28 h-28 md:w-40 md:h-40 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-900 flex items-center justify-center z-10 cursor-pointer ring-2 ring-white/10 group-hover:ring-cyan-400/50 transition-all"
+              className={`relative w-28 h-28 md:w-40 md:h-40 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-900 flex items-center justify-center z-10 ring-2 ring-white/10 transition-all ${avatarUrl ? 'cursor-pointer group-hover:ring-cyan-400/50' : ''}`}
               onClick={() => {
-                const url = avatarUrl || "/assets/default-avatar.png";
+                if (!avatarUrl) return;
                 openModal({
                   type: "IMAGE_ZOOM",
-                  payload: { url },
+                  payload: { url: avatarUrl },
                   className: "!bg-transparent !p-0 !border-none !shadow-none !w-auto !max-w-none !max-h-none !overflow-visible",
                   render: ({ url }: any) => (
                     <div className="flex flex-col items-center justify-center outline-none" tabIndex={0} data-modal-autofocus>
@@ -157,13 +157,15 @@ export default function MePage() {
               {avatarUrl ? (
                 <img src={avatarUrl} className="w-full h-full object-cover" alt="avatar" />
               ) : (
-                <span className="text-4xl">👤</span>
+                <span className="icon-[solar--user-bold] text-4xl text-gray-500" />
               )}
 
-              {/* Search overlay icon on hover */}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <span className="icon-[solar--magnifer-zoom-in-bold] text-white text-3xl drop-shadow-lg" />
-              </div>
+              {/* Search overlay icon on hover - only show if avatar exists */}
+              {avatarUrl && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span className="icon-[solar--magnifer-zoom-in-bold] text-white text-3xl drop-shadow-lg" />
+                </div>
+              )}
             </div>
           </div>
 

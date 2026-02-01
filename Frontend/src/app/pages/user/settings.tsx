@@ -1,5 +1,5 @@
 // src/app/pages/user/settings.tsx
-import { useEffect, useRef, useState, navigate } from "Reactor";
+import { useEffect, useRef, useState, navigate, openModal } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 import { useAuth } from "@/core/lib/useAuth";
 import { vAge, vUsername } from "@/core/lib/input/validators";
@@ -302,8 +302,35 @@ export default function UserSettingsPage() {
               {/* Current avatar */}
               <div className="flex flex-col items-center gap-2">
                 <div className="relative group/avatar">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-30"></div>
-                  <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-gray-800 flex items-center justify-center ring-2 ring-white/10">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-30 group-hover/avatar:opacity-60 transition-opacity"></div>
+                  <div
+                    className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-gray-800 flex items-center justify-center ring-2 ring-white/10 cursor-pointer hover:ring-cyan-400/50 transition-all"
+                    onClick={() => {
+                      if (currentAvatar) {
+                        openModal({
+                          type: "IMAGE_ZOOM",
+                          payload: { url: currentAvatar },
+                          className: "!bg-transparent !p-0 !border-none !shadow-none !w-auto !max-w-none !max-h-none !overflow-visible",
+                          render: ({ url }: any) => (
+                            <div className="flex flex-col items-center justify-center outline-none" tabIndex={0} data-modal-autofocus>
+                              <img
+                                src={url}
+                                className="max-h-[60vh] max-w-[80vw] object-contain rounded-xl shadow-2xl border border-white/10"
+                                alt="Zoomed avatar"
+                              />
+                              <button
+                                onClick={() => window.open(url, '_blank')}
+                                className="mt-6 flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/80 border border-white/10 text-gray-300 hover:text-white hover:bg-gray-700 transition-all"
+                              >
+                                <span className="icon-[heroicons--arrow-down-tray]" />
+                                Open Original
+                              </button>
+                            </div>
+                          )
+                        });
+                      }
+                    }}
+                  >
                     {currentAvatar ? (
                       <img
                         src={currentAvatar}
@@ -317,6 +344,12 @@ export default function UserSettingsPage() {
                     ) : (
                       <span className="icon-[solar--user-bold] text-3xl text-gray-500" />
                     )}
+                    {/* Zoom overlay */}
+                    {currentAvatar && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                        <span className="icon-[solar--magnifer-zoom-in-bold] text-white text-xl" />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <span className="text-[10px] md:text-xs text-gray-500 uppercase tracking-wider font-mono">Current</span>
@@ -324,10 +357,36 @@ export default function UserSettingsPage() {
 
               {/* Preview avatar */}
               <div className="flex flex-col items-center gap-2">
-                <div className="relative">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-gray-800/50 border-2 border-dashed border-gray-700 flex items-center justify-center">
+                <div className="relative group/preview">
+                  <div
+                    className={`w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-gray-800/50 border-2 ${previewUrl ? 'border-cyan-500/30 cursor-pointer hover:border-cyan-400' : 'border-dashed border-gray-700'} flex items-center justify-center transition-all`}
+                    onClick={() => {
+                      if (previewUrl) {
+                        openModal({
+                          type: "IMAGE_ZOOM",
+                          payload: { url: previewUrl },
+                          className: "!bg-transparent !p-0 !border-none !shadow-none !w-auto !max-w-none !max-h-none !overflow-visible",
+                          render: ({ url }: any) => (
+                            <div className="flex flex-col items-center justify-center outline-none" tabIndex={0} data-modal-autofocus>
+                              <img
+                                src={url}
+                                className="max-h-[60vh] max-w-[80vw] object-contain rounded-xl shadow-2xl border border-white/10"
+                                alt="Preview avatar"
+                              />
+                            </div>
+                          )
+                        });
+                      }
+                    }}
+                  >
                     {previewUrl ? (
-                      <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
+                      <>
+                        <img src={previewUrl} className="w-full h-full object-cover" alt="preview" />
+                        {/* Zoom overlay */}
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                          <span className="icon-[solar--magnifer-zoom-in-bold] text-white text-xl" />
+                        </div>
+                      </>
                     ) : (
                       <span className="icon-[solar--gallery-add-bold-duotone] text-2xl text-gray-600" />
                     )}

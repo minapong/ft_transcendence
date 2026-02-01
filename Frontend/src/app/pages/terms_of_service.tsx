@@ -161,40 +161,48 @@ export default function TermsOfService() {
   return (
     <main className="legal-page" id="legal-top">
       <div className="legal-shell">
-        <nav className="legal-breadcrumb" aria-label="Breadcrumb">
-          <span>Legal</span>
-          <span>•</span>
-          <strong>Terms</strong>
-          <span>•</span>
-          <a href="/privacy_policy" className="legal-top-link">Privacy</a>
-        </nav>
-
-        <header className="legal-hero panel-surface">
-          <div>
-            <p className="legal-eyebrow">Legal / Usage</p>
-            <h1 className="legal-title">Terms of Service</h1>
-            <p className="legal-subtitle">
-              Rules and expectations for using ft_transcendence — our multiplayer Pong & Connect4
-              platform with matchmaking, chat, leaderboards, and tournaments.
-            </p>
-            <div className="legal-badges" aria-label="service highlights">
-              <span className="legal-badge">No real-money prizes</span>
-              <span className="legal-badge">Competitive integrity first</span>
-              <span className="legal-badge">Educational / portfolio build</span>
-            </div>
-          </div>
-
-          <div className="legal-meta-card">
-            <p className="legal-meta-label">Scope</p>
-            <p className="legal-meta-value">Online multiplayer arcade + social features</p>
-            <p className="legal-meta-label">Audience</p>
-            <p className="legal-meta-value">Players 13+ · non-commercial use</p>
-            <p className="legal-meta-label">Last updated</p>
-            <p className="legal-meta-value">February 1, 2026</p>
+        <header className="legal-hero">
+          <p className="legal-eyebrow">Legal</p>
+          <h1 className="legal-title">Terms of Service</h1>
+          <p className="legal-subtitle">
+            By using ft_transcendence, you agree to the terms below. These rules protect fair play,
+            privacy, and the integrity of our multiplayer platform.
+          </p>
+          <div className="legal-meta">
+            <span>
+              <strong>Last updated:</strong> February 1, 2026
+            </span>
+            <span>
+              <strong>Scope:</strong> Multiplayer games, social features, and rankings
+            </span>
           </div>
         </header>
 
         <div className="legal-layout">
+          <section className="legal-content" aria-label="Terms sections">
+            {sections.map((section) => (
+              <article
+                key={section.id}
+                id={section.id}
+                className="legal-section"
+                aria-label={section.title}
+              >
+                <h2 className="legal-section__title">
+                  <span className={`legal-icon ${section.iconClass}`} aria-hidden="true" />
+                  {section.title}
+                </h2>
+                {section.lead && <p className="legal-section__text">{section.lead}</p>}
+                {section.bullets && (
+                  <ul className="legal-list">
+                    {section.bullets.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            ))}
+          </section>
+
           <aside className={`legal-toc ${tocOpen ? "" : "is-collapsed"}`}>
             <div className="legal-toc__head">
               <p className="legal-toc__title">Quick links</p>
@@ -217,30 +225,6 @@ export default function TermsOfService() {
               ))}
             </ul>
           </aside>
-
-          <section className="legal-grid" aria-label="Terms sections">
-            {sections.map((section) => (
-              <article
-                key={section.id}
-                id={section.id}
-                className="legal-section panel-surface"
-                aria-label={section.title}
-              >
-                <h2 className="legal-section__title">
-                  <span className={`legal-icon ${section.iconClass}`} aria-hidden="true" />
-                  {section.title}
-                </h2>
-                {section.lead && <p className="legal-section__text">{section.lead}</p>}
-                {section.bullets && (
-                  <ul className="legal-list">
-                    {section.bullets.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            ))}
-          </section>
         </div>
 
         <footer className="legal-foot">
