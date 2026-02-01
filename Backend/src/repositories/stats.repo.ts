@@ -38,11 +38,13 @@ export async function updateUserGameStats(
     where: { user_id: userId },
     update: {
       [isWinner ? "wins" : "losses"]: { increment: 1 },
+      total_score: { increment: isWinner ? 1 : 0 },
       last_match_at: new Date(),
     },
     create: {
       user_id: userId,
       [isWinner ? "wins" : "losses"]: 1,
+      total_score: isWinner ? 1 : 0,
       last_match_at: new Date(),
     },
   });
@@ -53,10 +55,12 @@ export async function updateUserTournamentStats(winnerId: number): Promise<void>
     where: { user_id: winnerId },
     update: {
       tournament_championships: { increment: 1 },
+      total_score: { increment: 5 },
     },
     create: {
       user_id: winnerId,
       tournament_championships: 1,
+      total_score: 5,
     },
   });
 }
@@ -97,6 +101,7 @@ export async function getUserAggregatedStats(userId: number) {
     select: {
       wins: true,
       losses: true,
+      total_score: true,
       tournament_championships: true,
       last_match_at: true,
     },
@@ -107,6 +112,7 @@ export async function getUserAggregatedStats(userId: number) {
     return {
       wins: 0,
       losses: 0,
+      totalScore:0,
       tournamentWins: 0,
       lastMatchAt: null,
     };
@@ -115,6 +121,7 @@ export async function getUserAggregatedStats(userId: number) {
   return {
     wins: stats.wins,
     losses: stats.losses,
+    totalScore: stats.total_score,
     tournamentWins: stats.tournament_championships,
     lastMatchAt: stats.last_match_at?.toISOString() || null,
   };
