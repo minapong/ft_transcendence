@@ -99,7 +99,7 @@ export default function ModalRoot() {
   }
 
   const content = renderer
-    ? renderer({ ...(modal!.payload ?? {}), close: closeModal })
+    ? renderer({ ...((modal!.payload ?? {}) as any), close: closeModal })
     : renderFallback(modal!);
 
   return (

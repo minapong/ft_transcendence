@@ -97,8 +97,8 @@ export default function ProfilePage(props?: { id?: string }) {
     setFriendMsg(null);
 
     Promise.all([
-      apiFetch("/api/friends").then(r => r.ok ? r.json() : {}),
-      apiFetch("/api/friends/incoming").then(r => r.ok ? r.json() : {})
+      apiFetch("/api/friends").then(r => r.ok ? r.json() : { friends: [] }),
+      apiFetch("/api/friends/incoming").then(r => r.ok ? r.json() : { incoming: [] })
     ]).then(([friendsData, incomingData]) => {
       if (cancelled) return;
 
