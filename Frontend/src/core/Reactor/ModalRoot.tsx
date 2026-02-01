@@ -116,7 +116,7 @@ export default function ModalRoot() {
       >
         <button
           type="button"
-          className="modal-close absolute top-4 right-4 z-[60] p-2.5 rounded-full bg-gray-900/50 text-gray-400 border border-white/10 backdrop-blur-md transition-all duration-300 animate-in zoom-in-50 fade-in slide-in-from-top-2 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 hover:rotate-90 hover:scale-110 active:scale-95"
+          className="modal-close absolute top-4 right-4 z-[60] p-2 rounded-full bg-black/20 text-gray-400 border border-white/5 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/20 hover:text-red-400 hover:rotate-90 hover:scale-110 active:scale-95"
           aria-label="Close modal"
           onClick={closeModal}
           ref={closeRef}
