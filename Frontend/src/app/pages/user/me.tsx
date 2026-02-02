@@ -323,28 +323,42 @@ function StatCard({ label, value, icon, color, trend, isPercentage }: any) {
 }
 
 function AchievementCard({ data }: any) {
-  const unlocked = data.unlocked;
+  const unlocked = !!data.unlocked;
+
+  const { current, target } = normalizeProgress(data);
+
+  const percent =
+    unlocked ? 100 :
+    target > 0 ? Math.max(0, Math.min(100, (current / target) * 100)) : 0;
 
   // Mock progress for locked items (since backend doesn't provide it yet)
   const progress = unlocked ? 100 : Math.floor(Math.random() * 80) + 10;
 
-  return (
-    <div className={`relative overflow-hidden p-6 rounded-2xl border transition-all duration-300 group ${unlocked
-      ? "bg-gray-900/60 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
-      : "bg-gray-900/40 border-white/5 opacity-75 hover:opacity-100"
-      }`}>
-
-      {/* Background glow for unlocked */}
+   return (
+    <div
+      className={`relative overflow-hidden p-6 rounded-2xl border transition-all duration-300 group ${
+        unlocked
+          ? "bg-gray-900/60 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
+          : "bg-gray-900/40 border-white/5 opacity-75 hover:opacity-100"
+      }`}
+    >
       {unlocked && (
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-50"></div>
       )}
 
       <div className="relative z-10 flex items-start gap-4">
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl shadow-inner ${unlocked ? "bg-cyan-950/50 text-cyan-400 ring-1 ring-cyan-500/50" : "bg-gray-800/50 text-gray-500 ring-1 ring-gray-700"}`}>
-          {unlocked
-            ? <span className="icon-[solar--cup-star-bold]" />
-            : <span className="icon-[solar--lock-keyhole-minimalistic-bold]" />
-          }
+        <div
+          className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl shadow-inner ${
+            unlocked
+              ? "bg-cyan-950/50 text-cyan-400 ring-1 ring-cyan-500/50"
+              : "bg-gray-800/50 text-gray-500 ring-1 ring-gray-700"
+          }`}
+        >
+          {unlocked ? (
+            <span className="icon-[solar--cup-star-bold]" />
+          ) : (
+            <span className="icon-[solar--lock-keyhole-minimalistic-bold]" />
+          )}
         </div>
 
         <div className="flex-1">
@@ -355,24 +369,47 @@ function AchievementCard({ data }: any) {
             {unlocked && <span className="icon-[solar--check-circle-bold] text-cyan-400 text-lg" />}
           </div>
 
-          <p className="text-xs text-gray-400 leading-relaxed mb-3">
-            {data.description}
-          </p>
+          <p className="text-xs text-gray-400 leading-relaxed mb-3">{data.description}</p>
 
           {/* Progress Bar */}
           <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-1000 ${unlocked ? 'bg-cyan-400 shadow-[0_0_8px_cyan]' : 'bg-gray-600'}`}
-              style={{ width: `${progress}%` }}
-            ></div>
+              className={`h-full rounded-full transition-all duration-500 ${
+                unlocked ? "bg-cyan-400 shadow-[0_0_8px_cyan]" : "bg-gray-600"
+              }`}
+              style={{ width: `${percent}%` }}
+            />
           </div>
+
+          {/* Progress text (stable) */}
           {!unlocked && (
             <div className="text-[10px] text-right text-gray-500 mt-1 font-mono">
-              {Math.floor(progress / 10)} / 10
+              {current} / {target}
             </div>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+function normalizeProgress(data: any): { current: number; target: number } {
+  // Best case: backend sends { current, target }
+  if (typeof data.current === "number" && typeof data.target === "number") {
+    return { current: data.current, target: data.target };
+  }
+
+  // Common case: backend sends progress like "1/10"
+  if (typeof data.progress === "string") {
+    const m = data.progress.match(/^\s*(\d+)\s*\/\s*(\d+)\s*$/);
+    if (m) return { current: Number(m[1]), target: Number(m[2]) };
+  }
+
+  // If backend sends progress as number, you MUST also know target somehow.
+  // Fallback target=10 (adjust per-achievement if needed).
+  if (typeof data.progress === "number") {
+    return { current: data.progress, target: typeof data.max === "number" ? data.max : 10 };
+  }
+
+  return { current: 0, target: 10 };
 }
