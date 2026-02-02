@@ -6,7 +6,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=file:./transcendence.db
     env_file:
       - ./Backend/.env
     restart: always
