@@ -285,7 +285,8 @@ export function pong4PLogic(
 			y + P4_BALL_SIZE >= paddleY_Left &&
 			y <= paddleY_Left + P4_PADDLE_LENGTH
 		) {
-			dx = -dx;
+			dx = -dx * 1.05;
+			dy = dy * 1.05;
 			x = P4_LEFT_PADDLE_X + P4_PADDLE_THICKNESS;
 		}
 
@@ -295,7 +296,8 @@ export function pong4PLogic(
 			y + P4_BALL_SIZE >= paddleY_Right &&
 			y <= paddleY_Right + P4_PADDLE_LENGTH
 		) {
-			dx = -dx;
+			dx = -dx * 1.05;
+			dy = dy * 1.05;
 			x = P4_RIGHT_PADDLE_X - P4_BALL_SIZE;
 		}
 
@@ -305,7 +307,8 @@ export function pong4PLogic(
 			x + P4_BALL_SIZE >= paddleX_Upper &&
 			x <= paddleX_Upper + P4_PADDLE_LENGTH
 		) {
-			dy = -dy;
+			dy = -dy * 1.05;
+			dx = dx * 1.05;
 			y = P4_TOP_PADDLE_Y + P4_PADDLE_THICKNESS;
 		}
 
@@ -315,7 +318,8 @@ export function pong4PLogic(
 			x + P4_BALL_SIZE >= paddleX_Lower &&
 			x <= paddleX_Lower + P4_PADDLE_LENGTH
 		) {
-			dy = -dy;
+			dy = -dy * 1.05;
+			dx = dx * 1.05;
 			y = P4_BOTTOM_PADDLE_Y - P4_BALL_SIZE;
 		}
 
