@@ -1,51 +1,40 @@
-list all content of tsx and ts and config files
+# Frontend Dev Notes
 
-find . -type d -name "node_modules" -prune -false -o \( -name  '*.tsx' -o -name '*.ts' -o -name 'config' \) -exec echo '=====' {} \; -exec cat {} \;
+Quick commands and references for debugging the frontend build and JSX output.
 
-debug live output on website after compilation
+## List Source Files (no node_modules)
 
+```bash
+find . -type d -name "node_modules" -prune -false -o \
+  \( -name "*.tsx" -o -name "*.ts" -o -name "*.config.*" \) -print
+```
+
+## Vite Transform Debug
+
+```bash
 npx vite --debug transform
+```
 
-build and output in dist folder with watching
+## Build + Watch
 
+```bash
 npx vite build --watch
+```
 
+## JSX Transform Notes
 
-this comes from viteconfig jsx: "automatic"
+Vite uses the custom JSX factory configured in `Frontend/vite.config.ts`:
 
-import {jsxDEV} from "/src/reactor/jsx-dev-runtime.tsx";
-function Greeting() {
-    return /* @__PURE__ */
-    jsxDEV("div", {
-        children: /* @__PURE__ */
-        jsxDEV("h1", {
-            children: "jksdfklasd"
-        }, void 0, false, {
-            fileName: "/Users/mhashir/Desktop/Ft_Transcendence/frontend/src/components/Greeting.tsx",
-            lineNumber: 11,
-            columnNumber: 3
-        }, this)
-    }, void 0, false, {
-        fileName: "/Users/mhashir/Desktop/Ft_Transcendence/frontend/src/components/Greeting.tsx",
-        lineNumber: 10,
-        columnNumber: 4
-    }, this);
+```ts
+esbuild: {
+  jsx: "transform",
+  jsxFactory: "createReactor",
+  jsxFragment: "Fragment"
 }
-export default Greeting;
+```
 
+This means JSX compiles to calls like:
 
-this comes from transform
-
-function Greeting() {
-    return /* @__PURE__ */
-    createIt("div", null, /* @__PURE__ */
-    createIt("h1", null, "jksdfklasd"));
-}
-export default Greeting;
-
-
-
-
-
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
+```ts
+createReactor("div", null, "Hello")
+```

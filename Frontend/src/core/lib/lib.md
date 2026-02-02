@@ -1,122 +1,81 @@
-# lib Folder
+# core/lib
 
-The `lib` folder contains shared utility functions used across the frontend application for authentication, API communication, and real-time presence tracking.
+Shared utilities used across the frontend for authentication, API communication, input validation, and presence.
 
 ## Files
 
 ### api.ts
 
-A wrapper around the native `fetch` API for making authenticated HTTP requests.
+Authenticated `fetch` wrapper.
 
 **Exports:**
-- `apiFetch(url: string, options?: RequestInit)` - Authenticated fetch wrapper
+- `apiFetch(path: string, options?: RequestInit)`
 
-**Features:**
-- Automatically attaches JWT token from localStorage via `Authorization: Bearer` header
-- Sets `Content-Type: application/json` when a request body is present
-- Auto-logout on 401 responses (token expired/invalid)
-
-**Dependencies:**
-- `@/lib/auth` - Uses `getAuth()` and `logout()`
+**Behavior:**
+- Adds `Authorization: Bearer <token>` if available
+- Sets `Content-Type: application/json` when sending JSON
+- Uses `VITE_API_BASE` as a prefix when `path` is relative
+- Auto-logout on `401`
 
 ---
 
 ### auth.ts
 
-Manages authentication state in localStorage and provides login/logout functionality.
+Authentication state and logout flow.
 
 **Exports:**
-- `getAuth()` - Retrieves and parses auth data from localStorage (returns `null` if not found/invalid)
-- `setAuth(data: any)` - Saves auth data to localStorage and dispatches `auth:changed` event
-- `clearAuth()` - Removes auth data from localStorage and dispatches `auth:changed` event
-- `logout()` - Full logout flow: disconnects WebSocket, clears auth, redirects to `/login`
-
-**Constants:**
-- `AUTH_KEY = "auth"` - localStorage key for auth data
-- `AUTH_EVENT = "auth:changed"` - Custom event name for auth state changes
-
-**Dependencies:**
-- `@/lib/presence` - Uses `disconnectPresenceWS()` for cleanup on logout
-- `Reactor` - Uses `navigate()` for redirect
+- `getAuth()`
+- `setAuth(data)`
+- `clearAuth()`
+- `logout()` (redirects to `/auth/login` and clears presence + auth state)
 
 ---
 
 ### presence.ts
 
-Manages WebSocket connection for real-time user presence tracking.
+Presence WebSocket helper.
 
 **Exports:**
-- `connectPresenceWS()` - Establishes WebSocket connection to `/ws/presence` endpoint with JWT token
-- `disconnectPresenceWS()` - Closes the WebSocket connection and cleans up
+- `connectPresenceWS()`
+- `disconnectPresenceWS()`
+- `onPresenceMessage(handler)`
 
-**Features:**
-- Prevents duplicate connections (checks if already open/connecting)
-- Requires valid auth token to connect
-- Logs connection status (open, closed, error) to console
-- Connects to `ws://localhost:3000/ws/presence?token={token}`
-
-**Dependencies:**
-- `@/lib/auth` - Uses `getAuth()` to retrieve token
+**Behavior:**
+- Connects to `VITE_WS_BASE` if set, otherwise uses current host
+- Emits `presence:msg` events with parsed payloads
 
 ---
 
 ### useAuth.ts
 
-React hook for reactive authentication state management.
+Reactive auth hook.
 
 **Exports:**
-- `useAuth()` - Hook that returns current auth state and auto-updates on changes
+- `useAuth()`
 
-**Features:**
-- Syncs with localStorage changes (same tab via custom event, cross-tab via `storage` event)
-- Re-syncs on component mount to catch changes while route was inactive
-- Cleans up event listeners on unmount
-
-**Dependencies:**
-- `Reactor` - Uses `useEffect` and `useState` hooks
-- `@/lib/auth` - Uses `getAuth()` and `setAuth()`
+**Behavior:**
+- Syncs with `localStorage` and `auth:changed` events
+- Updates on cross-tab changes via `storage` event
 
 ---
 
+### input/
+
+Validation helpers:
+- `validators.ts`
+- `sanitize.ts`
+- `unwrap.ts`
+
 ## Usage Examples
 
-```typescript
-// Making an authenticated API call
-import { apiFetch } from "@/lib/api";
+```ts
+import { apiFetch } from "@/core/lib/api";
 
-const response = await apiFetch("/api/users/me");
-const userData = await response.json();
+const res = await apiFetch("/api/users/me");
 ```
 
-```typescript
-// Using auth hook in a component
-import { useAuth } from "@/lib/useAuth";
+```ts
+import { useAuth } from "@/core/lib/useAuth";
 
-function Profile() {
-  const auth = useAuth();
-  if (!auth) return <Redirect to="/login" />;
-  return <div>Welcome, {auth.user.username}</div>;
-}
+const auth = useAuth();
 ```
-
-```typescript
-// Managing presence connection
-import { connectPresenceWS, disconnectPresenceWS } from "@/lib/presence";
-
-// On login success
-connectPresenceWS();
-
-// On logout (handled automatically by auth.ts logout())
-disconnectPresenceWS();
-```
-
-## Summary
-
-| File | Purpose |
-|------|---------|
-| `api.ts` | Authenticated HTTP requests with auto-logout on 401 |
-| `auth.ts` | Auth state management (localStorage + events) |
-| `presence.ts` | WebSocket connection for real-time presence |
-| `useAuth.ts` | Reactor hook for reactive auth state |
-
-The `lib` folder serves as the foundation for authentication flow, API communication, and real-time features throughout the frontend application.

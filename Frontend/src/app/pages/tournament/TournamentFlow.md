@@ -5,16 +5,14 @@ Roles
 
 Tournament Start Page (start.tsx)
 
-	Shows available tournaments (max one at a time).
+	Shows the active tournament (max one at a time).
 	Admin sees “Create Tournament” + “Start Tournament” buttons.
 	Users see “Join Tournament” if there’s an open spot.
-	Choice between 4-player or 8-player tournament.
+	Admin can choose between 4-player or 8-player bracket size.
 
 Tournament Active Page (active.tsx)
 
-	Shows matches for the signed-in user (both p1 and p2 matches where user ID matches).
-	User clicks “Start Game” only for their own match.
-	Only one player in the match can start the game. The other waits.
+	Shows matches for the signed-in user (p1 or p2).
+	Either player can start their own match.
 	After finishing the game, the result is submitted to the backend.
 	If all matches in a round are finished → admin can advance to next round.
-

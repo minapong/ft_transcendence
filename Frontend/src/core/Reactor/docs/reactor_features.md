@@ -268,7 +268,7 @@ Vite scans filesystem at build time. Routes are derived automatically.
 **Static Routes:**
 ```
 pages/dashboard.tsx     → /dashboard
-pages/auth/login.tsx    → /auth/login
+pages/auth/[mode].tsx   → /auth/:mode
 pages/index.tsx         → /
 ```
 
@@ -327,7 +327,7 @@ import { navigate } from "Reactor";
 // Simple navigation
 navigate("/dashboard");
 navigate("/game/pong");
-navigate("/user/profile");
+navigate("/user/123");
 ```
 
 #### Function Signature
@@ -346,13 +346,12 @@ export function navigate(
 #### Features
 
 **1. Automatic Path Normalization**
-- Appends leading slash if missing: `"dashboard"` → `"/dashboard"`
-- Only updates history if path actually changed
-- Prevents unnecessary re-renders
+- Lowercases paths and collapses duplicate slashes
+- Removes trailing slash and strips query/hash
+- Expects absolute paths (start with `/`)
 
 ```tsx
-navigate("dashboard");      // ✓ Becomes /dashboard
-navigate("/dashboard");     // ✓ Same result
+navigate("/dashboard");
 navigate("/dashboard");     // ✓ No update (already there)
 ```
 
@@ -362,7 +361,7 @@ navigate("/dashboard");     // ✓ No update (already there)
 ```tsx
 // Sequence: Home → Dashboard → Profile
 navigate("/dashboard");      // Back takes you to Home ✓
-navigate("/profile");        // Back takes you to Dashboard ✓
+navigate("/user/me");        // Back takes you to Dashboard ✓
 ```
 
 **Replace:** Overwrites current history entry (no back button)
@@ -397,7 +396,7 @@ console.log(routeState.difficulty);  // "hard"
 Force the entire layout (header, sidebar, main) to re-render:
 ```tsx
 // Normal: Only re-render current page
-navigate("/settings");
+navigate("/user/settings");
 
 // Force layout re-render (useful after auth changes, theme changes)
 navigate("/dashboard", { triggerLayout: true });
@@ -464,23 +463,19 @@ function ErrorBoundary() {
 #### Implementation Details
 
 ```ts
-// Internal flow
-export function navigate(path: string, opts?: NavigateOptions) {
-  // 1. Normalize: "dashboard" → "/dashboard"
-  const target = normalizePath(path.startsWith("/") ? path : `/${path}`);
+// Simplified internal flow
+export async function navigate(path: string, opts?: NavigateOptions) {
+  const target = normalizePath(path);
   const current = normalizePath(window.location.pathname);
 
-  // 2. Check if URL actually changed
-  const shouldUpdateHistory = opts?.replace || target !== current;
-
-  // 3. Update browser history
-  if (shouldUpdateHistory) {
-    const method = opts?.replace ? "replaceState" : "pushState";
-    history[method](opts?.state ?? {}, "", target);
+  // Avoid duplicate transitions
+  if (target === current && !opts?.replace) {
+    renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
+    return;
   }
 
-  // 4. Trigger route rendering
-  renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
+  // Start transition, update history, trigger routechange, render
+  // (see core/render.tsx for full behavior)
 }
 ```
 
@@ -489,6 +484,7 @@ export function navigate(path: string, opts?: NavigateOptions) {
 Applied automatically to all paths:
 ```ts
 path
+  .toLowerCase()
   .replace(/\/{2,}/g, "/")     // "//dashboard" → "/dashboard"
   .replace(/\/+$/, "")         // "/dashboard/" → "/dashboard"
   .split(/[?#]/)[0]            // "/dashboard?tab=1#section" → "/dashboard"
@@ -499,6 +495,7 @@ path
 ```ts
 // Applied to all paths:
 path
+  .toLowerCase()
   .replace(/\/{2,}/g, "/")     // Collapse multiple slashes
   .replace(/\/+$/, "")         // Remove trailing slash
   .split(/[?#]/)[0]            // Strip query/hash

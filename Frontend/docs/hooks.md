@@ -1,18 +1,33 @@
-you can use any hooks by importing in this way
+# Reactor Hooks
 
-example page : index.tsx
+Reactor exports its hooks from the `Reactor` alias.
 
-import {useState,useEffect,useMemo,useRef} from "Reactor"
+```tsx
+import { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from "Reactor";
+```
 
-function example(){
-    const [state,setState]=useState(0);
-    return(
-        <div onClick={()=>setState(state+1)} >{state}</div>
-    );
+## Example
+
+```tsx
+import { useState, useEffect } from "Reactor";
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // Runs after DOM commit
+  }, [count]);
+
+  return (
+    <button onClick={() => setCount(c => c + 1)}>
+      {count}
+    </button>
+  );
 }
+```
 
-in useState() function useState can take both callback function and variable as well like
+## Notes
 
-setState(()=>state+1) or setState("hashir") 
-
-
+- `useState` supports functional updates: `setCount(c => c + 1)`
+- `useEventListener` is also available from `Reactor` for DOM events
+- Router hook: `useLocation` from `Reactor` (see Reactor docs)

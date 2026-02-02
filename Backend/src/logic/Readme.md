@@ -6,52 +6,53 @@
 Real-time 1v1 matchmaking for Connect4 with automatic cleanup of abandoned games and queue entries.
 
 ### Key Principles
-- **Fully database-backed** — no fragile in-memory timeouts or localStorage  
-- All matchmaking state lives in two db tables: `MatchmakingQueue` and `ActiveMatches`
-- **Automatic timeout cleanup** runs on every poll → guarantees no orphan games even after crashes or reloads 
-- Results are recorded permanently in the `matches` table  
+- **Database-backed** — no fragile in-memory timeouts or localStorage
+- Matchmaking state lives in `matchmaking_queue` and `active_matches`
+- **Automatic timeout cleanup** runs on every poll
+- Results are recorded in `match` and `match_players`
 
 ### Simple Flow Explanation
-A player clicks "Play" → joins the queue.  
-The system immediately tries to pair them with another waiting player.  
-If a pair is found, a new active match is created in the database with status "matched".  
-Both players poll regularly; during each poll, the system checks for expired queue entries and abandoned matches and removes them.  
-When host player load the game page, the match status is updated to "started".  
-When the game ends, the winner is reported → the result is permanently recorded and the active match is deleted.
+A player clicks "Play" → joins the queue.
+The system tries to pair them with another waiting player.
+If a pair is found, a new active match is created with status `matched`.
+Clients poll for state; each poll triggers cleanup of expired queue entries and matches.
+When the game starts, status becomes `started`.
+When the game ends, the winner is recorded and the active match is deleted.
 
 ### API Endpoints (used by frontend)
 
 | Endpoint                          | Method | Purpose                                      |
 |-----------------------------------|--------|----------------------------------------------|
 | `/api/matchmaking/join`           | POST   | Player joins the Connect4 queue              |
-| `/api/matchmaking/state`          | GET    | Poll: returns queued, matched, or active match data |
-| `/api/matchmaking/start`          | POST   | Called by client when both players are ready → sets status to "started" |
-| `/api/matchmaking/finish`         | POST   | Called when game ends → records winner + cleans up active match |
+| `/api/matchmaking/start`          | POST   | Sets match status to `started`               |
+| `/api/matchmaking/finish`         | POST   | Records winner + cleans up active match      |
+| `/api/matchmaking/state/:userId`  | GET    | Poll: returns queued/active/idle state       |
 
-### Main Queries (matchmakingRepo.ts)
+### Main Queries (match.repo.ts)
 
-| Query / Function                  | Parameters                                               | Returns                                | Purpose                                                                 |
-|-----------------------------------|----------------------------------------------------------|----------------------------------------|-------------------------------------------------------------------------|
-| `enqueuePlayer()`                 | `userId: number`, `game: string`                         | void                                   | Insert/replace player in queue with current timestamp                   |
-| `dequeueTwoPlayers()`             | `game: string`, `queueTimeoutSeconds: number`            | `[number, number] \| null`             | Cleanup queue + return oldest two players (or null)                     |
-| `cleanupQueue()`                  | `game: string`, `timeoutSeconds: number`                 | void                                   | Delete queue entries older than timeout                                 |
-| `insertActiveMatch()`             | `match: ActiveMatchDTO`                                  | void                                   | Create new row in ActiveMatches with status "matched"                  |
-| `updateActiveMatchStatus()`       | `matchId: string`, `status: MatchStatus`                 | void                                   | Update status and set started_at timestamp when game begins             |
-| `deleteActiveMatch()`             | `matchId: string`                                        | void                                   | Remove finished or abandoned match from ActiveMatches                  |
-| `getActiveMatchFull()`            | `{ matchId?: string; userId?: number }`                  | `ActiveMatchDTO \| null`               | Unified query: get full match (with player names) by userId or matchId  |
-| `getExpiredActiveMatches()`       | `maxMatchedSeconds: number`, `maxStartedSeconds: number` | `string[]` (match IDs)                 | Find matched/started games past their timeout (used for cleanup)        |
-| `recordConnect4Game()`            | `p1Id: number`, `p2Id: number`, `winnerId: number`       | `number` (matchId)                     | Insert finished match + player stats into permanent history             |
+| Function                          | Purpose                                                                 |
+|-----------------------------------|-------------------------------------------------------------------------|
+| `enqueuePlayer()`                 | Insert or refresh a player in queue                                     |
+| `dequeueTwoPlayers()`             | Cleanup queue + return oldest two players (or null)                     |
+| `cleanupQueue()`                  | Remove expired queue entries                                            |
+| `insertActiveMatch()`             | Create a new active match (status `matched`)                            |
+| `updateActiveMatchStatus()`       | Update status and set `started_at`                                      |
+| `deleteActiveMatch()`             | Remove finished/expired match                                           |
+| `getActiveMatchFull()`            | Fetch full active match with player names                               |
+| `getExpiredActiveMatches()`       | Find matched/started games past their timeout                           |
+| `recordConnect4Game()`            | Insert finished match + match_players                                   |
 
 ### Main Functions (matchmakingManager.ts)
 
-| Function                          | Parameters                                      | Returns                                      | Purpose                                                                 |
-|-----------------------------------|-------------------------------------------------|----------------------------------------------|-------------------------------------------------------------------------|
-| `joinQueue()`                     | `player: Player`                                | `{ status: "already_active""waiting""matched""idle"; match?: ActiveMatchDTO }` | Full matchmaking logic: validate, enqueue, try to pair, create match   |
-| `cleanupExpiredMatchesAndQueue()` | none                                            | void                                         | Central cleanup called on every poll                                    |
-| `getActiveMatchForUser()`         | `userId: number`                                | `ActiveMatchDTO \| null`                     | Poll endpoint helper: cleanup + return user's active match              |
-| `isQueued()`                      | `user_id: number`                               | `boolean`                                    | Poll endpoint helper: cleanup + check if user is in queue               |
-| `startMatch()`                    | `matchId: string`                               | `ActiveMatchDTO`                             | Validate and transition match from "matched" to "started"               |
-| `finishMatch()`                   | `matchId: string`, `winnerId: number`           | `{ success: true }`                          | Idempotent: record result if match exists, otherwise ignore timeout     |
+| Function                          | Purpose                                                                 |
+|-----------------------------------|-------------------------------------------------------------------------|
+| `joinQueue()`                     | Validate, enqueue, try to pair, create match                            |
+| `getActiveMatchForUser()`         | Cleanup + return user's active match                                    |
+| `isQueued()`                      | Cleanup + check if user is in queue                                     |
+| `startMatch()`                    | Validate and transition to `started`                                    |
+| `finishMatch()`                   | Record result and clean up                                              |
+
+---
 
 ## 2. Pong Tournament System
 
@@ -59,19 +60,18 @@ When the game ends, the winner is reported → the result is permanently recorde
 Admin-controlled single-elimination tournament for Pong with support for 4 or 8 players, registration phase, automatic bracket generation, and manual round progression.
 
 ### Key Principles
-- **Fully persistent** — all tournament state, registrations, matches, and results stored in the database  
-- **Direct result reporting** from the Pong game page (fire-and-forget with `keepalive: true`)  
-- No localStorage used for match or result handoff
+- **Fully persistent** — tournament state, registrations, matches, and results stored in the database
+- **Direct result reporting** from the Pong game page
 - Manual round advancement gives the admin full control and visibility
 
-### Simple Flow Explanation (in words)
-An admin creates a new tournament (only one active/waiting at a time).  
-Players register until the tournament is full.  
-The admin starts the tournament → players are shuffled and first-round matches are created.  
-Players see all pending match, they can click on "Start Game" only for their game, play Pong.
-When a Pong game ends, the winner is reported directly to the backend API.  
-Once all matches in the current round are finished, the admin clicks "Advance Round" → winners are paired for the next round.  
-This continues until a final winner is determined and the tournament state becomes "finished".
+### Simple Flow Explanation
+An admin creates a new tournament (only one active/waiting at a time).
+Players register until the tournament is full.
+The admin starts the tournament → players are shuffled and first-round matches are created.
+Players can start only their own match.
+When a Pong game ends, the winner is reported to the backend API.
+Once all matches in the current round are finished, the admin advances to the next round.
+This continues until a final winner is determined and the tournament becomes `finished`.
 
 ### API Endpoints (used by frontend)
 
@@ -82,30 +82,31 @@ This continues until a final winner is determined and the tournament state becom
 | `/api/tournament/start`           | POST   | Admin starts the tournament (must be full)   |
 | `/api/tournament/result`          | POST   | Pong game reports the winner of a match      |
 | `/api/tournament/next`            | POST   | Admin advances to the next round             |
-| `/api/tournament/active`          | GET    | Returns the current waiting/active tournament with full details       |
+| `/api/tournament/get`             | POST   | Fetch tournament by ID                       |
+| `/api/tournament/active`          | GET    | Returns the current waiting/active tournament|
 
 ### Main Queries (tournamentRepo.ts)
 
-| Query / Function                  | Parameters                                      | Returns                                      | Purpose                                                                 |
-|-----------------------------------|-------------------------------------------------|----------------------------------------------|-------------------------------------------------------------------------|
-| `insertTournament()`              | `name: string`, `maxPlayers: number`            | `number` (new tournament ID)                 | Inserts new tournament row                                              |
-| `insertTournamentPlayer()`        | `tournamentId: number`, `userId: number \| null`, `alias?: string` | `number` (row ID)                  | Inserts player into tournament_players junction table                   |
-| `insertMatch()`                   | `tournamentId`, `p1Id`, `p2Id`, `roundNumber`, `matchNumber`, `nextMatchId?` | `number` (matchId)               | Transaction: creates match, links to tournament, adds players           |
-| `recordMatchWinner()`             | `matchId: number`, `winnerId: number`            | void                                         | Updates the match row with winner_id                                     |
-| `updateTournamentState()`         | `tournamentId`, `state`, `currentRound`, `winnerId?` | `TournamentDTO \| null`                 | Updates state, current round, and final winner when tournament ends     |
-| `getRegisteredPlayers()`          | `tournamentId: number`                          | `PlayerDTO[]`                                | Returns all registered players with usernames                           |
-| `getMatchDTO()`                   | `matchId: number`                               | `MatchDTO`                                   | Builds full match object with both players and status                   |
-| `get_ActiveTournament()`          | none                                            | `TournamentDTO \| null`                      | Returns the single waiting or active tournament                         |
-| `getTournamentWithMatches()`      | `tournamentId: number`                          | `TournamentDTO \| null`                      | Builds full DTO: tournament + registered players + all matches with details |
+| Function                          | Purpose                                                                 |
+|-----------------------------------|-------------------------------------------------------------------------|
+| `insertTournament()`              | Insert new tournament row                                               |
+| `insertTournamentPlayer()`        | Insert player into tournament_players                                   |
+| `insertMatch()`                   | Create match + link to tournament                                       |
+| `recordMatchWinner()`             | Update the match row with winner_id                                     |
+| `updateTournamentState()`         | Update state/round/winner                                               |
+| `getRegisteredPlayers()`          | Return registered players                                               |
+| `getMatchDTO()`                   | Build match object with players                                         |
+| `getActiveTournament()`           | Return single waiting/active tournament                                 |
+| `getTournamentWithMatches()`      | Build full tournament DTO                                               |
 
 ### Main Functions (tournamentManager.ts)
 
-| Function                          | Parameters                                      | Returns                                      | Purpose                                                                 |
-|-----------------------------------|-------------------------------------------------|----------------------------------------------|-------------------------------------------------------------------------|
-| `createTournament()`              | `name: string`, `maxPlayers: number = 4`        | `TournamentDTO`                              | Creates tournament (rejects if one is already active/waiting)           |
-| `registerUserToTournament()`      | `tournamentId: number`, `userId: number`        | `number` (player row ID)                     | Validates state/slots and registers player                              |
-| `startTournament()`               | `tournamentId: number`                          | `TournamentDTO \| null`                      | Shuffles players, creates first-round matches, sets state to "active"   |
-| `recordMatchResult()`             | `matchId: number`, `winnerId: number`           | `MatchDTO`                                   | Validates winner and records the result                                 |
-| `advanceRound()`                  | `tournamentId: number`                          | `TournamentDTO \| null`                      | Checks round complete → pairs winners → creates next round matches      |
-| `getActiveTournament()`           | none                                            | `TournamentDTO \| null`                      | Wrapper for repo function                                               |
-| `getTournament()`                 | `tournamentId: number`                          | `TournamentDTO \| null`                      | Wrapper for repo function                                               |
+| Function                          | Purpose                                                                 |
+|-----------------------------------|-------------------------------------------------------------------------|
+| `createTournament()`              | Create tournament (rejects if one already active/waiting)               |
+| `registerUserToTournament()`      | Validate state/slots and register player                                |
+| `startTournament()`               | Shuffle players, create first round, set state to `active`              |
+| `recordMatchResult()`             | Validate winner and record result                                       |
+| `advanceRound()`                  | Check round completion → create next round matches                      |
+| `getActiveTournament()`           | Wrapper for repo function                                               |
+| `getTournament()`                 | Wrapper for repo function                                               |

@@ -1,90 +1,65 @@
 # Core Directory
 
-This directory contains framework code, pure logic, and infrastructure — nothing users directly see.
+This directory contains framework code, game logic, and infrastructure — nothing users directly see.
 
 ## Structure
 
 ```
 core/
-├── engine/     # Pure game logic (no UI)
-├── Reactor/    # Custom JSX framework (React-like)
-└── lib/        # API, auth, presence utilities
+├── engine/     # Game logic (Pong/Connect4)
+├── Reactor/    # Custom JSX framework
+└── lib/        # API, auth, presence, input utils
 ```
 
-## Engine Philosophy
+## Engine
 
-The `engine/` folder contains **pure game logic**:
+The `engine/` folder contains game logic helpers:
 
-- `pong_logic.ts` — Pong game state and physics
-- `pong_ai.ts` — AI opponent logic
-- `connect4_logic.ts` — Connect4 game state
-- `pong_parameters.ts` — Game constants
+- `pong_logic.ts`, `4p_pong_logic.ts` — Pong logic
+- `pong_ai.ts` — AI opponent
+- `connect4_logic.ts` — Connect4 logic
+- `match_config.ts`, `match_intent.ts` — match setup helpers
 
-### Current State (⚠️ Technical Debt)
+### Current State (Technical Debt)
 
-The engine currently accesses DOM directly via `document.getElementById()`. 
+Some engine functions still access DOM directly via `document.getElementById()`.
 
-**Future refactor:** Separate state from rendering:
-- Engine returns state updates
-- UI layer handles DOM manipulation
-- Enables: AI training, replays, multiplayer sync
-
-### Rules for Engine Code
-
-1. ❌ No React/Reactor imports
-2. ❌ No direct DOM manipulation (future goal)
-3. ✅ Pure functions where possible
-4. ✅ Export state + callbacks, not DOM side effects
+**Future refactor:** separate state updates from rendering so the engine can be reused for:
+- AI training
+- Replays
+- Multiplayer sync
 
 ## Reactor
 
 Custom JSX framework with:
 
-- `runtime/` — JSX factory + JSX runtime
+- `runtime/` — JSX factory + runtime
 - `core/` — hooks + render pipeline
-- `features/router/` — File-based routing
-- `features/modal/` — Modal system
+- `features/router/` — file-based routing
+- `features/modal/` — modal system
 - `types/` — JSX type declarations
-- `docs/` — Reactor documentation
 
-**Do not use React.** Use Reactor hooks:
+Use Reactor hooks and navigation:
 
 ```tsx
 import { useState, useEffect, navigate } from "Reactor";
 ```
 
-## Lib
+## lib
 
 Utilities for external communication:
 
 - `api.ts` — `apiFetch()` wrapper for backend calls
-- `auth.ts` — Token storage, `getAuth()`, `setAuth()`, `logout()`
+- `auth.ts` — token storage + logout
 - `presence.ts` — WebSocket presence connection
-- `useAuth.ts` — Auth state hook
-
-### API Usage
-
-```tsx
-import { apiFetch } from "@/core/lib/api";
-
-const data = await apiFetch("/api/users/me");
-```
-
-### Auth Usage
-
-```tsx
-import { getAuth, setAuth, logout } from "@/core/lib/auth";
-
-const auth = getAuth(); // { token, user }
-setAuth({ token, user });
-logout();
-```
+- `useAuth.ts` — auth state hook
+- `input/` — validation helpers
 
 ## Import Aliases
 
 Configured in `tsconfig.json` and `vite.config.ts`:
 
-- `@/core/engine/...` → Game logic
-- `@/core/lib/...` → Utilities  
-- `Reactor` → Framework (direct alias)
-- `Reactor/...` → Framework internals
+- `@/core/engine/...` → game logic
+- `@/core/lib/...` → utilities
+- `Reactor` → framework entry
+- `Reactor/...` → framework internals

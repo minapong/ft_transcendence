@@ -1,12 +1,27 @@
-Static images to be served should be placed inside the `Frontend/public` directory.
+# Image Usage
 
-Usage example:
-```html
-<img src="./a.webp">
+## Bundled Assets (recommended)
+
+Place images in `Frontend/src/assets` and import them in code so Vite can hash and optimize them.
+
+```tsx
+import logoUrl from "@/assets/logo.png";
+
+<img src={logoUrl} alt="Logo" />
 ```
 
-Vite will always resolve the path relative to the `public` directory, so there is no need to specify the full path explicitly.
+You can also use `new URL`:
 
-### Key Notes:
-- Files in the `public` directory are copied directly into the build output without hashing.
-- Files in the `assets` folder go through Vite's build pipeline and are hashed for cache-busting.
+```tsx
+const heroUrl = new URL("../assets/hero.webp", import.meta.url).href;
+```
+
+## Public Assets (optional)
+
+If you need a file to be served as-is (no hashing), create a `Frontend/public` folder and reference it by absolute path:
+
+```html
+<img src="/brand/hero.webp" alt="Hero" />
+```
+
+Files in `public` are copied directly to the build output without hashing.

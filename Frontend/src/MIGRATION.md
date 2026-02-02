@@ -7,7 +7,6 @@ The previous structure had:
 - Mixed concerns (UI and logic in same directories)
 - No clear "where do I put this?" answer
 
-
 ---
 
 ## What Moved Where
@@ -41,13 +40,12 @@ src/                          src/
 
 | Old | New |
 |-----|-----|
-| `pages/login.tsx` | `pages/auth/login.tsx` |
-| `pages/signup.tsx` | `pages/auth/signup.tsx` |
+| `pages/login.tsx` | `pages/auth/[mode].tsx` (login/signup via `mode`) |
+| `pages/signup.tsx` | `pages/auth/[mode].tsx` |
 | `pages/pong.tsx` | `pages/game/pong.tsx` |
 | `pages/4p_pong.tsx` | `pages/game/4p_pong.tsx` |
 | `pages/connect4.tsx` | `pages/game/connect4.tsx` |
 | `pages/connect4_single.tsx` | `pages/game/connect4_single.tsx` |
-| `pages/single_game.tsx` | `pages/game/single_game.tsx` |
 | `pages/me.tsx` | `pages/user/me.tsx` |
 | `pages/profile.tsx` | `pages/user/[id].tsx` (dynamic route) |
 | `pages/tournament/` | `pages/tournament/` (unchanged) |
@@ -56,38 +54,14 @@ src/                          src/
 
 ## Dynamic Routing
 
-The router now supports **file-based dynamic routes** using `[param]` convention:
-
-### Convention
+The router supports **file-based dynamic routes** using `[param]` convention:
 
 ```
 pages/user/[id].tsx      → matches /user/123, /user/abc
 pages/post/[slug]/edit.tsx → matches /post/hello-world/edit
 ```
 
-### How It Works
-
-1. Files with `[param]` in name become dynamic routes
-2. Router converts `[id]` → regex capture group `([^/]+)`
-3. Matched params are passed as props to the component
-
-### Example
-
-```tsx
-// pages/user/[id].tsx
-export default function UserPage({ id }: { id: string }) {
-  // id = "123" when visiting /user/123
-  return <div>User: {id}</div>;
-}
-```
-
-### Adding a New Dynamic Route
-
-1. Create file: `pages/post/[slug].tsx`
-2. Accept params: `export default function Post({ slug }) { ... }`
-3. Done — `/post/anything` now works
-
-**No router edits needed.**
+Matched params are passed as props to the component.
 
 ---
 
@@ -109,22 +83,22 @@ import { pongLogic } from "@/core/engine/pong_logic";
 
 ### Aliases Updated
 
-In `tsconfig.json` and `vite.config.ts`:
+Configured in `tsconfig.json` and `vite.config.ts`:
 
-| Alias | Old Target | New Target |
-|-------|------------|------------|
-| `@/*` | `src/*` | `src/*` (unchanged) |
-| `@/app/*` | — | `src/app/*` (new) |
-| `@/core/*` | — | `src/core/*` (new) |
-| `Reactor` | `src/Reactor` | `src/core/Reactor` |
-| `components` | `src/components` | `src/app/components` |
-| `pages` | `src/pages` | `src/app/pages` |
+| Alias | Target |
+|-------|--------|
+| `@/*` | `src/*` |
+| `@/app/*` | `src/app/*` |
+| `@/core/*` | `src/core/*` |
+| `Reactor` | `src/core/Reactor` |
+| `components` | `src/app/components` |
+| `pages` | `src/app/pages` |
 
 ---
 
 ## Route Changes
 
-Routes are auto-generated from file paths. New routes:
+Routes are auto-generated from file paths. Notable changes:
 
 | Old Route | New Route |
 |-----------|-----------|
@@ -134,9 +108,7 @@ Routes are auto-generated from file paths. New routes:
 | `/connect4` | `/game/connect4` |
 | `/connect4_single` | `/game/connect4_single` |
 | `/me` | `/user/me` |
-| `/profile/:id` | `/user/profile/:id` |
-
-**Navigation calls updated throughout codebase.**
+| `/profile/:id` | `/user/:id` |
 
 ---
 
@@ -158,7 +130,7 @@ src/
 │   └── hooks/      # App-specific hooks
 │
 ├── core/       # Things users DON'T see
-│   ├── engine/     # Pure game logic
+│   ├── engine/     # Game logic
 │   ├── Reactor/    # JSX framework
 │   └── lib/        # API, auth, utilities
 │
@@ -176,7 +148,7 @@ src/
 
 ## Known Technical Debt
 
-Engine files (`core/engine/*.ts`) still access DOM directly via `document.getElementById()`. 
+Engine files (`core/engine/*.ts`) still access DOM directly via `document.getElementById()`.
 
 **Future refactor needed** to separate state from rendering for:
 - AI training
@@ -193,7 +165,7 @@ Documented in `core/README.md`.
 # Find a page
 ls src/app/pages/
 
-# Find game logic  
+# Find game logic
 ls src/core/engine/
 
 # Find API utilities

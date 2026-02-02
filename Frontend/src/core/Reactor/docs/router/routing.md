@@ -6,7 +6,7 @@ Reactor uses **file-based routing**. The filesystem determines your routes autom
 
 ```
 pages/dashboard.tsx     →  /dashboard
-pages/auth/login.tsx    →  /auth/login
+pages/auth/[mode].tsx   →  /auth/:mode
 pages/user/[id].tsx     →  /user/:id (dynamic)
 ```
 
@@ -21,10 +21,11 @@ const pages = import.meta.glob("/src/app/pages/**/*.tsx", { eager: true });
 ```
 
 This returns an object like:
+
 ```ts
 {
   "/src/app/pages/dashboard.tsx": { default: DashboardComponent },
-  "/src/app/pages/auth/login.tsx": { default: LoginComponent },
+  "/src/app/pages/auth/[mode].tsx": { default: AuthComponent },
   "/src/app/pages/user/[id].tsx": { default: UserComponent },
 }
 ```
@@ -46,11 +47,10 @@ This returns an object like:
 
 2. Stored in a simple lookup table:
    ```ts
-   staticRoutes = {
-     "/dashboard": DashboardComponent,
-     "/auth/login": LoginComponent,
-     "/": IndexComponent,
-   }
+  staticRoutes = {
+    "/dashboard": DashboardComponent,
+    "/": IndexComponent,
+  }
    ```
 
 3. Resolution is O(1) — direct key lookup (case-insensitive)
@@ -98,16 +98,6 @@ pages/[category]/[id].tsx  →  /:category/:id
    }
    ```
 
-### Regex Breakdown
-
-```
-^/user/([^/]+)$
-│      │     │
-│      │     └── End of string
-│      └── Capture group: one or more non-slash chars
-└── Start of string
-```
-
 ### Multiple Params
 
 ```
@@ -118,6 +108,7 @@ paramNames: ["category", "id"]
 ```
 
 Visiting `/electronics/42/edit`:
+
 ```ts
 params = { category: "electronics", id: "42" }
 ```
@@ -130,12 +121,12 @@ params = { category: "electronics", id: "42" }
 function resolvePage(routes, rawPath) {
   // 1. Normalize path
   path = normalize(rawPath);
-  
+
   // 2. Try static routes first (fast, O(1))
   if (routes.static[path]) {
     return routes.static[path];
   }
-  
+
   // 3. Try dynamic routes (regex matching)
   for (const route of routes.dynamic) {
     const match = path.match(route.pattern);
@@ -144,7 +135,7 @@ function resolvePage(routes, rawPath) {
       return () => route.component(params);
     }
   }
-  
+
   // 4. Not found
   return routes.static["/notfound"];
 }
@@ -184,15 +175,8 @@ Dynamic components receive params as props:
 ```tsx
 // pages/user/[id].tsx
 export default function UserProfile({ id }: { id: string }) {
-  // Visiting /user/123 → id = "123"
   return <div>User: {id}</div>;
 }
-```
-
-The router wraps the component:
-```ts
-return () => route.component(params);
-//     ↑ Returns a function that calls component with params
 ```
 
 ---
@@ -205,19 +189,12 @@ Routes are computed once and cached:
 let cache: RouteMap | null = null;
 
 function getRoutes() {
-  if (cache) return cache;  // Return cached
-  
+  if (cache) return cache;
   // ... build routes ...
-  
   cache = { static, dynamic };
   return cache;
 }
 ```
-
-**Why cache?**
-- Route building is expensive (regex compilation)
-- Routes don't change at runtime
-- Called on every navigation
 
 ---
 
@@ -226,54 +203,26 @@ function getRoutes() {
 ### Static Route
 
 1. Create file: `pages/about.tsx`
-2. Export default component:
-   ```tsx
-   export default function About() {
-     return <div>About page</div>;
-   }
-   ```
-3. Visit `/about` ✓
+2. Export default component
+3. Visit `/about`
 
 ### Dynamic Route
 
 1. Create file: `pages/post/[slug].tsx`
-2. Accept params:
-   ```tsx
-   export default function Post({ slug }: { slug: string }) {
-     return <div>Post: {slug}</div>;
-   }
-   ```
-3. Visit `/post/hello-world` ✓
+2. Accept params in component
+3. Visit `/post/hello-world`
 
 ### Nested Dynamic Route
 
 1. Create file: `pages/user/[id]/settings.tsx`
-2. Accept params:
-   ```tsx
-   export default function UserSettings({ id }: { id: string }) {
-     return <div>Settings for user {id}</div>;
-   }
-   ```
-3. Visit `/user/123/settings` ✓
-
----
-
-## Debug
-
-Routes are logged at startup:
-
-```
-🧭 static routes: ["/", "/dashboard", "/auth/login", "/auth/signup", ...]
-🧭 dynamic routes: ["/user/[id]", "/post/[slug]"]
-```
-
-Check browser console to verify your routes are registered.
+2. Accept params
+3. Visit `/user/123/settings`
 
 ---
 
 ## Limitations
 
-1. **No catch-all routes** (`[...slug]`) — would need separate implementation
-2. **No optional params** (`[[id]]`) — not supported
-3. **No route guards** — must be implemented in components
-4. **Case-insensitive matching** — `/User/123` matches `/user/[id]`
+1. No catch-all routes (`[...slug]`)
+2. No optional params (`[[id]]`)
+3. No route guards (implement in components)
+4. Case-insensitive matching
