@@ -7,7 +7,7 @@ COMPOSE_LOCALPROD = ./docker-compose.localprod.yml
 PROJECT_NAME = game_app
 
 # Default target
-.DEFAULT_GOAL := help
+.DEFAULT_GOAL := all
 
 # ==============================================================================
 # 🧩 Build Targets
@@ -31,6 +31,7 @@ seed-prod:
 		-f $(COMPOSE_LOCALPROD) \
 		exec backend npm run seed:prod
 
+all: prod-seed
 
 # ==============================================================================
 # 🚀 Run Targets
@@ -92,10 +93,19 @@ re: fclean
 # ==============================================================================
 
 help:
-	@echo "  make prod         → Run production environment"
-	@echo "  make prod-seed    → Build, run, and seed production environment"
-	@echo "  make build-prod   → Build prod Docker images"
-	@echo "  make seed-prod    → Seed prod database"
-	@echo "  make clean        → Stop and remove containers"
+	@echo ""
+	@echo "Default:"
+	@echo "  make              → Build, start, and SEED the environment"
+	@echo "  make all          → Build, start, and SEED the environment"
+	@echo ""
+	@echo "Run:"
+	@echo "  make prod         → Build and start environment (NO seeding)"
+	@echo "  make prod-seed    → Build, start, and seed environment"
+	@echo ""
+	@echo "Database:"
+	@echo "  make seed-prod    → Seed database manually"
+	@echo ""
+	@echo "Maintenance:"
+	@echo "  make clean        → Stop containers"
 	@echo "  make fclean       → Full cleanup"
-	@echo "  make re           → Rebuild everything"
+	@echo ""
