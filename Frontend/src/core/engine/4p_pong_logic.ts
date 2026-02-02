@@ -435,6 +435,14 @@ export function pong4PLogic(
 	return () => {
 		isWin = true;
 		isPaused = true;
+		inputRef.current.left = false;
+		inputRef.current.right = false;
+		inputRef.current.w = false;
+		inputRef.current.s = false;
+		inputRef.current.v = false;
+		inputRef.current.b = false;
+		inputRef.current.num6 = false;
+		inputRef.current.num3 = false;
 
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);

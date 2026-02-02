@@ -496,6 +496,10 @@ export function pongLogic(
 	return () => {
 		gameEnded = true;
 		isPaused = true;
+		inputRef.current.down = false;
+		inputRef.current.up = false;
+		inputRef.current.w = false;
+		inputRef.current.s = false;
 
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
