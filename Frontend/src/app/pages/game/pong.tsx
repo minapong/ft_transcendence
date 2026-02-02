@@ -168,6 +168,7 @@ export default function PongGame() {
                     type: "pong-winner",
                     payload: {
                         winner,
+                        scoreP1,
                         scoreP2,
                         isTournament: matchId !== null,
                         onNavigate: handleNavigate,

@@ -292,7 +292,8 @@ export function pongLogic(
 			if (aiPlayer) {
 				aiPlayer.start(getGameState, simulateKeyPress);
 			}
-			moveBall();
+			lastTime = performance.now();
+			animationId = requestAnimationFrame(moveBall);
 		} else {
 			window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
 		}
@@ -301,53 +302,64 @@ export function pongLogic(
 	pause.addEventListener("click", toggleHandler);
 
 	let animationId: number | null = null;
+	let lastTime = performance.now();
+	function moveBall(now: number) {
+		if (gameEnded || isPaused) {
+			lastTime = now; // prevent delta spike after pause
+			return;
+		}
 
-	function moveBall() {
-		if (gameEnded || isPaused) return;
-		x += dx;
-		y += dy;
+		const delta = (now - lastTime) / 16.666; // normalize to 60fps
+		lastTime = now;
 
-		/// Left Paddle
+		// --- Ball movement ---
+		x += dx * delta;
+		y += dy * delta;
+
+		/// Left Paddle collision
 		if (
 			x <= LEFT_PADDLE_X + PADDLE_WIDTH &&
 			x >= LEFT_PADDLE_X + PADDLE_WIDTH - 8 &&
-			y + BALL_SIZE >= paddleY_Left && // Ball's bottom edge >= Paddle's top edge
-			y <= paddleY_Left + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
+			y + BALL_SIZE >= paddleY_Left &&
+			y <= paddleY_Left + PADDLE_HEIGHT
 		) {
 			dx = -dx * 1.05;
 			dy = dy * 1.05;
 			x = LEFT_PADDLE_X + PADDLE_WIDTH;
 		}
 
-		/// Right Paddle
+		/// Right Paddle collision
 		if (
 			x + BALL_SIZE >= RIGHT_PADDLE_X &&
 			x + BALL_SIZE <= RIGHT_PADDLE_X + 8 &&
-			y + BALL_SIZE >= paddleY_Right && // Ball's bottom edge >= Paddle's top edge
-			y <= paddleY_Right + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
+			y + BALL_SIZE >= paddleY_Right &&
+			y <= paddleY_Right + PADDLE_HEIGHT
 		) {
 			dx = -dx * 1.05;
 			dy = dy * 1.05;
 			x = RIGHT_PADDLE_X - BALL_SIZE;
 		}
 
-		/// Top Wall
+		/// Top wall
 		if (y <= 0) {
 			dy = -dy;
 			y = 0;
 		}
 
-		/// Bottom Wall
+		/// Bottom wall
 		else if (y + BALL_SIZE >= PLAYABLE_HEIGHT) {
 			dy = -dy;
 			y = PLAYABLE_HEIGHT - BALL_SIZE;
 		}
 
-		ball.style.left = x + 'px';
-		ball.style.top = y + 'px';
+		// Render
+		ball.style.left = `${x}px`;
+		ball.style.top = `${y}px`;
 
-		movePaddle();
+		// --- Paddle movement ---
+		movePaddle(delta);
 
+		// Scoring
 		if (x < 0) {
 			scoreRight++;
 			scoreRightDisplay.textContent = `${p2}: ${scoreRight}`;
@@ -366,7 +378,15 @@ export function pongLogic(
 			animationId = requestAnimationFrame(moveBall);
 		}
 	}
-	function clampPaddle(pos: number, speed: number, min: number, max: number, length: number, movingPositive: boolean): number {
+
+	function clampPaddle(
+		pos: number,
+		speed: number,
+		min: number,
+		max: number,
+		length: number,
+		movingPositive: boolean
+	): number {
 		if (movingPositive) {
 			if (pos + speed + length >= max) return max - length;
 			return pos + speed;
@@ -376,22 +396,53 @@ export function pongLogic(
 		}
 	}
 
-	function movePaddle() {
-		// Read inputs from Ref
+	function movePaddle(delta: number) {
 		const { w, s, up, down } = inputRef.current;
+		const step = PADDLE_SPEED * delta;
 
 		// Left paddle (W / S)
 		if (w)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
+			paddleY_Left = clampPaddle(
+				paddleY_Left,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				false
+			);
+
 		if (s)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
+			paddleY_Left = clampPaddle(
+				paddleY_Left,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				true
+			);
+
 		left_p.style.top = `${paddleY_Left}px`;
 
 		// Right paddle (Arrow Up / Down or AI)
 		if (up)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
+			paddleY_Right = clampPaddle(
+				paddleY_Right,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				false
+			);
+
 		if (down)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
+			paddleY_Right = clampPaddle(
+				paddleY_Right,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				true
+			);
 
 		right_p.style.top = `${paddleY_Right}px`;
 	}
@@ -442,7 +493,8 @@ export function pongLogic(
 		console.log("gameEnded in showWinner")
 	}
 
-	moveBall();
+	lastTime = performance.now();
+	animationId = requestAnimationFrame(moveBall);
 
 	return () => {
 		console.log("gameEnded in return")

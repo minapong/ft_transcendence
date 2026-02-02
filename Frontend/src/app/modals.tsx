@@ -1,4 +1,5 @@
 import { registerModal, closeModal } from "Reactor";
+import Button from "@/app/components/ui/Button";
 
 export type AlertPayload = {
     title: string;
@@ -58,27 +59,33 @@ registerModal<PongWinnerPayload>("pong-winner", (payload) => (
 
         <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
             {payload.isTournament ? (
-                <button
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-colors w-full"
+                <Button
+                    variant="primary"
+                    size="lg"
+                    fullWidth
                     onClick={() => payload.onNavigate("tournament")}
                 >
                     Next Match
-                </button>
+                </Button>
             ) : (
-                <button
-                    className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold transition-colors w-full"
+                <Button
+                    variant="success"
+                    size="lg"
+                    fullWidth
                     onClick={() => payload.onNavigate("home")}
                 >
                     Play Again
-                </button>
+                </Button>
             )}
 
-            <button
-                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold transition-colors w-full"
+            <Button
+                variant="secondary"
+                size="lg"
+                fullWidth
                 onClick={() => payload.onNavigate("home")}
             >
                 Main Menu
-            </button>
+            </Button>
         </div>
     </div>
 ));

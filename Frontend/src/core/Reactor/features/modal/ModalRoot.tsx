@@ -27,7 +27,6 @@ export default function ModalRoot() {
   const modal = getCurrentModal();
   const renderer = resolveModalRenderer(modal);
   const panelRef = useRef<HTMLElement | null>(null);
-  const closeRef = useRef<HTMLButtonElement | null>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
   const prevOverflowRef = useRef<string>("");
 
@@ -43,7 +42,6 @@ export default function ModalRoot() {
     const preferred =
       panel.querySelector<HTMLElement>("[data-modal-autofocus]") ??
       getFocusableElements(panel)[0] ??
-      closeRef.current ??
       panel;
     preferred?.focus();
 
@@ -124,15 +122,6 @@ export default function ModalRoot() {
         tabIndex={-1}
         ref={panelRef}
       >
-        <button
-          type="button"
-          className="modal-close absolute top-4 right-4 z-[60] p-2 rounded-full bg-black/20 text-gray-400 border border-white/5 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/20 hover:text-red-400 hover:rotate-90 hover:scale-110 active:scale-95"
-          aria-label="Close modal"
-          onClick={closeModal}
-          ref={closeRef}
-        >
-          <span className="icon-[solar--close-circle-bold] text-xl" aria-hidden="true" />
-        </button>
         {content}
       </div>
     </div>
