@@ -24,7 +24,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
     return (
         <div className="flex flex-col gap-1.5 w-full">
             {label && (
-                <label className="input-label">
+                <label className="input-label" htmlFor={props.id}>
                     {label}
                 </label>
             )}
@@ -34,14 +34,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
                 ${error ? 'energy-none' : 'energy-low focus-within:energy-medium'}
             `}>
                 <input
+                    id={props.id}
                     ref={ref}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? `${props.id}-error` : undefined}
                     {...props}
                     className={`input-shell ${error ? 'input-shell--error' : ''} ${className}`}
                 />
             </div>
 
             {error && (
-                <span className="input-error-msg">
+                <span id={`${props.id}-error`} className="input-error-msg">
                     {error}
                 </span>
             )}

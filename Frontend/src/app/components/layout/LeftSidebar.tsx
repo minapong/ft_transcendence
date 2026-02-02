@@ -1,28 +1,28 @@
 import SidebarLink from "@/app/components/ui/SidebarLink"
 import { navigate, useEffect, useRef, useState, useCallback, useEventListener } from "Reactor"
-import { useLocation } from "Reactor/router/useLocation"
+import { useLocation } from "Reactor/features/router"
 import { animate, stagger } from "motion"
 
 const links = [
 	{ label: "Home", href: "/", icon: "icon-[solar--home-smile-bold-duotone]", iconActive: "icon-[solar--home-smile-linear]" },
 	{ label: "Tournament", href: "/tournament/start", icon: "icon-[solar--cup-star-bold-duotone]", iconActive: "icon-[solar--cup-star-linear]" },
-	{ label: "Pong", href: "/game/legacy_form_setup", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
+	{ label: "Pong", href: "/game/pre_match_scene", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
 	{ label: "Connect4", href: "/game/connect4_single", icon: "icon-[solar--widget-5-bold-duotone]", iconActive: "icon-[solar--widget-5-linear]" },
-	{ label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
+	// { label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
 	{ label: "Dashboard", href: "/dashboard", icon: "icon-[solar--chart-square-bold-duotone]", iconActive: "icon-[solar--chart-square-linear]" },
 ];
 
 interface SidebarProps {
 	isOverlayOpen: boolean;
 	setIsOverlayOpen?: (v: boolean | ((p: boolean) => boolean)) => void;
-	isCollapsed?: boolean;
 	hidden?: boolean;
 }
-export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isCollapsed = false, hidden = false }: SidebarProps & { mode: "overlay" | "static" }) {
+export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, hidden = false }: SidebarProps & { mode: "overlay" | "static" }) {
 
 	const activePath = normalizePath(useLocation());
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
 	const resolvedPath = mode === "overlay" ? (pendingPath ?? activePath) : activePath;
+
 
 	const asideRef = useRef<HTMLDivElement | null>(null);
 	const backdropRef = useRef<HTMLDivElement | null>(null);
@@ -118,33 +118,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			document.body.style.overflow = "";
 			root?.removeAttribute("inert");
 		}
-	}, [mode, isOverlayOpen, hidden]);
-
-	useEffect(() => {
-		if (hidden || mode !== "static" || !asideRef.current) return;
-		animate(
-			asideRef.current,
-			{
-				width: isCollapsed ? "0px" : "18rem",
-				opacity: isCollapsed ? 0 : 1,
-			},
-			{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }
-		);
-
-		if (navRef.current) {
-			animate(
-				Array.from(navRef.current.children),
-				{
-					opacity: isCollapsed ? 0 : 1,
-					x: isCollapsed ? -12 : 0
-				},
-				{
-					delay: stagger(0.03, { from: isCollapsed ? "last" : "first" }),
-					duration: 0.2
-				}
-			);
-		}
-	}, [mode, isCollapsed, hidden]);
+	}, [mode, hidden]);
 
 	useEventListener("sidebar:close", () => closeAndNavigate());
 
@@ -152,7 +126,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 		return current === target || current.startsWith(target + "/");
 	}
 
-	// ALWAYS process SidebarLinks to keep hook counts stable
 	const sidebarLinks = links.map(link => (
 		<SidebarLink
 			label={link.label}
@@ -160,7 +133,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, isColla
 			icon={link.icon}
 			iconActive={link.iconActive}
 			active={isActive(resolvedPath, link.href)}
-			collapsed={isCollapsed}
 			onClick={() => { if (link.href) closeAndNavigate(link.href); }}
 		/>
 	));

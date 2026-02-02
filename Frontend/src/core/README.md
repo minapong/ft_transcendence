@@ -40,10 +40,12 @@ The engine currently accesses DOM directly via `document.getElementById()`.
 
 Custom JSX framework with:
 
-- `createReactor.tsx` — JSX factory
-- `hooks.ts` — useState, useEffect, etc.
-- `router/` — File-based routing
-- `modal.ts` — Modal system
+- `runtime/` — JSX factory + JSX runtime
+- `core/` — hooks + render pipeline
+- `features/router/` — File-based routing
+- `features/modal/` — Modal system
+- `types/` — JSX type declarations
+- `docs/` — Reactor documentation
 
 **Do not use React.** Use Reactor hooks:
 

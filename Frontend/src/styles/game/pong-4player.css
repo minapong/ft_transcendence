@@ -1,10 +1,19 @@
+/* Optimize transforms for paddles/ball */
+#p4_game #ball,
+#p4_game #left_p,
+#p4_game #right_p,
+#p4_game #upper_p,
+#p4_game #lower_p {
+  will-change: transform;
+}
+
 @media (max-width: 639px) and (max-height: 639px) {
   #p4_game #players_names {
     max-width: 320px;
     font-size: 16px;
     margin-bottom: 8px;
   }
-  #p4_game #game_board { width: 200px; height: 200px; }
+  #p4_game #game_board { width: 200px; height: 200px; border-width: 4px; }
 
   #p4_game #left_p, #p4_game #right_p { width: 8px; height: 64px; }
   #p4_game #upper_p, #p4_game #lower_p { width: 64px; height: 8px; }
@@ -50,7 +59,7 @@
     margin-bottom: 8px;
   }
 
-  #p4_game #game_board { width: 280px; height: 280px; }
+  #p4_game #game_board { width: 280px; height: 280px; border-width: 6px; }
 
   #p4_game #left_p, #p4_game #right_p { width: 12px; height: 80px; }
   #p4_game #upper_p, #p4_game #lower_p { width: 80px; height: 12px; }
@@ -92,17 +101,17 @@
     margin-bottom: 8px;
   }
 
-  #p4_game #game_board { width: 380px; height: 380px; }
+  #p4_game #game_board { width: 380px; height: 380px; border-width: 8px; }
 
-  #p4_game #left_p, #p4_game #right_p { width: 16px; height: 96px; }
-  #p4_game #upper_p, #p4_game #lower_p { width: 96px; height: 16px; }
+  #p4_game #left_p, #p4_game #right_p { width: 12px; height: 80px; }
+  #p4_game #upper_p, #p4_game #lower_p { width: 80px; height: 12px; }
 
   #p4_game #left_p { left: 16px; }
   #p4_game #right_p { right: 16px; }
   #p4_game #upper_p { top: 16px; }
   #p4_game #lower_p { bottom: 16px; }
 
-  #p4_game #ball { width: 20px; height: 20px; }
+  #p4_game #ball { width: 16px; height: 16px; }
 
   #p4_game #left-up, #p4_game #left-down,
   #p4_game #right-up, #p4_game #right-down,
@@ -134,17 +143,17 @@
     margin-bottom: 8px;
   }
 
-  #p4_game #game_board { width: 500px; height: 500px; }
+  #p4_game #game_board { width: 500px; height: 500px; border-width: 8px;}
 
-  #p4_game #left_p, #p4_game #right_p { width: 24px; height: 120px; }
-  #p4_game #upper_p, #p4_game #lower_p { width: 120px; height: 24px; }
+  #p4_game #left_p, #p4_game #right_p { width: 12px; height: 96px; }
+  #p4_game #upper_p, #p4_game #lower_p { width: 96px; height: 12px; }
 
   #p4_game #left_p { left: 16px; }
   #p4_game #right_p { right: 16px; }
   #p4_game #upper_p { top: 16px; }
   #p4_game #lower_p { bottom: 16px; }
 
-  #p4_game #ball { width: 24px; height: 24px; }
+  #p4_game #ball { width: 16px; height: 16px; }
 
   #p4_game #left-up, #p4_game #left-down,
   #p4_game #right-up, #p4_game #right-down,

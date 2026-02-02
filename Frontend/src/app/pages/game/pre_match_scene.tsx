@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useEventListener } from "Reactor";
+import { useState, useEffect, useRef, useEventListener, openModal } from "Reactor";
 import { navigate } from "Reactor";
 import { animate } from "motion";
 import { IntentPresets } from "@/core/engine/match_intent";
@@ -28,8 +28,9 @@ export default function PreMatchScene() {
 
   /* ---- CAROUSEL CONFIG ---- */
   const screenSize = useScreen();
-  const CARD_WIDTH = screenSize === "mobile" ? 340 : screenSize === "tablet" ? 400 : 460;
-  const GAP = screenSize === "mobile" ? 24 : screenSize === "tablet" ? 32 : 48;
+  const isMobile = screenSize === "mobile";
+  const CARD_WIDTH = isMobile ? 340 : screenSize === "tablet" ? 400 : 460;
+  const GAP = isMobile ? 24 : screenSize === "tablet" ? 32 : 48;
 
   /* ---- DRAG ENGINE ---- */
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -51,6 +52,7 @@ export default function PreMatchScene() {
   };
 
   const onPointerDown = (e: any) => {
+    if (isMobile) return;
     if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
     isDragging.current = true;
     startX.current = e.clientX;
@@ -182,7 +184,14 @@ export default function PreMatchScene() {
         };
       }
     } catch (e: any) {
-      alert(e.message);
+      openModal({
+        type: "alert",
+        payload: {
+          title: "Invalid Configuration",
+          message: e.message,
+          type: "error"
+        }
+      });
       return;
     }
 
@@ -190,16 +199,93 @@ export default function PreMatchScene() {
   };
 
   /* Keyboard navigation */
-  useEventListener("keydown", (e: KeyboardEvent) => {
-    if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "SELECT") {
-      if (e.key === "Enter") commit();
-      return;
-    }
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Safety check: ensure we are actually on this page
+      if (window.location.pathname !== "/game/pre_match_scene") return;
 
-    if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
-    if (e.key === "ArrowRight") setIndex((i) => Math.min(intents.length - 1, i + 1));
-    if (e.key === "Enter") commit();
-  });
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "SELECT") {
+        if (e.key === "Enter") commit();
+        return;
+      }
+
+      if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
+      if (e.key === "ArrowRight") setIndex((i) => Math.min(intents.length - 1, i + 1));
+      if (e.key === "Enter") commit();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [commit, index, intents.length]);
+
+  if (isMobile) {
+    return (
+      <section className="relative h-[calc(100vh-var(--header-height))] w-full flex flex-col bg-black overflow-y-auto overflow-x-hidden">
+        {/* Background */}
+        <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#0B0F29] via-[#02040a] to-black" />
+
+        <div className="relative z-10 flex flex-col gap-4 p-4 pb-20 max-w-md mx-auto w-full mt-4">
+          {intents.map((entry, i) => (
+            <IntentCard
+              intent={entry.state}
+              isActive={i === index}
+              onClick={() => setIndex(i)}
+              href={entry.href}
+              mobile
+              updateSlot={(k, v) =>
+                entry.set({
+                  ...entry.state,
+                  slots: { ...entry.state.slots, [k]: v },
+                })
+              }
+              updateRuleset={(k, v) =>
+                entry.set({
+                  ...entry.state,
+                  ruleset: { ...entry.state.ruleset, [k]: v },
+                })
+              }
+              onCommit={commit}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <section className="relative h-[calc(100vh-var(--header-height))] w-full flex flex-col bg-black overflow-y-auto overflow-x-hidden">
+        {/* Background */}
+        <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#0B0F29] via-[#02040a] to-black" />
+
+        <div className="relative z-10 flex flex-col gap-4 p-4 pb-20 max-w-md mx-auto w-full mt-4">
+          {intents.map((entry, i) => (
+            <IntentCard
+              key={entry.state.type}
+              intent={entry.state}
+              isActive={i === index}
+              onClick={() => setIndex(i)}
+              href={entry.href}
+              mobile
+              updateSlot={(k, v) =>
+                entry.set({
+                  ...entry.state,
+                  slots: { ...entry.state.slots, [k]: v },
+                })
+              }
+              updateRuleset={(k, v) =>
+                entry.set({
+                  ...entry.state,
+                  ruleset: { ...entry.state.ruleset, [k]: v },
+                })
+              }
+              onCommit={commit}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

@@ -1,4 +1,5 @@
 import { registerModal, closeModal } from "Reactor";
+import Button from "@/app/components/ui/Button";
 
 export type AlertPayload = {
     title: string;
@@ -33,55 +34,76 @@ registerModal<AlertPayload>("alert", (payload) => (
     </div>
 ));
 
-export type PongWinnerPayload = {
-    winner: string;
-    scoreP1: number;
-    scoreP2: number;
-    isTournament: boolean;
-    onNavigate: (destination: "tournament" | "home") => void;
+export type ConfirmPayload = {
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    type?: "danger" | "warning" | "info";
 };
 
-registerModal<PongWinnerPayload>("pong-winner", (payload) => {
-    const handleClick = (destination: "tournament" | "home") => {
-        if (typeof payload.onNavigate === "function") {
-            payload.onNavigate(destination);
-        } else {
-            console.error("[Pong Modal] onNavigate is not a function. Please refresh the page.");
-            // Fallback navigation
-            closeModal();
-            if (destination === "tournament") {
-                window.location.href = "/tournament/active";
-            } else {
-                window.location.href = "/game/single_game";
-            }
-        }
-    };
-
-    return (
-        <div className="text-center p-6">
-            <div className="text-6xl mb-4">🏆</div>
-            <h2 className="text-3xl font-bold text-white mb-2">{payload.winner} Wins!</h2>
-            <p className="text-xl text-slate-300 mb-6">{payload.scoreP1} - {payload.scoreP2}</p>
-
-            <div className="flex gap-3 justify-center">
-                {payload.isTournament ? (
-                    <button
-                        onClick={() => handleClick("tournament")}
-                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-all active:scale-95 flex items-center gap-2"
-                    >
-                        <span className="icon-[solar--cup-star-bold] text-xl" />
-                        Back to Tournament
-                    </button>
-                ) : (
-                    <button
-                        onClick={() => handleClick("home")}
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all active:scale-95 flex items-center gap-2"
-                    >
-                        <span className="icon-[solar--home-2-bold] text-xl" />
-                        Back to Home
-                    </button>
-                )}
+registerModal<ConfirmPayload>("confirm", (payload) => (
+    <div className="p-2">
+        <div className="flex items-center gap-4 mb-4">
+            <div className={`p-3 rounded-xl ${payload.type === 'danger' ? 'bg-red-500/10 text-red-500' :
+                payload.type === 'warning' ? 'bg-orange-500/10 text-orange-500' :
+                    'bg-blue-500/10 text-blue-500'
+                }`}>
+                {payload.type === 'danger' && <span className="icon-[solar--danger-triangle-linear] text-2xl" />}
+                {payload.type === 'warning' && <span className="icon-[solar--shield-warning-linear] text-2xl" />}
+                {(payload.type === 'info' || !payload.type) && <span className="icon-[solar--question-circle-linear] text-2xl" />}
+            </div>
+            <div>
+                <h2 className="text-xl font-bold text-slate-100">{payload.title}</h2>
+                <p className="text-slate-400 text-sm mt-1">{payload.message}</p>
             </div>
         </div>
-    );
-});
+        <div className="flex justify-end gap-3 mt-6">
+            <button
+                onClick={closeModal}
+                className="px-6 py-2.5 bg-transparent hover:bg-white/5 text-slate-300 font-semibold rounded-xl transition-all border border-transparent hover:border-white/10"
+            >
+                {payload.cancelText || "Cancel"}
+            </button>
+            <button
+                onClick={() => {
+                    payload.onConfirm();
+                    closeModal();
+                }}
+                className={`px-6 py-2.5 font-semibold rounded-xl transition-all active:scale-95 shadow-lg ${payload.type === 'danger'
+                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/20'
+                    : 'bg-slate-100 hover:bg-white text-slate-900 shadow-white/10'
+                    }`}
+            >
+                {payload.confirmText || "Confirm"}
+            </button>
+        </div>
+    </div>
+));
+
+import WinnerModal, { type WinnerModalPayload } from "@/app/components/game/WinnerModal";
+export type { WinnerModalPayload };
+
+registerModal<WinnerModalPayload>("game-winner", (payload) => (
+    <WinnerModal payload={payload} />
+));
+
+// Kept for backward compatibility if needed temporarily, but we will remove it as we migrate.
+// Actually, let's just remove pong-winner entirely as per plan to force migration.
+
+
+type DemoPayload = {
+    title: string;
+    body: string;
+};
+
+registerModal<DemoPayload>("demo", (payload) => (
+    <div className="space-y-3">
+        <h2 className="text-xl font-semibold">{payload.title}</h2>
+        <p>{payload.body}</p>
+        <button className="bleed-btn px-3 py-2 rounded-md" onClick={closeModal}>
+            Close
+        </button>
+    </div>
+));

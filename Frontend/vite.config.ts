@@ -16,17 +16,17 @@ export default defineConfig({
 			layouts: "/src/app/components/layout",
 			"@/app": "/src/app",
 			"@/core": "/src/core",
-			"@":"/src",
+			"@": "/src",
 		},
 	},
 	server: {
 		port: 5173,
 		open: false,
 		proxy: {
-		   "/static": {
-			target: "http://backend:3000",
-			changeOrigin: true,
-		   },
+			"/static": {
+				target: "http://backend:3000",
+				changeOrigin: true,
+			},
 		},
 	},
 	build: {

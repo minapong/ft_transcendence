@@ -1,10 +1,50 @@
 import { prisma } from "../src/db/prisma.js";
 import { hashPassword } from "../src/services/auth.service.js"; // wherever your AuthService lives
-
 // import crypto from "crypto";
 
+const DEFAULTS = [
+  "default_avatars/a1.jpg",
+  "default_avatars/a2.jpg",
+  "default_avatars/a3.jpg",
+  "default_avatars/a4.jpg",
+  "default_avatars/a5.jpg",
+];
+
+export async function ensureDefaultAvatars() {
+  for (const p of DEFAULTS) {
+    const existing = await prisma.avatar.findFirst({ where: { file_path: p } });
+
+    if (!existing) {
+      await prisma.avatar.create({
+        data: {
+          user_id: null,
+          file_path: p,
+          is_default: true,
+        },
+      });
+    } else {
+      // keep them in a consistent "default pool" state
+      await prisma.avatar.update({
+        where: { id: existing.id },
+        data: { is_default: true, user_id: null },
+      });
+    }
+  }
+
+  const defaults = await prisma.avatar.findMany({
+    where: { is_default: true, user_id: null },
+    orderBy: { id: "asc" },
+  });
+
+  if (defaults.length === 0) {
+    throw new Error("Default avatars were not created.");
+  }
+
+  return defaults;
+}
+
 const users = await prisma.user.count();
-if (users > 9) {
+if (users > 0) {
   console.log("Database already seeded, skipping.");
   process.exit(0);
 }
@@ -38,20 +78,39 @@ async function seedUsers() {
 
   for (let i = 1; i <= USER_COUNT; i++) {
     const username = `user${i}`;
+    const password = `pass${username}`;
 
-    const user = await prisma.user.create({
-      data: {
-        email: `${username}@example.com`,
-        username,
-        password_hash: hashPassword(username),
-        isAdmin: i === 1,
-      },
-    });
+  const user = await prisma.user.upsert({
+    where: { username },
+    update: {},
+    create: {
+      email: `${username}@example.com`,
+      username,
+      password_hash: hashPassword(password),
+      isAdmin: i === 1,
+    },
+  });
 
     users.push(user);
   }
 
   return users;
+}
+
+async function assignDefaultAvatarsToUsers(users: { id: number }[]) {
+  console.log("Assigning default avatars to users...");
+
+  const defaults = await ensureDefaultAvatars(); // returns Avatar[]
+
+  for (let i = 0; i < users.length; i++) {
+    const u = users[i];
+    const chosen = defaults[i % defaults.length];
+
+    await prisma.user.update({
+      where: { id: u.id },
+      data: { avatarId: chosen.id }, // ✅ your schema field
+    });
+  }
 }
 
 async function seedMatches(users: { id: number }[]) {
@@ -96,14 +155,14 @@ async function seedMatches(users: { id: number }[]) {
       where: { user_id: winnerId },
       update: {
         wins: { increment: 1 },
-        total_score: { increment: 10 },
+        total_score: { increment: 1 },
         last_match_at: new Date(),
       },
       create: {
         user_id: winnerId,
         wins: 1,
         losses: 0,
-        total_score: 10,
+        total_score: 1,
         last_match_at: new Date(),
       },
     });
@@ -113,14 +172,14 @@ async function seedMatches(users: { id: number }[]) {
       where: { user_id: loserId },
       update: {
         losses: { increment: 1 },
-        total_score: { increment: 5 },
+        total_score: { increment: 0 },
         last_match_at: new Date(),
       },
       create: {
         user_id: loserId,
         wins: 0,
         losses: 1,
-        total_score: 5,
+        total_score: 0,
         last_match_at: new Date(),
       },
     });
@@ -197,11 +256,13 @@ async function seedTournament(users: { id: number }[]) {
   await prisma.statsUser.upsert({
     where: { user_id: champion },
     update: {
+      total_score: { increment: 5 },
       tournament_championships: { increment: 1 },
     },
     create: {
       user_id: champion,
       tournament_championships: 1,
+      total_score: 5,
     },
   });
 
@@ -231,6 +292,7 @@ async function main() {
   await seedMatches(users);
   await seedTournament(users);
   await seedFriendsCount(users);
+  await assignDefaultAvatarsToUsers(users);
 
   console.log("✅ Seeding complete.");
 }

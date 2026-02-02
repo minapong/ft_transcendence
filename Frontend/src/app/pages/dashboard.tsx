@@ -10,7 +10,6 @@ export default function Dashboard() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-console.log("dashboard useeffect");
   useEffect(() => {
     fetchLeaderboard();
     fetchHistory(1);
@@ -35,7 +34,6 @@ console.log("dashboard useeffect");
         setError(json.error || "API error");
       }
     } catch (err: any) {
-      console.error("Leaderboard failed:", err);
       setError("Failed to load leaderboard");
     }
   };
@@ -59,7 +57,6 @@ console.log("dashboard useeffect");
         setError(json.error || "API error");
       }
     } catch (err: any) {
-      console.error("History failed:", err);
       setError("Failed to load match history");
     } finally {
       setLoading(false);

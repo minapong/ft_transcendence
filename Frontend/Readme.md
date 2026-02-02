@@ -1,103 +1,61 @@
-# 🎮 ft_transcendence – Frontend
+# ft_transcendence — Frontend
 
-## 🧭 Overview
-This is the **frontend** of the ft_transcendence project.  
-Built as a **Single Page Application (SPA)** using **TypeScript**, with **Tailwind CSS** for styling.  
-It must run flawlessly on the latest stable version of **Mozilla Firefox**.
+This is the single-page app (SPA) for ft_transcendence. It uses the custom Reactor framework (JSX runtime + hooks + router) and a Tailwind v4 + tokens-based design system.
 
----
+## Tech Stack
 
-## 🧱 Base Responsibilities
-- SPA routing with full **Back/Forward navigation** support  
-- Core **Pong game interface** (canvas + controls)  
-- **Tournament** and **Matchmaking** UI  
-- Integration with backend APIs (Fastify)  
-- Clean console — no warnings or errors  
+- TypeScript + Vite
+- Reactor (custom JSX runtime, hooks, router)
+- Tailwind CSS v4 + custom CSS tokens
+- Motion One
+- Babylon dependencies are installed but not yet wired into the UI
 
----
-
-## ⚙️ Tech Stack
-- **TypeScript** – main language  
-- **Tailwind CSS** – frontend toolkit *(Minor Module)*  
-- **Babylon.js** – 3D graphics for enhanced Pong experience  
-- **WebSockets (WSS)** – for real-time gameplay and chat  
-- **Docker** – full containerized deployment  
-
----
-
-## 🧩 Folder Structure
-```bash
-src/
-├── app/                    # App entry & global setup
-│   ├── index.css           # Global styles
-│   └── main.tsx            # Root entry, mounts the app
-│
-├── assets/                 # Imported images, icons, fonts (bundled by Vite)
-│   └── a.jpg
-│
-├── components/             # Reusable building blocks
-│   ├── layout/             # Page structure (header, nav, footer, sidebar)
-│   │   ├── Header.tsx
-│   │   ├── Nav.tsx
-│   │   ├── Side.tsx
-│   │   └── footer.tsx
-│   ├── ui/                 # Small reusable UI parts (buttons, inputs, etc.)
-│   │   ├── Buton.tsx
-│   │   └── Greeting.tsx
-│   └── main.tsx            # (Temp) — consider moving or removing
-│
-├── layouts/                # Page wrappers combining layout parts
-│   └── MainLayout.tsx
-│
-├── pages/                  # Route-level views
-│   ├── contact.tsx
-│   ├── index.tsx
-│   ├── login.tsx
-│   ├── notfound.tsx
-│   ├── santiago.tsx
-│   └── tournament/         # Feature-specific routes
-│       ├── active.tsx
-│       └── start.tsx
-│
-├── reactor/                # Custom JSX/React-like runtime
-│   ├── createReactor.md
-│   ├── createReactor.tsx
-│   ├── index.tsx
-│   ├── jsx-dev-runtime.ts
-│   ├── jsx.d.ts
-│   └── router.tsx
-│
-└── styles/                 # CSS modules & global style definitions
-    └── abc.css
-
-````
-
----
-
-## 🚀 Development
-
-To run locally:
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open 👉 **[https://localhost:5173](https://localhost:5173)**
-(Use HTTPS even locally for compliance)
+Frontend runs on `http://localhost:5173` by default.
 
----
+## Environment
 
-## 👤 Maintainers
+```env
+VITE_API_BASE=http://localhost:3000
+# Optional override:
+# VITE_WS_BASE=ws://localhost:3000
+```
 
-| Name             | Role                                         |
-| ---------------- | -------------------------------------------- |
-| **Hashir**       | SPA, Tournament, Matchmaking, UI integration |
-| **Abdul Rehman** | Pong gameplay logic                          |
-| **Natalia**      | Docker & HTTPS configuration                 |
-| **Santiago**     | JWT + 2FA & GDPR / Account Deletion          |
----
-
-🧩 *This frontend forms the visual layer of ft_transcendence, integrating directly with the Fastify backend and real-time WebSocket services for gameplay and chat.*
+## Folder Structure
 
 ```
+src/
+├── app/                     # User-facing UI
+│   ├── components/          # Layout + UI building blocks
+│   │   ├── layout/
+│   │   ├── ui/
+│   │   └── game/
+│   ├── hooks/               # App-specific hooks
+│   ├── pages/               # File-based routes
+│   │   ├── auth/[mode].tsx   # /auth/login, /auth/signup
+│   │   ├── game/             # Pong / 4P / AI / Connect4
+│   │   ├── tournament/       # start/active views
+│   │   └── user/             # /user/me, /user/[id], /user/settings
+│   ├── modals.tsx            # Modal registrations
+│   ├── main.tsx              # App entry
+│   └── global.css            # Global styles import
+│
+├── core/                    # Framework + pure logic
+│   ├── Reactor/             # JSX runtime + hooks + router
+│   ├── engine/              # Game logic (Pong/Connect4)
+│   └── lib/                 # API/auth/presence helpers
+│
+├── styles/                  # Design system + tokens
+└── assets/                  # Bundled static assets
+```
+
+## Notes
+
+- Routes are auto-generated from `src/app/pages` via Reactor.
+- Use `navigate()` from `Reactor` for programmatic navigation.

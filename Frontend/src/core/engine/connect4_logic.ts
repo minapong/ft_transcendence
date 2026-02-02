@@ -10,7 +10,7 @@ export function connect4Logic(
   let winningCase = false;
 
   const cells = Array.from(document.querySelectorAll(".cell"));
-  const resetBtn = document.getElementById("resetBtn")!;
+  // resetBtn removed
 
   function findEmptyCell(col: number): number | null {
     for (let row = 5; row >= 0; row--) {
@@ -29,8 +29,15 @@ export function connect4Logic(
 
     const cell = document.getElementById(`${idx}`);
     if (cell) {
-      cell.classList.remove("bg-white");
-      cell.classList.add(currentPlayer === "R" ? "bg-red-500" : "bg-yellow-500");
+      // Remove empty state class
+      cell.classList.remove("bg-gray-950/80", "shadow-[inset_0_4px_8px_rgba(0,0,0,0.8)]");
+
+      // Add filled state with neon glow (Inward + Outward Hybrid + Drop Animation)
+      if (currentPlayer === "R") {
+        cell.classList.add("bg-red-500", "shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]", "animate-drop");
+      } else {
+        cell.classList.add("bg-yellow-400", "shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]", "animate-drop");
+      }
     }
 
     if (checkWinner()) {
@@ -59,7 +66,7 @@ export function connect4Logic(
   }
 
   function highlight(indices: number[]) {
-    indices.forEach(i => document.getElementById(`${i}`)?.classList.add("ring-4", "ring-green-400"));
+    indices.forEach(i => document.getElementById(`${i}`)?.classList.add("ring-4", "ring-white", "animate-pulse"));
   }
 
   function checkWinner(): boolean {
@@ -89,10 +96,6 @@ export function connect4Logic(
 
   function resetGame() {
     board.fill(null);
-    cells.forEach(c => c.className = "cell w-full aspect-square bg-white rounded-full");
-    winningCase = false;
-    currentPlayer = "R";
-
     // Notify initial turn (Player 1 / Red starts)
     if (onTurnChange) {
       onTurnChange(currentPlayer);
@@ -108,8 +111,7 @@ export function connect4Logic(
     listeners.push(() => cell.removeEventListener("click", handler));
   });
 
-  resetBtn.addEventListener("click", resetGame);
-  listeners.push(() => resetBtn.removeEventListener("click", resetGame));
+  // resetBtn listener removed as we are switching to Exit Match flow
 
   // Initial turn notification
   if (onTurnChange) {

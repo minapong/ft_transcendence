@@ -1,4 +1,5 @@
 import { PongAI } from './pong_ai'
+export const GAME_PAUSE_EVENT = "pong:pause";
 
 
 let GAME_WIDTH: number;
@@ -19,9 +20,9 @@ let RIGHT_PADDLE_X: number;
 
 
 
-const PADDLE_SPEED = 6;
+let PADDLE_SPEED = 6;
 
-const GAME_SPEED = 2;
+let GAME_SPEED = 2;
 
 const WIN_SCORE = 3;
 
@@ -32,16 +33,12 @@ export function pongLogic(
 		leftPaddle: HTMLElement;
 		rightPaddle: HTMLElement;
 		pauseBtn: HTMLElement;
-		leftUpBtn: HTMLElement;
-		leftDownBtn: HTMLElement;
-		rightUpBtn: HTMLElement;
-		rightDownBtn: HTMLElement;
 		scoreLeft: HTMLElement;
 		scoreRight: HTMLElement;
 	},
 	p1: string,
 	p2: string,
-	onWin: (winner: string, scoreP1: number, scoreP2: number) => void,  //scores added
+	onWin: (winner: string, scoreP1: number, scoreP2: number) => void,
 	inputRef: { current: { w: boolean; s: boolean; up: boolean; down: boolean } },
 	useAI: boolean = false,
 	aiDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
@@ -50,13 +47,11 @@ export function pongLogic(
 	const left_p = elements.leftPaddle;
 	const right_p = elements.rightPaddle;
 	const pause = elements.pauseBtn;
-	const left_up_But = elements.leftUpBtn;
-	const left_down_But = elements.leftDownBtn;
-	const right_up_But = elements.rightUpBtn;
-	const right_down_But = elements.rightDownBtn;
+	// Buttons handled via hooks in PongGame
+	// const left_up_But = elements.leftUpBtn;
+	// ...
 
 	let isPaused = false;
-
 
 
 	// Initial ball position (centered in playable area)
@@ -69,8 +64,9 @@ export function pongLogic(
 	function handle_parameters() {
 		let width = window.innerWidth;
 
-		// Sync AI parameters as well
-		// updateAIParameters();
+		// Calculate speed scaling factors based on width/height
+		// Base speeds for 800x500 resolution
+		// speed = base * (currentDimension / baseDimension)
 
 		if (width < 640) {
 			GAME_WIDTH = 320;
@@ -80,13 +76,21 @@ export function pongLogic(
 			PADDLE_HEIGHT = 64;
 			PADDLE_WIDTH = 8;
 			PADDLE_DIST = 8;
+
+			// Recalculate dynamic speeds
+			GAME_SPEED = 2; // Slower for small screen
+			PADDLE_SPEED = 3;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
+
 			if (state == 2) {
 				paddleY_Left = paddleY_Left * (200 / 280);
 				paddleY_Right = paddleY_Right * (200 / 280);
 				x = x * (200 / 280);
 				y = y * (200 / 280);
+				dx = dx * (200 / 280); // Scale velocity
+				dy = dy * (200 / 280);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -104,6 +108,10 @@ export function pongLogic(
 			PADDLE_HEIGHT = 80;
 			PADDLE_WIDTH = 12;
 			PADDLE_DIST = 12;
+
+			GAME_SPEED = 3;
+			PADDLE_SPEED = 4.5;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 			if (state == 1) {
@@ -111,12 +119,16 @@ export function pongLogic(
 				paddleY_Right = paddleY_Right * (280 / 200);
 				x = x * (280 / 200);
 				y = y * (280 / 200);
+				dx = dx * (280 / 200);
+				dy = dy * (280 / 200);
 			}
 			else if (state == 3) {
 				paddleY_Left = paddleY_Left * (280 / 380);
 				paddleY_Right = paddleY_Right * (280 / 380);
 				x = x * (280 / 380);
 				y = y * (280 / 380);
+				dx = dx * (280 / 380);
+				dy = dy * (280 / 380);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -135,6 +147,10 @@ export function pongLogic(
 			PADDLE_HEIGHT = 80;
 			PADDLE_WIDTH = 12;
 			PADDLE_DIST = 16;
+
+			GAME_SPEED = 4;
+			PADDLE_SPEED = 6;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 			if (state == 2) {
@@ -142,12 +158,16 @@ export function pongLogic(
 				paddleY_Right = paddleY_Right * (380 / 280);
 				x = x * (380 / 280);
 				y = y * (380 / 280);
+				dx = dx * (380 / 280);
+				dy = dy * (380 / 280);
 			}
 			else if (state == 4) {
 				paddleY_Left = paddleY_Left * (380 / 500);
 				paddleY_Right = paddleY_Right * (380 / 500);
 				x = x * (380 / 500);
 				y = y * (380 / 500);
+				dx = dx * (380 / 500);
+				dy = dy * (380 / 500);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -165,6 +185,10 @@ export function pongLogic(
 			PADDLE_HEIGHT = 96;
 			PADDLE_WIDTH = 12;
 			PADDLE_DIST = 16;
+
+			GAME_SPEED = 5;
+			PADDLE_SPEED = 8;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 			if (state == 3) {
@@ -172,6 +196,8 @@ export function pongLogic(
 				paddleY_Right = paddleY_Right * (500 / 380);
 				x = x * (500 / 380);
 				y = y * (500 / 380);
+				dx = dx * (500 / 380);
+				dy = dy * (500 / 380);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -185,8 +211,13 @@ export function pongLogic(
 		RIGHT_PADDLE_X = PLAYABLE_WIDTH - PADDLE_DIST - PADDLE_WIDTH;
 	}
 
-	handle_parameters();
-	window.addEventListener("resize", handle_parameters);
+	const resizeHandler = () => {
+		handle_parameters();
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
+	};
+
+	resizeHandler();
+	window.addEventListener("resize", resizeHandler);
 
 	dx = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
 	dy = (Math.random() > 0.5 ? 1 : -1) * GAME_SPEED;
@@ -212,7 +243,11 @@ export function pongLogic(
 		ballDx: dx,
 		ballDy: dy,
 		aiPaddleY: paddleY_Right,
-		timestamp: Date.now()
+		timestamp: Date.now(),
+		gameHeight: PLAYABLE_HEIGHT,
+		paddleX: RIGHT_PADDLE_X,
+		paddleHeight: PADDLE_HEIGHT,
+		ballSize: BALL_SIZE
 	});
 
 	const simulateKeyPress = (key: string, action: 'down' | 'up') => {
@@ -229,113 +264,128 @@ export function pongLogic(
 		aiPlayer.start(getGameState, simulateKeyPress);
 	}
 
-	left_up_But.addEventListener("pointerdown", e => {
-		inputRef.current.w = true;
-	});
-	left_up_But.addEventListener("pointerup", e => {
-		inputRef.current.w = false;
-	});
-	left_down_But.addEventListener("pointerdown", e => {
-		inputRef.current.s = true;
-	});
-	left_down_But.addEventListener("pointerup", e => {
-		inputRef.current.s = false;
-	});
-	right_up_But.addEventListener("pointerdown", e => {
-		inputRef.current.up = true;
-	});
-	right_up_But.addEventListener("pointerup", e => {
-		inputRef.current.up = false;
-	});
-	right_down_But.addEventListener("pointerdown", e => {
-		inputRef.current.down = true;
-	});
-	right_down_But.addEventListener("pointerup", e => {
-		inputRef.current.down = false;
-	});
+	// Event listeners moved to pong.tsx
 
-	const pauseHandler = () => {
-		isPaused = !isPaused;
 
+	const pauseHandler = (e?: Event) => {
+		if (gameEnded) return;
+
+		isPaused = true;
+		pause.textContent = "▶️ Resume";
+
+		if (aiPlayer) {
+			aiPlayer.stop(simulateKeyPress);
+		}
+	};
+
+	const blurHandler = () => {
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
+	};
+
+	window.addEventListener(GAME_PAUSE_EVENT, pauseHandler);
+	window.addEventListener("blur", blurHandler);
+
+	const toggleHandler = () => {
 		if (isPaused) {
-			pause.textContent = "▶️ Resume";
-			if (aiPlayer) {
-				aiPlayer.stop(simulateKeyPress);
-			}
-		} else {
+			isPaused = false;
 			pause.textContent = "⏸️ Pause";
 			if (aiPlayer) {
 				aiPlayer.start(getGameState, simulateKeyPress);
 			}
-			moveBall();
+			lastTime = performance.now();
+			animationId = requestAnimationFrame(moveBall);
+		} else {
+			window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
 		}
 	};
-	// Attach
-	pause.addEventListener("click", pauseHandler);
+
+	pause.addEventListener("click", toggleHandler);
 
 	let animationId: number | null = null;
+	let lastTime = performance.now();
+	function moveBall(now: number) {
+		if (gameEnded || isPaused) {
+			lastTime = now; // prevent delta spike after pause
+			return;
+		}
 
-	function moveBall() {
-		if (isPaused || gameEnded) return;
-		x += dx;
-		y += dy;
+		const delta = (now - lastTime) / 16.666; // normalize to 60fps
+		lastTime = now;
 
-		/// Left Paddle
+		// --- Ball movement ---
+		x += dx * delta;
+		y += dy * delta;
+
+		/// Left Paddle collision
 		if (
 			x <= LEFT_PADDLE_X + PADDLE_WIDTH &&
-			x >= LEFT_PADDLE_X + PADDLE_WIDTH - 8 &&
-			y + BALL_SIZE >= paddleY_Left && // Ball's bottom edge >= Paddle's top edge
-			y <= paddleY_Left + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
+			x >= LEFT_PADDLE_X + PADDLE_WIDTH - 10 &&
+			y + BALL_SIZE >= paddleY_Left &&
+			y <= paddleY_Left + PADDLE_HEIGHT
 		) {
-			dx = -dx;
+			dx = -dx * 1.05;
+			dy = dy * 1.05;
 			x = LEFT_PADDLE_X + PADDLE_WIDTH;
 		}
 
-		/// Right Paddle
+		/// Right Paddle collision
 		if (
 			x + BALL_SIZE >= RIGHT_PADDLE_X &&
-			x + BALL_SIZE <= RIGHT_PADDLE_X + 8 &&
-			y + BALL_SIZE >= paddleY_Right && // Ball's bottom edge >= Paddle's top edge
-			y <= paddleY_Right + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
+			x + BALL_SIZE <= RIGHT_PADDLE_X + 10 &&
+			y + BALL_SIZE >= paddleY_Right &&
+			y <= paddleY_Right + PADDLE_HEIGHT
 		) {
-			dx = -dx;
+			dx = -dx * 1.05;
+			dy = dy * 1.05;
 			x = RIGHT_PADDLE_X - BALL_SIZE;
 		}
 
-		/// Top Wall
+		/// Top wall
 		if (y <= 0) {
 			dy = -dy;
 			y = 0;
 		}
 
-		/// Bottom Wall
+		/// Bottom wall
 		else if (y + BALL_SIZE >= PLAYABLE_HEIGHT) {
 			dy = -dy;
 			y = PLAYABLE_HEIGHT - BALL_SIZE;
 		}
 
-		ball.style.left = x + 'px';
-		ball.style.top = y + 'px';
+		// Render (GPU-friendly)
+		ball.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
-		movePaddle();
+		// --- Paddle movement ---
+		movePaddle(delta);
 
-		animationId = requestAnimationFrame(moveBall);
-
+		// Scoring
 		if (x < 0) {
 			scoreRight++;
 			scoreRightDisplay.textContent = `${p2}: ${scoreRight}`;
 			checkWinner();
-			resetBall();
+			if (!gameEnded) resetBall();
 		}
 
 		if (x + BALL_SIZE > PLAYABLE_WIDTH) {
 			scoreLeft++;
 			scoreLeftDisplay.textContent = `${p1}: ${scoreLeft}`;
 			checkWinner();
-			resetBall();
+			if (!gameEnded) resetBall();
+		}
+
+		if (!gameEnded && !isPaused) {
+			animationId = requestAnimationFrame(moveBall);
 		}
 	}
-	function clampPaddle(pos: number, speed: number, min: number, max: number, length: number, movingPositive: boolean): number {
+
+	function clampPaddle(
+		pos: number,
+		speed: number,
+		min: number,
+		max: number,
+		length: number,
+		movingPositive: boolean
+	): number {
 		if (movingPositive) {
 			if (pos + speed + length >= max) return max - length;
 			return pos + speed;
@@ -345,24 +395,55 @@ export function pongLogic(
 		}
 	}
 
-	function movePaddle() {
-		// Read inputs from Ref
+	function movePaddle(delta: number) {
 		const { w, s, up, down } = inputRef.current;
+		const step = PADDLE_SPEED * delta;
 
 		// Left paddle (W / S)
 		if (w)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
+			paddleY_Left = clampPaddle(
+				paddleY_Left,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				false
+			);
+
 		if (s)
-			paddleY_Left = clampPaddle(paddleY_Left, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
-		left_p.style.top = `${paddleY_Left}px`;
+			paddleY_Left = clampPaddle(
+				paddleY_Left,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				true
+			);
+
+		left_p.style.transform = `translate3d(0, ${paddleY_Left}px, 0)`;
 
 		// Right paddle (Arrow Up / Down or AI)
 		if (up)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, false);
-		if (down)
-			paddleY_Right = clampPaddle(paddleY_Right, PADDLE_SPEED, 0, PLAYABLE_HEIGHT, PADDLE_HEIGHT, true);
+			paddleY_Right = clampPaddle(
+				paddleY_Right,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				false
+			);
 
-		right_p.style.top = `${paddleY_Right}px`;
+		if (down)
+			paddleY_Right = clampPaddle(
+				paddleY_Right,
+				step,
+				0,
+				PLAYABLE_HEIGHT,
+				PADDLE_HEIGHT,
+				true
+			);
+
+		right_p.style.transform = `translate3d(0, ${paddleY_Right}px, 0)`;
 	}
 
 	let resetTimeout: number | null = null;
@@ -373,8 +454,7 @@ export function pongLogic(
 		dx = 0;
 		dy = 0;
 
-		ball.style.left = x + 'px';
-		ball.style.top = y + 'px';
+		ball.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
 		if (scoreLeft !== WIN_SCORE && scoreRight !== WIN_SCORE) {
 			resetTimeout = window.setTimeout(() => {
@@ -395,6 +475,7 @@ export function pongLogic(
 	}
 
 	function showWinner(winner: string, scoreP1: number, scoreP2: number) {
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
 		gameEnded = true;
 		isPaused = true;
 		dx = 0;
@@ -404,24 +485,31 @@ export function pongLogic(
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
-		window.removeEventListener("resize", handle_parameters);
+		// Listeners are removed in the return cleanup function now
 
 		onWin(winner, scoreP1, scoreP2);
 	}
 
-	moveBall();
+	lastTime = performance.now();
+	animationId = requestAnimationFrame(moveBall);
 
 	return () => {
 		gameEnded = true;
 		isPaused = true;
+		inputRef.current.down = false;
+		inputRef.current.up = false;
+		inputRef.current.w = false;
+		inputRef.current.s = false;
 
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
 
-		window.removeEventListener("resize", handle_parameters);
+		window.removeEventListener("resize", resizeHandler);
+		window.removeEventListener(GAME_PAUSE_EVENT, pauseHandler);
+		window.removeEventListener("blur", blurHandler);
 		// No event listeners to remove here anymore!
-		pause.removeEventListener('click', pauseHandler);
+		pause.removeEventListener('click', toggleHandler);
 	};
 }

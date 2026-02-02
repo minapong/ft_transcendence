@@ -94,10 +94,11 @@
    ======================================== */
 
 .header-surface {
-    background: linear-gradient(90deg, var(--color-gradient-start), var(--color-gradient-mid), var(--color-gradient-end));
+    background: rgba(6, 12, 30, 0.6);
     border-bottom: 1px solid var(--color-border-soft);
     box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(var(--blur-lg));
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
 }
 
 .header-surface::before,
@@ -236,4 +237,30 @@
 .hero-node {
     background: rgba(0, 0, 0, 0.3);
     filter: blur(1px);
+}
+
+/* ========================================
+   Homepage Animations
+   ======================================== */
+
+@keyframes connect4Drop {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(200%);
+    }
+}
+
+@keyframes quickPlayPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 30px 10px rgba(0, 255, 255, 0.3), 0 0 60px 20px rgba(0, 255, 255, 0.15);
+    }
+
+    50% {
+        box-shadow: 0 0 40px 15px rgba(0, 255, 255, 0.45), 0 0 80px 30px rgba(0, 255, 255, 0.2);
+    }
 }

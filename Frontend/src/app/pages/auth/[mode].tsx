@@ -6,10 +6,10 @@ import { useAuth } from "@/core/lib/useAuth";
 import Input from "@/app/components/ui/Input";
 
 import {
-  vEmail,
-  vPasswordLogin,
-  vPassword,
-  vUsername,
+    vEmail,
+    vPasswordLogin,
+    vPassword,
+    vUsername,
 } from "@/core/lib/input/validators";
 import { unwrap } from "@/core/lib/input/unwrap";
 
@@ -22,120 +22,176 @@ type AuthForm = {
 };
 
 type ValidationError = {
-    field: "email" | "password" | "username" | "general";
+    field: "email" | "password" | "username" | "general" | "terms";
     message: string;
 };
 
 type Result<T, E> =
-  | { ok: true; data: T }
-  | { ok: false; error: E };
+    | { ok: true; data: T }
+    | { ok: false; error: E };
 
 function sanitizeAuth(mode: AuthMode, raw: AuthForm): Result<AuthForm, ValidationError> {
-  const emailRaw = (raw.email ?? "").trim();
-  const usernameRaw = (raw.username ?? "").trim();
-  const passwordRaw = raw.password ?? "";
+    const emailRaw = (raw.email ?? "").trim();
+    const usernameRaw = (raw.username ?? "").trim();
+    const passwordRaw = raw.password ?? "";
 
-  let email: string;
-  let password: string;
-  let username: string | undefined;
+    let email: string;
+    let password: string;
+    let username: string | undefined;
 
-  try {
-    email = unwrap(vEmail(emailRaw));
-  } catch (e: any) {
-    return { ok: false, error: { field: "email", message: e?.message || "Invalid email" } };
-  }
-
-  if (mode === "signup") {
     try {
-      username = unwrap(vUsername(usernameRaw));
+        email = unwrap(vEmail(emailRaw));
     } catch (e: any) {
-      return { ok: false, error: { field: "username", message: e?.message || "Invalid username" } };
+        return { ok: false, error: { field: "email", message: e?.message || "Invalid email" } };
     }
-  }
 
-  try {
-    password =
-      mode === "login"
-        ? unwrap(vPasswordLogin(passwordRaw))
-        : unwrap(vPassword(passwordRaw));
-  } catch (e: any) {
-    return { ok: false, error: { field: "password", message: e?.message || "Invalid password" } };
-  }
+    if (mode === "signup") {
+        try {
+            username = unwrap(vUsername(usernameRaw));
+        } catch (e: any) {
+            return { ok: false, error: { field: "username", message: e?.message || "Invalid username" } };
+        }
+    }
 
-  // Extra guard: signup must have username after sanitization
-  if (mode === "signup" && !username) {
+    try {
+        password =
+            mode === "login"
+                ? unwrap(vPasswordLogin(passwordRaw))
+                : unwrap(vPassword(passwordRaw));
+    } catch (e: any) {
+        return { ok: false, error: { field: "password", message: e?.message || "Invalid password" } };
+    }
+
+    // Extra guard: signup must have username after sanitization
+    if (mode === "signup" && !username) {
+        return {
+            ok: false,
+            error: { field: "username", message: "Network handle required" },
+        };
+    }
+
     return {
-      ok: false,
-      error: { field: "username", message: "Network handle required" },
+        ok: true,
+        data: mode === "login"
+            ? { email, password }
+            : { email, password, username },
     };
-  }
-
-  return {
-    ok: true,
-    data: mode === "login"
-      ? { email, password }
-      : { email, password, username },
-  };
 }
 
 export default function AuthPage() {
     const auth = useAuth();
     const location = useLocation();
     const [uiError, setUiError] = useState<ValidationError | null>(null);
+    const [loading, setLoading] = useState(false);
+    // const [email, setEmail] = useState("");
+    // const [username, setUsername] = useState("");
+    // const [password, setPassword] = useState("");
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+
 
     // Derive mode from routing (URL segments are the source of truth)
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
 
-    useEffect(() => {
-        if (auth?.token) navigate("/user/me", { replace: true });
-    }, [auth?.token]);
-
-    // Superset refs
     const emailRef = useRef<HTMLInputElement>(null);
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
 
+    const draftRef = useRef({ email: "", username: "", password: "" });
+
+    const syncDraftFromDOM = () => {
+        draftRef.current.email = emailRef.current?.value || "";
+        draftRef.current.username = usernameRef.current?.value || "";
+        draftRef.current.password = passwordRef.current?.value || "";
+    };
+
+    const restoreDraftToDOM = () => {
+        if (emailRef.current) emailRef.current.value = draftRef.current.email;
+        if (usernameRef.current) usernameRef.current.value = draftRef.current.username;
+        if (passwordRef.current) passwordRef.current.value = draftRef.current.password;
+    };
+
+    useEffect(() => {
+        const isLoggingOut = window.history.state?.logout;
+        if (auth?.token && !isLoggingOut) {
+            navigate("/user/me", { replace: true });
+        }
+    }, [auth?.token]);
+
+    useEffect(() => {
+        setUiError(null);
+        setAcceptedTerms(false);
+
+         draftRef.current = { email: "", username: "", password: "" };
+
+        // clear DOM inputs if they exist
+        if (emailRef.current) emailRef.current.value = "";
+        if (usernameRef.current) usernameRef.current.value = "";
+        if (passwordRef.current) passwordRef.current.value = "";
+
+        // Defer focus until DOM + layout are settled
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                emailRef.current?.focus();
+            });
+        });
+    }, [mode]);
+
+        useEffect(() => {
+        requestAnimationFrame(() => restoreDraftToDOM());
+    }, [acceptedTerms, loading, uiError, mode]);
+    // Superset refs
+
     // Single submit pipeline
     const handleSubmit = async (e: any) => {
         e?.preventDefault?.();
+        if (loading) return;
 
-        //Capture data immediately BEFORE any state-triggered re-renders
+        syncDraftFromDOM();
+
+        //capture data immediately BEFORE any state-triggered re-renders
         const raw: AuthForm = {
             email: emailRef.current?.value || "",
             password: passwordRef.current?.value || "",
-            username: usernameRef.current?.value || ""
+            username: usernameRef.current?.value || "",
         };
 
         // Now clear errors and proceed
         setUiError(null);
-
+        setLoading(true);
+        if (mode === "signup" && !acceptedTerms) {
+            setUiError({ field: "terms", message: "You must accept the Terms of Service to continue." });
+            setLoading(false);
+            return;
+        }
         const sanitized = sanitizeAuth(mode, raw);
-          if ("error" in sanitized) {
-             setUiError(sanitized.error);
+        if ("error" in sanitized) {
+            setUiError(sanitized.error);
+            setLoading(false);
             return;
         }
 
         const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
         try {
             const res = await apiFetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(sanitized.data),
-        });
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(sanitized.data),
+            });
 
             const resData = await res.json();
 
-            if (!res.ok  || resData.ok === false) {
+            if (!res.ok || resData.ok === false) {
                 setUiError({ field: "general", message: resData.error || `${mode} failed` });
                 return;
             }
-
+            draftRef.current = { email: "", username: "", password: "" };
             setAuth(resData);
             connectPresenceWS();
             navigate("/user/me", { replace: true });
         } catch (err) {
-            //  console.error("Auth failed:", err);
             setUiError({ field: "general", message: "System connection failure. Retry authentication." });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -205,36 +261,99 @@ export default function AuthPage() {
                             )}
 
                             <Input
+                                id="auth-email"
+                                name="email"
                                 ref={emailRef}
                                 label="Email Address"
                                 placeholder="name@example.com"
                                 type="email"
+                                autoComplete="email"
+                                onInput={() => {
+                                    draftRef.current.email = emailRef.current?.value || "";
+                                }}
                                 error={uiError?.field === "email" ? uiError.message : undefined}
+                                autoFocus
+                                disabled={loading}
                             />
 
                             {mode === "signup" && (
                                 <Input
+                                    id="auth-username"
+                                    name="username"
                                     ref={usernameRef}
-                                    label="Username (minimum 3 symbols"
+                                    label="Username (minimum 3 symbols)"
                                     placeholder="Choose a username"
+                                    autoComplete="username"
+                                    onInput={() => {
+                                        draftRef.current.username = usernameRef.current?.value || "";
+                                    }}
                                     error={uiError?.field === "username" ? uiError.message : undefined}
+                                    disabled={loading}
                                 />
                             )}
 
                             <Input
+                                id="auth-password"
+                                name="password"
                                 ref={passwordRef}
                                 label="Password (8-20 symbols)"
                                 type="password"
                                 placeholder="••••••••"
+                                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                                onInput={() => {
+                                 draftRef.current.password = passwordRef.current?.value || "";
+                                }}
                                 error={uiError?.field === "password" ? uiError.message : undefined}
+                                disabled={loading}
                             />
+                            {mode === "signup" && (
+                            <div className="flex flex-col gap-2">
+                                <label className="flex items-start gap-3 text-xs text-white/60 select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={acceptedTerms}
+                                    disabled={loading}
+                                   onChange={(e: any) => {
+                                    // snapshot values before this rerender
+                                    syncDraftFromDOM();
+                                    setAcceptedTerms(!!e?.target?.checked);
+                                    if (uiError?.field === "terms") setUiError(null);
+                                    }}
+                                    className="mt-1 h-4 w-4 rounded border border-white/20 bg-white/5"
+                                />
+
+                                <span className="leading-5">
+                                    I agree to the{" "}
+                                    <button
+                                    type="button"
+                                    disabled={loading}
+                                   onClick={() => {
+                                    // snapshot before leaving
+                                    syncDraftFromDOM();
+                                    navigate("/terms_of_service");
+                                    }}
+                                    className="underline underline-offset-2 text-white/80 hover:text-white"
+                                    >
+                                    Terms of Service
+                                    </button>
+                                </span>
+                                </label>
+
+                                {uiError?.field === "terms" && (
+                                <div className="text-[10px] uppercase tracking-wider text-red-400">
+                                    {uiError.message}
+                                </div>
+                                )}
+                            </div>
+                            )}
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full py-3 px-6 rounded-xl bg-accent text-gray-950 font-bold tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] cursor-pointer"
+                            disabled={loading || (mode === "signup" && !acceptedTerms)}
+                            className="w-full py-3 px-6 rounded-xl bg-accent text-gray-950 font-bold tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {mode === "login" ? "AUTHENTICATE" : "REGISTER"}
+                            {loading ? "INITIALIZING..." : (mode === "login" ? "AUTHENTICATE" : "REGISTER")}
                         </button>
                     </form>
 

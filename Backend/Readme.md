@@ -1,70 +1,45 @@
-# ⚙️ ft_transcendence – Backend
+# ft_transcendence — Backend
 
-## 🧭 Overview
-This is the **backend** for the ft_transcendence project.  
-It provides all API routes, authentication logic, and real-time services (chat, multiplayer, blockchain integration).
+Fastify API server for auth, profiles, social features, matchmaking, tournaments, and stats. Uses Prisma + SQLite and a WebSocket presence channel.
 
-Initially, it serves the **mandatory base** (SPA hosting, Pong data, HTTPS),  
-and later scales into **module integrations** such as:
-- User Management  
-- Live Chat  
-- Blockchain (Avalanche)  
-- AI / Multiplayer services  
+## Responsibilities
 
----
-## 🧱 Base Responsibilities
-- Serve frontend SPA content via HTTPS  
-- Provide secure WebSocket (WSS) connection  
-- Manage tournament and matchmaking data  
-- Ensure environment variables are used for secrets  
-- No unhandled errors or insecure endpoints  
+- Auth (login/signup), sessions, profile settings
+- Friends + avatars
+- Presence status + WebSocket presence stream
+- Matchmaking (Connect4)
+- Tournaments (Pong)
+- Stats, leaderboard, match history
+- Static asset serving for uploaded avatars
 
----
+## Tech Stack
 
-## 🧩 Modules Built on Top
-| Module | Description |
-|--------|-------------|
-| **User Management** | Authentication, profile system, avatar uploads |
-| **Live Chat** | Real-time messaging using WSS |
-| **Blockchain** | Tournament scores stored on Avalanche via Solidity smart contracts |
-| **Multiplayer** | Socket-based real-time gameplay sync |
+- Node.js + Fastify
+- Prisma ORM + SQLite
+- JWT auth
+- @fastify/websocket for presence
 
----
-
-## ⚙️ Tech Stack
-- **Node.js + Fastify** – *(Major Module: Backend Framework)*  
-- **SQLite** – *(Minor Module: Database)*  
-- **TypeScript** – optional for backend logic  
-- **WebSocket (WSS)** – real-time communication layer  
-- **Dockerized deployment** – production-ready setup  
-
----
-
-## 🚀 Development
-
-To run locally:
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
----
+Notes:
+- `npm run dev` runs `tsc` then starts `dist/src/index.js`.
+- `JWT_SECRET` is required for auth.
 
+## Environment
 
-## 👤 Maintainers
+```env
+JWT_SECRET=change-me
+DATABASE_URL="file:./database/transcendence.db"
+```
 
-| Name             | Role                                         |
-| ---------------- | -------------------------------------------- |
-| **Hashir**       | SPA,  UI integration |
-| **Abdul Rehman** | Pong gameplay logic                            |
-| **Natalia**      | Docker & HTTPS configuration                   |
-| **Santiago**     | Tournament, Matchmaking, AI Oponent, Dashboard |
----
+## Maintainers
 
-
-
-
-🧩 *This backend serves as the secure core of ft_transcendence, powering real-time features, authentication, and blockchain integrations while maintaining strict compliance with HTTPS and Docker deployment requirements.*
-
- 
+- Malik Hashir (mhashir)
+- Abdul Rehman (aalkaisi)
+- Natalia (nmagdano)
+- Santiago (saherrer)
