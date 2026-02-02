@@ -34,8 +34,8 @@ registerModal<AlertPayload>("alert", (payload) => (
     </div>
 ));
 
-export type { WinnerModalPayload } from "@/app/components/game/WinnerModal";
-import WinnerModal from "@/app/components/game/WinnerModal";
+import WinnerModal, { type WinnerModalPayload } from "@/app/components/game/WinnerModal";
+export type { WinnerModalPayload };
 
 registerModal<WinnerModalPayload>("game-winner", (payload) => (
     <WinnerModal payload={payload} />

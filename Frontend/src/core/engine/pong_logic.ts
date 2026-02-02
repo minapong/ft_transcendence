@@ -488,14 +488,12 @@ export function pongLogic(
 		// Listeners are removed in the return cleanup function now
 
 		onWin(winner, scoreP1, scoreP2);
-		console.log("gameEnded in showWinner")
 	}
 
 	lastTime = performance.now();
 	animationId = requestAnimationFrame(moveBall);
 
 	return () => {
-		console.log("gameEnded in return")
 		gameEnded = true;
 		isPaused = true;
 
