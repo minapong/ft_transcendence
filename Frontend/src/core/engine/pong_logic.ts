@@ -319,7 +319,7 @@ export function pongLogic(
 		/// Left Paddle collision
 		if (
 			x <= LEFT_PADDLE_X + PADDLE_WIDTH &&
-			x >= LEFT_PADDLE_X + PADDLE_WIDTH - 8 &&
+			x >= LEFT_PADDLE_X + PADDLE_WIDTH - 10 &&
 			y + BALL_SIZE >= paddleY_Left &&
 			y <= paddleY_Left + PADDLE_HEIGHT
 		) {
@@ -331,7 +331,7 @@ export function pongLogic(
 		/// Right Paddle collision
 		if (
 			x + BALL_SIZE >= RIGHT_PADDLE_X &&
-			x + BALL_SIZE <= RIGHT_PADDLE_X + 8 &&
+			x + BALL_SIZE <= RIGHT_PADDLE_X + 10 &&
 			y + BALL_SIZE >= paddleY_Right &&
 			y <= paddleY_Right + PADDLE_HEIGHT
 		) {

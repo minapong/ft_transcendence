@@ -244,7 +244,7 @@ export function pong4PLogic(
 	window.addEventListener("resize", resizeHandler);
 
 	let dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
-	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.6;
+	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.5;
 
 	let scoreRed = 0;
 	let scoreBlue = 0;
@@ -400,7 +400,7 @@ export function pong4PLogic(
 
 		resetTimeout = window.setTimeout(() => {
 			dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
-			dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
+			dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.5;
 			resetTimeout = null;
 		}, 1000);
 	}
