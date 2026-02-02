@@ -250,9 +250,9 @@ export default function App() {
 					className="absolute bottom-8 w-full px-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-[10px] tracking-[0.2em] uppercase"
 					style={{ color: 'var(--color-primary)', opacity: 0.3 }}
 				>
-					<a href="/terms" className="hover:opacity-100 transition-opacity">Terms of Service</a>
+					<a href="/terms_of_service" className="hover:opacity-100 transition-opacity">Terms of Service</a>
 					<span className="hidden sm:inline opacity-30">|</span>
-					<a href="/privacy" className="hover:opacity-100 transition-opacity">Privacy Policy</a>
+					<a href="/privacy_policy" className="hover:opacity-100 transition-opacity">Privacy Policy</a>
 					<span className="hidden sm:inline opacity-30">|</span>
 					<span>© 2026 FT_TRANSCENDENCE</span>
 				</footer>
