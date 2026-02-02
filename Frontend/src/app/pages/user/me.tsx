@@ -17,7 +17,7 @@ export default function MePage() {
 
   useEffect(() => {
     if (!token) {
-      navigate("/auth/login");
+      navigate("/auth/login", { replace: true });
       return;
     }
 
@@ -107,21 +107,39 @@ export default function MePage() {
         {/* Settings - Absolute Top Right */}
         <div className="absolute top-4 right-4 md:top-6 md:right-6 z-30">
           {screen === "desktop" ? (
-            <button
-              onClick={() => navigate("/user/settings")}
-              className="flex items-center gap-3 px-6 py-3 rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)]"
-            >
-              <span className="icon-[solar--settings-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-500" />
-              <span className="tracking-wide">SETTINGS</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/user/friends")}
+                className="flex items-center gap-3 px-6 py-3 rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)]"
+              >
+                <span className="icon-[solar--users-group-two-rounded-bold-duotone] text-2xl group-hover:scale-110 transition-transform duration-500" />
+                <span className="tracking-wide">FRIENDS</span>
+              </button>
+              <button
+                onClick={() => navigate("/user/settings")}
+                className="flex items-center gap-3 px-6 py-3 rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)]"
+              >
+                <span className="icon-[solar--settings-bold-duotone] text-2xl group-hover:rotate-90 transition-transform duration-500" />
+                <span className="tracking-wide">SETTINGS</span>
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={() => navigate("/user/settings")}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 font-bold hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-            >
-              <span className="icon-[solar--settings-bold-duotone] text-xl group-hover:rotate-90 transition-transform duration-500" />
-              <span className="tracking-wide text-xs">SETTINGS</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/user/friends")}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                aria-label="Friends"
+              >
+                <span className="icon-[solar--users-group-two-rounded-bold-duotone] text-xl group-hover:scale-110 transition-transform duration-500" />
+              </button>
+              <button
+                onClick={() => navigate("/user/settings")}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-cyan-950/40 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-900/60 hover:text-cyan-300 hover:border-cyan-400 transition-all duration-300 backdrop-blur-md group shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                aria-label="Settings"
+              >
+                <span className="icon-[solar--settings-bold-duotone] text-xl group-hover:rotate-90 transition-transform duration-500" />
+              </button>
+            </div>
           )}
         </div>
 
@@ -200,13 +218,12 @@ export default function MePage() {
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 mt-12 space-y-12">
         {/* 2. STATS GRID */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
           <StatCard
             label="Wins"
             value={stats?.wins ?? 0}
             icon={<span className="icon-[solar--cup-first-bold-duotone]" />}
             color="text-yellow-400"
-            trend="+2 this week"
           />
           <StatCard
             label="Win Rate"
@@ -227,8 +244,14 @@ export default function MePage() {
             icon={<span className="icon-[solar--crown-star-bold-duotone]" />}
             color="text-amber-400"
           />
-        </div>
 
+          <StatCard
+            label="XP"
+            value={stats?.totalScore ?? 0}
+            icon={<span className="icon-[solar--star-bold-duotone]" />}
+            color="text-purple-400"
+          />
+        </div>
         {/* 3. ACHIEVEMENTS */}
         <section>
           <div className="flex items-center justify-between mb-6">

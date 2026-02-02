@@ -3,6 +3,8 @@ import { useScreen } from "@/app/hooks/useScreen";
 import { logout } from "@/core/lib/auth";
 import { useAuth } from "@/core/lib/useAuth";
 import { apiFetch } from "@/core/lib/api";
+import "@/styles/components/browser-kit.css";
+
 
 // PanelButton extracted for clarity and reusability
 function PanelButton({ icon, label, onClick }) {
@@ -15,6 +17,14 @@ function PanelButton({ icon, label, onClick }) {
       <span className="font-medium">{label}</span>
     </button>
   );
+}
+
+function getBrowserName(): string {
+  const ua = navigator.userAgent;
+  if (ua.includes("Firefox")) return "Firefox";
+  if (ua.includes("Chrome") || ua.includes("Chromium")) return "Chrome/Brave";
+  if (ua.includes("Safari")) return "Safari";
+  return "Unknown";
 }
 
 
@@ -56,6 +66,18 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
     return () => window.removeEventListener("user:avatar-update", handleAvatarUpdate);
   }, [user]);
 
+  useEffect(() => {
+    const badge = document.createElement("div");
+    badge.className = "browser-badge";
+    badge.innerText = `Browser: ${getBrowserName()}`;
+    const headerEl = document.querySelector("header");
+    if (headerEl) headerEl.appendChild(badge);
+
+    return () => {
+      if (headerEl?.contains(badge)) headerEl.removeChild(badge);
+    };
+  }, []);
+
   const statusCards = [
     {
       icon: "mdi--ghost",
@@ -92,7 +114,8 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
             if (isSpecialPage) {
               navigate("/");
             } else {
-              // console.log("[Header] Menu toggle: overlay open");
+              // 
+
               onMenuToggle();
             }
           }}
@@ -165,9 +188,12 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
             </button>
           </div>
         ) : (
-          <details className="relative group">
-            <summary
-              className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)] whitespace-nowrap flex-shrink-0 list-none [&::-webkit-details-marker]:hidden"
+          <div className="relative">
+            <input type="checkbox" id="user-menu-toggle" className="peer hidden" />
+
+            <label
+              htmlFor="user-menu-toggle"
+              className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] cursor-pointer rounded-lg px-2 py-1.5 transition-colors duration-120 hover:bg-[var(--color-surface-strong)] whitespace-nowrap flex-shrink-0 select-none relative z-20"
             >
               <div className="w-8 h-8 rounded-md bg-[var(--color-surface)] flex items-center justify-center overflow-hidden border border-white/10 relative">
                 {avatarUrl ? (
@@ -177,11 +203,18 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
                 )}
               </div>
               <span className="text-sm text-[var(--color-primary)] opacity-85 ml-1">{user.username}</span>
-              <span className="icon-[mdi--chevron-down] text-sm text-[var(--color-primary)] opacity-30 transition-transform duration-150 group-open:rotate-180" />
-            </summary>
+              <span className="icon-[mdi--chevron-down] text-sm text-[var(--color-primary)] opacity-30 transition-transform duration-150 peer-checked:rotate-180" />
+            </label>
+
+            {/* Backdrop: Clicking anywhere else closes the menu */}
+            <label
+              htmlFor="user-menu-toggle"
+              className="fixed inset-0 z-10 hidden peer-checked:block cursor-default"
+              aria-hidden="true"
+            />
 
             <div
-              className="absolute right-0 top-[calc(100%+8px)] w-60 rounded-xl bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-2xl shadow-black/50 overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100"
+              className="absolute right-0 top-[calc(100%+8px)] w-60 rounded-xl bg-[var(--color-panel)] border border-[var(--color-panel-border)] shadow-2xl shadow-black/50 overflow-hidden z-30 hidden peer-checked:block animate-in fade-in zoom-in-95 duration-100"
             >
               {/* Header Section: More "Command Center" feel */}
               <div className="px-4 py-4 bg-white/[0.02] border-b border-[var(--color-border-soft)]">
@@ -228,7 +261,7 @@ export default function Header({ onMenuToggle, isSpecialPage }) {
                 </button>
               </div>
             </div>
-          </details>
+          </div>
         )}
       </div>
     </header >

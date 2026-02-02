@@ -1,5 +1,5 @@
 import { closeModal, getCurrentModal, resolveModalRenderer } from "./modal";
-import { useEffect, useRef, useEventListener } from "./hooks";
+import { useEffect, useRef, useEventListener } from "../../core/hooks";
 import type { ModalDescriptor } from "./modal";
 
 const FOCUSABLE_SELECTOR = [
@@ -27,7 +27,6 @@ export default function ModalRoot() {
   const modal = getCurrentModal();
   const renderer = resolveModalRenderer(modal);
   const panelRef = useRef<HTMLElement | null>(null);
-  const closeRef = useRef<HTMLButtonElement | null>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
   const prevOverflowRef = useRef<string>("");
 
@@ -43,9 +42,10 @@ export default function ModalRoot() {
     const preferred =
       panel.querySelector<HTMLElement>("[data-modal-autofocus]") ??
       getFocusableElements(panel)[0] ??
-      closeRef.current ??
       panel;
     preferred?.focus();
+
+    // window.dispatchEvent(new CustomEvent("game-pause")); // Removed legacy dispatch
 
     // Removed direct listener attachment here
 
@@ -64,7 +64,9 @@ export default function ModalRoot() {
 
     if (event.key === "Escape") {
       event.preventDefault();
-      closeModal();
+      if (!(modal.payload as any)?.preventClose) {
+        closeModal();
+      }
       return;
     }
     if (event.key !== "Tab") return;
@@ -99,29 +101,27 @@ export default function ModalRoot() {
   }
 
   const content = renderer
-    ? renderer(modal!.payload ?? {})
+    ? renderer({ ...((modal!.payload ?? {}) as any), close: closeModal })
     : renderFallback(modal!);
+
+  const handleBackdropClick = () => {
+    if (!(modal!.payload as any)?.preventClose) {
+      closeModal();
+    }
+  };
 
   return (
     <div id="modal-root" className={layerClass} role="presentation">
-      <div className="modal-backdrop" onClick={closeModal}></div>
+      <div className="modal-backdrop" onClick={handleBackdropClick}></div>
       <div
-        className={`modal-panel panel-surface panel-surface--heavy ${modal!.className ?? ""}`}
+        className={`relative z-50 transform transition-all w-full p-4 md:p-6 flex items-center justify-center group ${modal.className || "max-w-lg"}`}
+        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={modal!.label ?? modal!.type}
         tabIndex={-1}
         ref={panelRef}
       >
-        <button
-          type="button"
-          className="modal-close"
-          aria-label="Close modal"
-          onClick={closeModal}
-          ref={closeRef}
-        >
-          <span className="icon-[solar--close-circle-linear] text-lg" aria-hidden="true" />
-        </button>
         {content}
       </div>
     </div>

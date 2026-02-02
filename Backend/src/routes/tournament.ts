@@ -14,12 +14,17 @@ import {
 	MatchDTO, 
 } from "../types/tournament.js";
 
+import { validateBody } from "../lib/input/validateBody.js";
+import { vTournamentName, vIntId, vInt } from "../lib/input/validators.js";
+
+
 // Request body types
 type StartTournamentBody = { name: string; max_players: number; tournamentId?: number };
 type RegisterUserBody = { tournamentId: number};
 type ReportResultBody = { matchId: number; winnerId: number, scoreP1: number, scoreP2: number };
 type AdvanceRoundBody = { tournamentId: number };
 type GetTournamentBody = { tournamentId: number };
+
 
 export async function registerTournamentRoutes(server: FastifyInstance) {
   
@@ -29,26 +34,38 @@ export async function registerTournamentRoutes(server: FastifyInstance) {
         async (req: any, reply) => {        
         const { name, max_players } = req.body;
         try {
+            const { name, max_players } = validateBody(req.body, {
+            name: vTournamentName,
+            max_players: (v) => vInt(v, "max_players", { min: 2, max: 64 }),
+            });
+
             const tournament = await createTournament(name, max_players);
-            return reply.send({ success: true, tournament });
-        } catch (err: any) {
-            return reply.code(400).send({ error: err.message });
+            return reply.send({ ok: true, tournament });
+        } catch (e: any) {
+            return reply.send({ ok: false, error: e?.message || "Invalid input" });
         }
-        });
+        }
+    );
 
     server.post<{ Body: RegisterUserBody }>(
         "/api/tournament/register", 
          { preHandler: requireAuth }, 
          async (req: any,reply) => {
-        const { tournamentId } = req.body;
-        const { userId } = req.user as any;
         try {
+            const { tournamentId } = validateBody(req.body, {
+                tournamentId: (v) => vIntId(v, "tournamentId"),
+            });
+            const userId = Number((req.user as any)?.userId);
+            if (!Number.isFinite(userId)) {
+                return reply.send({ ok: false, error: "Unauthorized" });
+            }
             const playerId = await registerUserToTournament(tournamentId, userId);
-            return reply.send({ success: true, playerId });
-        } catch (err: any) {
-            return reply.code(400).send({ error: err.message });
+            return reply.send({ ok: true, playerId });
+            } catch (e: any) {
+             return reply.send({ ok: false, error: e?.message || "Invalid input" });
+            }
         }
-    });
+    );
 
     server.post<{ Body: StartTournamentBody }>(
         "/api/tournament/start",

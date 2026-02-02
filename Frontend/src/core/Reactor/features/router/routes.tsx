@@ -29,16 +29,29 @@ export function getRoutes(): RouteMap {
   const dynamicRoutes: RouteEntry[] = [];
 
   for (const filePath in pages) {
-    let route = filePath
-      .replace("/src/app/pages", "")
-      .replace(/index\.tsx$/, "")
-      .replace(/\.tsx$/, "");
+    // Robustly extract the path following ".../pages"
+    const parts = filePath.split("/pages");
+    let route = parts[parts.length - 1];
 
-    // Normalize trailing slash
-    if (route.endsWith("/")) route = route.slice(0, -1);
+    if (!route) continue;
+
+    // Remove file extension
+    route = route.replace(/\.tsx$/, "");
+
+    // Handle "index" convention (e.g., /user/index -> /user)
+    if (route.endsWith("/index")) {
+      route = route.slice(0, -6);
+    } else if (route === "index") {
+      route = "/";
+    }
+
+    // Normalize: ensure leading slash, remove trailing slash
+    if (!route.startsWith("/")) route = "/" + route;
+    if (route.length > 1 && route.endsWith("/")) route = route.slice(0, -1);
     if (route === "") route = "/";
 
     const component = (pages[filePath] as any).default;
+    if (!component) continue;
 
     // Check for dynamic segments: [param]
     if (route.includes("[")) {
@@ -64,8 +77,6 @@ export function getRoutes(): RouteMap {
 
   cache = { static: staticRoutes, dynamic: dynamicRoutes };
 
-  console.log("🧭 static routes:", Object.keys(staticRoutes));
-  console.log("🧭 dynamic routes:", dynamicRoutes.map(r => r.path));
 
   return cache;
 }
@@ -75,39 +86,50 @@ export function getRoutes(): RouteMap {
  * Static routes checked first, then dynamic patterns.
  */
 export function resolvePage(routes: RouteMap, rawPath: string) {
-  const original = rawPath;
-
   // Normalize: collapse slashes, remove trailing slash, strip query/hash
   let path = rawPath.replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "/";
   path = path.split(/[?#]/)[0];
 
-  // try static route (case-insensitive lookup)
+  //try static route (case-insensitive lookup)
   const staticComponent = routes.static[path.toLowerCase()];
   if (staticComponent) {
     return { component: staticComponent, params: {} };
   }
 
-  // try dynamic routes
+  //try dynamic routes
   for (const route of routes.dynamic) {
     const match = path.match(route.pattern);
     if (match) {
-      // Extract params from capture groups
       const params: Record<string, string> = {};
       route.paramNames.forEach((name, i) => {
         params[name] = match[i + 1];
       });
-
-      // Return component with params
       return { component: route.component, params: params };
     }
   }
 
-  // 3. Not found
-  return { component: routes.static["/notfound"], params: {} };
+  // 3. Fallback: NotFound or Error
+  const NotFound = routes.static["/notfound"];
+  if (NotFound) return { component: NotFound, params: {} };
+
+  // Terminal fallback if even /notfound is missing
+  return {
+    component: () => {
+      const el = document.createElement("div");
+      el.innerHTML = `<div style="padding: 40px; text-align: center; color: white;">
+        <h1>404</h1>
+        <p>Route not found and no NotFound page defined.</p>
+        <a href="/" style="color: cyan;">Return Home</a>
+      </div>`;
+      return el;
+    },
+    params: {}
+  };
 }
 
 // Define which paths require a different layout look
 export const isSpecialLayout = (p: string) => {
   const path = p.toLowerCase().split(/[?#]/)[0].replace(/\/+$/, "") || "/";
-  return path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
+  const isSpecial = path.startsWith("/game") || path.startsWith("/auth") || path === "/login";
+  return isSpecial;
 };

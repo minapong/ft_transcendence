@@ -216,7 +216,7 @@ export function useCallback<T extends (...args: any[]) => any>(fn: T, deps: any[
 export function useEventListener<T extends Event>(
 	eventName: string,
 	handler: (event: T) => void,
-	element: EventTarget = window
+	element: EventTarget | { current: any } = window
 ) {
 	// Create a ref that stores handler
 	const savedHandler = useRef(handler);
@@ -226,9 +226,16 @@ export function useEventListener<T extends Event>(
 		savedHandler.current = handler;
 	}, [handler]);
 
+	const elementKey = (element && typeof element === "object" && "current" in element)
+		? (element as { current: any }).current
+		: element;
+
 	useEffect(() => {
 		// Define the listening target
-		const targetElement: EventTarget = element;
+		const targetElement: EventTarget | null = (element && typeof element === "object" && "current" in element)
+			? (element as { current: any }).current
+			: (element as EventTarget);
+
 		if (!(targetElement && targetElement.addEventListener)) {
 			return;
 		}
@@ -246,7 +253,7 @@ export function useEventListener<T extends Event>(
 		return () => {
 			targetElement.removeEventListener(eventName, eventListener);
 		};
-	}, [eventName, element]);
+	}, [eventName, elementKey]); // Rebind if event name or resolved element changes.
 }
 
 function depsChanged(prev: any[] | undefined, next: any[]) {

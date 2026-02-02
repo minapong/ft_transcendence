@@ -88,7 +88,10 @@ export default function AuthPage() {
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
 
     useEffect(() => {
-        if (auth?.token) navigate("/user/me", { replace: true });
+        const isLoggingOut = window.history.state?.logout;
+        if (auth?.token && !isLoggingOut) {
+            navigate("/user/me", { replace: true });
+        }
     }, [auth?.token]);
 
     useEffect(() => {

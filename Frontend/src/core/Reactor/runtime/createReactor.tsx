@@ -5,7 +5,7 @@
 //   <div id="box" style={{color:"red"}}>Hello</div>
 // ================================================================
 
-import { pendingRefSetters } from "./hooks";
+import { pendingRefSetters } from "../core/hooks";
 
 // Applies properties to a DOM element (styles, events, refs, attributes)
 function applyProps(el: HTMLElement, props: any) {

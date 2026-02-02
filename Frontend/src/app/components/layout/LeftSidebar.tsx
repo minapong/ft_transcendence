@@ -1,12 +1,12 @@
 import SidebarLink from "@/app/components/ui/SidebarLink"
 import { navigate, useEffect, useRef, useState, useCallback, useEventListener } from "Reactor"
-import { useLocation } from "Reactor/router/useLocation"
+import { useLocation } from "Reactor/features/router"
 import { animate, stagger } from "motion"
 
 const links = [
 	{ label: "Home", href: "/", icon: "icon-[solar--home-smile-bold-duotone]", iconActive: "icon-[solar--home-smile-linear]" },
 	{ label: "Tournament", href: "/tournament/start", icon: "icon-[solar--cup-star-bold-duotone]", iconActive: "icon-[solar--cup-star-linear]" },
-	{ label: "Pong", href: "/game/legacy_form_setup", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
+	{ label: "Pong", href: "/game/pre_match_scene", icon: "icon-[solar--gameboy-bold-duotone]", iconActive: "icon-[solar--gameboy-linear]" },
 	{ label: "Connect4", href: "/game/connect4_single", icon: "icon-[solar--widget-5-bold-duotone]", iconActive: "icon-[solar--widget-5-linear]" },
 	{ label: "Contact", href: "/contact", icon: "icon-[solar--chat-round-call-bold-duotone]", iconActive: "icon-[solar--chat-round-call-linear]" },
 	{ label: "Dashboard", href: "/dashboard", icon: "icon-[solar--chart-square-bold-duotone]", iconActive: "icon-[solar--chart-square-linear]" },
@@ -22,6 +22,7 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, hidden 
 	const activePath = normalizePath(useLocation());
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
 	const resolvedPath = mode === "overlay" ? (pendingPath ?? activePath) : activePath;
+
 
 	const asideRef = useRef<HTMLDivElement | null>(null);
 	const backdropRef = useRef<HTMLDivElement | null>(null);

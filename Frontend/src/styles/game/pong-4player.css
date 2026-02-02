@@ -1,3 +1,12 @@
+/* Optimize transforms for paddles/ball */
+#p4_game #ball,
+#p4_game #left_p,
+#p4_game #right_p,
+#p4_game #upper_p,
+#p4_game #lower_p {
+  will-change: transform;
+}
+
 @media (max-width: 639px) and (max-height: 639px) {
   #p4_game #players_names {
     max-width: 320px;
@@ -102,7 +111,7 @@
   #p4_game #upper_p { top: 16px; }
   #p4_game #lower_p { bottom: 16px; }
 
-  #p4_game #ball { width: 20px; height: 20px; }
+  #p4_game #ball { width: 16px; height: 16px; }
 
   #p4_game #left-up, #p4_game #left-down,
   #p4_game #right-up, #p4_game #right-down,
@@ -144,7 +153,7 @@
   #p4_game #upper_p { top: 16px; }
   #p4_game #lower_p { bottom: 16px; }
 
-  #p4_game #ball { width: 24px; height: 24px; }
+  #p4_game #ball { width: 16px; height: 16px; }
 
   #p4_game #left-up, #p4_game #left-down,
   #p4_game #right-up, #p4_game #right-down,

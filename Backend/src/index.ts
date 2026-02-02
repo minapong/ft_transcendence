@@ -28,35 +28,6 @@ import { registerProfileSettingsRoutes } from "./routes/settings.routes.js";
 
 const server = Fastify({ logger: true });
 
-// Force "console-clean" API: convert any Fastify error (parser/auth/etc) into HTTP 200 JSON
-server.setErrorHandler((err, _req, reply) => {
-  const code = (err as any)?.statusCode || (err as any)?.status || 500;
-  const ecode = (err as any)?.code ? String((err as any).code) : "";
-  const msg = String((err as any)?.message ?? "");
-
-  // Body/parser errors (invalid JSON, invalid content-length, too large, etc.)
-  const isBodyProblem =
-    code === 400 ||
-    ecode.startsWith("FST_ERR_CTP_") ||
-    msg.includes("Bad control character") ||
-    msg.includes("Unexpected token") ||
-    msg.includes("Request body size") ||
-    msg.includes("Content-Length");
-
-  if (isBodyProblem) {
-    return reply.code(200).send({ ok: false, error: "Invalid request body" });
-  }
-
-  // Unauthorized / forbidden / not found etc -> still 200
-  if (code === 401 || code === 403) {
-    return reply.code(200).send({ ok: false, error: "Unauthorized" });
-  }
-
-  // Default: never leak internal details, never 500/4xx
-  return reply.code(200).send({ ok: false, error: "Server error" });
-});
-
-
 //  Enable CORS
 async function start() {
 	await server.register(cors, {
@@ -100,7 +71,6 @@ async function start() {
 
     server.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
       if (err){ process.exit(1); throw err; }
-      // console.log(`Server listening at ${address}, hot reload is working!`);
     });
 }
 

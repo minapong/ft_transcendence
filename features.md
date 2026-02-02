@@ -15,6 +15,12 @@ User-facing features you can demo in 30 seconds without opening code.
 - **Online status indicator** — See who's online in real-time (green dot)
 - **Public profiles** — View other players' profiles and online status
 
+### Profile & Social
+- **Avatar upload** — Upload and update your profile avatar
+- **Friend requests** — Send friend requests by username
+- **Friends list** — View pending requests and accepted friends
+- **Remove friends** — Cancel or remove existing friendships
+
 ### Pong Game
 - **Classic 2-player Pong** — Local multiplayer on same keyboard
 - **Single-player vs AI** — Play against AI with 3 difficulty levels (easy, medium, hard)
@@ -46,7 +52,6 @@ User-facing features you can demo in 30 seconds without opening code.
 
 ## 🚧 Partial / In Progress
 
-- **Avatar upload** — Profile system exists, avatar upload not complete
 - **3D graphics mode** — Babylon.js imported but not integrated
 
 ---
@@ -54,7 +59,6 @@ User-facing features you can demo in 30 seconds without opening code.
 ## ❌ Not Implemented
 
 - Live chat between users
-- Friends system (add/remove friends)
 - Game invites / notifications
 - OAuth login (Google/42)
 - Spectator mode
