@@ -272,7 +272,7 @@ export default function PongGame() {
                 </div>
 
                 {/* RIGHT TOUCH CONTROLS */}
-                <div className="absolute -right-16 sm:-right-24 top-1/2 -translate-y-1/2 flex flex-col gap-3 lg:gap-4 z-20">
+                <div className={`absolute -right-16 sm:-right-24 top-1/2 -translate-y-1/2 flex flex-col gap-3 lg:gap-4 z-20 ${useAI ? 'hidden' : ''}`}>
                     <button
                         onPointerDown={() => { inputRef.current.up = true; }}
                         onPointerUp={() => { inputRef.current.up = false; }}

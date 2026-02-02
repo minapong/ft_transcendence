@@ -158,7 +158,7 @@ function getPageTitle(path: string): string {
   return `Mina - ${title}`;
 }
 
-function renderSubtree(renderFn: () => Node, container: HTMLElement, key: string, opts?: { track?: boolean }) {
+function renderSubtree(renderFn: () => HTMLElement | DocumentFragment, container: HTMLElement, key: string, opts?: { track?: boolean }) {
   resetHooks(key, opts); //reset context on every page switch
   const el = renderFn(); //call the components funcs to make tree
   container.replaceChildren(el); //replace the content of page and add new

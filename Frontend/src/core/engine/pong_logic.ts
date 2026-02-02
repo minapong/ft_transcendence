@@ -20,9 +20,9 @@ let RIGHT_PADDLE_X: number;
 
 
 
-const PADDLE_SPEED = 6;
+let PADDLE_SPEED = 6;
 
-const GAME_SPEED = 2;
+let GAME_SPEED = 2;
 
 const WIN_SCORE = 3;
 
@@ -64,8 +64,9 @@ export function pongLogic(
 	function handle_parameters() {
 		let width = window.innerWidth;
 
-		// Sync AI parameters as well
-		// updateAIParameters();
+		// Calculate speed scaling factors based on width/height
+		// Base speeds for 800x500 resolution
+		// speed = base * (currentDimension / baseDimension)
 
 		if (width < 640) {
 			GAME_WIDTH = 320;
@@ -75,13 +76,21 @@ export function pongLogic(
 			PADDLE_HEIGHT = 64;
 			PADDLE_WIDTH = 8;
 			PADDLE_DIST = 8;
+
+			// Recalculate dynamic speeds
+			GAME_SPEED = 2; // Slower for small screen
+			PADDLE_SPEED = 3;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
+
 			if (state == 2) {
 				paddleY_Left = paddleY_Left * (200 / 280);
 				paddleY_Right = paddleY_Right * (200 / 280);
 				x = x * (200 / 280);
 				y = y * (200 / 280);
+				dx = dx * (200 / 280); // Scale velocity
+				dy = dy * (200 / 280);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -99,6 +108,10 @@ export function pongLogic(
 			PADDLE_HEIGHT = 80;
 			PADDLE_WIDTH = 12;
 			PADDLE_DIST = 12;
+
+			GAME_SPEED = 3;
+			PADDLE_SPEED = 4.5;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 			if (state == 1) {
@@ -106,12 +119,16 @@ export function pongLogic(
 				paddleY_Right = paddleY_Right * (280 / 200);
 				x = x * (280 / 200);
 				y = y * (280 / 200);
+				dx = dx * (280 / 200);
+				dy = dy * (280 / 200);
 			}
 			else if (state == 3) {
 				paddleY_Left = paddleY_Left * (280 / 380);
 				paddleY_Right = paddleY_Right * (280 / 380);
 				x = x * (280 / 380);
 				y = y * (280 / 380);
+				dx = dx * (280 / 380);
+				dy = dy * (280 / 380);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -130,6 +147,10 @@ export function pongLogic(
 			PADDLE_HEIGHT = 80;
 			PADDLE_WIDTH = 12;
 			PADDLE_DIST = 16;
+
+			GAME_SPEED = 4;
+			PADDLE_SPEED = 6;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 			if (state == 2) {
@@ -137,12 +158,16 @@ export function pongLogic(
 				paddleY_Right = paddleY_Right * (380 / 280);
 				x = x * (380 / 280);
 				y = y * (380 / 280);
+				dx = dx * (380 / 280);
+				dy = dy * (380 / 280);
 			}
 			else if (state == 4) {
 				paddleY_Left = paddleY_Left * (380 / 500);
 				paddleY_Right = paddleY_Right * (380 / 500);
 				x = x * (380 / 500);
 				y = y * (380 / 500);
+				dx = dx * (380 / 500);
+				dy = dy * (380 / 500);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -160,6 +185,10 @@ export function pongLogic(
 			PADDLE_HEIGHT = 96;
 			PADDLE_WIDTH = 12;
 			PADDLE_DIST = 16;
+
+			GAME_SPEED = 5;
+			PADDLE_SPEED = 8;
+
 			PLAYABLE_WIDTH = GAME_WIDTH - (2 * WALL_WIDTH);
 			PLAYABLE_HEIGHT = GAME_HEIGHT - (2 * WALL_WIDTH);
 			if (state == 3) {
@@ -167,6 +196,8 @@ export function pongLogic(
 				paddleY_Right = paddleY_Right * (500 / 380);
 				x = x * (500 / 380);
 				y = y * (500 / 380);
+				dx = dx * (500 / 380);
+				dy = dy * (500 / 380);
 			}
 			else if (state == 0) {
 				paddleY_Left = (PLAYABLE_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
@@ -212,7 +243,11 @@ export function pongLogic(
 		ballDx: dx,
 		ballDy: dy,
 		aiPaddleY: paddleY_Right,
-		timestamp: Date.now()
+		timestamp: Date.now(),
+		gameHeight: PLAYABLE_HEIGHT,
+		paddleX: RIGHT_PADDLE_X,
+		paddleHeight: PADDLE_HEIGHT,
+		ballSize: BALL_SIZE
 	});
 
 	const simulateKeyPress = (key: string, action: 'down' | 'up') => {
@@ -279,7 +314,8 @@ export function pongLogic(
 			y + BALL_SIZE >= paddleY_Left && // Ball's bottom edge >= Paddle's top edge
 			y <= paddleY_Left + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
 		) {
-			dx = -dx;
+			dx = -dx * 1.05;
+			dy = dy * 1.05;
 			x = LEFT_PADDLE_X + PADDLE_WIDTH;
 		}
 
@@ -290,7 +326,8 @@ export function pongLogic(
 			y + BALL_SIZE >= paddleY_Right && // Ball's bottom edge >= Paddle's top edge
 			y <= paddleY_Right + PADDLE_HEIGHT // Ball's top edge <= Paddle's bottom edge
 		) {
-			dx = -dx;
+			dx = -dx * 1.05;
+			dy = dy * 1.05;
 			x = RIGHT_PADDLE_X - BALL_SIZE;
 		}
 

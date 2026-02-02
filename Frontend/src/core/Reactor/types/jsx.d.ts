@@ -8,7 +8,8 @@ declare namespace JSX {
 
 // Module declarations for Reactor imports
 declare module "Reactor" {
-	export function createReactor(type: any, props: any, ...children: any[]): HTMLElement | DocumentFragment | Node;
+	export type ReactorElement = HTMLElement | DocumentFragment;
+	export function createReactor(type: any, props: any, ...children: any[]): ReactorElement;
 	export function Fragment(props: { children?: any }): DocumentFragment;
 	export function useState<T>(initial: T): [T, (v: T | ((prev: T) => T)) => void];
 	export function useEffect(cb: () => void | (() => void), deps?: any[]): void;
@@ -16,7 +17,7 @@ declare module "Reactor" {
 	export function useMemo<T>(fn: () => T, deps: any[]): T;
 	export function useCallback<T extends (...args: any[]) => any>(fn: T, deps: any[]): T;
 	export function useLocation(): string;
-	export function forwardRef<T = any, P = {}>(render: (props: P, ref: any) => Node | DocumentFragment | HTMLElement): any;
+	export function forwardRef<T = any, P = {}>(render: (props: P, ref: any) => ReactorElement): any;
 	export function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean; state?: any }): void;
 	export function initRouter(): void;
 	export function renderRoute(triggerKey?: string): void;
@@ -24,7 +25,7 @@ declare module "Reactor" {
 	export function useEventListener<T extends Event>(eventName: string, handler: (event: T) => void, element?: EventTarget | { current: any }): void;
 
 	// Modal functions
-	export type ModalRenderer<T = unknown> = (payload: T) => Node | DocumentFragment | HTMLElement;
+	export type ModalRenderer<T = unknown> = (payload: T) => ReactorElement;
 	export type ModalDescriptor<T = unknown> = {
 		type: string;
 		payload?: T;
