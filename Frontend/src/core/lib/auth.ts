@@ -24,8 +24,8 @@ export function clearAuth() {
   window.dispatchEvent(new Event(AUTH_EVENT));
 }
 
-export function logout() {
-  disconnectPresenceWS();   // tell backend you’re gone
+export async function logout() {
+  await navigate("/auth/login", { replace: true, state: { logout: true } });       // redirect FIRST to hide state change
+  disconnectPresenceWS();
   clearAuth();              // update local state + UI
-  navigate("/auth/login", { replace: true });       // redirect
 }

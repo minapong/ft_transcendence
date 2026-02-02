@@ -1,7 +1,8 @@
 import rootLayout from "@/app/components/layout/RootLayout";
 import { resetHooks, flushEffects, runPendingRefs, cleanupContext } from "./hooks";
-import { getRoutes, resolvePage, isSpecialLayout } from "./router/routes";
-import { startTransition, endTransition } from "./router/transition";
+import { getRoutes, resolvePage, isSpecialLayout } from "../features/router/routes";
+import { startTransition, endTransition } from "../features/router/transition";
+import { setModalRerender } from "../features/modal/modal";
 
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
 export const LAYOUT_KEY = "__layout__";
@@ -19,8 +20,6 @@ let lastKnownPath = "";
 export function renderRoute(triggerKey?: string) {
   const rawPath = window.location.pathname;
   const normalizedPath = normalizePath(rawPath);
-  console.log("🎨 renderRoute:", normalizedPath, triggerKey ? `(trigger: ${triggerKey})` : "");
-
   // Detect layout swap BEFORE updating lastKnownPath
   const prevIsSpecial = lastKnownPath ? isSpecialLayout(lastKnownPath) : null;
   const nextIsSpecial = isSpecialLayout(normalizedPath);
@@ -47,7 +46,6 @@ export function renderRoute(triggerKey?: string) {
     }
 
     if (!component) {
-      console.error("🧭 Route resolved to null component for path:", normalizedPath);
       return;
     }
 
@@ -56,7 +54,6 @@ export function renderRoute(triggerKey?: string) {
         try {
           return component(params);
         } catch (err) {
-          console.error("🧭 Page render error:", err);
           const errorBox = document.createElement("div");
           errorBox.innerHTML = `<div style="padding: 2rem; color: #f87171; background: #7f1d1d22; border: 1px solid #7f1d1d44; border-radius: 0.5rem; margin: 2rem;">
                     <h2 style="font-weight: bold; margin-bottom: 0.5rem;">Render Error</h2>
@@ -79,29 +76,38 @@ export function initRouter() {
 
   document.addEventListener("click", (e) => {
     if (e.defaultPrevented) return;
+    if (e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const link = (e.target as HTMLElement).closest("a");
-    if (link && link.getAttribute("href")?.startsWith("/") && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      navigate(link.getAttribute("href")!);
-    }
+    if (!link) return;
+    if (link.hasAttribute("download")) return;
+    if (link.getAttribute("target") === "_blank") return;
+    if (link.hasAttribute("data-no-router")) return;
+    const href = link.getAttribute("href");
+    if (!href || !href.startsWith("/")) return;
+    e.preventDefault();
+    navigate(href);
   });
 
   window.addEventListener("popstate", async () => {
     // Browser has already changed URL. Sync app state.
     const target = normalizePath(window.location.pathname);
 
-    // Notify reactive components (sidebar, header) that URL changed
-    window.dispatchEvent(new Event("routechange"));
-
     transitioningTarget = target;
     isTransitioning = true;
 
     try {
+      // 1. Start Animation FIRST so the user sees the bar moving before content swaps
       await startTransition({
         direction: "backward",
         weight: isHeavyRoute(target) ? "heavy" : "normal"
       });
 
+      // 2. NOW notify reactive components (sidebar, header) to update their active states
+      // This is crucial: useLocation listeners will now fire AFTER the bar has started covering things
+      window.dispatchEvent(new Event("routechange"));
+
+      // 3. Render content
       renderRoute();
       await endTransition();
     } catch (err) {
@@ -148,7 +154,7 @@ function getPageTitle(path: string): string {
   return `Mina - ${title}`;
 }
 
-function renderSubtree(renderFn: () => HTMLElement, container: HTMLElement, key: string, opts?: { track?: boolean }) {
+function renderSubtree(renderFn: () => HTMLElement | DocumentFragment, container: HTMLElement, key: string, opts?: { track?: boolean }) {
   resetHooks(key, opts); //reset context on every page switch
   const el = renderFn(); //call the components funcs to make tree
   container.replaceChildren(el); //replace the content of page and add new
@@ -198,7 +204,6 @@ export async function navigate(path: string, opts?: { replace?: boolean; trigger
     renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
     await endTransition();
   } catch (err) {
-    console.error("🧭 Navigation failed:", err);
     renderRoute();
   } finally {
     isTransitioning = false;
@@ -214,3 +219,6 @@ function isHeavyRoute(path: string): boolean {
   const p = normalizePath(path);
   return p.startsWith("/game") || p.startsWith("/tournament");
 }
+
+// Wire modal updates into the render pipeline without creating import cycles.
+setModalRerender((triggerKey?: string) => renderRoute(triggerKey));

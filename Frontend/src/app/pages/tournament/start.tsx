@@ -304,8 +304,8 @@ export default function TournamentPage() {
 									</div>
 
 									<div className="pt-4">
-										<button onClick={handleCreateTournament} className="btn-hero btn-xl w-full">
-											<span className="icon-[solar--cup-star-bold] mr-3" />
+										<button onClick={handleCreateTournament} className="btn-cyber btn-xl w-full">
+											<span className="icon-[solar--cup-star-bold] mr-3 icon" />
 											Create Tournament
 										</button>
 									</div>
@@ -375,9 +375,8 @@ export default function TournamentPage() {
 									{tournament.state === "waiting" && (
 										<div className="space-y-4">
 											{isAdmin && isFull && (
-												<button onClick={handleStartTournament} className="btn-hero btn-xl w-full animate-pulse-slow">
-													<div className="absolute inset-0 bg-white/20 blur opacity-0 hover:opacity-100 transition-opacity" />
-													<span className="icon-[solar--play-circle-bold] mr-3" />
+												<button onClick={handleStartTournament} className="btn-cyber btn-xl w-full animate-pulse-slow">
+													<span className="icon-[solar--play-circle-bold] mr-3 icon" />
 													Launch Tournament
 												</button>
 											)}

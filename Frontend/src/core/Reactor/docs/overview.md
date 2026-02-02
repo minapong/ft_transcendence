@@ -52,7 +52,7 @@ Reactor is a lightweight, React-like library for building web applications with 
 
 ## Router
 
-**[→ Full Router Documentation](./router/Readme.md)**
+**[→ Full Router Documentation](./router/routing.md)**
 
 The router module provides:
 - `useLocation` hook for reactive URL subscriptions
@@ -62,8 +62,7 @@ The router module provides:
 ### Quick Example
 
 ```tsx
-import { useLocation } from "@/core/router/useLocation";
-import { navigate } from "Reactor";
+import { useLocation, navigate } from "Reactor";
 
 function MyComponent() {
   const pathname = useLocation(); // Reactive to URL changes

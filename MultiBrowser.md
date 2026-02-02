@@ -14,7 +14,7 @@ Browser compatibility was an explicit design consideration throughout developmen
 
 - Only standardized Web APIs are used (Fetch, WebSockets, DOM, sessionStorage).
 - No Chrome-specific or experimental browser APIs are relied upon.
-- React/Reactor hooks and rendering logic were actively corrected to avoid lifecycle and re-render issues that typically surface in stricter browsers such as Firefox.
+- Reactor hooks and rendering logic were actively corrected to avoid lifecycle and re-render issues that typically surface in stricter browsers such as Firefox.
 - Navigation and routing rely on SPA-safe mechanisms instead of `window`-level hacks.
 - HTTPS is enforced, aligning with Firefox and Brave’s stricter security defaults.
 - Rendering, resize handling, and responsiveness were repeatedly validated and fixed across different viewport and device conditions.
@@ -22,11 +22,8 @@ Browser compatibility was an explicit design consideration throughout developmen
 ### Practical Validation
 
 The application has been tested in Chrome and Firefox with equivalent behavior and performance.  
-Since Brave is Chromium-based and applies stricter privacy policies rather than divergent APIs, it is also considered fully compatible.
+Since Brave is Chromium-based and applies stricter privacy policies rather than divergent APIs, it is also fully compatible.
 
-### Non-Goals
-
-Legacy browsers (e.g. Internet Explorer) are not supported.
 
 ## ✅ Cross-Browser Compatibility Checklist
 

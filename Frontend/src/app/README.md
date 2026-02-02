@@ -23,7 +23,7 @@ app/
 
 ## Routing
 
-Routes are **file-based**. The router in `core/Reactor/router/routes.tsx` auto-discovers pages:
+Routes are **file-based**. The router in `core/Reactor/features/router/routes.tsx` auto-discovers pages:
 
 - `/src/app/pages/auth/login.tsx` → `/auth/login`
 - `/src/app/pages/game/pong.tsx` → `/game/pong`

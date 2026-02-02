@@ -22,15 +22,24 @@
 
 ```
 Reactor/
-├── createReactor.tsx   # JSX factory + Fragment
-├── hooks.ts            # useState, useEffect, useMemo, useRef
-├── render.tsx          # renderRoute, initRouter, navigate
-├── modal.ts            # Modal state management
-├── ModalRoot.tsx       # Modal UI component
-├── router/
-│   └── routes.tsx      # File-based routing engine
-├── index.tsx           # Public exports
-└── jsx.d.ts            # TypeScript declarations
+├── runtime/            # JSX factory + JSX runtime
+│   ├── createReactor.tsx
+│   └── jsx-runtime.ts
+├── core/               # Hooks + render pipeline
+│   ├── hooks.ts
+│   └── render.tsx
+├── features/           # Router + modal systems
+│   ├── router/
+│   │   ├── routes.tsx
+│   │   ├── transition.ts
+│   │   └── useLocation.ts
+│   └── modal/
+│       ├── modal.ts
+│       └── ModalRoot.tsx
+├── types/
+│   └── jsx.d.ts
+├── docs/               # Framework docs
+└── index.tsx           # Public exports
 ```
 
 ### Design Principles

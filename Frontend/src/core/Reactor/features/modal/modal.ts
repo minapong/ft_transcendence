@@ -1,4 +1,14 @@
-import { LAYOUT_KEY, renderRoute } from "./render";
+// registry definition moved here to avoid circular dependency issues
+export type ModalRenderer<T = unknown> = (payload: T) => any;
+var registry: Map<string, ModalRenderer<any>> | undefined;
+
+function getRegistry() {
+  if (!registry) registry = new Map<string, ModalRenderer<any>>();
+  return registry;
+}
+
+
+const LAYOUT_KEY = "__layout__";
 
 export type ModalDescriptor<T = unknown> = {
   type: string;
@@ -8,11 +18,11 @@ export type ModalDescriptor<T = unknown> = {
   className?: string;
 };
 
-export type ModalRenderer<T = unknown> = (payload: T) => HTMLElement;
+
 
 let currentModal: ModalDescriptor | null = null;
-const registry = new Map<string, ModalRenderer<any>>();
-let requestRerender: (triggerKey?: string) => void = (key?: string) => renderRoute(key ?? LAYOUT_KEY);
+// registry imported above
+let requestRerender: (triggerKey?: string) => void = () => { };
 
 export function getCurrentModal() {
   return currentModal;
@@ -21,10 +31,12 @@ export function getCurrentModal() {
 export function openModal<T>(modal: ModalDescriptor<T>) {
   if (!modal || !modal.type) return;
   currentModal = modal;
-  if (!modal.render && !registry.has(modal.type)) {
+  const registryMap = getRegistry();
+  if (!modal.render && !registryMap.has(modal.type)) {
     console.warn(`[modal] Missing renderer for type "${modal.type}"`);
   }
   requestRerender(LAYOUT_KEY);
+  window.dispatchEvent(new Event("pong:pause"));
 }
 
 export function closeModal() {
@@ -34,13 +46,13 @@ export function closeModal() {
 }
 
 export function registerModal<T>(type: string, renderer: ModalRenderer<T>) {
-  registry.set(type, renderer as ModalRenderer<any>);
+  getRegistry().set(type, renderer as ModalRenderer<any>);
 }
 
 export function resolveModalRenderer(modal: ModalDescriptor | null) {
   if (!modal) return null;
   if (typeof modal.render === "function") return modal.render;
-  return registry.get(modal.type) ?? null;
+  return getRegistry().get(modal.type) ?? null;
 }
 
 // Allow tests (or advanced hosts) to control how a re-render is requested.

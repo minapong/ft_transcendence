@@ -1,6 +1,6 @@
 import SidebarLink from "@/app/components/ui/SidebarLink"
 import { navigate, useEffect, useRef, useState, useCallback, useEventListener } from "Reactor"
-import { useLocation } from "Reactor/router/useLocation"
+import { useLocation } from "Reactor/features/router"
 import { animate, stagger } from "motion"
 
 const links = [
@@ -23,9 +23,6 @@ export default function Sidebar({ isOverlayOpen, setIsOverlayOpen, mode, hidden 
 	const [pendingPath, setPendingPath] = useState<string | null>(null);
 	const resolvedPath = mode === "overlay" ? (pendingPath ?? activePath) : activePath;
 
-	useEffect(() => {
-		console.log(`[LeftSidebar] Updated: hidden=${hidden}, mode=${mode}, isOverlayOpen=${isOverlayOpen}, activePath=${activePath}`);
-	});
 
 	const asideRef = useRef<HTMLDivElement | null>(null);
 	const backdropRef = useRef<HTMLDivElement | null>(null);

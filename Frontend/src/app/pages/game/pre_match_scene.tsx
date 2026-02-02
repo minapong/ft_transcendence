@@ -190,16 +190,24 @@ export default function PreMatchScene() {
   };
 
   /* Keyboard navigation */
-  useEventListener("keydown", (e: KeyboardEvent) => {
-    if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "SELECT") {
-      if (e.key === "Enter") commit();
-      return;
-    }
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Safety check: ensure we are actually on this page
+      if (window.location.pathname !== "/game/pre_match_scene") return;
 
-    if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
-    if (e.key === "ArrowRight") setIndex((i) => Math.min(intents.length - 1, i + 1));
-    if (e.key === "Enter") commit();
-  });
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "SELECT") {
+        if (e.key === "Enter") commit();
+        return;
+      }
+
+      if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
+      if (e.key === "ArrowRight") setIndex((i) => Math.min(intents.length - 1, i + 1));
+      if (e.key === "Enter") commit();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <section

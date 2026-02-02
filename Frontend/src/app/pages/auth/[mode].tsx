@@ -88,7 +88,8 @@ export default function AuthPage() {
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
 
     useEffect(() => {
-        if (auth?.token) {
+        const isLoggingOut = window.history.state?.logout;
+        if (auth?.token && !isLoggingOut) {
             navigate("/user/me", { replace: true });
         }
     }, [auth?.token]);
@@ -153,6 +154,7 @@ export default function AuthPage() {
 
             setAuth(resData);
             connectPresenceWS();
+            navigate("/user/me", { replace: true });
         } catch (err) {
             setUiError({ field: "general", message: "System connection failure. Retry authentication." });
         } finally {
