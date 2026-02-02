@@ -354,27 +354,36 @@ export function pong4PLogic(
 		}
 	}
 
+
 	function movePaddles() {
 		const { w, s, num6, num3, v, b, left, right } = inputRef.current;
 
+		// Vertical Limits (for Left/Right paddles)
+		const vMin = P4_TOP_PADDLE_Y + P4_PADDLE_THICKNESS;
+		const vMax = P4_BOTTOM_PADDLE_Y;
+
+		// Horizontal Limits (for Top/Bottom paddles)
+		const hMin = P4_LEFT_PADDLE_X + P4_PADDLE_THICKNESS;
+		const hMax = P4_RIGHT_PADDLE_X;
+
 		// Left paddle (vertical)
-		if (w) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
-		if (s) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
+		if (w) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, false);
+		if (s) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, true);
 		left_p.style.top = `${paddleY_Left}px`;
 
 		// Right paddle (vertical)
-		if (num6) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, false);
-		if (num3) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, 0, P4_PLAYABLE_HEIGHT, P4_PADDLE_LENGTH, true);
+		if (num6) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, false);
+		if (num3) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, true);
 		right_p.style.top = `${paddleY_Right}px`;
 
 		// Bottom paddle (horizontal)
-		if (left) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
-		if (right) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
+		if (left) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, false);
+		if (right) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, true);
 		lower_p.style.left = `${paddleX_Lower}px`;
 
 		// Top paddle (horizontal)
-		if (v) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, false);
-		if (b) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, 0, P4_PLAYABLE_WIDTH, P4_PADDLE_LENGTH, true);
+		if (v) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, false);
+		if (b) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, true);
 		upper_p.style.left = `${paddleX_Upper}px`;
 	}
 
