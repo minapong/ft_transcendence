@@ -44,6 +44,10 @@ interface Pong4PElements {
 	scoreBlueDisplay: HTMLElement;
 }
 
+import { GAME_PAUSE_EVENT } from "./pong_logic";
+
+// ... (existing constants)
+
 export function pong4PLogic(
 	elements: Pong4PElements,
 	inputRef: {
@@ -84,6 +88,7 @@ export function pong4PLogic(
 	let paddleX_Upper: number, paddleX_Lower: number;
 
 	function handle_parameters() {
+		// ... (existing logic)
 		let width = window.innerWidth;
 		let height = window.innerHeight;
 		let size: number;
@@ -229,8 +234,14 @@ export function pong4PLogic(
 		P4_BOTTOM_PADDLE_Y = P4_PLAYABLE_HEIGHT - P4_PADDLE_DIST - P4_PADDLE_THICKNESS;
 	}
 
+	// Resize Handler
+	const resizeHandler = () => {
+		handle_parameters();
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
+	};
+
 	handle_parameters();
-	window.addEventListener("resize", handle_parameters);
+	window.addEventListener("resize", resizeHandler);
 
 	let dx = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED;
 	let dy = (Math.random() > 0.5 ? 1 : -1) * P4_BALL_SPEED * 0.6;
@@ -238,70 +249,25 @@ export function pong4PLogic(
 	let scoreRed = 0;
 	let scoreBlue = 0;
 
-	/* ---------------- touch handlers ---------------- */
-
-	leftP_up_But.addEventListener("pointerdown", e => {
-		inputRef.current.w = true;
-	});
-	leftP_up_But.addEventListener("pointerup", e => {
-		inputRef.current.w = false;
-	});
-	leftP_down_But.addEventListener("pointerdown", e => {
-		inputRef.current.s = true;
-	});
-	leftP_down_But.addEventListener("pointerup", e => {
-		inputRef.current.s = false;
-	});
-
-	rightP_up_But.addEventListener("pointerdown", e => {
-		inputRef.current.num6 = true;
-	});
-	rightP_up_But.addEventListener("pointerup", e => {
-		inputRef.current.num6 = false;
-	});
-	rightP_down_But.addEventListener("pointerdown", e => {
-		inputRef.current.num3 = true;
-	});
-	rightP_down_But.addEventListener("pointerup", e => {
-		inputRef.current.num3 = false;
-	});
-
-	topP_left_But.addEventListener("pointerdown", e => {
-		inputRef.current.v = true;
-	});
-	topP_left_But.addEventListener("pointerup", e => {
-		inputRef.current.v = false;
-	});
-	topP_right_But.addEventListener("pointerdown", e => {
-		inputRef.current.b = true;
-	});
-	topP_right_But.addEventListener("pointerup", e => {
-		inputRef.current.b = false;
-	});
-
-	bottomP_left_But.addEventListener("pointerdown", e => {
-		inputRef.current.left = true;
-	});
-	bottomP_left_But.addEventListener("pointerup", e => {
-		inputRef.current.left = false;
-	});
-	bottomP_right_But.addEventListener("pointerdown", e => {
-		inputRef.current.right = true;
-	});
-	bottomP_right_But.addEventListener("pointerup", e => {
-		inputRef.current.right = false;
-	});
-
-
+	// Pause Handlers
 	const pauseHandler = () => {
+		isPaused = true;
+		pause.textContent = "▶️ Resume";
+	};
+
+	const toggleHandler = () => {
 		isPaused = !isPaused;
 		pause.textContent = isPaused ? "▶️ Resume" : "⏸️ Pause";
 		if (!isPaused) moveBall();
 	};
 
-	// Removed direct document.addEventListener calls. Inputs come from inputRef now.
+	const blurHandler = () => {
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
+	};
 
-	pause.addEventListener('click', pauseHandler);
+	window.addEventListener(GAME_PAUSE_EVENT, pauseHandler);
+	window.addEventListener("blur", blurHandler);
+	pause.addEventListener('click', toggleHandler);
 
 	/* ---------------- game loop ---------------- */
 
@@ -437,6 +403,7 @@ export function pong4PLogic(
 	}
 
 	function endGame(winner: "red" | "blue") {
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
 		isWin = true;
 		isPaused = true;
 		dx = 0;
@@ -445,11 +412,7 @@ export function pong4PLogic(
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
-		window.removeEventListener("resize", handle_parameters);
-		// document.removeEventListener('keydown', keydownHandler);
-		// document.removeEventListener('keyup', keyupHandler);
-		pause.removeEventListener('click', pauseHandler);
-
+		// cleanup listeners managed by cleanup function
 		onWin(winner);
 	}
 
@@ -464,9 +427,9 @@ export function pong4PLogic(
 		if (animationId !== null) cancelAnimationFrame(animationId);
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
-		window.removeEventListener("resize", handle_parameters);
-		// document.removeEventListener('keydown', keydownHandler);
-		// document.removeEventListener('keyup', keyupHandler);
-		pause.removeEventListener('click', pauseHandler);
+		window.removeEventListener("resize", resizeHandler);
+		window.removeEventListener(GAME_PAUSE_EVENT, pauseHandler);
+		window.removeEventListener("blur", blurHandler);
+		pause.removeEventListener('click', toggleHandler);
 	};
 }
