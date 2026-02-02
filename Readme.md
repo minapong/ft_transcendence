@@ -44,15 +44,10 @@ Create the following files:
 #### Backend (`Backend/.env`)
 ```env
 NODE_ENV=development
-PORT=3000
 DATABASE_URL=file:./database/transcendence.db
 JWT_SECRET=change_me
 ```
 
-#### Frontend (`Frontend/.env`)
-```env
-VITE_API_URL=http://localhost:3000
-```
 
 ---
 
@@ -79,10 +74,9 @@ All services are started using Docker with a single command.
 **Responsibilities:**
 Defined the overall product vision and roadmap. Designed the task structure and divided responsibilities between frontend and backend. Coordinated feature priorities, validated completed work, and contributed to both frontend architecture and backend core logic. Led technical direction and ensured coherent project growth.
 
-
 ---
 
-### aalkaisi — Abdulrahman
+### aalkaisi — Abdul Rahman
 **Roles:** Scrum Master, Developer
 **Responsibilities:**
 Ensured smooth team coordination and meeting flow, resolved blockers and conflicts, and supported delivery alignment. Designed and implemented the core game engines for Pong and Connect 4, including gameplay mechanics and real-time behavior.
@@ -93,7 +87,6 @@ Ensured smooth team coordination and meeting flow, resolved blockers and conflic
 **Roles:** Technical Lead/Architect Lead, Developer
 **Responsibilities:**
 Designed backend architecture and infrastructure. Set up Docker, NGINX, and the CI/CD pipeline. Implemented user management using Fastify and Prisma, including authentication, database schema, and persistence logic.
-
 
 ---
 
@@ -194,7 +187,7 @@ This directly aligns with the ft_transcendence objective of demonstrating **mast
 * **Framework:** Fastify
 * **Real-time Communication:** WebSockets (Fastify WebSocket)
 * **Authentication:** JWT (Fastify JWT)
-* **Security:** bcrypt for password hashing
+* **Security:** crypto for password  hashing & avatar images hashing
 * **File Handling:** Fastify Multipart & Static
 
 #### Justification (Backend)
@@ -256,7 +249,6 @@ The stack was deliberately selected and implemented to ensure every system—fro
 - `tournament_matches`
 - `stats_user`
 
-
 ### Relationships
 - **Users ↔ Matches:** Many-to-many
 - **Tournaments ↔ Matches:** One-to-many
@@ -266,7 +258,6 @@ The stack was deliberately selected and implemented to ensure every system—fro
 ### Data Integrity
 - **Cascade deletes** for ownership-bound entities.
 - **SetNull** for historical references (winners, selected avatars).
-
 ---
 
 
@@ -286,7 +277,7 @@ The stack was deliberately selected and implemented to ensure every system—fro
 
 ### 🔐 Authentication & Social
 *   **Secure Authentication**
-    *   **Functionality:** User signup, login/logout, and session management using JWT and bcrypt password hashing.
+    *   **Functionality:** User signup, login/logout, and session management using JWT and crypto password hashing.
     *   **Owner:** Natalia (`nmagdano`)
 *   **Real-Time Presence**
     *   **Functionality:** WebSocket-powered status tracking; displays real-time online/offline status indicators across the platform.
@@ -298,14 +289,13 @@ The stack was deliberately selected and implemented to ensure every system—fro
 ### 🕹️ Games & AI
 *   **Pong Engine (2P, 4P, AI)**
     *   **Functionality:** Custom physics-based engine supporting classic 2-player mode, a 4-player 2v2 "Squad" mode, and AI opponents with three difficulty tiers. Includes touch controls and pause/resume.
-    *   **Owner:** Abdulrahman  (`aalkaisi`)
+    *   **Owner:** Abdul Rahman (`aalkaisi`)
 *   **Connect 4 & Matchmaking**
     *   **Functionality:** Turn-based strategy game with automated win-state detection, paired with a database-backed real-time matchmaking queue.
-    *   **Owners:** Abdulrahman (`aalkaisi`), Santiago (`saherrer`)
+    *   **Owners:** Abdul Rahman (`aalkaisi`), Santiago (`saherrer`)
 *   **Tournament System**
     *   **Functionality:** Complete tournament management for 4-8 players, featuring automatic bracket generation, player registrations, and admin-led round progression.
     *   **Owner:** Santiago (`saherrer`)
-
 
 ### 📊 Competitive Systems
 *   **Global Leaderboards & Stats**
@@ -314,7 +304,6 @@ The stack was deliberately selected and implemented to ensure every system—fro
 *   **Gamification & Achievements**
     *   **Functionality:** A persistent achievement system tracking milestones and unlocking badges based on player performance and community interactions.
     *   **Owner:** Santiago (`saherrer`)
-
 
 ---
 
@@ -388,7 +377,7 @@ User management is foundational for authentication, social features, statistics,
 **How it was implemented**
 
 * Secure signup and login using JWT
-* Password hashing with bcrypt
+* Password hashing with crypto
 * User profiles with editable metadata
 * Avatar upload with default fallbacks
 * Friends system with persistent relationships
@@ -631,9 +620,8 @@ This section provides a detailed breakdown of each team member’s contributions
 
 ---
 
-### aalkaisi — Abdulrahman
+### aalkaisi — Abdul Rehman
 **Primary Roles:** Scrum Master, Developer
-
 
 **Key Contributions:**
 - Designed and implemented the Pong game engine, including:
@@ -646,7 +634,6 @@ This section provides a detailed breakdown of each team member’s contributions
     - Win-condition detection
 - Ensured gameplay correctness, fairness, and responsiveness
 - Facilitated sprint coordination and removed development blockers
->>>>>>> origin/Dev
 
 **Challenges & Solutions:**
 - **Challenge:** Synchronizing real-time gameplay across multiple players
