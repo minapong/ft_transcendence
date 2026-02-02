@@ -78,7 +78,7 @@ For production, the frontend API URL is handled by NGINX.
 | Login      | Name         | Role(s)                | Responsibilities |
 |------------|--------------|------------------------|------------------|
 | mhashir    | Malik Hashir | PO, PM, Frontend Lead  | Product vision, planning, frontend architecture, backend core logic |
-| aalkaisi   | Abdul Rehman | Scrum Master, Developer| Sprint coordination, gameplay logic, Pong & Connect 4, touch controls |
+| aalkaisi   | Abdulrahman | Scrum Master, Developer| Sprint coordination, gameplay logic, Pong & Connect 4, touch controls |
 | nmagdano   | Natalia      | Tech Lead, Developer   | Infrastructure, Docker, NGINX, database schema, persistence |
 | saherrer   | Santiago     | Tech Lead, Developer   | Tournament system, matchmaking, AI opponent, statistics |
 
@@ -93,7 +93,7 @@ For production, the frontend API URL is handled by NGINX.
 
 ### Scrum Master
 
-**Abdul Rehman**
+**Abdulrahman**
 
 * Sprint coordination
 * Gameplay task tracking
@@ -284,14 +284,14 @@ Relationships:
 * 4-player Pong (2v2, four paddles)
 * Touch controls
 * Pause / resume
-	**Owner:** Abdul Rehman
+	**Owner:** Abdulrahman
 
 ### Connect 4
 
 * Matchmaking
 * Turn indicators
 * Automatic win/draw detection
-	**Owner:** Abdul Rehman
+	**Owner:** Abdulrahman
 
 ### Tournament System
 
@@ -364,7 +364,7 @@ Relationships:
 * Backend foundation
 * Presence system
 
-### Abdul Rehman
+### Abdulrahman
 
 * Pong engines (2P, 4P)
 * Connect 4 logic
