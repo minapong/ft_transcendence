@@ -28,8 +28,6 @@ The project emphasizes real-time systems, game logic, clean architecture, and te
 ### Prerequisites
 
 - Docker & Docker Compose
-- Node.js ≥ 18
-- npm
 - Make
 - Google Chrome (latest stable)
 
