@@ -1,65 +1,35 @@
-# Features
+# Features List
 
-User-facing features you can demo in 30 seconds without opening code.
+Direct map of what we actually built. If it's here, it's testable.
 
 ---
 
 ## ✅ Implemented Features
 
-### Authentication & Accounts
-- **User signup** — Create an account with email, username, and password
-- **User login/logout** — Secure session with auto-redirect on expiry
-- **User profile page** — View your stats, achievements, and account info
+### 🛠️ Core Infrastructure
+- **Custom Frontend Framework (Reactor)** — JSX-based SPA framework with hook-based state/lifecycle management and deterministic rendering. (Owner: Malik)
+- **Global Modal System** — Framework-level modal infrastructure with accessibility focus and lifecycle isolation. (Owner: Malik)
+- **Infrastructure & DevOps** — Docker Compose, NGINX reverse proxy, and Prisma-backed migrations/seeding. (Owner: Natalia)
 
-### User Presence
-- **Online status indicator** — See who's online in real-time (green dot)
-- **Public profiles** — View other players' profiles and online status
+### 🔐 Authentication & Social
+- **Secure Authentication** — JWT sessions + Bcrypt hashing. Covers signup, login, and secure logout. (Owner: Natalia)
+- **Real-Time Presence** — WebSocket status stream; see who's online/offline instantly. (Owner: Natalia)
+- **Social & Friends System** — Handle friend requests, manage lists, and profile settings (including avatar uploads). (Owners: Natalia, Malik)
 
-### Profile & Social
-- **Avatar upload** — Upload and update your profile avatar
-- **Friend requests** — Send friend requests by username
-- **Friends list** — View pending requests and accepted friends
-- **Remove friends** — Cancel or remove existing friendships
+### 🕹️ Games & AI
+- **Pong Engine (2P, 4P, AI)** — Custom physics engine for classic 2P, 4P (2v2 Squads), and AI with multiple difficulty levels. (Owner: Abdul Rehman)
+- **Connect 4 & Matchmaking** — Turn-based logic with a real-time matchmaking queue. (Owners: Abdul Rehman, Santiago)
+- **Tournament System** — 4-8 player tournament management with auto-brackets and admin progression. (Owner: Santiago)
 
-### Pong Game
-- **Classic 2-player Pong** — Local multiplayer on same keyboard
-- **Single-player vs AI** — Play against AI with 3 difficulty levels (easy, medium, hard)
-- **4-player team Pong** — 2v2 mode with paddles on all 4 sides
-- **Touch controls** — On-screen buttons for mobile/tablet play
-- **Pause/resume** — Pause mid-game and continue later
-
-### Connect 4 Game
-- **Connect 4 with matchmaking** — Queue up and get matched with another player
-- **Turn indicator** — Visual cue for whose turn it is
-- **Win detection** — Automatic win/draw detection with overlay
-
-### Tournament System
-- **Tournament creation** (admin) — Create tournaments for 4 or 8 players
-- **Tournament registration** — Players can join open tournaments
-- **Bracket progression** — Automatic bracket generation and round advancement
-- **Tournament winner display** — Shows champion when tournament ends
-
-### Statistics & Leaderboard
-- **Global leaderboard** — Top 50 players ranked by wins
-- **Global match history** — Browse all recent matches with scores
-- **Personal stats** — Wins, losses, win rate, tournament championships
-- **Achievements system** — Unlockable achievements with progress tracking
-
-### Dashboard
-- **Global dashboard** — Combined view of leaderboard + recent matches
+### 📊 Competitive Systems
+- **Global Leaderboards & Stats** — Real-time rankings, match history, and win/loss analytics. (Owner: Santiago)
+- **Gamification & Achievements** — Persistent milestone tracking and badge unlocks. (Owner: Santiago)
 
 ---
 
-## 🚧 Partial / In Progress
+## 👋 Post-Evaluation / Planned
 
-- **3D graphics mode** — Babylon.js imported but not integrated
-
----
-
-## ❌ Not Implemented
-
-- Live chat between users
-- Game invites / notifications
-- OAuth login (Google/42)
-- Spectator mode
-- Remote multiplayer (online Pong)
+These were deprioritized to focus on code quality and engine stability:
+- **Live chat** (Using presence system instead)
+- **Game invites** (Using public matchmaking instead)
+- **OAuth** (Manual auth prioritized for security mastery)

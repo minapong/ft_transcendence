@@ -4,7 +4,6 @@ This project is designed to be fully compatible with all modern, standards-compl
 
 ### Supported Browsers
 - Google Chrome (latest)
-- Mozilla Firefox (latest)
 - Brave (latest)
 - Chromium-based browsers in general
 
@@ -14,20 +13,20 @@ Browser compatibility was an explicit design consideration throughout developmen
 
 - Only standardized Web APIs are used (Fetch, WebSockets, DOM, sessionStorage).
 - No Chrome-specific or experimental browser APIs are relied upon.
-- Reactor hooks and rendering logic were actively corrected to avoid lifecycle and re-render issues that typically surface in stricter browsers such as Firefox.
+- Reactor hooks and rendering logic were actively corrected to avoid lifecycle and re-render issues that typically surface in stricter browsers.
 - Navigation and routing rely on SPA-safe mechanisms instead of `window`-level hacks.
-- HTTPS is enforced, aligning with Firefox and Brave’s stricter security defaults.
+- HTTPS is enforced, aligning with Brave’s stricter security defaults.
 - Rendering, resize handling, and responsiveness were repeatedly validated and fixed across different viewport and device conditions.
 
 ### Practical Validation
 
-The application has been tested in Chrome and Firefox with equivalent behavior and performance.  
+The application has been tested in Chrome and Brave with equivalent behavior and performance.  
 Since Brave is Chromium-based and applies stricter privacy policies rather than divergent APIs, it is also fully compatible.
 
 
 ## ✅ Cross-Browser Compatibility Checklist
 
-This checklist summarizes the browser compatibility validation for Chrome, Firefox, and Brave.
+This table tracks what we actually tested and confirmed.
 
 | Area | Check | Status |
 |------|-------|--------|
