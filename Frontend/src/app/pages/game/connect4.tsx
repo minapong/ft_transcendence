@@ -1,4 +1,4 @@
-import { navigate, useEffect } from "Reactor";
+import { navigate, useEffect, openModal, closeModal } from "Reactor";
 import { connect4Logic } from "@/core/engine/connect4_logic";
 import { apiFetch } from "@/core/lib/api";
 import UserAvatar from "@/app/components/ui/UserAvatar";
@@ -21,8 +21,6 @@ export default function Connect4Game() {
   const { matchId, p1, p2 } = navState;
 
   useEffect(() => {
-    const overlay = document.getElementById("winnerOverlay")!;
-    const text = document.getElementById("winnerText")!;
     const turnIndicator = document.getElementById("turnIndicator")!;
     let winTimeout: number | null = null;
 
@@ -40,33 +38,40 @@ export default function Connect4Game() {
 
     const cleanup = connect4Logic(
       (winner) => {
-        // Show winner message
+        let payload: any = {
+          onNavigate: (dest: string) => {
+            closeModal();
+            navigate("/game/connect4_single", { replace: true });
+          }
+        };
+
         if (winner === "R") {
-          text.innerHTML = `
-            <div class="flex flex-col items-center gap-4">
-                <span class="icon-[solar--crown-bold] text-6xl text-yellow-500 animate-bounce"></span>
-                <span class="text-red-500 text-5xl font-black tracking-tighter drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] uppercase">${p1.name} WINS</span>
-            </div>
-          `;
+          payload = {
+            ...payload,
+            type: "win",
+            winnerName: p1.name,
+            winnerColor: "text-red-500",
+          };
           finishMatch(p1.id);
         } else if (winner === "Y") {
-          text.innerHTML = `
-            <div class="flex flex-col items-center gap-4">
-                <span class="icon-[solar--crown-bold] text-6xl text-yellow-500 animate-bounce"></span>
-                <span class="text-yellow-400 text-5xl font-black tracking-tighter drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] uppercase">${p2.name} WINS</span>
-            </div>
-          `;
+          payload = {
+            ...payload,
+            type: "win",
+            winnerName: p2.name,
+            winnerColor: "text-yellow-400",
+          };
           finishMatch(p2.id);
         } else {
-          text.innerHTML = '<span class="text-gray-400 text-5xl font-black tracking-widest uppercase">DRAW</span>';
+          payload = {
+            ...payload,
+            type: "draw",
+          };
         }
 
-        overlay.classList.remove("hidden");
-        overlay.classList.add("flex");
-
-        winTimeout = window.setTimeout(() => {
-          navigate("/game/connect4_single", { replace: true });
-        }, 3000);
+        openModal({
+          type: "game-winner",
+          payload: payload
+        });
       },
       (currentPlayer) => {
         // Update turn indicator color - logic handles classes
@@ -80,8 +85,8 @@ export default function Connect4Game() {
     );
 
     // Hide overlay on mount
-    overlay.classList.add("hidden");
-    overlay.classList.remove("flex");
+    // overlay.classList.add("hidden"); // Removed overlay ref usage
+    // overlay.classList.remove("flex");
 
     return () => {
       if (winTimeout !== null) {
@@ -210,22 +215,7 @@ export default function Connect4Game() {
         </button>
       </div>
 
-      {/* Winner Overlay - Cyberpunk Style */}
-      <div
-        id="winnerOverlay"
-        className="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex-col items-center justify-center animate-in fade-in duration-300"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent)] pointer-events-none" />
-        <div
-          id="winnerText"
-          className="relative z-10 p-12 text-center"
-        >
-          {/* Content injected via JS */}
-        </div>
-        <div className="mt-8 text-xs font-mono text-gray-500 tracking-[0.5em] animate-pulse">
-          REDIRECTING TO LOBBY
-        </div>
-      </div>
+
     </div>
   );
 }

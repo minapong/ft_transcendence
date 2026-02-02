@@ -128,17 +128,18 @@ export default function Pong4PGame() {
 				window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
 
 				openModal({
-					type: "pong-winner",
+					type: "game-winner",
 					payload: {
-						winner: teamName,
-						scoreP1: Number(scoreRedRef.current?.textContent || 0),
-						scoreP2: Number(scoreBlueRef.current?.textContent || 0),
+						type: "win",
+						winnerName: teamName,
+						winnerColor: winner === "red" ? "text-red-500" : "text-blue-500",
+						scoreLeft: Number(scoreRedRef.current?.textContent || 0),
+						scoreRight: Number(scoreBlueRef.current?.textContent || 0),
 						isTournament: false,
 						onNavigate: (dest) => {
 							closeModal();
 							navigate("/game/pre_match_scene", { replace: true });
 						},
-						preventClose: true
 					}
 				});
 			}

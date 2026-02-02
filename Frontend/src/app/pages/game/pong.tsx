@@ -151,7 +151,7 @@ export default function PongGame() {
             p2Name,
             (winner: string, scoreP1: number, scoreP2: number) => {
                 // Navigation handler for modal buttons
-                const handleNavigate = (destination: "tournament" | "home") => {
+                const handleNavigate = (destination: "tournament" | "home" | "retry") => {
                     closeModal();
                     if (destination === "tournament") {
                         navigate("/tournament/active", { replace: true });
@@ -165,14 +165,15 @@ export default function PongGame() {
 
                 // Show winner modal
                 openModal({
-                    type: "pong-winner",
+                    type: "game-winner",
                     payload: {
-                        winner,
-                        scoreP1,
-                        scoreP2,
+                        type: "win",
+                        winnerName: winner,
+                        winnerColor: "text-yellow-400",
+                        scoreLeft: scoreP1,
+                        scoreRight: scoreP2,
                         isTournament: matchId !== null,
                         onNavigate: handleNavigate,
-                        preventClose: true // Block closing by clicking outside because this is a critical game state
                     }
                 });
 
