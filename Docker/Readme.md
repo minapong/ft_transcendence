@@ -1,85 +1,44 @@
-# 🐳 ft_transcendence – Docker Setup
+# Docker Setup
 
-## 🧭 Overview
-This folder contains all **Docker configuration files** used to build and run the entire ft_transcendence project.  
-It ensures the app can be launched with **a single command** (`docker compose up`) and provides  
-a fully containerized environment with **HTTPS (TLS 1.2/1.3)** support.
+Docker Compose files for local development and production-like runs.
 
----
+## Files
 
-## 🧱 Base Responsibilities
-- Run **frontend + backend** together with one command.  
-- Include **SQLite database** persistence inside a volume.  
-- Configure **HTTPS (SSL/TLS)** for both frontend and backend.  
-- Manage environment variables securely through `.env` files.  
-- Auto-restart containers on crash or error.  
+- `Docker/docker-compose.yml` — base services (frontend + backend)
+- `Docker/docker-compose.dev.yml` — dev overrides (volumes, ports, env)
+- `docker-compose.prod.yml` — production images + nginx + TLS
+- `docker-compose.localprod.yml` — local prod with nginx on `8443`
+- `nginx/` — nginx configs and TLS assets
 
----
+## Common Commands
 
-## ⚙️ Folder Structure
+Development (build + run):
+
 ```bash
-docker/
-├── nginx/
-│   ├── nginx.conf          # Reverse proxy config for HTTPS
-│   ├── certs/              # SSL certificates (.pem / .key)
-│   └── Dockerfile          # NGINX Docker build
-│
-├── compose.yml             # Main Docker Compose file
-├── .env.example            # Example environment variables
-└── README.md
+make dev
 ```
 
----
+Development with seed:
 
-🔐 Environment Variables
+```bash
+make dev-seed
+```
 
-Example .env file (in project root):
+Production:
 
-# Docker configuration
-FRONTEND_PORT=443
-BACKEND_PORT=3000
+```bash
+make prod
+```
 
-# SSL certificates
-SSL_CERT_PATH=./docker/nginx/certs/cert.pem
-SSL_KEY_PATH=./docker/nginx/certs/key.pem
+Local production with seed:
 
+```bash
+make prod-seed
+```
 
----
+## Ports
 
-🚀 Launch Instructions
-
-To start all services:
-
-docker compose up --build
-
-To stop and remove all containers:
-
-docker compose down
-
-To rebuild everything clean:
-
-docker compose build --no-cache
-
-
----
-
-🌐 HTTPS & NGINX
-
-NGINX acts as the sole entry point to the system.
-
-All traffic is routed through port 443 using TLS v1.2/v1.3.
-
-It redirects http:// → https:// automatically.
-
-Backend (Fastify) and Frontend (Vite or React) communicate internally via Docker network.
-
-
-
----
-
-👤 Maintainer
-
-Natalia – Docker environment, NGINX proxy, SSL/TLS setup, and secure deployment.
-
-
----
+- Dev frontend: `5173`
+- Dev backend: `3000`
+- Prod nginx: `80` / `443`
+- Local-prod nginx: `8443` (TLS)

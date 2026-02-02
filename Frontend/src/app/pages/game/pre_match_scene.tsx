@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useEventListener } from "Reactor";
+import { useState, useEffect, useRef, useEventListener, openModal } from "Reactor";
 import { navigate } from "Reactor";
 import { animate } from "motion";
 import { IntentPresets } from "@/core/engine/match_intent";
@@ -184,7 +184,14 @@ export default function PreMatchScene() {
         };
       }
     } catch (e: any) {
-      alert(e.message);
+      openModal({
+        type: "alert",
+        payload: {
+          title: "Invalid Configuration",
+          message: e.message,
+          type: "error"
+        }
+      });
       return;
     }
 
@@ -209,7 +216,7 @@ export default function PreMatchScene() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [commit, index, intents.length]);
 
   if (isMobile) {
     return (
@@ -220,7 +227,6 @@ export default function PreMatchScene() {
         <div className="relative z-10 flex flex-col gap-4 p-4 pb-20 max-w-md mx-auto w-full mt-4">
           {intents.map((entry, i) => (
             <IntentCard
-              key={entry.state.type}
               intent={entry.state}
               isActive={i === index}
               onClick={() => setIndex(i)}

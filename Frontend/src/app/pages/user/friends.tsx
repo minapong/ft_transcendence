@@ -1,5 +1,5 @@
 import { apiFetch } from "@/core/lib/api";
-import { navigate, useEffect, useState } from "Reactor";
+import { navigate, useEffect, useState, openModal } from "Reactor";
 import { useAuth } from "@/core/lib/useAuth";
 import { vUsername } from "@/core/lib/input/validators";
 import { unwrap } from "@/core/lib/input/unwrap";
@@ -106,17 +106,26 @@ export default function FriendsPage() {
   }
 
   async function remove(userId: number) {
-    if (!confirm("Are you sure?")) return;
-
-    setMsg(null);
-    const res = await apiFetch(`/api/friends/${userId}`, { method: "DELETE" });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.ok === false) {
-      setMsg({ type: 'error', text: data.error || "Failed to remove" });
-      return;
-    }
-    setMsg({ type: 'success', text: "Removed successfully." });
-    reload();
+    openModal({
+      type: "confirm",
+      payload: {
+        title: "Remove Friend",
+        message: "Are you sure you want to remove this friend? This action cannot be undone.",
+        confirmText: "Remove",
+        type: "danger",
+        onConfirm: async () => {
+          setMsg(null);
+          const res = await apiFetch(`/api/friends/${userId}`, { method: "DELETE" });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || data.ok === false) {
+            setMsg({ type: 'error', text: data.error || "Failed to remove" });
+            return;
+          }
+          setMsg({ type: 'success', text: "Removed successfully." });
+          reload();
+        }
+      }
+    });
   }
 
   if (!token) return <div>Not logged in</div>;

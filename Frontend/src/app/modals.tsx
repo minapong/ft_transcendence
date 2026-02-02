@@ -34,6 +34,54 @@ registerModal<AlertPayload>("alert", (payload) => (
     </div>
 ));
 
+export type ConfirmPayload = {
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    type?: "danger" | "warning" | "info";
+};
+
+registerModal<ConfirmPayload>("confirm", (payload) => (
+    <div className="p-2">
+        <div className="flex items-center gap-4 mb-4">
+            <div className={`p-3 rounded-xl ${payload.type === 'danger' ? 'bg-red-500/10 text-red-500' :
+                payload.type === 'warning' ? 'bg-orange-500/10 text-orange-500' :
+                    'bg-blue-500/10 text-blue-500'
+                }`}>
+                {payload.type === 'danger' && <span className="icon-[solar--danger-triangle-linear] text-2xl" />}
+                {payload.type === 'warning' && <span className="icon-[solar--shield-warning-linear] text-2xl" />}
+                {(payload.type === 'info' || !payload.type) && <span className="icon-[solar--question-circle-linear] text-2xl" />}
+            </div>
+            <div>
+                <h2 className="text-xl font-bold text-slate-100">{payload.title}</h2>
+                <p className="text-slate-400 text-sm mt-1">{payload.message}</p>
+            </div>
+        </div>
+        <div className="flex justify-end gap-3 mt-6">
+            <button
+                onClick={closeModal}
+                className="px-6 py-2.5 bg-transparent hover:bg-white/5 text-slate-300 font-semibold rounded-xl transition-all border border-transparent hover:border-white/10"
+            >
+                {payload.cancelText || "Cancel"}
+            </button>
+            <button
+                onClick={() => {
+                    payload.onConfirm();
+                    closeModal();
+                }}
+                className={`px-6 py-2.5 font-semibold rounded-xl transition-all active:scale-95 shadow-lg ${payload.type === 'danger'
+                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/20'
+                    : 'bg-slate-100 hover:bg-white text-slate-900 shadow-white/10'
+                    }`}
+            >
+                {payload.confirmText || "Confirm"}
+            </button>
+        </div>
+    </div>
+));
+
 import WinnerModal, { type WinnerModalPayload } from "@/app/components/game/WinnerModal";
 export type { WinnerModalPayload };
 
