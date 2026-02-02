@@ -257,8 +257,6 @@ export default function App() {
 					<span>© 2026 FT_TRANSCENDENCE</span>
 				</footer>
 			</div>
-
-
 		</div>
 	);
 }

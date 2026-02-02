@@ -1,4 +1,4 @@
-import { useState, useEffect, navigate } from "Reactor"
+import { useState, useEffect, navigate, openModal } from "Reactor"
 import { getAuth } from "@/core/lib/auth"
 import { apiFetch } from "@/core/lib/api"
 import UserAvatar from "@/app/components/ui/UserAvatar"
@@ -33,14 +33,28 @@ export default function ActiveTournamentPage() {
   // Start Game
   function handleStartGame(match: any) {
     if (!currentUser) {
-      alert("Please login");
+      openModal({
+        type: "alert",
+        payload: {
+          title: "Authentication Required",
+          message: "Please login to start the game.",
+          type: "error"
+        }
+      });
       return;
     }
     const isPlayer =
       match.p1.id === currentUser.id || match.p2.id === currentUser.id;
 
     if (!isPlayer) {
-      alert("You are not a player in this match.");
+      openModal({
+        type: "alert",
+        payload: {
+          title: "Access Denied",
+          message: "You are not a participant in this match.",
+          type: "error"
+        }
+      });
       return;
     }
 
@@ -76,11 +90,25 @@ export default function ActiveTournamentPage() {
           // We could add a toast here, but for now relying on UI update
         }
       } else {
-        alert("Unable to advance round: " + (data?.error ?? "unknown error"));
+        openModal({
+          type: "alert",
+          payload: {
+            title: "Round Advance Failed",
+            message: "Unable to advance round: " + (data?.error ?? "unknown error"),
+            type: "error"
+          }
+        });
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to advance round");
+      openModal({
+        type: "alert",
+        payload: {
+          title: "System Error",
+          message: "Failed to advance round due to a network or server error.",
+          type: "error"
+        }
+      });
     } finally {
       setLoading(false);
     }
