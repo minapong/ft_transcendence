@@ -223,6 +223,8 @@ Simple, deterministic, and aligned with project constraints.
 
 Main tables:
 - `users`
+- `friends`
+- `avatars`
 - `matches`
 - `match_players`
 - `tournaments`
@@ -232,21 +234,11 @@ Main tables:
 Relationships:
 - Users ↔ Matches (many-to-many)
 - Tournaments ↔ Matches (one-to-many)
+- User ↔ StatsUser (one-to-one)
+- User ↔ Friend (one-to-one)
 
-Main tables:
-
-* `users`
-* `matches`
-* `match_players`
-* `tournaments`
-* `tournament_matches`
-* `stats_user`
-
-Relationships:
-
-* Users ↔ Matches (many-to-many)
-* Tournaments ↔ Matches (one-to-many)
-
+* Cascade deletes for ownership-bound entities
+* SetNull for historical references (winners, selected avatars)
 ---
 
 
