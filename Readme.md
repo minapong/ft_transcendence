@@ -45,7 +45,7 @@ make dev-seed
 Production:
 
 ```bash
-make prod
+make prod-seed 
 ```
 
 Local production + seed:

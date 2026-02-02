@@ -252,6 +252,41 @@ export default function PreMatchScene() {
     );
   }
 
+  if (isMobile) {
+    return (
+      <section className="relative h-[calc(100vh-var(--header-height))] w-full flex flex-col bg-black overflow-y-auto overflow-x-hidden">
+        {/* Background */}
+        <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#0B0F29] via-[#02040a] to-black" />
+
+        <div className="relative z-10 flex flex-col gap-4 p-4 pb-20 max-w-md mx-auto w-full mt-4">
+          {intents.map((entry, i) => (
+            <IntentCard
+              key={entry.state.type}
+              intent={entry.state}
+              isActive={i === index}
+              onClick={() => setIndex(i)}
+              href={entry.href}
+              mobile
+              updateSlot={(k, v) =>
+                entry.set({
+                  ...entry.state,
+                  slots: { ...entry.state.slots, [k]: v },
+                })
+              }
+              updateRuleset={(k, v) =>
+                entry.set({
+                  ...entry.state,
+                  ruleset: { ...entry.state.ruleset, [k]: v },
+                })
+              }
+              onCommit={commit}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       className="relative h-[calc(100vh-var(--header-height))] w-full flex flex-col justify-center overflow-hidden bg-black selection:bg-cyan-500/30 cursor-grab active:cursor-grabbing"
