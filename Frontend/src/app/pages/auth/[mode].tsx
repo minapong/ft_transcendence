@@ -83,14 +83,32 @@ export default function AuthPage() {
     const location = useLocation();
     const [uiError, setUiError] = useState<ValidationError | null>(null);
     const [loading, setLoading] = useState(false);
-    const [email, setEmail] = useState("");
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    // const [email, setEmail] = useState("");
+    // const [username, setUsername] = useState("");
+    // const [password, setPassword] = useState("");
     const [acceptedTerms, setAcceptedTerms] = useState(false);
 
 
     // Derive mode from routing (URL segments are the source of truth)
     const mode: AuthMode = location.split("/").filter(Boolean)[1] === "signup" ? "signup" : "login";
+
+    const emailRef = useRef<HTMLInputElement>(null);
+    const usernameRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
+
+    const draftRef = useRef({ email: "", username: "", password: "" });
+
+    const syncDraftFromDOM = () => {
+        draftRef.current.email = emailRef.current?.value || "";
+        draftRef.current.username = usernameRef.current?.value || "";
+        draftRef.current.password = passwordRef.current?.value || "";
+    };
+
+    const restoreDraftToDOM = () => {
+        if (emailRef.current) emailRef.current.value = draftRef.current.email;
+        if (usernameRef.current) usernameRef.current.value = draftRef.current.username;
+        if (passwordRef.current) passwordRef.current.value = draftRef.current.password;
+    };
 
     useEffect(() => {
         if (auth?.token) {
@@ -103,9 +121,12 @@ export default function AuthPage() {
         setUiError(null);
         setAcceptedTerms(false);
 
-        setEmail("");
-        setUsername("");
-        setPassword("");
+         draftRef.current = { email: "", username: "", password: "" };
+
+        // clear DOM inputs if they exist
+        if (emailRef.current) emailRef.current.value = "";
+        if (usernameRef.current) usernameRef.current.value = "";
+        if (passwordRef.current) passwordRef.current.value = "";
 
         // Defer focus until DOM + layout are settled
         requestAnimationFrame(() => {
@@ -115,21 +136,23 @@ export default function AuthPage() {
         });
     }, [mode]);
 
+        useEffect(() => {
+        requestAnimationFrame(() => restoreDraftToDOM());
+    }, [acceptedTerms, loading, uiError, mode]);
     // Superset refs
-    const emailRef = useRef<HTMLInputElement>(null);
-    const usernameRef = useRef<HTMLInputElement>(null);
-    const passwordRef = useRef<HTMLInputElement>(null);
 
     // Single submit pipeline
     const handleSubmit = async (e: any) => {
         e?.preventDefault?.();
         if (loading) return;
 
+        syncDraftFromDOM();
+
         //capture data immediately BEFORE any state-triggered re-renders
         const raw: AuthForm = {
-                email,
-                password,
-                username,
+            email: emailRef.current?.value || "",
+            password: passwordRef.current?.value || "",
+            username: usernameRef.current?.value || "",
         };
 
         // Now clear errors and proceed
@@ -161,7 +184,7 @@ export default function AuthPage() {
                 setUiError({ field: "general", message: resData.error || `${mode} failed` });
                 return;
             }
-
+            draftRef.current = { email: "", username: "", password: "" };
             setAuth(resData);
             connectPresenceWS();
             console.log("[AuthPage] Login successful, waiting for useEffect redirect...");
@@ -246,8 +269,9 @@ export default function AuthPage() {
                                 placeholder="name@example.com"
                                 type="email"
                                 autoComplete="email"
-                                value={email}
-                                onInput={(e: any) => setEmail(e?.target?.value ?? "")}
+                                onInput={() => {
+                                    draftRef.current.email = emailRef.current?.value || "";
+                                }}
                                 error={uiError?.field === "email" ? uiError.message : undefined}
                                 autoFocus
                                 disabled={loading}
@@ -261,8 +285,9 @@ export default function AuthPage() {
                                     label="Username (minimum 3 symbols)"
                                     placeholder="Choose a username"
                                     autoComplete="username"
-                                    value={username}
-                                    onInput={(e: any) => setUsername(e?.target?.value ?? "")}
+                                    onInput={() => {
+                                        draftRef.current.username = usernameRef.current?.value || "";
+                                    }}
                                     error={uiError?.field === "username" ? uiError.message : undefined}
                                     disabled={loading}
                                 />
@@ -276,8 +301,9 @@ export default function AuthPage() {
                                 type="password"
                                 placeholder="••••••••"
                                 autoComplete={mode === "login" ? "current-password" : "new-password"}
-                                value={password}
-                                onInput={(e: any) => setPassword(e?.target?.value ?? "")}
+                                onInput={() => {
+                                 draftRef.current.password = passwordRef.current?.value || "";
+                                }}
                                 error={uiError?.field === "password" ? uiError.message : undefined}
                                 disabled={loading}
                             />
@@ -288,7 +314,9 @@ export default function AuthPage() {
                                     type="checkbox"
                                     checked={acceptedTerms}
                                     disabled={loading}
-                                    onChange={(e: any) => {
+                                   onChange={(e: any) => {
+                                    // snapshot values before this rerender
+                                    syncDraftFromDOM();
                                     setAcceptedTerms(!!e?.target?.checked);
                                     if (uiError?.field === "terms") setUiError(null);
                                     }}
@@ -300,7 +328,11 @@ export default function AuthPage() {
                                     <button
                                     type="button"
                                     disabled={loading}
-                                    onClick={() => navigate("/terms_of_service")}
+                                   onClick={() => {
+                                    // snapshot before leaving
+                                    syncDraftFromDOM();
+                                    navigate("/terms_of_service");
+                                    }}
                                     className="underline underline-offset-2 text-white/80 hover:text-white"
                                     >
                                     Terms of Service
