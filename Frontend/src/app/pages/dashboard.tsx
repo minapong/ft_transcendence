@@ -34,7 +34,6 @@ export default function Dashboard() {
         setError(json.error || "API error");
       }
     } catch (err: any) {
-      console.error("Leaderboard failed:", err);
       setError("Failed to load leaderboard");
     }
   };
@@ -58,7 +57,6 @@ export default function Dashboard() {
         setError(json.error || "API error");
       }
     } catch (err: any) {
-      console.error("History failed:", err);
       setError("Failed to load match history");
     } finally {
       setLoading(false);

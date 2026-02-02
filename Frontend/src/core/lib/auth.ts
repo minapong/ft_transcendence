@@ -25,7 +25,7 @@ export function clearAuth() {
 }
 
 export async function logout() {
-  await navigate("/auth/login", { replace: true });       // redirect FIRST to hide state change
-  disconnectPresenceWS();   // tell backend you’re gone
+  await navigate("/auth/login", { replace: true, state: { logout: true } });       // redirect FIRST to hide state change
+  disconnectPresenceWS();
   clearAuth();              // update local state + UI
 }

@@ -69,7 +69,6 @@ export default function Connect4Single() {
           setStatus("idle");
         }
       } catch (err) {
-        console.error("[poll] error:", err);
         setMatch(null);
         setStatus("idle");
       }
@@ -139,7 +138,6 @@ export default function Connect4Single() {
         },
       });
     } catch (err) {
-      console.error("[startGame] fetch error:", err);
     }
   }
 

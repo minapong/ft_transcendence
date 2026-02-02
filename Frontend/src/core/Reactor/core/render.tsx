@@ -46,7 +46,6 @@ export function renderRoute(triggerKey?: string) {
     }
 
     if (!component) {
-      console.error("🧭 Route resolved to null component for path:", normalizedPath);
       return;
     }
 
@@ -55,7 +54,6 @@ export function renderRoute(triggerKey?: string) {
         try {
           return component(params);
         } catch (err) {
-          console.error("🧭 Page render error:", err);
           const errorBox = document.createElement("div");
           errorBox.innerHTML = `<div style="padding: 2rem; color: #f87171; background: #7f1d1d22; border: 1px solid #7f1d1d44; border-radius: 0.5rem; margin: 2rem;">
                     <h2 style="font-weight: bold; margin-bottom: 0.5rem;">Render Error</h2>
@@ -206,7 +204,6 @@ export async function navigate(path: string, opts?: { replace?: boolean; trigger
     renderRoute(opts?.triggerLayout ? LAYOUT_KEY : undefined);
     await endTransition();
   } catch (err) {
-    console.error("🧭 Navigation failed:", err);
     renderRoute();
   } finally {
     isTransitioning = false;
