@@ -210,21 +210,27 @@ export default function PongGame() {
     });
 
     return (
-        <div className="bg-gray-900 flex flex-col items-center justify-center min-h-screen px-2">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 overflow-hidden relative">
+            {/* Ambient Background Glow */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[var(--color-accent)]/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[var(--color-accent-soft)]/5 rounded-full blur-[120px]" />
+            </div>
 
             {/* Scoreboard */}
             <div className="
             flex items-center justify-between
             w-full max-w-[320px] sm:max-w-[500px] lg:max-w-[800px]
-            px-4 py-2
-            rounded-full
-            bg-gradient-to-b from-white/10 to-white/5
-            backdrop-blur-sm
-            shadow-md shadow-black/40
-            text-slate-100
-            text-sm sm:text-base lg:text-lg
-            font-semibold
-            mb-4
+            px-6 py-3
+            rounded-2xl
+            panel-surface
+            backdrop-blur-md
+            border border-[var(--color-border-soft)]
+            text-[var(--color-primary)]
+            max-sm:text-sm text-base lg:text-xl
+            font-mono tracking-widest font-bold
+            mb-6
+            relative z-10
             ">
 
                 <span ref={scoreLeftRef} className="flex-1 text-left">
@@ -242,46 +248,50 @@ export default function PongGame() {
             <div className="relative flex items-center justify-center overflow-visible">
 
                 {/* LEFT TOUCH CONTROLS */}
-                <div className="absolute -left-15 sm:-left-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
+                <div className="absolute -left-16 sm:-left-24 top-1/2 -translate-y-1/2 flex flex-col gap-3 lg:gap-4 z-20">
                     <button
                         onPointerDown={() => { inputRef.current.w = true; }}
                         onPointerUp={() => { inputRef.current.w = false; }}
                         onPointerLeave={() => { inputRef.current.w = false; }}
                         id="left-up"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                        className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center glass-pill border border-[var(--color-border-soft)] text-[var(--color-primary)] text-xl sm:text-2xl hover:bg-white/10 active:scale-95 transition-all rounded-full relative"
                     >
-                        ▲
+                        <span className="icon-[solar--arrow-up-linear]" />
+                        <span className="absolute bottom-1 right-2 text-[10px] font-mono opacity-50 font-bold">W</span>
                     </button>
                     <button
                         onPointerDown={() => { inputRef.current.s = true; }}
                         onPointerUp={() => { inputRef.current.s = false; }}
                         onPointerLeave={() => { inputRef.current.s = false; }}
                         id="left-down"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                        className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center glass-pill border border-[var(--color-border-soft)] text-[var(--color-primary)] text-xl sm:text-2xl hover:bg-white/10 active:scale-95 transition-all rounded-full relative"
                     >
-                        ▼
+                        <span className="icon-[solar--arrow-down-linear]" />
+                        <span className="absolute bottom-1 right-2 text-[10px] font-mono opacity-50 font-bold">S</span>
                     </button>
                 </div>
 
                 {/* RIGHT TOUCH CONTROLS */}
-                <div className="absolute -right-15 sm:-right-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
+                <div className="absolute -right-16 sm:-right-24 top-1/2 -translate-y-1/2 flex flex-col gap-3 lg:gap-4 z-20">
                     <button
                         onPointerDown={() => { inputRef.current.up = true; }}
                         onPointerUp={() => { inputRef.current.up = false; }}
                         onPointerLeave={() => { inputRef.current.up = false; }}
                         id="right-up"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                        className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center glass-pill border border-[var(--color-border-soft)] text-[var(--color-primary)] text-xl sm:text-2xl hover:bg-white/10 active:scale-95 transition-all rounded-full relative"
                     >
-                        ▲
+                        <span className="icon-[solar--arrow-up-linear]" />
+                        <span className="absolute bottom-1 right-2 text-[10px] sm:text-lg font-mono opacity-50 font-bold scale-75">↑</span>
                     </button>
                     <button
                         onPointerDown={() => { inputRef.current.down = true; }}
                         onPointerUp={() => { inputRef.current.down = false; }}
                         onPointerLeave={() => { inputRef.current.down = false; }}
                         id="right-down"
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
+                        className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center glass-pill border border-[var(--color-border-soft)] text-[var(--color-primary)] text-xl sm:text-2xl hover:bg-white/10 active:scale-95 transition-all rounded-full relative"
                     >
-                        ▼
+                        <span className="icon-[solar--arrow-down-linear]" />
+                        <span className="absolute bottom-1 right-2 text-[10px] sm:text-lg font-mono opacity-50 font-bold scale-75">↓</span>
                     </button>
                 </div>
 
@@ -289,18 +299,20 @@ export default function PongGame() {
                 <div
                     id="game_board"
                     className="
-                    bg-[#1e293b]
-                    border-4 sm:border-6 lg:border-8 border-[#475569]
-                    rounded-lg relative
+                    bg-black/40
+                    border-4 border-[var(--color-border-strong)]
+                    rounded-xl relative
                     w-[320px] h-[200px]
                     sm:w-[400px] sm:h-[280px]
                     lg:w-[600px] lg:h-[380px]
                     xl:w-[800px] xl:h-[500px]
+                    backdrop-blur-sm
+                    z-10
                 "
                     style={{
                         boxShadow: `
-                    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-                    0 8px 30px rgba(0, 0, 0, 0.6)
+                    0 0 40px -10px var(--color-accent-soft),
+                    inset 0 0 20px rgba(0,0,0,0.5)
                     `,
                     }}
                 >
@@ -312,11 +324,11 @@ export default function PongGame() {
                         ref={leftPaddleRef}
                         id="left_p"
                         className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
-                            w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[#f8fafc]"
+                            w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[var(--color-primary)] rounded-full"
                         style={{
                             boxShadow: `
-                    inset 0 0 0 1px rgba(0, 0, 0, 0.12),
-                    0 0 8px rgba(56, 189, 248, 0.25)
+                    0 0 15px var(--color-accent),
+                    0 0 5px var(--color-primary)
                     `,
                         }}
                     />
@@ -328,11 +340,11 @@ export default function PongGame() {
                         ref={rightPaddleRef}
                         id="right_p"
                         className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
-                            w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-white"
+                            w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[var(--color-primary)] rounded-full"
                         style={{
                             boxShadow: `
-                    inset 0 0 0 1px rgba(0, 0, 0, 0.12),
-                    0 0 8px rgba(56, 189, 248, 0.25)
+                    0 0 15px var(--color-accent),
+                    0 0 5px var(--color-primary)
                     `,
                         }}
                     />
@@ -348,13 +360,11 @@ export default function PongGame() {
 							top-1/2 left-1/2"
                         style={{
                             boxShadow: `
-							0 0 10px 2px rgba(0, 255, 255, 0.8),
-							0 0 20px 4px rgba(0, 255, 255, 0.5),
-							0 0 30px 6px rgba(0, 255, 255, 0.3),
-							0 0 40px 8px rgba(0, 255, 255, 0.15),
-							inset 0 0 5px rgba(0, 255, 255, 0.6)
+							0 0 10px 2px var(--color-accent),
+							0 0 20px 4px var(--color-accent),
+                             inset 0 0 4px var(--color-primary)
 						`,
-                            filter: 'brightness(1.2) blur(0.3px)',
+                            filter: 'brightness(1.5)',
                             transition: 'transform 0.05s linear'
                         }}
                     />
@@ -367,13 +377,15 @@ export default function PongGame() {
                 ref={pauseBtnRef}
                 id="pauseBtn"
                 className="
-					mt-3 sm:mt-4 
-					px-3 sm:px-4 py-1.5 sm:py-2 
-					bg-yellow-500 text-black font-bold rounded 
-					hover:bg-yellow-400 text-sm sm:text-base
+					mt-6
+					btn btn-secondary
+                    glass-pill
+                    border border-[var(--color-border-soft)]
+                    hover:border-[var(--color-accent)]
 				"
             >
-                ⏸️ Pause
+                <span className="icon-[solar--pause-bold]" />
+                <span className="tracking-wider">PAUSE GAME</span>
             </button>
         </div>
     );

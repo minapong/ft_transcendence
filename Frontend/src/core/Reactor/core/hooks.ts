@@ -226,10 +226,14 @@ export function useEventListener<T extends Event>(
 		savedHandler.current = handler;
 	}, [handler]);
 
+	const elementKey = (element && typeof element === "object" && "current" in element)
+		? (element as { current: any }).current
+		: element;
+
 	useEffect(() => {
 		// Define the listening target
-		const targetElement: EventTarget | null = (element && 'current' in element)
-			? element.current
+		const targetElement: EventTarget | null = (element && typeof element === "object" && "current" in element)
+			? (element as { current: any }).current
 			: (element as EventTarget);
 
 		if (!(targetElement && targetElement.addEventListener)) {
@@ -249,7 +253,7 @@ export function useEventListener<T extends Event>(
 		return () => {
 			targetElement.removeEventListener(eventName, eventListener);
 		};
-	}, [eventName, element]); // Effect re-runs if ref object changes (unlikely) or eventName changes. Ref.current is read on mount/update.
+	}, [eventName, elementKey]); // Rebind if event name or resolved element changes.
 }
 
 function depsChanged(prev: any[] | undefined, next: any[]) {

@@ -118,7 +118,7 @@ export function resolvePage(routes: RouteMap, rawPath: string) {
       const el = document.createElement("div");
       el.innerHTML = `<div style="padding: 40px; text-align: center; color: white;">
         <h1>404</h1>
-        <p>Route not found and no NotFound page de   fined.</p>
+        <p>Route not found and no NotFound page defined.</p>
         <a href="/" style="color: cyan;">Return Home</a>
       </div>`;
       return el;

@@ -11,7 +11,7 @@ A custom hook that subscribes to URL changes and returns the current pathname. A
 #### Usage
 
 ```tsx
-import { useLocation } from "Reactor/router/useLocation";
+import { useLocation } from "Reactor";
 
 export default function MyComponent() {
   const pathname = useLocation();
@@ -42,7 +42,7 @@ When either event fires, the component re-renders with the new pathname.
 #### Example: Responsive Layout with useLocation
 
 ```tsx
-import { useLocation } from "Reactor/router/useLocation";
+import { useLocation } from "Reactor";
 
 export default function RootLayout({ children }) {
   const pathname = useLocation();
@@ -68,7 +68,7 @@ The layout automatically updates when navigating between game routes and normal 
 
 ### `navigate(path, options?)`
 
-Programmatically navigate to a new page. Available in `Reactor/render.tsx`.
+Programmatically navigate to a new page. Available via the Reactor core render module.
 
 #### Parameters
 
@@ -86,7 +86,7 @@ navigate(
 #### Usage
 
 ```tsx
-import { navigate } from "Reactor/render";
+import { navigate } from "Reactor";
 
 export default function LoginForm() {
   const handleLogin = () => {
@@ -207,7 +207,7 @@ useEffect(() => {
 ## Advanced: Custom Route Detection
 
 ```tsx
-import { useLocation } from "Reactor/router/useLocation";
+import { useLocation } from "Reactor";
 
 export default function Header() {
   const pathname = useLocation();

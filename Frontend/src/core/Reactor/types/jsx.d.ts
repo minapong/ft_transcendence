@@ -3,12 +3,12 @@ declare namespace JSX {
 	interface IntrinsicElements {
 		[elemName: string]: any;
 	}
-	interface Element extends HTMLElement { }
+	type Element = HTMLElement | DocumentFragment;
 }
 
 // Module declarations for Reactor imports
 declare module "Reactor" {
-	export function createReactor(type: any, props: any, ...children: any[]): HTMLElement;
+	export function createReactor(type: any, props: any, ...children: any[]): HTMLElement | DocumentFragment | Node;
 	export function Fragment(props: { children?: any }): DocumentFragment;
 	export function useState<T>(initial: T): [T, (v: T | ((prev: T) => T)) => void];
 	export function useEffect(cb: () => void | (() => void), deps?: any[]): void;
@@ -20,11 +20,11 @@ declare module "Reactor" {
 	export function navigate(path: string, opts?: { replace?: boolean; triggerLayout?: boolean; state?: any }): void;
 	export function initRouter(): void;
 	export function renderRoute(triggerKey?: string): void;
-	export function resetHooks(key: string, opts?: { track?: boolean }): void;
-	export function useEventListener<T extends Event>(eventName: string, handler: (event: T) => void, element?: EventTarget): void;
+	export function resetHooks(key?: string, opts?: { track?: boolean }): void;
+	export function useEventListener<T extends Event>(eventName: string, handler: (event: T) => void, element?: EventTarget | { current: any }): void;
 
 	// Modal functions
-	export type ModalRenderer<T = unknown> = (payload: T) => HTMLElement;
+	export type ModalRenderer<T = unknown> = (payload: T) => HTMLElement | DocumentFragment;
 	export type ModalDescriptor<T = unknown> = {
 		type: string;
 		payload?: T;
@@ -38,4 +38,3 @@ declare module "Reactor" {
 	export function getCurrentModal(): ModalDescriptor | null;
 	export function resolveModalRenderer(modal: ModalDescriptor | null): ModalRenderer<any> | null;
 }
-

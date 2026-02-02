@@ -1,4 +1,4 @@
-import { useState, useEventListener } from "Reactor";
+import { useState, useEventListener } from "../../core/hooks";
 
 /**
  * useLocation Hook

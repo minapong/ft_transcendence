@@ -1,6 +1,6 @@
 import SidebarLink from "@/app/components/ui/SidebarLink"
 import { navigate, useEffect, useRef, useState, useCallback, useEventListener } from "Reactor"
-import { useLocation } from "Reactor/router/useLocation"
+import { useLocation } from "Reactor/features/router"
 import { animate, stagger } from "motion"
 
 const links = [

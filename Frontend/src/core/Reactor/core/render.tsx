@@ -1,7 +1,8 @@
 import rootLayout from "@/app/components/layout/RootLayout";
 import { resetHooks, flushEffects, runPendingRefs, cleanupContext } from "./hooks";
-import { getRoutes, resolvePage, isSpecialLayout } from "./router/routes";
-import { startTransition, endTransition } from "./router/transition";
+import { getRoutes, resolvePage, isSpecialLayout } from "../features/router/routes";
+import { startTransition, endTransition } from "../features/router/transition";
+import { setModalRerender } from "../features/modal/modal";
 
 // Shared key so layout-level state (including modals) can trigger a shell re-render.
 export const LAYOUT_KEY = "__layout__";
@@ -79,29 +80,38 @@ export function initRouter() {
 
   document.addEventListener("click", (e) => {
     if (e.defaultPrevented) return;
+    if (e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const link = (e.target as HTMLElement).closest("a");
-    if (link && link.getAttribute("href")?.startsWith("/") && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      navigate(link.getAttribute("href")!);
-    }
+    if (!link) return;
+    if (link.hasAttribute("download")) return;
+    if (link.getAttribute("target") === "_blank") return;
+    if (link.hasAttribute("data-no-router")) return;
+    const href = link.getAttribute("href");
+    if (!href || !href.startsWith("/")) return;
+    e.preventDefault();
+    navigate(href);
   });
 
   window.addEventListener("popstate", async () => {
     // Browser has already changed URL. Sync app state.
     const target = normalizePath(window.location.pathname);
 
-    // Notify reactive components (sidebar, header) that URL changed
-    window.dispatchEvent(new Event("routechange"));
-
     transitioningTarget = target;
     isTransitioning = true;
 
     try {
+      // 1. Start Animation FIRST so the user sees the bar moving before content swaps
       await startTransition({
         direction: "backward",
         weight: isHeavyRoute(target) ? "heavy" : "normal"
       });
 
+      // 2. NOW notify reactive components (sidebar, header) to update their active states
+      // This is crucial: useLocation listeners will now fire AFTER the bar has started covering things
+      window.dispatchEvent(new Event("routechange"));
+
+      // 3. Render content
       renderRoute();
       await endTransition();
     } catch (err) {
@@ -214,3 +224,6 @@ function isHeavyRoute(path: string): boolean {
   const p = normalizePath(path);
   return p.startsWith("/game") || p.startsWith("/tournament");
 }
+
+// Wire modal updates into the render pipeline without creating import cycles.
+setModalRerender((triggerKey?: string) => renderRoute(triggerKey));

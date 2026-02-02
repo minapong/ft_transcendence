@@ -230,10 +230,9 @@ export default function ActiveTournamentPage() {
                           {isParticipant ? (
                             <button
                               onClick={() => handleStartGame(match)}
-                              className="btn-hero btn-lg group/btn overflow-hidden relative"
+                              className="btn-cyber btn-lg"
                             >
-                              <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover/btn:translate-y-0 transition-transform duration-300" />
-                              <span className="icon-[solar--gamepad-bold] mr-2 text-xl" />
+                              <span className="icon-[solar--gamepad-bold] mr-2 text-xl icon" />
                               Start Match
                             </button>
                           ) : (
@@ -295,10 +294,10 @@ export default function ActiveTournamentPage() {
                   <p className="text-sm font-mono text-emerald-400/70 uppercase tracking-widest">Next Stage Ready</p>
                   <button
                     onClick={handleAdvanceRound}
-                    className="group relative px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xl rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] active:scale-95"
+                    className="btn-cyber w-full py-4 text-xl"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="icon-[solar--double-alt-arrow-right-bold-duotone] text-2xl group-hover:translate-x-1 transition-transform" />
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="icon-[solar--double-alt-arrow-right-bold-duotone] text-2xl icon" />
                       ADVANCE ROUND
                     </div>
                   </button>

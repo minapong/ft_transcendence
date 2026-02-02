@@ -7,7 +7,7 @@ export function useAuth() {
   const [auth, setAuth] = useState(getAuth());
 
   useEffect(() => {
-    
+
     const sync = () => setAuth(getAuth());
 
     //if auth changed while this route was away, catch up now
@@ -17,7 +17,7 @@ export function useAuth() {
     window.addEventListener(AUTH_EVENT, sync);
 
     // fires for other tabs changing localStorage
-    window.addEventListener("storage",sync);
+    window.addEventListener("storage", sync);
 
     return () => {
       window.removeEventListener(AUTH_EVENT, sync);
@@ -25,5 +25,5 @@ export function useAuth() {
     };
   }, []);
 
-  return auth; 
+  return auth;
 }

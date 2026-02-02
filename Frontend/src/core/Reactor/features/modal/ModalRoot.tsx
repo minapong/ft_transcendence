@@ -1,5 +1,5 @@
 import { closeModal, getCurrentModal, resolveModalRenderer } from "./modal";
-import { useEffect, useRef, useEventListener } from "./hooks";
+import { useEffect, useRef, useEventListener } from "../../core/hooks";
 import type { ModalDescriptor } from "./modal";
 
 const FOCUSABLE_SELECTOR = [
