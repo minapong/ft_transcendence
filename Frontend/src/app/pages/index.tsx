@@ -230,7 +230,13 @@ export default function App() {
 						<Button
 							variant="secondary"
 							size="lg"
-							href="/game/pre_match_scene"
+							onClick={() => navigate("/game/pong", {
+								state: {
+									mode: "ai",
+									p1: "Player 1",
+									difficulty: "medium"
+								}
+							})}
 							className="w-full sm:w-64"
 						>
 							Quick Play
