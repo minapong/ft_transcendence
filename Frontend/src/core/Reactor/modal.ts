@@ -25,6 +25,7 @@ export function openModal<T>(modal: ModalDescriptor<T>) {
     console.warn(`[modal] Missing renderer for type "${modal.type}"`);
   }
   requestRerender(LAYOUT_KEY);
+  window.dispatchEvent(new Event("pong:pause"));
 }
 
 export function closeModal() {

@@ -47,7 +47,7 @@ export default function ModalRoot() {
       panel;
     preferred?.focus();
 
-    window.dispatchEvent(new CustomEvent("game-pause"));
+    // window.dispatchEvent(new CustomEvent("game-pause")); // Removed legacy dispatch
 
     // Removed direct listener attachment here
 
@@ -66,7 +66,9 @@ export default function ModalRoot() {
 
     if (event.key === "Escape") {
       event.preventDefault();
-      closeModal();
+      if (!(modal.payload as any)?.preventClose) {
+        closeModal();
+      }
       return;
     }
     if (event.key !== "Tab") return;
@@ -104,9 +106,15 @@ export default function ModalRoot() {
     ? renderer({ ...((modal!.payload ?? {}) as any), close: closeModal })
     : renderFallback(modal!);
 
+  const handleBackdropClick = () => {
+    if (!(modal!.payload as any)?.preventClose) {
+      closeModal();
+    }
+  };
+
   return (
     <div id="modal-root" className={layerClass} role="presentation">
-      <div className="modal-backdrop" onClick={closeModal}></div>
+      <div className="modal-backdrop" onClick={handleBackdropClick}></div>
       <div
         className={`relative z-50 transform transition-all w-full p-4 md:p-6 flex items-center justify-center group ${modal.className || "max-w-lg"}`}
         onClick={(e) => e.stopPropagation()}

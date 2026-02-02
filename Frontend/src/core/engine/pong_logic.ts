@@ -243,7 +243,12 @@ export function pongLogic(
 		}
 	};
 
+	const blurHandler = () => {
+		window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
+	};
+
 	window.addEventListener(GAME_PAUSE_EVENT, pauseHandler);
+	window.addEventListener("blur", blurHandler);
 
 	const toggleHandler = () => {
 		if (isPaused) {
@@ -263,7 +268,6 @@ export function pongLogic(
 	let animationId: number | null = null;
 
 	function moveBall() {
-		console.log("moveBall in ",gameEnded)
 		if (gameEnded || isPaused) return;
 		x += dx;
 		y += dy;
@@ -395,7 +399,7 @@ export function pongLogic(
 		if (resetTimeout !== null) clearTimeout(resetTimeout);
 
 		if (aiPlayer) aiPlayer.stop(simulateKeyPress);
-		window.removeEventListener("resize", resizeHandler);
+		// Listeners are removed in the return cleanup function now
 
 		onWin(winner, scoreP1, scoreP2);
 		console.log("gameEnded in showWinner")
@@ -415,6 +419,7 @@ export function pongLogic(
 
 		window.removeEventListener("resize", resizeHandler);
 		window.removeEventListener(GAME_PAUSE_EVENT, pauseHandler);
+		window.removeEventListener("blur", blurHandler);
 		// No event listeners to remove here anymore!
 		pause.removeEventListener('click', toggleHandler);
 	};

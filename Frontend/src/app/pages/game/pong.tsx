@@ -1,5 +1,5 @@
-import { pongLogic } from "@/core/engine/pong_logic";
-import { navigate, useEffect, useRef, useLocation, openModal, closeModal, useEventListener } from "Reactor";
+import { pongLogic, GAME_PAUSE_EVENT } from "@/core/engine/pong_logic";
+import { navigate, useEffect, useRef, useLocation, openModal, closeModal } from "Reactor";
 import { apiFetch } from "@/core/lib/api";
 
 // Define types for navigation state
@@ -36,11 +36,6 @@ export default function PongGame() {
     const leftPaddleRef = useRef<HTMLDivElement>(null);
     const rightPaddleRef = useRef<HTMLDivElement>(null);
     const pauseBtnRef = useRef<HTMLButtonElement>(null);
-    const leftUpBtnRef = useRef<HTMLButtonElement | null>(null);
-    const leftDownBtnRef = useRef<HTMLButtonElement | null>(null);
-    const rightUpBtnRef = useRef<HTMLButtonElement | null>(null);
-    const rightDownBtnRef = useRef<HTMLButtonElement | null>(null);
-
     const scoreLeftRef = useRef<HTMLSpanElement>(null);
     const scoreRightRef = useRef<HTMLSpanElement>(null);
 
@@ -87,51 +82,61 @@ export default function PongGame() {
     // Update ref directly. No re-renders needed for input updates (Game Loop reads ref).
 
     // KeyDown Handler
-    useEventListener("keydown", (e: KeyboardEvent) => {
-        if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
+    // Native Event Listeners for Keyboard
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
 
-        if (e.key === "w") inputRef.current.w = true;
-        if (e.key === "s") inputRef.current.s = true;
-        if (e.key === "ArrowUp") inputRef.current.up = true;
-        if (e.key === "ArrowDown") inputRef.current.down = true;
+            if (e.key === "w") inputRef.current.w = true;
+            if (e.key === "s") inputRef.current.s = true;
+            if (e.key === "ArrowUp") inputRef.current.up = true;
+            if (e.key === "ArrowDown") inputRef.current.down = true;
 
-        // Prevent scrolling with arrows
-        if (["ArrowUp", "ArrowDown", " "].includes(e.key)) {
-            e.preventDefault();
-        }
-    });
+            // Prevent scrolling
+            if (["ArrowUp", "ArrowDown", " "].includes(e.key)) {
+                e.preventDefault();
+            }
+        };
 
-    // KeyUp Handler
-    useEventListener("keyup", (e: KeyboardEvent) => {
-        if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (useAI && (e.key === "ArrowUp" || e.key === "ArrowDown") && e.isTrusted) return;
 
-        if (e.key === "w") inputRef.current.w = false;
-        if (e.key === "s") inputRef.current.s = false;
-        if (e.key === "ArrowUp") inputRef.current.up = false;
-        if (e.key === "ArrowDown") inputRef.current.down = false;
-    });
+            if (e.key === "w") inputRef.current.w = false;
+            if (e.key === "s") inputRef.current.s = false;
+            if (e.key === "ArrowUp") inputRef.current.up = false;
+            if (e.key === "ArrowDown") inputRef.current.down = false;
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+        };
+    }, [useAI]);
 
 
 
     // --- INPUT HANDLING for Touch Controls ---
-    useEventListener("pointerdown", () => { inputRef.current.w = true; }, leftUpBtnRef as any);
-    useEventListener("pointerup", () => { inputRef.current.w = false; }, leftUpBtnRef as any);
+    // Handled via onPointerDown/Up props on buttons
 
-    useEventListener("pointerdown", () => { inputRef.current.s = true; }, leftDownBtnRef as any);
-    useEventListener("pointerup", () => { inputRef.current.s = false; }, leftDownBtnRef as any);
 
-    useEventListener("pointerdown", () => { inputRef.current.up = true; }, rightUpBtnRef as any);
-    useEventListener("pointerup", () => { inputRef.current.up = false; }, rightUpBtnRef as any);
-
-    useEventListener("pointerdown", () => { inputRef.current.down = true; }, rightDownBtnRef as any);
-    useEventListener("pointerup", () => { inputRef.current.down = false; }, rightDownBtnRef as any);
+    const gameInitialized = useRef(false);
 
     useEffect(() => {
+        // Guard: Prevent double-initialization
+        if (gameInitialized.current) {
+            return;
+        }
+
         // Ensure all refs are populated
         if (!ballRef.current || !leftPaddleRef.current || !rightPaddleRef.current ||
             !pauseBtnRef.current || !scoreLeftRef.current || !scoreRightRef.current) {
             return;
         }
+
+        gameInitialized.current = true;
 
         const cleanup = pongLogic(
             {
@@ -155,15 +160,18 @@ export default function PongGame() {
                     }
                 };
 
+                // Dispatch global pause event to ensure game stops
+                window.dispatchEvent(new Event(GAME_PAUSE_EVENT));
+
                 // Show winner modal
                 openModal({
                     type: "pong-winner",
                     payload: {
                         winner,
-                        scoreP1,
                         scoreP2,
                         isTournament: matchId !== null,
-                        onNavigate: handleNavigate
+                        onNavigate: handleNavigate,
+                        preventClose: true // Block closing by clicking outside because this is a critical game state
                     }
                 });
 
@@ -197,8 +205,9 @@ export default function PongGame() {
         // Note: useEventListener cleans itself up! We only need to clean up the game loop here.
         return () => {
             cleanup();
+            gameInitialized.current = false;
         };
-    }, []);
+    });
 
     return (
         <div className="bg-gray-900 flex flex-col items-center justify-center min-h-screen px-2">
@@ -235,14 +244,18 @@ export default function PongGame() {
                 {/* LEFT TOUCH CONTROLS */}
                 <div className="absolute -left-15 sm:-left-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 ml-1 sm:ml-2">
                     <button
-                        ref={leftUpBtnRef}
+                        onPointerDown={() => { inputRef.current.w = true; }}
+                        onPointerUp={() => { inputRef.current.w = false; }}
+                        onPointerLeave={() => { inputRef.current.w = false; }}
                         id="left-up"
                         className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                     >
                         ▲
                     </button>
                     <button
-                        ref={leftDownBtnRef}
+                        onPointerDown={() => { inputRef.current.s = true; }}
+                        onPointerUp={() => { inputRef.current.s = false; }}
+                        onPointerLeave={() => { inputRef.current.s = false; }}
                         id="left-down"
                         className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                     >
@@ -253,14 +266,18 @@ export default function PongGame() {
                 {/* RIGHT TOUCH CONTROLS */}
                 <div className="absolute -right-15 sm:-right-20 top-1/2 -translate-y-1/2 flex flex-col gap-2 sm:gap-3 lg:gap-4 mr-1 sm:mr-2">
                     <button
-                        ref={rightUpBtnRef}
+                        onPointerDown={() => { inputRef.current.up = true; }}
+                        onPointerUp={() => { inputRef.current.up = false; }}
+                        onPointerLeave={() => { inputRef.current.up = false; }}
                         id="right-up"
                         className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                     >
                         ▲
                     </button>
                     <button
-                        ref={rightDownBtnRef}
+                        onPointerDown={() => { inputRef.current.down = true; }}
+                        onPointerUp={() => { inputRef.current.down = false; }}
+                        onPointerLeave={() => { inputRef.current.down = false; }}
                         id="right-down"
                         className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/80 text-black text-xl sm:text-2xl font-bold rounded-lg active:bg-white"
                     >
