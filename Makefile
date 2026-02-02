@@ -1,6 +1,5 @@
 # Configuration
 COMPOSE_BASE = Docker/docker-compose.yml
-COMPOSE_DEV = Docker/docker-compose.dev.yml
 COMPOSE_PROD = ./docker-compose.prod.yml
 COMPOSE_LOCALPROD = ./docker-compose.localprod.yml
 
@@ -14,10 +13,6 @@ PROJECT_NAME = game_app
 # 🧩 Build Targets
 # ==============================================================================
 
-build-dev:
-	@echo "🛠️  Building development images..."
-	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) build
-
 build-prod:
 	@echo "🏗️  Building production images..."
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) build
@@ -30,12 +25,6 @@ build-local-prod:
 # 🌱 Database Seeding
 # ==============================================================================
 
-seed-dev:
-	@echo "🌱 Seeding database (dev)..."
-	docker compose -p $(PROJECT_NAME)_dev \
-		-f $(COMPOSE_BASE) -f $(COMPOSE_DEV) \
-		exec backend npm run seed
-
 seed-prod:
 	@echo "🌱 Seeding database (prod)..."
 	docker compose -p $(PROJECT_NAME)_prod \
@@ -47,10 +36,6 @@ seed-prod:
 # 🚀 Run Targets
 # ==============================================================================
 
-dev: build-dev
-	@echo "🚀 Starting development environment..."
-	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up
-
 prod: build-prod
 	@echo "🌐 Starting production environment..."
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) up -d
@@ -59,12 +44,6 @@ prod: build-prod
 # ==============================================================================
 # 🌱 Bootstrap (build + run + seed)
 # ==============================================================================
-
-dev-seed: build-dev
-	@echo "🚀 Starting development environment (with seed)..."
-	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up -d
-	@echo "🌱 Seeding development database..."
-	make seed-dev
 
 prod-seed: build-local-prod
 	@echo "🌐 Starting production environment (with seed)..."
@@ -78,26 +57,25 @@ prod-seed: build-local-prod
 
 clean:
 	@echo "🧼 Stopping and removing containers..."
-	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) down
-	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_PROD) down
+	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_LOCALPROD) down
 
 fclean: clean
 	@echo "🧹 Removing dist/..."
 	rm -rf Backend/dist/
 	@echo "🔥 Removing all images and volumes..."
 	docker system prune -af --volumes
-	@if docker volume inspect game_app_dev_backend_node_modules >/dev/null 2>&1; then \
-		echo "💿Removing game_app_dev_backend_node_modules..."; \
-		docker volume rm game_app_dev_backend_node_modules; \
+	@if docker volume inspect game_app_prod_backend_node_modules >/dev/null 2>&1; then \
+		echo "💿Removing game_app_prod_backend_node_modules..."; \
+		docker volume rm game_app_prod_backend_node_modules; \
 	else \
-		echo "Volume game_app_dev_backend_node_modules does not exist."; \
+		echo "Volume game_app_prod_backend_node_modules does not exist."; \
 	fi
 
-	@if docker volume inspect game_app_dev_frontend_node_modules >/dev/null 2>&1; then \
-		echo "💿Removing game_app_dev_frontend_node_modules..."; \
-		docker volume rm game_app_dev_frontend_node_modules; \
+	@if docker volume inspect game_app_prod_frontend_node_modules >/dev/null 2>&1; then \
+		echo "💿Removing game_app_prod_frontend_node_modules..."; \
+		docker volume rm game_app_prod_frontend_node_modules; \
 	else \
-		echo "Volume game_app_devfrontend_node_modules does not exist."; \
+		echo "Volume game_app_prod_frontend_node_modules does not exist."; \
 	fi
 
 
@@ -107,7 +85,6 @@ fclean: clean
 
 re: fclean
 	@echo "♻️  Rebuilding everything from scratch..."
-	make build-dev
 	make build-prod
 
 # ==============================================================================
@@ -115,14 +92,9 @@ re: fclean
 # ==============================================================================
 
 help:
-	@echo "Available targets:"
-	@echo "  make dev          → Run development environment"
-	@echo "  make dev-seed     → Build, run, and seed development environment"
 	@echo "  make prod         → Run production environment"
 	@echo "  make prod-seed    → Build, run, and seed production environment"
-	@echo "  make build-dev    → Build dev Docker images"
 	@echo "  make build-prod   → Build prod Docker images"
-	@echo "  make seed-dev     → Seed dev database"
 	@echo "  make seed-prod    → Seed prod database"
 	@echo "  make clean        → Stop and remove containers"
 	@echo "  make fclean       → Full cleanup"
