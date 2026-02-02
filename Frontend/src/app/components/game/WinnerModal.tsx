@@ -2,11 +2,10 @@ import Button from "@/app/components/ui/Button";
 
 export type WinnerModalPayload = {
     type: "win" | "draw";
-    winnerName?: string;     // e.g. "Player 1", "Red Team"
-    winnerColor?: string;    // e.g. "text-red-500", "text-yellow-400"
+    winnerName?: string; 
+    winnerColor?: string;       
     scoreLeft?: number;
     scoreRight?: number;
-    // Optional labels for scores if needed, though usually implicit by position or generic
     isTournament?: boolean;
     onNavigate: (destination: "tournament" | "home" | "retry") => void;
 };
@@ -52,10 +51,6 @@ export default function WinnerModal({ payload }: { payload: WinnerModalPayload }
                 <div className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-red-500/20 blur-xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
                     <div className="relative flex items-center gap-6 text-3xl font-mono bg-black/40 backdrop-blur-md px-8 py-4 rounded-xl border border-white/10 shadow-2xl">
-                        {/* We can make assumptions about colors/sides or just keep it generic P1 vs P2 style */}
-                        {/* Typically Left = P1/Blue, Right = P2/Red or similar. We'll stick to generic coloring unless passed ? 
-                             Actually, Pong uses Blue/Red often. Let's default to standard coloring but maybe improve later.
-                         */}
                         <span className="text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]">{scoreLeft}</span>
                         <span className="text-slate-600 text-xl font-bold">VS</span>
                         <span className="text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.6)]">{scoreRight}</span>
