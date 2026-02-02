@@ -333,26 +333,11 @@ Relationships:
 | Tournament System                    | Minor | 1      | saherrer    | Bracket, registration, winner  |
 | Game Statistics                      | Minor | 1      | saherrer    | Leaderboard, match history     |
 | Custom Design System                 | Minor | 1      | mhashir     | Custom UI components and design tokens for consistent UX |
+| Modal System                 | Minor | 1      | mhashir     | Centralized, framework-level modal infrastructure; accessibility, lifecycle, and rendering isolation |
 | Gamification System                  | Minor | 1      | saherrer    | Achievements, badges, leaderboards, XP/level, persistent & visual |
 | Support for Additional Browsers      | Minor | 1      | saherrer    | Firefox, Safari, Edge compatibility, consistent UI/UX |
 
-**Total:** 16 / 14 points
-
-### Implemented
-
-| Module                              | Type  | Points | Owner    |
-| ----------------------------------- | ----- | ------ | -------- |
-| Custom Frontend Framework (Reactor) | Major | 2      | Hashir   |
-| Web-based Game (Pong)               | Major | 2      | Abdul    |
-| Multiplayer Game (4P Pong)          | Major | 2      | Abdul    |
-| Second Game (Connect 4)             | Major | 2      | Abdul    |
-| AI Opponent                         | Major | 2      | Santiago |
-| Backend Framework (Fastify)         | Minor | 1      | Hashir   |
-| Tournament System                   | Minor | 1      | Santiago |
-| Game Statistics                     | Minor | 1      | Santiago |
-
-**Total:** 13 / 14 points
-
+**Total:** 19 / 14 points
 ---
 
 
