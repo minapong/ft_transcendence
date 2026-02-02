@@ -352,9 +352,8 @@ export function pongLogic(
 			y = PLAYABLE_HEIGHT - BALL_SIZE;
 		}
 
-		// Render
-		ball.style.left = `${x}px`;
-		ball.style.top = `${y}px`;
+		// Render (GPU-friendly)
+		ball.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
 		// --- Paddle movement ---
 		movePaddle(delta);
@@ -421,7 +420,7 @@ export function pongLogic(
 				true
 			);
 
-		left_p.style.top = `${paddleY_Left}px`;
+		left_p.style.transform = `translate3d(0, ${paddleY_Left}px, 0)`;
 
 		// Right paddle (Arrow Up / Down or AI)
 		if (up)
@@ -444,7 +443,7 @@ export function pongLogic(
 				true
 			);
 
-		right_p.style.top = `${paddleY_Right}px`;
+		right_p.style.transform = `translate3d(0, ${paddleY_Right}px, 0)`;
 	}
 
 	let resetTimeout: number | null = null;
@@ -455,8 +454,7 @@ export function pongLogic(
 		dx = 0;
 		dy = 0;
 
-		ball.style.left = x + 'px';
-		ball.style.top = y + 'px';
+		ball.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
 		if (scoreLeft !== WIN_SCORE && scoreRight !== WIN_SCORE) {
 			resetTimeout = window.setTimeout(() => {

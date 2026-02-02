@@ -1,3 +1,12 @@
+/* Optimize transforms for paddles/ball */
+#p4_game #ball,
+#p4_game #left_p,
+#p4_game #right_p,
+#p4_game #upper_p,
+#p4_game #lower_p {
+  will-change: transform;
+}
+
 @media (max-width: 639px) and (max-height: 639px) {
   #p4_game #players_names {
     max-width: 320px;

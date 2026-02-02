@@ -299,32 +299,32 @@ export default function Pong4PGame() {
 					<div
 						ref={leftPaddleRef}
 						id="left_p"
-						className="absolute left-2 top-1/2 w-2 h-16 bg-red-500 rounded-full"
-						style={{ boxShadow: `0 0 15px rgba(239, 68, 68, 0.8)` }} // Red glow
+						className="absolute left-2 top-0 w-2 h-16 bg-red-500 rounded-full"
+						style={{ boxShadow: `0 0 15px rgba(239, 68, 68, 0.8)`, willChange: "transform" }} // Red glow
 					></div>
 					<div
 						ref={rightPaddleRef}
 						id="right_p"
-						className="absolute right-2 top-1/2 w-2 h-16 bg-blue-500 rounded-full"
-						style={{ boxShadow: `0 0 15px rgba(59, 130, 246, 0.8)` }} // Blue glow
+						className="absolute right-2 top-0 w-2 h-16 bg-blue-500 rounded-full"
+						style={{ boxShadow: `0 0 15px rgba(59, 130, 246, 0.8)`, willChange: "transform" }} // Blue glow
 					></div>
 					<div
 						ref={upperPaddleRef}
 						id="upper_p"
-						className="absolute top-2 left-1/2 h-2 w-16 bg-blue-500 rounded-full"
-						style={{ boxShadow: `0 0 15px rgba(59, 130, 246, 0.8)` }}
+						className="absolute top-2 left-0 h-2 w-16 bg-blue-500 rounded-full"
+						style={{ boxShadow: `0 0 15px rgba(59, 130, 246, 0.8)`, willChange: "transform" }}
 					></div>
 					<div
 						ref={lowerPaddleRef}
 						id="lower_p"
-						className="absolute bottom-2 left-1/2 h-2 w-16 bg-red-500 rounded-full"
-						style={{ boxShadow: `0 0 15px rgba(239, 68, 68, 0.8)` }}
+						className="absolute bottom-2 left-0 h-2 w-16 bg-red-500 rounded-full"
+						style={{ boxShadow: `0 0 15px rgba(239, 68, 68, 0.8)`, willChange: "transform" }}
 					></div>
 
 					<div
 						ref={ballRef}
 						id="ball"
-						className="absolute w-3 h-3 bg-white rounded-full top-1/2 left-1/2"
+						className="absolute w-3 h-3 bg-white rounded-full top-0 left-0"
 						style={{
 							boxShadow: `
                             0 0 10px 2px var(--color-accent),
@@ -332,7 +332,8 @@ export default function Pong4PGame() {
                             inset 0 0 4px var(--color-primary)
                         `,
 							filter: 'brightness(1.5)',
-							transition: 'transform 0.05s linear'
+							transition: "none",
+							willChange: "transform"
 						}}
 					></div>
 

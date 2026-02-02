@@ -319,8 +319,7 @@ export function pong4PLogic(
 			y = P4_BOTTOM_PADDLE_Y - P4_BALL_SIZE;
 		}
 
-		ball.style.left = `${x}px`;
-		ball.style.top = `${y}px`;
+		ball.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
 		movePaddles();
 		animationId = requestAnimationFrame(moveBall);
@@ -369,22 +368,22 @@ export function pong4PLogic(
 		// Left paddle (vertical)
 		if (w) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, false);
 		if (s) paddleY_Left = clampPaddle(paddleY_Left, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, true);
-		left_p.style.top = `${paddleY_Left}px`;
+		left_p.style.transform = `translate3d(0, ${paddleY_Left}px, 0)`;
 
 		// Right paddle (vertical)
 		if (num6) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, false);
 		if (num3) paddleY_Right = clampPaddle(paddleY_Right, P4_PADDLE_SPEED, vMin, vMax, P4_PADDLE_LENGTH, true);
-		right_p.style.top = `${paddleY_Right}px`;
+		right_p.style.transform = `translate3d(0, ${paddleY_Right}px, 0)`;
 
 		// Bottom paddle (horizontal)
 		if (left) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, false);
 		if (right) paddleX_Lower = clampPaddle(paddleX_Lower, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, true);
-		lower_p.style.left = `${paddleX_Lower}px`;
+		lower_p.style.transform = `translate3d(${paddleX_Lower}px, 0, 0)`;
 
 		// Top paddle (horizontal)
 		if (v) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, false);
 		if (b) paddleX_Upper = clampPaddle(paddleX_Upper, P4_PADDLE_SPEED, hMin, hMax, P4_PADDLE_LENGTH, true);
-		upper_p.style.left = `${paddleX_Upper}px`;
+		upper_p.style.transform = `translate3d(${paddleX_Upper}px, 0, 0)`;
 	}
 
 	let resetTimeout: number | null = null;

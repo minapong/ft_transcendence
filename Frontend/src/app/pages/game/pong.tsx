@@ -324,13 +324,14 @@ export default function PongGame() {
                     <div
                         ref={leftPaddleRef}
                         id="left_p"
-                        className="absolute left-2 sm:left-3 lg:left-4 top-1/2 
+                        className="absolute left-2 sm:left-3 lg:left-4 top-0 
                             w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[var(--color-primary)] rounded-full"
                         style={{
                             boxShadow: `
                     0 0 15px var(--color-accent),
                     0 0 5px var(--color-primary)
                     `,
+                            willChange: "transform",
                         }}
                     />
 
@@ -340,13 +341,14 @@ export default function PongGame() {
                     <div
                         ref={rightPaddleRef}
                         id="right_p"
-                        className="absolute right-2 sm:right-3 lg:right-4 top-1/2 
+                        className="absolute right-2 sm:right-3 lg:right-4 top-0 
                             w-2 sm:w-3 h-16 sm:h-20 xl:h-24 bg-[var(--color-primary)] rounded-full"
                         style={{
                             boxShadow: `
                     0 0 15px var(--color-accent),
                     0 0 5px var(--color-primary)
                     `,
+                            willChange: "transform",
                         }}
                     />
 
@@ -358,7 +360,7 @@ export default function PongGame() {
                         className="absolute 
 							w-3 h-3 sm:w-4 sm:h-4 
 							bg-white rounded-full 
-							top-1/2 left-1/2"
+							top-0 left-0"
                         style={{
                             boxShadow: `
 							0 0 10px 2px var(--color-accent),
@@ -366,7 +368,8 @@ export default function PongGame() {
                              inset 0 0 4px var(--color-primary)
 						`,
                             filter: 'brightness(1.5)',
-                            transition: 'transform 0.05s linear'
+                            transition: "none",
+                            willChange: "transform",
                         }}
                     />
                 </div>
