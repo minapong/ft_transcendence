@@ -91,6 +91,7 @@ jobs:
           IMAGE_BACKEND=${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.APP_BACKEND }}:latest
           IMAGE_FRONTEND=${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.APP_FRONTEND }}:latest
           JWT_SECRET=${{ secrets.JWT_SECRET }}
+          SSL_DIR=/etc/letsencrypt/
           EOF
           chmod 600 ~/app/.env.production
           ls -al ~/app
