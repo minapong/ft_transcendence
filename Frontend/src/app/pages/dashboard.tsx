@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'Reactor';
+import { useState, useEffect, navigate } from 'Reactor';
 import { apiFetch } from "@/core/lib/api";
 
 
@@ -104,7 +104,15 @@ export default function Dashboard() {
                         {user.username?.[0]?.toUpperCase() || "?"}
                       </div>
                       <span className="font-medium">{user.username || "Unknown"}</span>
+                        <button
+                          onClick={() => navigate(`/user/${user.id}`)}
+                          className="p-2 rounded-lg bg-gray-800 text-cyan-400 hover:bg-cyan-900/50 transition-colors"
+                          title="View Profile"
+                        >
+                          <span className="icon-[solar--user-id-bold]" />
+                        </button>
                     </td>
+                    
                     <td className="p-4 text-center">{entry.wins || 0}</td>
                     <td className="p-4 text-center">{winRate}%</td>
                     <td className="p-4 text-center">{entry.tournament_championships || 0}</td>

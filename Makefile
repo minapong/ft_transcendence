@@ -1,5 +1,6 @@
 # Configuration
 COMPOSE_BASE = Docker/docker-compose.yml
+COMPOSE_DEV = Docker/docker-compose.dev.yml
 COMPOSE_PROD = ./docker-compose.prod.yml
 COMPOSE_LOCALPROD = ./docker-compose.localprod.yml
 
@@ -12,6 +13,9 @@ PROJECT_NAME = game_app
 # ==============================================================================
 # 🧩 Build Targets
 # ==============================================================================
+build-dev:
+	@echo "🛠️  Building development images..."
+	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) build
 
 build-prod:
 	@echo "🏗️  Building production images..."
@@ -24,6 +28,11 @@ build-local-prod:
 # ==============================================================================
 # 🌱 Database Seeding
 # ==============================================================================
+seed-dev:
+	@echo "🌱 Seeding database (dev)..."
+	docker compose -p $(PROJECT_NAME)_dev \
+		-f $(COMPOSE_BASE) -f $(COMPOSE_DEV) \
+		exec backend npm run seed
 
 seed-prod:
 	@echo "🌱 Seeding database (prod)..."
@@ -36,6 +45,9 @@ all: prod-seed
 # ==============================================================================
 # 🚀 Run Targets
 # ==============================================================================
+dev: build-dev
+	@echo "🚀 Starting development environment..."
+	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up
 
 prod: build-prod
 	@echo "🌐 Starting production environment..."
@@ -45,6 +57,11 @@ prod: build-prod
 # ==============================================================================
 # 🌱 Bootstrap (build + run + seed)
 # ==============================================================================
+dev-seed: build-dev
+	@echo "🚀 Starting development environment (with seed)..."
+	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up -d
+	@echo "🌱 Seeding development database..."
+	make seed-dev
 
 prod-seed: build-local-prod
 	@echo "🌐 Starting production environment (with seed)..."
@@ -58,6 +75,7 @@ prod-seed: build-local-prod
 
 clean:
 	@echo "🧼 Stopping and removing containers..."
+	docker compose -p $(PROJECT_NAME)_dev -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) down
 	docker compose -p $(PROJECT_NAME)_prod -f $(COMPOSE_LOCALPROD) down
 
 fclean: clean
@@ -86,6 +104,7 @@ fclean: clean
 
 re: fclean
 	@echo "♻️  Rebuilding everything from scratch..."
+	make build-dev
 	make build-prod
 
 # ==============================================================================
