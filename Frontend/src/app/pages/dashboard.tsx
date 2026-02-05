@@ -100,9 +100,23 @@ export default function Dashboard() {
                   <tr key={user.id || idx} className="border-b border-gray-700 hover:bg-gray-750">
                     <td className="p-4 text-center font-bold">#{idx + 1}</td>
                     <td className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-lg font-bold">
+                      {/* <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-lg font-bold">
                         {user.username?.[0]?.toUpperCase() || "?"}
-                      </div>
+                      </div> 
+                       {/* Avatar with Glow */}
+                      <div className="relative group self-center md:self-auto">
+                        <div className={`absolute -inset-0.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full blur opacity-50 transition duration-500`}></div>
+                          <div
+                            className={`relative w-10 h-10 md:w-15 md:h-15 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-900 flex items-center justify-center z-10 ring-2 ring-white/10 ${user.avatarUrl ? 'cursor-pointer' : ''}`}
+                            >
+                            {user.avatarUrl ? (
+                              <img src={user.avatarUrl} className="w-full h-full object-cover" alt="avatar" />
+                              ) : (
+                              <span className="icon-[solar--user-bold] text-4xl text-gray-500" />
+                              )}
+                            </div>
+                          </div>
+                     
                       <span className="font-medium">{user.username || "Unknown"}</span>
                         <button
                           onClick={() => navigate(`/user/${user.id}`)}
